@@ -5,39 +5,49 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const LoginPage: React.FC = () => {
+  const handleSignIn = () => {
+    // No credential validation is performed.
+    // No backend/API calls are made.
+    // Immediately route to the "Exam-Goal" page using client-side JavaScript.
+    window.location.href = '/exam-goal.html';
+  };
+
   return (
-    <Card className="w-full max-w-md bg-gray-800 border-gray-700 shadow-xl">
-      <CardHeader className="text-center">
-        <CardTitle className="text-3xl font-bold text-blue-500">Welcome Back</CardTitle>
-        <CardDescription className="text-gray-400 pt-2">
+    <Card className="w-full max-w-md bg-card border-border shadow-xl mx-auto my-auto sm:my-8">
+      <CardHeader className="text-center px-6 py-8 sm:px-8">
+        <CardTitle className="text-3xl sm:text-4xl font-bold text-primary">Welcome Back</CardTitle>
+        <CardDescription className="text-muted-foreground pt-2 text-sm sm:text-base">
           Sign in to continue your AI Padhai journey
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 px-6 pb-8 sm:px-8">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-gray-300">Email address</Label>
+          <Label htmlFor="email" className="text-foreground">Email address</Label>
           <Input
             id="email"
             type="email"
             placeholder="you@example.com"
-            className="bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
+            className="bg-input border-border text-foreground placeholder-muted-foreground focus:ring-ring focus:border-primary"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-gray-300">Password</Label>
+          <Label htmlFor="password" className="text-foreground">Password</Label>
           <Input
             id="password"
             type="password"
             placeholder="••••••••"
-            className="bg-gray-700 border-gray-600 text-white placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500"
+            className="bg-input border-border text-foreground placeholder-muted-foreground focus:ring-ring focus:border-primary"
           />
         </div>
-        <Button className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold py-3">
+        <Button
+          onClick={handleSignIn}
+          className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-primary-foreground font-semibold py-3 text-base"
+        >
           Sign In
         </Button>
-        <p className="text-xs text-gray-500 text-center">
+        <p className="text-xs sm:text-sm text-muted-foreground text-center">
           By continuing, you agree to our{' '}
-          <a href="#" className="text-blue-500 underline hover:text-blue-400">
+          <a href="#" className="text-primary underline hover:text-blue-400">
             Privacy Policy
           </a>
         </p>

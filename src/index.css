@@ -78,7 +78,7 @@
 
 /* Forcing dark theme for the login page as requested */
 /* You might want to manage this with a theme provider or a class on the html/body tag for a full app */
-.dark, body {
+.dark, body { /* Apply dark theme variables to body directly for this specific case */
   --background: oklch(0.07 0.02 237.09); /* Dark background for the page - e.g., gray-900 */
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.12 0.02 237.09); /* Darker card background - e.g., gray-800 */
@@ -114,20 +114,20 @@
 
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
+  html {
+    @apply h-full;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply h-full bg-background text-foreground;
     /* Ensure the body takes up the full height for centering */
-    min-height: 100vh;
     display: flex;
     flex-direction: column;
   }
   /* Ensure root also takes full height if App.tsx is directly in body */
   #root {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
+    @apply flex-grow flex flex-col;
+  }
+  * {
+    @apply border-border outline-ring/50;
   }
 }
