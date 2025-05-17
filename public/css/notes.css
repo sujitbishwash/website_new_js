@@ -1,0 +1,150 @@
+:root {
+  --notes-bg-primary: oklch(0.15 0.02 230); /* Darker background for the page */
+  --notes-bg-secondary: oklch(0.2 0.02 230); /* Component background */
+  --notes-text-primary: oklch(0.9 0.01 230); /* Light text */
+  --notes-text-placeholder: oklch(0.6 0.01 230); /* Placeholder text */
+  --notes-border-color: oklch(0.35 0.02 230);
+  --notes-accent-color: oklch(0.7 0.2 200); /* Accent for focus/hover */
+  --notes-shadow-color: oklch(0 0 0 / 0.5);
+  --notes-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --notes-border-radius: 10px;
+  --notes-spacing-unit: 8px;
+  --notes-transition-speed: 0.3s;
+}
+
+body {
+  margin: 0;
+  font-family: var(--notes-font-family);
+  background-color: var(--notes-bg-primary);
+  color: var(--notes-text-primary);
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Center component for demo */
+  min-height: 100vh;
+  padding: calc(var(--notes-spacing-unit) * 2);
+  box-sizing: border-box;
+}
+
+.notes-component-wrapper { /* Added for better centering in demo */
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.notes-container {
+  background-color: var(--notes-bg-secondary);
+  border-radius: var(--notes-border-radius);
+  border: 1px solid var(--notes-border-color);
+  box-shadow: 0 8px 25px var(--notes-shadow-color);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px; /* Default max-width */
+  min-height: 250px; /* Minimum height */
+  height: 400px; /* Default height, can be overridden by expanded state */
+  position: relative; /* For absolute positioning of header */
+  transition: all var(--notes-transition-speed) ease-in-out;
+  overflow: hidden; /* Ensures children conform to border radius */
+}
+
+.notes-header {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--notes-spacing-unit) calc(var(--notes-spacing-unit) * 1.5);
+  background-color: oklch(from var(--notes-bg-secondary) calc(l + 0.03) c h); /* Slightly lighter header */
+  border-bottom: 1px solid var(--notes-border-color);
+}
+
+.notes-action-btn {
+  background: none;
+  border: none;
+  color: var(--notes-text-placeholder);
+  cursor: pointer;
+  padding: calc(var(--notes-spacing-unit) * 0.5);
+  border-radius: calc(var(--notes-border-radius) / 2);
+  transition: color var(--notes-transition-speed), background-color var(--notes-transition-speed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notes-action-btn:hover,
+.notes-action-btn:focus {
+  color: var(--notes-accent-color);
+  background-color: oklch(from var(--notes-border-color) l c h / 0.5);
+  outline: none;
+}
+
+.notes-action-btn svg {
+  transition: transform var(--notes-transition-speed);
+}
+.notes-action-btn:hover svg {
+  transform: scale(1.1);
+}
+
+.note-input {
+  flex-grow: 1;
+  background-color: transparent;
+  border: none;
+  color: var(--notes-text-primary);
+  font-family: var(--notes-font-family);
+  font-size: 1em;
+  padding: calc(var(--notes-spacing-unit) * 2);
+  resize: none; /* Disable manual resize, rely on container */
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+.note-input::placeholder {
+  color: var(--notes-text-placeholder);
+  opacity: 1; /* Firefox fix */
+}
+
+.note-input:focus {
+  border-color: var(--notes-accent-color); /* Subtle focus on parent if needed */
+}
+
+/* Expanded (Fullscreen-like) State */
+.notes-container.expanded {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  border-radius: 0;
+  z-index: 1000;
+  border: none; /* Remove border in fullscreen */
+  box-shadow: none; /* Remove shadow in fullscreen */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .notes-container {
+    min-height: 200px;
+    height: 300px;
+  }
+  .note-input {
+    font-size: 0.95em;
+    padding: calc(var(--notes-spacing-unit) * 1.5);
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    padding: var(--notes-spacing-unit);
+  }
+  .notes-container {
+    min-height: 180px;
+    height: 250px;
+  }
+  .notes-header {
+    padding: calc(var(--notes-spacing-unit) * 0.75) var(--notes-spacing-unit);
+  }
+  .note-input {
+    font-size: 0.9em;
+    padding: var(--notes-spacing-unit);
+  }
+}
