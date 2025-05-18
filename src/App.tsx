@@ -1,14 +1,22 @@
-import LoginPage from '@/components/LoginPage';
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import LoginPage from './components/LoginPage';
+import ExamGoalPage from './components/ExamGoalPage';
 import './App.css'; // Keep App.css for any App-specific global styles if needed
 
-function App() {
+const App: React.FC = () => {
   return (
-    // Ensure this div takes full height and centers its content
-    // The background color is now handled by body styles in index.css
-    <div className="flex flex-col items-center justify-center min-h-full p-4">
-      <LoginPage />
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/exam-goal" element={<ExamGoalPage />} />
+        <Route path="/exam-goal.html" element={<Navigate to="/exam-goal" replace />} />
+        <Route path="/dashboard" element={<div>Dashboard Page (Coming Soon)</div>} />
+        <Route path="*" element={<Navigate to="/login" replace />} />
+      </Routes>
+    </Router>
   );
-}
+};
 
 export default App;
