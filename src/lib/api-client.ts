@@ -86,4 +86,15 @@ export const examGoalApi = {
       }
     });
   },
+  addExamGoal: async (exam: string, groupType: string) => {
+    const token = localStorage.getItem('access_token');
+    return apiRequest<{ success: boolean; message: string }>('POST', '/exam-goal/add', {
+      exam,
+      group_type: groupType
+    }, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
 };

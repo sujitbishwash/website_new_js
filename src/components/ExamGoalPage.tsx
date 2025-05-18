@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { examGoalApi, ExamType } from '@/lib/api-client';
@@ -15,6 +14,7 @@ const ExamGoalPage: React.FC = () => {
   const [examTypeOptions, setExamTypeOptions] = useState<ExamType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchExamTypes = async () => {
@@ -48,9 +48,21 @@ const ExamGoalPage: React.FC = () => {
     }
   };
 
-  const handleContinue = () => {
-    // TODO: Save exam preferences and redirect to dashboard
-    navigate('/dashboard');
+  const handleContinue = async () => {
+    try {
+      setIsSubmitting(true);
+      const response = await examGoalApi.addExamGoal(examType, specificExam);
+      
+      if (response.data.success) {
+        navigate('/dashboard');
+      } else {
+        throw new Error(response.data.message || 'Failed to save exam preferences');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to save exam preferences');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {
@@ -125,10 +137,10 @@ const ExamGoalPage: React.FC = () => {
 
         <Button
           onClick={handleContinue}
-          disabled={!examType || !specificExam}
+          disabled={!examType || !specificExam || isSubmitting}
           className={styles.button}
         >
-          Continue to Dashboard
+          {isSubmitting ? 'Saving...' : 'Continue to Dashboard'}
         </Button>
 
         <div className={styles.footer}>
