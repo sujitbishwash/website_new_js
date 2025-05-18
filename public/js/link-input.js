@@ -5,10 +5,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const linkUrlInput = document.getElementById('linkUrl');
   const linkNotesTextarea = document.getElementById('linkNotes');
 
-  // Example: Log to console when buttons are clicked
-  // In a real application, these would trigger actual logic
-  // (e.g., closing the modal, submitting data)
-
   if (cancelButton) {
     cancelButton.addEventListener('click', () => {
       console.log('Cancel button clicked');
@@ -24,8 +20,8 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log('Add button clicked');
       console.log('URL:', url);
       console.log('Notes:', notes);
-      // Example: Hide the modal after adding
-      // if (modalOverlay) modalOverlay.style.display = 'none';
+      // Redirect to dashboard.html
+      window.location.href = 'dashboard.html';
     });
   }
 

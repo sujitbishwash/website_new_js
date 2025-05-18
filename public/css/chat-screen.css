@@ -25,44 +25,21 @@ body {
 }
 
 .chat-screen-container {
-  display: flex;
+  display: flex; /* Remains flex to allow chat-main-content to grow */
   width: 100%;
   height: 100%;
 }
 
-.chat-sidebar {
-  width: 260px; /* Default width for sidebar */
-  height: 100%;
-  background-color: var(--chat-bg-secondary); /* Match sidebar.css if integrated */
-  border-right: 1px solid var(--chat-border-color);
-  flex-shrink: 0;
-  transition: width 0.3s ease, margin-left 0.3s ease;
-}
-
-.chat-sidebar.collapsed {
-  width: 0;
-  overflow: hidden;
-  border-right: none;
-}
-
-.sidebar-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--chat-text-secondary);
-}
-
+/* Removed .chat-sidebar, .chat-sidebar.collapsed, .sidebar-placeholder styles */
 
 .chat-main-content {
-  flex-grow: 1;
+  flex-grow: 1; /* Will take full width as it's the only direct child */
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden; /* Important for layout */
 }
-
+/*
 .chat-header {
   display: flex;
   align-items: center;
@@ -70,23 +47,12 @@ body {
   background-color: var(--chat-bg-secondary);
   border-bottom: 1px solid var(--chat-border-color);
   flex-shrink: 0;
+  min-height: 50px; /* Ensure header has some height even if empty */
 }
+*/
+/* Removed .menu-toggle-btn styles */
 
-.menu-toggle-btn {
-  background: none;
-  border: none;
-  color: var(--chat-text-primary);
-  cursor: pointer;
-  padding: var(--chat-spacing-unit);
-  margin-right: var(--chat-spacing-unit);
-  display: none; /* Hidden by default, shown on smaller screens */
-}
-.menu-toggle-btn svg {
-  display: block;
-}
-
-
-.chat-header h1 {
+.chat-header h1 { /* Style for h1 if it were present, but it's removed */
   font-size: 1.25em;
   font-weight: 600;
   margin: 0;
@@ -94,7 +60,7 @@ body {
 }
 
 .header-actions {
-  margin-left: auto;
+  margin-left: auto; /* Pushes actions to the right if any */
 }
 
 .chat-tabs {
@@ -442,22 +408,7 @@ body {
 
 /* Tablet and smaller desktops */
 @media (max-width: 1024px) {
-  .chat-sidebar {
-    position: fixed;
-    left: -260px; /* Initially hidden */
-    z-index: 1000;
-    box-shadow: 2px 0 10px oklch(0 0 0 / 0.2);
-    transition: left 0.3s ease;
-  }
-  .chat-sidebar.open {
-    left: 0;
-  }
-  .menu-toggle-btn {
-    display: block;
-  }
-  .chat-main-content.sidebar-open {
-    /* Optional: Add a margin or dim effect when sidebar is open */
-  }
+  /* Removed .chat-sidebar, .menu-toggle-btn, .chat-main-content.sidebar-open specific styles */
   .message-group {
     max-width: 90%;
   }
@@ -468,7 +419,7 @@ body {
   .chat-header {
     padding: var(--chat-spacing-unit) calc(var(--chat-spacing-unit) * 1.5);
   }
-  .chat-header h1 {
+  .chat-header h1 { /* Style for h1 if it were present */
     font-size: 1.1em;
   }
   .chat-tabs {
@@ -539,4 +490,3 @@ body {
   background-color: var(--chat-border-color);
   border-radius: 2px;
 }
-</style>

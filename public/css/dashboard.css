@@ -1,0 +1,344 @@
+/* General Dashboard Styles */
+:root {
+  --dashboard-bg: oklch(0.12 0.02 230); /* Very dark blue/purple */
+  --dashboard-text: oklch(0.95 0.01 230);
+  --sidebar-width-left-expanded: 260px;
+  /* --sidebar-width-left-shrunk: 70px; REMOVED - now hides */
+  --sidebar-width-right: 320px;
+  --header-height: 60px; /* Used for main content padding top on mobile */
+  --spacing-unit: 16px;
+  --border-radius: 8px;
+  --border-color: oklch(0.3 0.02 230);
+  --accent-color: oklch(0.7 0.2 200); /* A bright accent */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --shadow-color: oklch(0 0 0 / 0.3);
+  --button-bg: oklch(0.2 0.02 230);
+  --button-hover-bg: oklch(0.25 0.02 230);
+  --hamburger-area-width: calc(var(--spacing-unit) + 24px + var(--spacing-unit)); /* approx. left + width + right_gap for fixed hamburger */
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--dashboard-bg);
+  color: var(--dashboard-text);
+  overflow-x: hidden; /* Prevent horizontal scroll on main body */
+}
+
+.dashboard-layout {
+  display: flex;
+  min-height: 100vh;
+  position: relative; /* For hamburger positioning */
+}
+
+/* Hamburger Menu */
+.hamburger-menu {
+  display: block; 
+  position: fixed;
+  top: var(--spacing-unit);
+  left: var(--spacing-unit);
+  z-index: 1300; /* Above sidebars */
+  background-color: oklch(from var(--dashboard-bg) calc(l + 0.1) c h);
+  color: var(--dashboard-text);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  padding: calc(var(--spacing-unit) / 2);
+  cursor: pointer;
+  box-shadow: 0 2px 10px var(--shadow-color);
+}
+.hamburger-menu:hover {
+  background-color: oklch(from var(--dashboard-bg) calc(l + 0.15) c h);
+}
+
+/* Left Sidebar */
+.left-sidebar {
+  width: 0; /* Hidden by default on larger screens */
+  background-color: oklch(0.15 0.02 230);
+  height: 100vh;
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
+  overflow-x: hidden; 
+  transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
+  z-index: 1000;
+  border-right: none; /* No border when hidden */
+  display: flex;
+  flex-direction: column;
+}
+.left-sidebar.expanded { /* For desktop expansion */
+  width: var(--sidebar-width-left-expanded);
+  border-right: 1px solid var(--border-color); /* Add border when expanded */
+}
+.left-sidebar iframe {
+  width: 100%; 
+  height: 100%;
+  flex-grow: 1;
+  display: block;
+  min-width: var(--sidebar-width-left-expanded); /* Ensure iframe content doesn't try to shrink beyond this when visible */
+}
+
+/* Main Content Area */
+.main-content-area {
+  flex-grow: 1;
+  padding: var(--spacing-unit);
+  /* Adjust padding-left to account for fixed hamburger menu */
+  padding-left: var(--hamburger-area-width); 
+  overflow-y: auto;
+  height: 100vh;
+  box-sizing: border-box;
+  transition: padding-left 0.3s ease-in-out;
+}
+.left-sidebar.expanded + .main-content-area {
+  padding-left: calc(var(--sidebar-width-left-expanded) + var(--spacing-unit));
+}
+
+
+.video-player-section {
+  margin-bottom: var(--spacing-unit);
+  background-color: oklch(0.15 0.02 230);
+  padding: var(--spacing-unit);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.video-player-wrapper {
+  position: relative;
+  padding-bottom: 56.25%; /* 16:9 aspect ratio */
+  height: 0;
+  overflow: hidden;
+  border-radius: var(--border-radius);
+}
+.video-player-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  min-width: auto; 
+}
+
+.content-tabs-notes-section {
+  display: flex;
+  gap: var(--spacing-unit);
+  min-height: 400px; 
+}
+
+.tabs-and-content {
+  flex: 2; 
+  display: flex;
+  flex-direction: column;
+  background-color: oklch(0.15 0.02 230);
+  padding: var(--spacing-unit);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  overflow: hidden; 
+}
+
+.main-tabs-controls {
+  display: flex;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: var(--spacing-unit);
+}
+.main-tab-button {
+  padding: calc(var(--spacing-unit) / 1.5) var(--spacing-unit);
+  background: none;
+  border: none;
+  color: var(--dashboard-text);
+  cursor: pointer;
+  font-size: 1em;
+  border-bottom: 3px solid transparent;
+  transition: border-color 0.3s, color 0.3s;
+}
+.main-tab-button:hover {
+  color: var(--accent-color);
+}
+.main-tab-button.active {
+  color: var(--accent-color);
+  border-bottom-color: var(--accent-color);
+  font-weight: bold;
+}
+
+.main-tab-content-panels {
+  flex-grow: 1;
+  overflow-y: auto; 
+}
+.main-tab-panel {
+  display: none;
+  animation: fadeIn 0.5s;
+}
+.main-tab-panel.active {
+  display: block;
+}
+.main-tab-panel h3 {
+  margin-top: 0;
+  color: var(--accent-color);
+}
+.main-tab-panel ul {
+  list-style: none;
+  padding-left: 0;
+}
+.main-tab-panel li {
+  padding: calc(var(--spacing-unit) / 2) 0;
+  border-bottom: 1px solid oklch(from var(--border-color) l c h / 0.5);
+}
+.main-tab-panel li:last-child {
+  border-bottom: none;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.notes-component-container {
+  flex: 1; 
+  min-width: 280px; 
+  background-color: oklch(0.15 0.02 230);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px var(--shadow-color);
+  overflow: hidden; 
+  display: flex; 
+  flex-direction: column;
+}
+.notes-component-container iframe {
+  width: 100%;
+  height: 100%;
+  flex-grow: 1;
+  display: block;
+  min-width: auto; 
+}
+
+/* Right Sidebar */
+.right-sidebar {
+  width: var(--sidebar-width-right);
+  background-color: oklch(0.15 0.02 230);
+  height: 100vh; 
+  position: sticky; 
+  top: 0;
+  z-index: 900;
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-unit);
+  box-sizing: border-box;
+}
+.right-sidebar-controls {
+  display: flex;
+  gap: calc(var(--spacing-unit) / 2);
+  margin-bottom: var(--spacing-unit);
+  flex-shrink: 0; 
+}
+.right-sidebar-tab-button {
+  flex-grow: 1;
+  padding: calc(var(--spacing-unit) / 1.5);
+  background-color: var(--button-bg);
+  color: var(--dashboard-text);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  font-size: 0.9em;
+  transition: background-color 0.3s, border-color 0.3s, color 0.3s;
+}
+.right-sidebar-tab-button:hover,
+.right-sidebar-tab-button.active {
+  background-color: var(--button-hover-bg);
+  border-color: var(--accent-color);
+  color: var(--accent-color);
+}
+.right-sidebar-content-wrapper {
+  flex-grow: 1; 
+  position: relative; 
+  overflow-y: auto; 
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius);
+  background-color: var(--dashboard-bg); 
+}
+.right-sidebar-content-wrapper iframe {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: var(--border-radius); 
+  min-width: auto; 
+}
+.right-sidebar-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: oklch(0.6 0.01 230);
+  text-align: center;
+  padding: var(--spacing-unit);
+  display: block; 
+}
+.right-sidebar-placeholder.hidden {
+  display: none;
+}
+
+
+/* Responsive Adjustments */
+
+/* Tablet and larger mobile */
+@media (max-width: 1024px) {
+  .content-tabs-notes-section {
+    flex-direction: column; 
+  }
+  .notes-component-container {
+    min-height: 300px; 
+    margin-top: var(--spacing-unit);
+  }
+}
+
+/* Mobile devices */
+@media (max-width: 768px) {
+  .left-sidebar {
+    position: fixed; 
+    width: var(--sidebar-width-left-expanded); 
+    transform: translateX(-100%); 
+    box-shadow: 5px 0 15px var(--shadow-color);
+    border-right: none; 
+  }
+  .left-sidebar.open { 
+    transform: translateX(0);
+  }
+  /* .left-sidebar.expanded is for desktop, .open is for mobile. No conflict. */
+
+  .main-content-area {
+    width: 100%; 
+    padding-left: var(--hamburger-area-width); /* Keep space for hamburger */
+    padding-top: calc(var(--header-height) + var(--spacing-unit)); /* Space for hamburger at top */
+    height: auto; 
+    min-height: calc(100vh - var(--header-height) - var(--spacing-unit));
+  }
+  /* When left sidebar is an overlay, main content padding doesn't change based on its expanded state */
+  .left-sidebar.expanded + .main-content-area {
+    padding-left: var(--hamburger-area-width); 
+  }
+
+
+  .right-sidebar {
+    width: 100%; 
+    height: 60vh; 
+    position: relative; 
+    border-left: none;
+    border-top: 1px solid var(--border-color);
+    margin-top: var(--spacing-unit); 
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --spacing-unit: 12px;
+    --hamburger-area-width: calc(var(--spacing-unit) + 24px + var(--spacing-unit));
+  }
+  .main-content-area {
+    padding-top: calc(var(--header-height) + var(--spacing-unit));
+  }
+  .main-tab-button {
+    font-size: 0.9em;
+    padding: calc(var(--spacing-unit) / 2) calc(var(--spacing-unit) / 1.5);
+  }
+  .right-sidebar-tab-button {
+    font-size: 0.85em;
+    padding: calc(var(--spacing-unit) / 2);
+  }
+}

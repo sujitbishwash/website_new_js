@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Padhai - Dashboard</title>
+  <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+  <div class="dashboard-layout">
+    <button class="hamburger-menu" id="hamburgerMenu" aria-label="Toggle sidebar" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+      </svg>
+    </button>
+
+    <aside class="left-sidebar" id="leftSidebar">
+      <iframe src="sidebar.html" frameborder="0" title="Main Navigation Sidebar"></iframe>
+    </aside>
+
+    <main class="main-content-area" id="mainContentArea">
+      <section class="video-player-section">
+        <div class="video-player-wrapper">
+          <iframe 
+            width="560" 
+            height="315" 
+            src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
+            title="YouTube video player" 
+            frameborder="0" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      </section>
+
+      <section class="content-tabs-notes-section">
+        <div class="tabs-and-content">
+          <div class="main-tabs-controls">
+            <button class="main-tab-button active" data-tab-target="#chaptersContent">Chapters</button>
+            <button class="main-tab-button" data-tab-target="#transcriptsContent">Transcripts</button>
+          </div>
+          <div class="main-tab-content-panels">
+            <div id="chaptersContent" class="main-tab-panel active">
+              <h3>Chapters</h3>
+              <ul>
+                <li>Chapter 1: Introduction to Quantum Physics</li>
+                <li>Chapter 2: Wave-Particle Duality</li>
+                <li>Chapter 3: The Uncertainty Principle</li>
+                <li>Chapter 4: Quantum Entanglement</li>
+                <li>Chapter 5: Applications of Quantum Mechanics</li>
+              </ul>
+            </div>
+            <div id="transcriptsContent" class="main-tab-panel">
+              <h3>Transcripts</h3>
+              <p>Welcome to this course on Quantum Physics. In our first chapter, we will explore the foundational concepts that revolutionized our understanding of the universe at the smallest scales...</p>
+              <p>[More transcript text would go here...]</p>
+            </div>
+          </div>
+        </div>
+        <div class="notes-component-container">
+          <iframe src="notes.html" frameborder="0" title="Notes Taking Component"></iframe>
+        </div>
+      </section>
+    </main>
+
+    <aside class="right-sidebar" id="rightSidebar">
+      <div class="right-sidebar-controls">
+        <button id="loadAIChatBtn" class="right-sidebar-tab-button active" data-content-src="chat-screen.html">AI Chat</button>
+        <button id="loadQuestionBtn" class="right-sidebar-tab-button" data-content-src="quiz.html">Question</button>
+        <button id="loadFlashcardsBtn" class="right-sidebar-tab-button" data-content-src="flashcard.html">Flash Cards</button>
+      </div>
+      <div class="right-sidebar-content-wrapper">
+        <iframe id="rightSidebarContentFrame" src="chat-screen.html" frameborder="0" title="Dynamic Content Area"></iframe>
+        <p id="rightSidebarPlaceholder" class="right-sidebar-placeholder hidden">Select an option above to load content.</p>
+      </div>
+    </aside>
+  </div>
+
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
