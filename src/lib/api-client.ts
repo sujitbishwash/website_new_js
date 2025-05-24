@@ -98,3 +98,187 @@ export const examGoalApi = {
     });
   }
 };
+
+export interface VideoDetail {
+  external_source_id: string;
+  title: string;
+  description: string;
+  tags: string[];
+  url: string;
+  type: string;
+  user_code: string;
+  topics: string[];
+  created_at: string;
+}
+
+export interface VideoChapter {
+  timestamp: string;
+  title: string;
+  description: string;
+}
+
+export interface VideoChaptersResponse {
+  video_id: string;
+  chapters: VideoChapter[];
+}
+
+export interface VideoTranscriptResponse {
+  video_id: string;
+  transcript: string;
+}
+
+export const videoApi = {
+  getVideoDetail: async (url: string): Promise<VideoDetail> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/video/detail?url=${encodeURIComponent(url)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to fetch video details');
+    }
+
+    return response.json();
+  },
+
+  getVideoChapters: async (videoId: string): Promise<VideoChaptersResponse> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/video/chapter?video_id=${encodeURIComponent(videoId)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to fetch video chapters');
+    }
+
+    return response.json();
+  },
+
+  getVideoTranscript: async (videoId: string): Promise<VideoTranscriptResponse> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/video/transcript?video_id=${encodeURIComponent(videoId)}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to fetch video transcript');
+    }
+
+    return response.json();
+  },
+};
+
+interface ChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+interface ChatHistoryResponse {
+  memory: ChatMessage[];
+}
+
+interface ChatStartResponse {
+  role: 'assistant';
+  content: string;
+}
+
+interface ChatSendResponse{
+    role: 'assistant';
+    content: string;
+  }
+
+export const chatApi = {
+  getChatHistory: async (videoId: string): Promise<ChatHistoryResponse> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/ai_agent/history?vedio_id=${encodeURIComponent(videoId)}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch chat history');
+    }
+
+    return response.json();
+  },
+
+  startChat: async (videoId: string): Promise<ChatStartResponse> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/ai_agent/start`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({ vedio_id: videoId })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to start chat');
+    }
+
+    return response.json();
+  },
+
+  sendMessage: async (videoId: string, message: string): Promise<ChatSendResponse> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/ai_agent/send`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        vedio_id: videoId,
+        message: message
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to send message');
+    }
+
+    return response.json();
+  }
+};
+

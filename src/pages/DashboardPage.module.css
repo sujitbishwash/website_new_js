@@ -203,7 +203,6 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  padding: var(--spacing-unit);
   box-sizing: border-box;
   position: relative;
 }
@@ -218,7 +217,7 @@
 
 /* Right Sidebar */
 .rightSidebar {
-  width: var(--sidebar-width-right);
+  width: 20%;
   background-color: oklch(0.15 0.02 230);
   height: 100vh;
   position: sticky;
@@ -436,5 +435,26 @@
   text-align: center;
   padding: 20px;
   color: oklch(0.7 0.01 230);
+  font-size: 1.1em;
+}
+
+.transcriptContent {
+  padding: var(--spacing-unit);
+  line-height: 1.6;
+}
+
+.transcriptContent p {
+  margin: 0 0 1em 0;
+  color: var(--notes-text-primary);
+}
+
+.transcriptContent p:last-child {
+  margin-bottom: 0;
+}
+
+.noContentMessage {
+  text-align: center;
+  padding: 20px;
+  color: var(--notes-text-placeholder);
   font-size: 1.1em;
 } 

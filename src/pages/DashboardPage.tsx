@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { VideoDetail, VideoChapter } from '@/lib/api-client';
 import { videoApi } from '@/lib/api-client';
 import Notes from '@/components/ui/notes';
+import Chat from '@/components/ui/Chat';
 import styles from './DashboardPage.module.css';
 
 interface LocationState {
@@ -20,6 +21,9 @@ const DashboardPage: React.FC = () => {
   const [chapters, setChapters] = useState<VideoChapter[]>([]);
   const [isLoadingChapters, setIsLoadingChapters] = useState(false);
   const [chaptersError, setChaptersError] = useState<string | null>(null);
+  const [transcript, setTranscript] = useState<string>('');
+  const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
+  const [transcriptError, setTranscriptError] = useState<string | null>(null);
 
   if (!videoDetails) {
     return (
@@ -48,6 +52,26 @@ const DashboardPage: React.FC = () => {
     };
 
     fetchChapters();
+  }, [videoDetails?.external_source_id]);
+
+  useEffect(() => {
+    const fetchTranscript = async () => {
+      if (!videoDetails?.external_source_id) return;
+
+      try {
+        setIsLoadingTranscript(true);
+        setTranscriptError(null);
+        const response = await videoApi.getVideoTranscript(videoDetails.external_source_id);
+        setTranscript(response.transcript);
+      } catch (err: any) {
+        setTranscriptError(err.message || 'Failed to fetch transcript');
+        console.error('Error fetching transcript:', err);
+      } finally {
+        setIsLoadingTranscript(false);
+      }
+    };
+
+    fetchTranscript();
   }, [videoDetails?.external_source_id]);
 
   const handleMainTabClick = (tabId: string) => {
@@ -114,7 +138,6 @@ const DashboardPage: React.FC = () => {
               <div 
                 className={`${styles.mainTabPanel} ${activeMainTab === 'chaptersContent' ? styles.active : ''}`}
               >
-                <h3>Chapters</h3>
                 {isLoadingChapters ? (
                   <div className={styles.loadingMessage}>Loading chapters...</div>
                 ) : chaptersError ? (
@@ -138,9 +161,19 @@ const DashboardPage: React.FC = () => {
               <div 
                 className={`${styles.mainTabPanel} ${activeMainTab === 'transcriptsContent' ? styles.active : ''}`}
               >
-                <h3>Transcripts</h3>
-                <p>Welcome to this course on Quantum Physics. In our first chapter, we will explore the foundational concepts that revolutionized our understanding of the universe at the smallest scales...</p>
-                <p>[More transcript text would go here...]</p>
+                {isLoadingTranscript ? (
+                  <div className={styles.loadingMessage}>Loading transcript...</div>
+                ) : transcriptError ? (
+                  <div className={styles.errorMessage}>{transcriptError}</div>
+                ) : transcript ? (
+                  <div className={styles.transcriptContent}>
+                    {transcript.split('\n').map((paragraph, index) => (
+                      <p key={index}>{paragraph}</p>
+                    ))}
+                  </div>
+                ) : (
+                  <div className={styles.noContentMessage}>No transcript available for this video.</div>
+                )}
               </div>
             </div>
           </div>
@@ -178,11 +211,15 @@ const DashboardPage: React.FC = () => {
           </button>
         </div>
         <div className={styles.rightSidebarContentWrapper}>
-          <iframe 
-            src={activeRightTab} 
-            frameBorder="0" 
-            title="Dynamic Content Area"
-          />
+          {activeRightTab === 'chat-screen.html' ? (
+            <Chat videoId={videoDetails.external_source_id} />
+          ) : (
+            <iframe 
+              src={activeRightTab} 
+              frameBorder="0" 
+              title="Dynamic Content Area"
+            />
+          )}
           <p 
             className={`${styles.rightSidebarPlaceholder} ${activeRightTab ? styles.hidden : ''}`}
           >
