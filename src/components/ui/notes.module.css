@@ -14,6 +14,7 @@
 
 .notesComponentWrapper {
   width: 100%;
+  padding: var(--notes-spacing-unit);
   display: flex;
   justify-content: start;
 }
@@ -96,15 +97,18 @@
 
 .expanded {
   position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
   height: 100%;
   max-width: none;
   border-radius: 0;
-  z-index: 1000;
-  border: none;
-  box-shadow: none;
+  background-color: var(--notes-bg-secondary);
+  border-radius: var(--notes-border-radius);
+  border: 1px solid var(--notes-border-color);
+  box-shadow: 0 8px 25px var(--notes-shadow-color);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--notes-transition-speed) ease-in-out;
+  overflow: hidden;
 }
 
 @media (max-width: 768px) {

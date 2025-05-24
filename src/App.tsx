@@ -1,7 +1,9 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './components/LoginPage';
-import ExamGoalPage from './components/ExamGoalPage';
+import LoginPage from './pages/LoginPage';
+import ExamGoalPage from './pages/ExamGoalPage';
+import DashboardPage from './pages/DashboardPage';
+import LinkInputPage from './pages/LinkInputPage';
 import './App.css'; // Keep App.css for any App-specific global styles if needed
 
 const App: React.FC = () => {
@@ -11,8 +13,8 @@ const App: React.FC = () => {
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/exam-goal" element={<ExamGoalPage />} />
-        <Route path="/exam-goal.html" element={<Navigate to="/exam-goal" replace />} />
-        <Route path="/dashboard" element={<div>Dashboard Page (Coming Soon)</div>} />
+        <Route path="/link-input" element={<LinkInputPage />} />
+        <Route path="/dashboard" element={<DashboardPage />} />
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Router>

@@ -1,0 +1,211 @@
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+  z-index: 1000;
+}
+
+.modalContent {
+  background-color: oklch(0.18 0.02 230);
+  color: oklch(0.95 0.01 230);
+  padding: 28px 32px;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  border: 1px solid oklch(0.25 0.02 230);
+}
+
+.modalHeader {
+  text-align: center;
+}
+
+.modalHeader h2 {
+  font-size: 1.6em;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: oklch(0.98 0 0);
+}
+
+.modalHeader p {
+  font-size: 0.95em;
+  color: oklch(0.7 0.01 230);
+  margin: 0;
+}
+
+.modalBody {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  position: relative;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 8px;
+  border: 1px solid oklch(0.3 0.02 230);
+  background-color: oklch(0.22 0.02 230);
+  color: oklch(0.95 0.01 230);
+  font-size: 1em;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input::placeholder,
+.textarea::placeholder {
+  color: oklch(0.55 0.01 230);
+}
+
+.input:focus,
+.textarea:focus {
+  outline: none;
+  border-color: oklch(0.6 0.18 260);
+  box-shadow: 0 0 0 2px oklch(0.6 0.18 260 / 0.3);
+}
+
+.textareaGroup {
+  position: relative;
+}
+
+.textarea {
+  min-height: 100px;
+  resize: vertical;
+  padding-top: 30px;
+}
+
+.clipboardIcon {
+  position: absolute;
+  top: 10px;
+  left: 12px;
+  color: oklch(0.6 0.01 230);
+  pointer-events: none;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: oklch(0.5 0.01 230);
+  font-size: 0.9em;
+  margin: 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid oklch(0.3 0.02 230);
+}
+
+.divider span {
+  padding: 0 12px;
+}
+
+.modalFooter {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.button {
+  padding: 10px 20px;
+  font-size: 0.95em;
+  font-weight: 500;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, opacity 0.2s ease;
+}
+
+.cancelButton {
+  background-color: oklch(0.35 0.02 230);
+  color: oklch(0.9 0.01 230);
+  border: 1px solid oklch(0.4 0.02 230);
+}
+
+.cancelButton:hover {
+  background-color: oklch(0.4 0.02 230);
+}
+
+.cancelButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px oklch(0.4 0.02 230 / 0.5);
+}
+
+.addButton {
+  background-color: oklch(0.1 0 0);
+  color: oklch(0.98 0 0);
+}
+
+.addButton:hover {
+  background-color: oklch(0.15 0 0);
+}
+
+.addButton:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px oklch(0.15 0 0 / 0.5);
+}
+
+.errorMessage {
+  background-color: oklch(0.2 0.1 30);
+  color: oklch(0.95 0.1 30);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid oklch(0.3 0.1 30);
+  margin-bottom: 16px;
+  font-size: 0.95em;
+  text-align: center;
+}
+
+@media (max-width: 480px) {
+  .modalContent {
+    margin: 20px;
+    padding: 20px 24px;
+    gap: 15px;
+  }
+  .modalHeader h2 {
+    font-size: 1.4em;
+  }
+  .modalHeader p {
+    font-size: 0.9em;
+  }
+  .input,
+  .textarea {
+    padding: 10px 12px;
+    font-size: 0.95em;
+  }
+  .textarea {
+    padding-top: 28px;
+  }
+  .clipboardIcon {
+    top: 8px;
+    left: 10px;
+  }
+  .clipboardIcon svg {
+    width: 14px;
+    height: 14px;
+  }
+  .modalFooter {
+    flex-direction: column;
+  }
+  .button {
+    width: 100%;
+  }
+} 

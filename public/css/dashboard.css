@@ -210,7 +210,7 @@ body {
 
 /* Right Sidebar */
 .right-sidebar {
-  width: var(--sidebar-width-right);
+  width: 20%;
   background-color: oklch(0.15 0.02 230);
   height: 100vh; 
   position: sticky; 
@@ -221,6 +221,7 @@ body {
   flex-direction: column;
   padding: var(--spacing-unit);
   box-sizing: border-box;
+  overflow: hidden;
 }
 .right-sidebar-controls {
   display: flex;

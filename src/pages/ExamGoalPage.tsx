@@ -54,7 +54,8 @@ const ExamGoalPage: React.FC = () => {
       const response = await examGoalApi.addExamGoal(examType, specificExam);
       
       if (response.data.success) {
-        navigate('/dashboard');
+        console.log('Exam goal saved successfully');
+        navigate('/link-input');
       } else {
         throw new Error(response.data.message || 'Failed to save exam preferences');
       }
