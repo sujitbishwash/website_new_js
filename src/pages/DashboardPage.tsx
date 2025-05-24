@@ -4,6 +4,8 @@ import { VideoDetail, VideoChapter } from '@/lib/api-client';
 import { videoApi } from '@/lib/api-client';
 import Notes from '@/components/ui/notes';
 import Chat from '@/components/ui/Chat';
+import Quiz from '@/components/ui/Quiz';
+import Flashcard from '@/components/ui/Flashcard';
 import styles from './DashboardPage.module.css';
 
 interface LocationState {
@@ -213,6 +215,10 @@ const DashboardPage: React.FC = () => {
         <div className={styles.rightSidebarContentWrapper}>
           {activeRightTab === 'chat-screen.html' ? (
             <Chat videoId={videoDetails.external_source_id} />
+          ) : activeRightTab === 'quiz.html' ? (
+            <Quiz videoId={videoDetails.external_source_id} />
+          ) : activeRightTab === 'flashcard.html' ? (
+            <Flashcard videoId={videoDetails.external_source_id} />
           ) : (
             <iframe 
               src={activeRightTab} 

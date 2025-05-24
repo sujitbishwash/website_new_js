@@ -1,0 +1,399 @@
+:root {
+  --fc-bg-primary: oklch(0.15 0.02 230);
+  --fc-bg-secondary: oklch(0.2 0.02 230);
+  --fc-bg-tertiary: oklch(0.25 0.02 230);
+  --fc-text-primary: oklch(0.95 0.01 230);
+  --fc-text-secondary: oklch(0.7 0.01 230);
+  --fc-accent-primary: oklch(0.6 0.15 260);
+  --fc-accent-secondary: oklch(0.5 0.1 250);
+  --fc-border-color: oklch(0.3 0.02 230);
+  --fc-shadow-color: oklch(0 0 0 / 0.3);
+  --fc-star-color: oklch(0.8 0.2 85);
+  --fc-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --fc-border-radius: 12px;
+  --fc-spacing-unit: 8px;
+}
+
+.flashcardAppContainer {
+  width: 100%;
+  max-width: 700px;
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--fc-spacing-unit) * 3);
+}
+
+.flashcardAppHeader {
+  text-align: center;
+  color: var(--fc-text-primary);
+}
+
+.flashcardAppHeader h1 {
+  font-size: 1.8em;
+  font-weight: 600;
+  margin-bottom: var(--fc-spacing-unit);
+}
+
+.flashcardComponent {
+  background-color: var(--fc-bg-secondary);
+  border-radius: var(--fc-border-radius);
+  padding: calc(var(--fc-spacing-unit) * 3);
+  box-shadow: 0 8px 25px var(--fc-shadow-color);
+  display: flex;
+  flex-direction: column;
+  gap: calc(var(--fc-spacing-unit) * 2.5);
+  position: relative;
+}
+
+.flashcardMainArea {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(var(--fc-spacing-unit) * 2);
+}
+
+.flashcard {
+  flex-grow: 1;
+  background-color: var(--fc-bg-tertiary);
+  border-radius: var(--fc-border-radius);
+  min-height: 250px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: calc(var(--fc-spacing-unit) * 2);
+  box-shadow: inset 0 0 10px oklch(0 0 0 / 0.2);
+  overflow: hidden;
+}
+
+.flashcardTopBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--fc-spacing-unit);
+}
+
+.flashcardHintBtn {
+  background-color: transparent;
+  color: var(--fc-text-secondary);
+  border: 1px solid var(--fc-border-color);
+  padding: calc(var(--fc-spacing-unit) * 0.75) calc(var(--fc-spacing-unit) * 1.5);
+  border-radius: calc(var(--fc-border-radius) * 2);
+  font-size: 0.85em;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: calc(var(--fc-spacing-unit) * 0.5);
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.flashcardHintBtn:hover {
+  background-color: var(--fc-accent-secondary);
+  color: var(--fc-text-primary);
+}
+
+.flashcardHintBtn svg {
+  opacity: 0.8;
+}
+
+.flashcardActionsIcons {
+  display: flex;
+  gap: var(--fc-spacing-unit);
+}
+
+.flashcardIconBtn {
+  background: none;
+  border: none;
+  color: var(--fc-text-secondary);
+  cursor: pointer;
+  padding: var(--fc-spacing-unit);
+  border-radius: 50%;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.flashcardIconBtn:hover {
+  background-color: oklch(from var(--fc-bg-tertiary) calc(l + 0.1) c h);
+  color: var(--fc-text-primary);
+}
+
+.flashcardIconBtn.starred .starEmpty,
+.flashcardIconBtn:not(.starred) .starFilled {
+  display: none;
+}
+
+.flashcardIconBtn.starred .starFilled {
+  display: inline-block !important;
+  color: var(--fc-star-color);
+}
+
+.flashcardContent {
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--fc-spacing-unit) 0;
+}
+
+.flashcardQuestion {
+  font-size: 1.5em;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--fc-text-primary);
+  margin: 0;
+}
+
+.flashcardBottomBar {
+  text-align: center;
+  margin-top: var(--fc-spacing-unit);
+}
+
+.flashcardNavIndicators {
+  font-size: 0.9em;
+  color: var(--fc-text-secondary);
+}
+
+.flashcardNavArrow {
+  background-color: var(--fc-bg-tertiary);
+  color: var(--fc-text-primary);
+  border: none;
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+  flex-shrink: 0;
+}
+
+.flashcardNavArrow:hover {
+  background-color: var(--fc-accent-primary);
+  transform: scale(1.1);
+}
+
+.flashcardNavArrow:active {
+  transform: scale(0.95);
+}
+
+.flashcardNavArrow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--fc-border-color);
+}
+
+.flashcardNavArrow svg {
+  width: 28px;
+  height: 28px;
+}
+
+.flashcardHintPopup {
+  position: absolute;
+  top: calc(var(--fc-spacing-unit) * 6);
+  left: calc(var(--fc-spacing-unit) * 3);
+  background-color: oklch(from var(--fc-accent-secondary) calc(l + 0.1) c h);
+  color: var(--fc-text-primary);
+  padding: calc(var(--fc-spacing-unit) * 1.5) calc(var(--fc-spacing-unit) * 2);
+  border-radius: var(--fc-border-radius);
+  box-shadow: 0 4px 15px var(--fc-shadow-color);
+  z-index: 10;
+  max-width: 300px;
+  font-size: 0.9em;
+  display: none;
+}
+
+.flashcardHintPopup.visible {
+  display: block;
+}
+
+.flashcardHintPopup p {
+  margin: 0 0 var(--fc-spacing-unit) 0;
+}
+
+.closePopupBtn {
+  position: absolute;
+  top: var(--fc-spacing-unit);
+  right: var(--fc-spacing-unit);
+  background: none;
+  border: none;
+  color: var(--fc-text-primary);
+  font-size: 1.5em;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+.flashcardActionButtons {
+  display: flex;
+  justify-content: center;
+  gap: calc(var(--fc-spacing-unit) * 1.5);
+  flex-wrap: wrap;
+  margin-top: var(--fc-spacing-unit);
+}
+
+.actionBtn {
+  background-color: var(--fc-bg-tertiary);
+  color: var(--fc-text-secondary);
+  border: 1px solid var(--fc-border-color);
+  padding: calc(var(--fc-spacing-unit) * 1.25) calc(var(--fc-spacing-unit) * 2);
+  border-radius: var(--fc-border-radius);
+  font-size: 0.95em;
+  font-weight: 500;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--fc-spacing-unit);
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+.actionBtn:hover {
+  background-color: var(--fc-accent-secondary);
+  color: var(--fc-text-primary);
+  border-color: var(--fc-accent-primary);
+}
+
+.actionBtn:active {
+  transform: scale(0.98);
+}
+
+.actionBtn svg {
+  transition: transform 0.2s;
+}
+
+.actionBtn.starred .starEmpty,
+.actionBtn:not(.starred) .starFilled {
+  display: none;
+}
+
+.actionBtn.starred .starFilled {
+  display: inline-block !important;
+  color: var(--fc-star-color);
+}
+
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: oklch(0 0 0 / 0.5);
+  display: none;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+}
+
+.modalContent {
+  background-color: var(--fc-bg-secondary);
+  border-radius: var(--fc-border-radius);
+  padding: calc(var(--fc-spacing-unit) * 3);
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 8px 25px var(--fc-shadow-color);
+}
+
+.modalContent h2 {
+  margin-top: 0;
+  color: var(--fc-text-primary);
+  font-size: 1.5em;
+}
+
+.modalContent p,
+.modalContent ul {
+  color: var(--fc-text-secondary);
+  margin-bottom: calc(var(--fc-spacing-unit) * 2);
+}
+
+.modalContent ul {
+  padding-left: calc(var(--fc-spacing-unit) * 3);
+}
+
+.modalCloseBtn {
+  margin-top: calc(var(--fc-spacing-unit) * 2);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .flashcardAppContainer {
+    max-width: 100%;
+  }
+
+  .flashcardComponent {
+    padding: calc(var(--fc-spacing-unit) * 2);
+  }
+
+  .flashcardQuestion {
+    font-size: 1.3em;
+  }
+
+  .flashcardNavArrow {
+    width: 40px;
+    height: 40px;
+  }
+
+  .flashcardNavArrow svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  .actionBtn {
+    font-size: 0.9em;
+    padding: calc(var(--fc-spacing-unit)) calc(var(--fc-spacing-unit) * 1.75);
+  }
+}
+
+@media (max-width: 500px) {
+  .flashcardAppHeader h1 {
+    font-size: 1.5em;
+  }
+
+  .flashcardMainArea {
+    flex-direction: column;
+    gap: calc(var(--fc-spacing-unit) * 1.5);
+  }
+
+  .flashcard {
+    min-height: 200px;
+    order: 2;
+  }
+
+  .flashcardNavArrow.prev {
+    order: 1;
+  }
+
+  .flashcardNavArrow.next {
+    order: 3;
+  }
+
+  .flashcardNavArrow {
+    width: 36px;
+    height: 36px;
+  }
+
+  .flashcardQuestion {
+    font-size: 1.2em;
+  }
+
+  .flashcardHintBtn {
+    font-size: 0.8em;
+    padding: calc(var(--fc-spacing-unit) * 0.5) calc(var(--fc-spacing-unit));
+  }
+
+  .flashcardIconBtn svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .flashcardActionButtons {
+    gap: var(--fc-spacing-unit);
+  }
+
+  .actionBtn {
+    font-size: 0.85em;
+    padding: calc(var(--fc-spacing-unit) * 0.75) calc(var(--fc-spacing-unit) * 1.5);
+  }
+
+  .flashcardHintPopup {
+    max-width: 250px;
+    font-size: 0.85em;
+  }
+}

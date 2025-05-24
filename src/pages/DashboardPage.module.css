@@ -217,7 +217,7 @@
 
 /* Right Sidebar */
 .rightSidebar {
-  width: 20%;
+  width: 30%;
   background-color: oklch(0.15 0.02 230);
   height: 100vh;
   position: sticky;
