@@ -1,0 +1,316 @@
+:root {
+  --primary: 0, 100, 200;
+  --primary-light: 100, 180, 255;
+  --primary-dark: 0, 50, 100;
+  --secondary: 0, 200, 255;
+  --dark: 10, 12, 16;
+  --darker: 5, 7, 10;
+  --light: 240, 240, 240;
+  --gradient: linear-gradient(135deg, rgb(var(--primary)), rgb(var(--primary-light)));
+  --glass: rgba(0, 0, 0, 0.3);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --transition: all 0.3s ease-in-out;
+  --sidebar-width: 260px;
+  --sidebar-width-collapsed: 70px;
+  --text-light: #e5e7eb;
+  --dark-medium: 25, 28, 35;
+  --legend-grey: #888;
+  --legend-red: #dc3545;
+  --legend-green: #28a745;
+  --legend-purple: #6f42c1;
+  --warning-red: #f8d7da;
+  --warning-red-text: #721c24;
+  --button-soft-bg: rgba(var(--primary-light), 0.2);
+  --button-soft-border: rgba(var(--primary-light), 0.5);
+  --button-soft-hover-bg: rgba(var(--primary-light), 0.3);
+}
+
+.main-content-area.instructions-page {
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.instructions-container {
+  display: flex;
+  flex-grow: 1;
+  gap: 1.5rem;
+  background: rgba(var(--dark-medium), 0.7);
+  border-radius: 12px;
+  border: 1px solid var(--glass-border);
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.instructions-left {
+  flex: 0 0 70%;
+  overflow-y: auto;
+  padding-right: 1rem;
+}
+
+.instructions-left::-webkit-scrollbar {
+  width: 6px;
+}
+
+.instructions-left::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.instructions-left::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.instructions-left::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.instructions-right {
+  flex: 0 0 30%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+}
+
+.instructions-left h1 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+  color: white;
+  border-bottom: 1px solid var(--glass-border);
+  padding-bottom: 0.5rem;
+}
+
+.instruction-section {
+  margin-bottom: 2rem;
+}
+
+.instruction-section h2 {
+  font-size: 1.3rem;
+  margin-bottom: 1rem;
+  color: rgb(var(--primary-light));
+}
+
+.instruction-section ol,
+.instruction-section ul {
+  padding-left: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.instruction-section li {
+  margin-bottom: 0.75rem;
+  line-height: 1.7;
+}
+
+.instruction-section p {
+  margin-bottom: 0.75rem;
+}
+
+.instruction-section strong {
+  font-weight: 600;
+  color: white;
+}
+
+.legend {
+  list-style: none;
+  padding-left: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.legend-box {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  position: relative;
+  flex-shrink: 0;
+}
+
+.legend-box.grey {
+  background-color: var(--legend-grey);
+}
+
+.legend-box.red {
+  background-color: var(--legend-red);
+}
+
+.legend-box.green {
+  background-color: var(--legend-green);
+}
+
+.legend-box.purple {
+  background-color: var(--legend-purple);
+}
+
+.check-mark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--legend-green);
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.legend-box.purple .check-mark {
+  color: white;
+}
+
+.warning-text {
+  color: var(--warning-red-text);
+  background-color: var(--warning-red);
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  display: inline-block;
+  border: 1px solid rgba(var(--warning-red-text), 0.3);
+}
+
+.user-profile {
+  text-align: center;
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--glass-border);
+  width: 100%;
+}
+
+.profile-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin-bottom: 0.75rem;
+  border: 2px solid var(--glass-border);
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.profile-name {
+  display: block;
+  font-weight: 600;
+  color: white;
+}
+
+.instructions-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  margin-top: 1rem;
+  border-top: 1px solid var(--glass-border);
+  background: rgba(var(--dark-medium), 0.5);
+  border-radius: 0 0 12px 12px;
+  position: sticky;
+  bottom: 0;
+}
+
+.btn {
+  padding: 0.6rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: var(--transition);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: none;
+  color: inherit;
+}
+
+.btn-secondary {
+  background-color: rgba(var(--light), 0.1);
+  border-color: rgba(var(--light), 0.2);
+  color: var(--text-light);
+}
+
+.btn-secondary:hover {
+  background-color: rgba(var(--light), 0.15);
+  border-color: rgba(var(--light), 0.3);
+}
+
+.btn-primary-soft {
+  background-color: var(--button-soft-bg);
+  border-color: var(--button-soft-border);
+  color: rgb(var(--primary-light));
+}
+
+.btn-primary-soft:hover {
+  background-color: var(--button-soft-hover-bg);
+  border-color: rgb(var(--primary-light));
+  color: white;
+}
+
+@media (max-width: 992px) {
+  .main-content-area.instructions-page {
+    padding: 1.5rem;
+  }
+
+  .instructions-container {
+    flex-direction: column;
+  }
+
+  .instructions-left,
+  .instructions-right {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .instructions-left {
+    padding-right: 0;
+    max-height: 60vh;
+  }
+
+  .instructions-right {
+    order: -1;
+    padding: 1rem;
+  }
+
+  .user-profile {
+    padding: 0.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .profile-avatar {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .main-content-area.instructions-page {
+    padding: 1rem;
+    padding-bottom: 80px;
+  }
+
+  .instructions-container {
+    padding: 1rem;
+  }
+
+  .instructions-left h1 {
+    font-size: 1.6rem;
+  }
+
+  .instruction-section h2 {
+    font-size: 1.2rem;
+  }
+
+  .instructions-footer {
+    padding: 0.8rem 1rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1.2rem;
+    font-size: 0.85rem;
+  }
+} 

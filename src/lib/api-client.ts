@@ -282,3 +282,65 @@ export const chatApi = {
   }
 };
 
+interface SubTopic {
+  subject: string;
+  sub_topic: string[];
+}
+
+interface TestSeriesFormData {
+  subjects: SubTopic[];
+  level: string[];
+  language: string[];
+}
+
+export const fetchTestSeriesFormData = async (): Promise<TestSeriesFormData> => {
+  const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+  const response = await fetch(`${API_CONFIG.baseURL}/test-series/form-data`, {
+    headers: {
+      'Authorization': `Bearer ${token}`
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch test series data');
+  }
+  return response.json();
+};
+
+interface TestSeriesResponse {
+  testId: string;
+  status: string;
+}
+
+export const testSeriesApi = {
+  createTest: async (data: {
+    subject: string;
+    sub_topic: string[];
+    level: string;
+    language: string;
+  }): Promise<TestSeriesResponse> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/test-series/form`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(data)
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to create test');
+    }
+
+    return response.json();
+  }
+};
+
