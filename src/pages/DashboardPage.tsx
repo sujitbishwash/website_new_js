@@ -6,6 +6,7 @@ import Notes from '@/components/ui/notes';
 import Chat from '@/components/ui/Chat';
 import Quiz from '@/components/ui/Quiz';
 import Flashcard from '@/components/ui/Flashcard';
+import Sidebar from '@/components/Sidebar';
 import styles from './DashboardPage.module.css';
 
 interface LocationState {
@@ -90,20 +91,11 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className={styles.dashboardLayout}>
-      <button 
-        className={styles.hamburgerMenu} 
-        aria-label="Toggle sidebar" 
-        aria-expanded={isLeftSidebarOpen}
-        onClick={toggleLeftSidebar}
-      >
-        <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-          <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
-        </svg>
-      </button>
-
-      <aside className={`${styles.leftSidebar} ${isLeftSidebarOpen ? styles.open : ''}`}>
-        <iframe src="/sidebar.html" frameBorder="0" title="Main Navigation Sidebar"></iframe>
-      </aside>
+      <Sidebar 
+        isOpen={isLeftSidebarOpen} 
+        onClose={() => setIsLeftSidebarOpen(false)}
+        onToggle={toggleLeftSidebar}
+      />
 
       <main className={styles.mainContentArea}>
         <section className={styles.videoPlayerSection}>

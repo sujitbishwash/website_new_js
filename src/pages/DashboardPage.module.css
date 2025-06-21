@@ -11,6 +11,7 @@
   --button-bg: oklch(0.2 0.02 230);
   --button-hover-bg: oklch(0.25 0.02 230);
   --hamburger-area-width: calc(var(--spacing-unit) + 24px + var(--spacing-unit));
+  --sidebar-width: 280px;
 }
 
 .dashboardLayout {
@@ -43,35 +44,6 @@
   background-color: oklch(from var(--dashboard-bg) calc(l + 0.15) c h);
 }
 
-/* Left Sidebar */
-.leftSidebar {
-  width: 0;
-  background-color: oklch(0.15 0.02 230);
-  height: 100vh;
-  position: sticky;
-  top: 0;
-  overflow-y: auto;
-  overflow-x: hidden;
-  transition: width 0.3s ease-in-out, transform 0.3s ease-in-out;
-  z-index: 1000;
-  border-right: none;
-  display: flex;
-  flex-direction: column;
-}
-
-.leftSidebar.open {
-  width: var(--sidebar-width-left-expanded);
-  border-right: 1px solid var(--border-color);
-}
-
-.leftSidebar iframe {
-  width: 100%;
-  height: 100%;
-  flex-grow: 1;
-  display: block;
-  min-width: var(--sidebar-width-left-expanded);
-}
-
 /* Main Content Area */
 .mainContentArea {
   flex-grow: 1;
@@ -81,10 +53,14 @@
   height: 100vh;
   box-sizing: border-box;
   transition: padding-left 0.3s ease-in-out;
+  margin-left: 0;
 }
 
-.leftSidebar.expanded + .mainContentArea {
-  padding-left: calc(var(--sidebar-width-left-expanded) + var(--spacing-unit));
+/* Adjust main content when sidebar is open on desktop */
+@media (min-width: 769px) {
+  .mainContentArea {
+    margin-left: var(--sidebar-width);
+  }
 }
 
 .videoPlayerSection {
@@ -300,27 +276,13 @@
 }
 
 @media (max-width: 768px) {
-  .leftSidebar {
-    position: fixed;
-    width: var(--sidebar-width-left-expanded);
-    transform: translateX(-100%);
-    box-shadow: 5px 0 15px var(--shadow-color);
-    border-right: none;
-  }
-  .leftSidebar.open {
-    transform: translateX(0);
-  }
-
   .mainContentArea {
     width: 100%;
     padding-left: var(--hamburger-area-width);
     padding-top: calc(var(--header-height) + var(--spacing-unit));
     height: auto;
     min-height: calc(100vh - var(--header-height) - var(--spacing-unit));
-  }
-
-  .leftSidebar.expanded + .mainContentArea {
-    padding-left: var(--hamburger-area-width);
+    margin-left: 0;
   }
 
   .rightSidebar {

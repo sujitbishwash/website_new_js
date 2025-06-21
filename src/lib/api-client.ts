@@ -295,18 +295,23 @@ interface TestSeriesFormData {
 
 export const fetchTestSeriesFormData = async (): Promise<TestSeriesFormData> => {
   const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
+  if (!token) {
+    throw new Error('No authentication token found');
+  }
+
   const response = await fetch(`${API_CONFIG.baseURL}/test-series/form-data`, {
+    method: 'GET',
     headers: {
-      'Authorization': `Bearer ${token}`
-    }
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
-    throw new Error('Failed to fetch test series data');
+    const errorData = await response.json();
+    throw new Error(errorData.detail || 'Failed to fetch test series form data');
   }
+
   return response.json();
 };
 
@@ -342,5 +347,82 @@ export const testSeriesApi = {
 
     return response.json();
   }
+};
+
+// Quiz/Test Questions API
+export interface QuestionResponse {
+  session_id: number;
+  questions: {
+    questionId: number;
+    questionType: string;
+    content: string;
+    option: string[];
+    answer: string | null;
+  }[];
+}
+
+export interface SubmitTestRequest {
+  session_id: number;
+  answers: {
+    question_id: number;
+    selected_option: string | null;
+    answer: string | null;
+  }[];
+}
+
+export interface SubmitTestResponse {
+  session_id: number;
+  score: number;
+  total: number;
+  attempt: number;
+}
+
+export const quizApi = {
+  getQuestions: async (sessionId: number): Promise<QuestionResponse> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/test-series/question/${sessionId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    console.log(response);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to fetch questions');
+    }
+
+    return response.json();
+  },
+
+  submitTest: async (data: SubmitTestRequest): Promise<SubmitTestResponse> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/test-series/submit-test-session`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to submit test');
+    }
+
+    return response.json();
+  },
 };
 
