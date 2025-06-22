@@ -8,6 +8,7 @@ import TestSeries from './pages/TestSeries';
 import ExamInstructions from './pages/ExamInstructions';
 import ExamInstructionsSecond from './pages/ExamInstructionsSecond';
 import Quiz from './pages/Quiz';
+import ComingSoon from './pages/ComingSoon';
 import './App.css'; // Keep App.css for any App-specific global styles if needed
 
 const App: React.FC = () => {
@@ -23,7 +24,7 @@ const App: React.FC = () => {
         <Route path="/exam-instructions" element={<ExamInstructions />} />
         <Route path="/exam-instructions-second" element={<ExamInstructionsSecond />} />
         <Route path="/quiz" element={<Quiz />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<ComingSoon />} />
       </Routes>
     </Router>
   );
