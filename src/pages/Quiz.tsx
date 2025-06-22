@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { quizApi, QuestionResponse, SubmitTestRequest } from '../lib/api-client';
+import { quizApi, SubmitTestRequest } from '../lib/api-client';
 import '../styles/Quiz.css';
 
 type QuestionStatus = 'not-visited' | 'answered' | 'not-answered' | 'marked' | 'marked-answered';

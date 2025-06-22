@@ -1,14 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import '../styles/ComingSoon.css';
 
 const ComingSoon: React.FC = () => {
-  const navigate = useNavigate();
-
-  const handleGoBack = () => {
-    navigate('/dashboard');
-  };
-
   return (
     <div className="coming-soon-container">
       <div className="coming-soon-content">

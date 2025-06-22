@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { videoApi, VideoDetail } from '@/lib/api-client';
+import { videoApi } from '@/lib/api-client';
 import styles from './LinkInputPage.module.css';
 
 const LinkInputPage: React.FC = () => {
