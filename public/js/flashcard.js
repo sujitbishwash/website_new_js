@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded', () => {
   const cardQuestionEl = document.getElementById('cardQuestion');
   const navIndicatorsEl = document.getElementById('navIndicators');
