@@ -57,11 +57,12 @@
 }
 
 /* Adjust main content when sidebar is open on desktop */
-@media (min-width: 769px) {
+/* we can hide this area as hamburger menu can open sidebar on top of main content area */
+/* @media (min-width: 769px) {
   .mainContentArea {
     margin-left: var(--sidebar-width);
   }
-}
+} */
 
 .videoPlayerSection {
   margin-bottom: var(--spacing-unit);
