@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Subscription Plan Selector</title>
+  <link rel="stylesheet" href="css/subscription.css">
+</head>
+<body>
+
+  <div class="subscription-container">
+    <div class="offer-banner">
+      <p class="offer-title">Limited Time Offer</p>
+      <p class="offer-details">Get 25% OFF Premium! Use code: <strong>FINALS25</strong></p>
+      <p class="offer-validity">(Valid until April 30)</p>
+    </div>
+
+    <h2 class="section-title">Upgrade Your Plan</h2>
+
+    <ul class="benefits-list">
+      <li>
+        <svg class="checkmark-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path></svg>
+        Unlimited uploads, pastes, and records
+      </li>
+      <li>
+        <svg class="checkmark-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path></svg>
+        Unlimited AI chats (Learn+ mode: 100 chats/month)
+      </li>
+      <li>
+        <svg class="checkmark-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path></svg>
+        Unlimited quiz generation
+      </li>
+      <li>
+        <svg class="checkmark-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path></svg>
+        Unlimited practice exams
+      </li>
+      <li>
+        <svg class="checkmark-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path></svg>
+        Extended voice mode usage
+      </li>
+      <li>
+        <svg class="checkmark-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"></path></svg>
+        Upload files up to 100 pages / 15 MB
+      </li>
+    </ul>
+
+    <div class="pricing-options">
+      <div class="pricing-box" data-plan="annual">
+        <h3 class="plan-name">Annual</h3>
+        <p class="plan-price">₹199<span class="plan-interval">/month</span></p>
+        <p class="plan-save">(Save 40%)</p>
+        <p class="plan-billing">Billed annually</p>
+      </div>
+      <div class="pricing-box" data-plan="monthly">
+        <h3 class="plan-name">Monthly</h3>
+        <p class="plan-price">₹399<span class="plan-interval">/month</span></p>
+        <p class="plan-billing">Billed monthly</p>
+      </div>
+    </div>
+
+    <button class="select-plan-btn" id="selectPlanBtn" disabled>Select Plan</button>
+  </div>
+
+  <script src="js/subscription.js"></script>
+</body>
+</html>
