@@ -1,33 +1,14 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import LoginPage from './pages/LoginPage';
-import ExamGoalPage from './pages/ExamGoalPage';
-import DashboardPage from './pages/DashboardPage';
-import LinkInputPage from './pages/LinkInputPage';
-import TestSeries from './pages/TestSeries';
-import ExamInstructions from './pages/ExamInstructions';
-import ExamInstructionsSecond from './pages/ExamInstructionsSecond';
-import Quiz from './pages/Quiz';
-import ComingSoon from './pages/ComingSoon';
+import LoginPage from '@/components/LoginPage';
 import './App.css'; // Keep App.css for any App-specific global styles if needed
 
-const App: React.FC = () => {
+function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/exam-goal" element={<ExamGoalPage />} />
-        <Route path="/link-input" element={<LinkInputPage />} />
-        <Route path="/dashboard" element={<DashboardPage />} />
-        <Route path="/test-series" element={<TestSeries />} />
-        <Route path="/exam-instructions" element={<ExamInstructions />} />
-        <Route path="/exam-instructions-second" element={<ExamInstructionsSecond />} />
-        <Route path="/quiz" element={<Quiz />} />
-        <Route path="*" element={<ComingSoon />} />
-      </Routes>
-    </Router>
+    // Ensure this div takes full height and centers its content
+    // The background color is now handled by body styles in index.css
+    <div className="flex flex-col items-center justify-center min-h-full p-4">
+      <LoginPage />
+    </div>
   );
-};
+}
 
 export default App;

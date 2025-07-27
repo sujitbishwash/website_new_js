@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat Screen</title>
+  <link rel="stylesheet" href="css/chat-screen.css">
+</head>
+<body>
+
+  <div class="chat-screen-container">
+    <!-- Internal sidebar removed -->
+
+    <main class="chat-main-content">
+      <header class="chat-header">
+        <!-- Menu toggle button removed -->
+        <!-- "Learning Guide" h1 removed -->
+        <div class="header-actions">
+          <!-- Placeholder for other header actions if any -->
+        </div>
+      </header>
+
+      <!-- <div class="chat-tabs">
+        <button class="chat-tab-button active" data-tab="ai-chat">AI Chat</button>
+        <button class="chat-tab-button" data-tab="flash-cards">Flash Cards</button>
+        <button class="chat-tab-button" data-tab="quizzes">Quizzes</button>
+      </div>
+			-->
+      <div class="chat-window-area">
+        <div class="chat-messages">
+          <!-- Initial AI Message -->
+          <div class="message-group ai-message-group">
+            <div class="message-avatar">
+              <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"></path><path d="M12 10V7h-.01"></path><path d="M12 11h.01"></path></svg>
+            </div>
+            <div class="message-content-wrapper">
+              <div class="message-sender-info">
+                <span class="sender-name">AI Assistant</span>
+                <span class="sender-status">Online</span>
+              </div>
+              <div class="message-bubble">
+                <p>Hello! I'm your AI Learning Assistant. How can I help you explore new topics or prepare for your exams today?</p>
+                <div class="message-actions">
+                  <span class="message-timestamp">10:30 AM</span>
+                  <button class="copy-icon" aria-label="Copy message">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Message Example (hidden by default, template for JS) -->
+          <div class="message-group user-message-group" style="display: none;" id="user-message-template">
+            <div class="message-content-wrapper">
+              <div class="message-bubble">
+                <p class="user-message-text"></p>
+                 <div class="message-actions">
+                  <span class="message-timestamp"></span>
+                   <button class="copy-icon" aria-label="Copy message">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="learn-suggestions">
+          <button class="suggestions-toggle" aria-expanded="true">
+            <span>Learn suggestions</span>
+            <svg class="toggle-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          <div class="suggestions-content">
+            <button class="suggestion-item">Explain quantum physics</button>
+            <button class="suggestion-item">Summarize the French Revolution</button>
+            <button class="suggestion-item">Draft a practice quiz on calculus</button>
+          </div>
+        </div>
+      </div>
+
+      <footer class="chat-input-bar">
+        <div class="input-bar-top-row">
+          <div class="input-mode-selector">
+            <select aria-label="Select input mode">
+              <option value="default">Default</option>
+              <option value="creative">Creative</option>
+              <option value="precise">Precise</option>
+            </select>
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <button class="tag-button learn-plus-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"></path></svg>
+            Learn+
+          </button>
+          <button class="tag-button filter-button">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 3H2l8 9.46V19l4 2v-8.46L22 3z"></path></svg>
+            Questions
+          </button>
+        </div>
+        <div class="input-bar-main-row">
+          <textarea id="chat-message-input" placeholder="Ask anything..." rows="1"></textarea>
+          <button id="send-message-button" aria-label="Send message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+          </button>
+        </div>
+      </footer>
+    </main>
+  </div>
+
+  <script src="js/chat-screen.js"></script>
+</body>
+</html>
