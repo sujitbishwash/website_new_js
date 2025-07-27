@@ -1,0 +1,251 @@
+/* Coming Soon Page Styles */
+.coming-soon-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, oklch(0.95 0.02 230) 0%, oklch(0.9 0.03 250) 100%);
+  position: relative;
+  overflow: hidden;
+  padding: 2rem;
+}
+
+.coming-soon-content {
+  text-align: center;
+  max-width: 600px;
+  z-index: 10;
+  position: relative;
+}
+
+.coming-soon-icon {
+  margin-bottom: 2rem;
+  animation: pulse 2s infinite;
+}
+
+.coming-soon-icon svg {
+  color: oklch(0.3 0.02 230);
+}
+
+.coming-soon-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  color: oklch(0.2 0.02 230);
+  margin-bottom: 1.5rem;
+  background: linear-gradient(135deg, oklch(0.3 0.02 230), oklch(0.4 0.03 250));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.coming-soon-description {
+  font-size: 1.25rem;
+  color: oklch(0.4 0.02 230);
+  margin-bottom: 3rem;
+  line-height: 1.6;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.coming-soon-features {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 3rem;
+  align-items: center;
+}
+
+.feature-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  max-width: 300px;
+  width: 100%;
+}
+
+.feature-item:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.feature-item svg {
+  color: oklch(0.3 0.02 230);
+  flex-shrink: 0;
+}
+
+.feature-item span {
+  font-weight: 500;
+  color: oklch(0.3 0.02 230);
+  font-size: 1rem;
+}
+
+.coming-soon-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem 2rem;
+  background: oklch(0.3 0.02 230);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.coming-soon-button:hover {
+  background: oklch(0.25 0.02 230);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.coming-soon-button:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.5);
+  outline-offset: 2px;
+}
+
+.coming-soon-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Background floating shapes */
+.coming-soon-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floating-shape {
+  position: absolute;
+  border-radius: 50%;
+  background: linear-gradient(135deg, oklch(0.8 0.02 230, 0.1), oklch(0.7 0.03 250, 0.1));
+  animation: float 6s ease-in-out infinite;
+}
+
+.shape-1 {
+  width: 100px;
+  height: 100px;
+  top: 20%;
+  left: 10%;
+  animation-delay: 0s;
+}
+
+.shape-2 {
+  width: 150px;
+  height: 150px;
+  top: 60%;
+  right: 15%;
+  animation-delay: 2s;
+}
+
+.shape-3 {
+  width: 80px;
+  height: 80px;
+  bottom: 20%;
+  left: 20%;
+  animation-delay: 4s;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-20px) rotate(120deg);
+  }
+  66% {
+    transform: translateY(10px) rotate(240deg);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .coming-soon-container {
+    padding: 1rem;
+  }
+  
+  .coming-soon-title {
+    font-size: 2.5rem;
+  }
+  
+  .coming-soon-description {
+    font-size: 1.1rem;
+  }
+  
+  .coming-soon-features {
+    gap: 0.75rem;
+  }
+  
+  .feature-item {
+    padding: 0.75rem 1rem;
+    max-width: 280px;
+  }
+  
+  .coming-soon-button {
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  .shape-1 {
+    width: 60px;
+    height: 60px;
+  }
+  
+  .shape-2 {
+    width: 100px;
+    height: 100px;
+  }
+  
+  .shape-3 {
+    width: 50px;
+    height: 50px;
+  }
+}
+
+@media (max-width: 480px) {
+  .coming-soon-title {
+    font-size: 2rem;
+  }
+  
+  .coming-soon-description {
+    font-size: 1rem;
+  }
+  
+  .feature-item {
+    max-width: 250px;
+    padding: 0.625rem 0.875rem;
+  }
+  
+  .feature-item span {
+    font-size: 0.9rem;
+  }
+  
+  .coming-soon-button {
+    padding: 0.75rem 1.25rem;
+    font-size: 0.95rem;
+  }
+} 

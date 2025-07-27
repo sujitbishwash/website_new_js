@@ -1,0 +1,137 @@
+:root {
+  --notes-bg-primary: oklch(0.15 0.02 230);
+  --notes-bg-secondary: oklch(0.2 0.02 230);
+  --notes-text-primary: oklch(0.9 0.01 230);
+  --notes-text-placeholder: oklch(0.6 0.01 230);
+  --notes-border-color: oklch(0.35 0.02 230);
+  --notes-accent-color: oklch(0.7 0.2 200);
+  --notes-shadow-color: oklch(0 0 0 / 0.5);
+  --notes-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --notes-border-radius: 10px;
+  --notes-spacing-unit: 8px;
+  --notes-transition-speed: 0.3s;
+}
+
+.notesComponentWrapper {
+  width: 100%;
+  padding: var(--notes-spacing-unit);
+  display: flex;
+  justify-content: start;
+}
+
+.notesContainer {
+  background-color: var(--notes-bg-secondary);
+  border-radius: var(--notes-border-radius);
+  border: 1px solid var(--notes-border-color);
+  box-shadow: 0 8px 25px var(--notes-shadow-color);
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 600px;
+  min-height: 250px;
+  height: 400px;
+  position: relative;
+  transition: all var(--notes-transition-speed) ease-in-out;
+  overflow: hidden;
+}
+
+.notesHeader {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--notes-spacing-unit) calc(var(--notes-spacing-unit) * 1.5);
+  background-color: oklch(from var(--notes-bg-secondary) calc(l + 0.03) c h);
+  border-bottom: 1px solid var(--notes-border-color);
+}
+
+.notesActionBtn {
+  background: none;
+  border: none;
+  color: var(--notes-text-placeholder);
+  cursor: pointer;
+  padding: calc(var(--notes-spacing-unit) * 0.5);
+  border-radius: calc(var(--notes-border-radius) / 2);
+  transition: color var(--notes-transition-speed), background-color var(--notes-transition-speed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notesActionBtn:hover,
+.notesActionBtn:focus {
+  color: var(--notes-accent-color);
+  background-color: oklch(from var(--notes-border-color) l c h / 0.5);
+  outline: none;
+}
+
+.notesActionBtn svg {
+  transition: transform var(--notes-transition-speed);
+}
+
+.notesActionBtn:hover svg {
+  transform: scale(1.1);
+}
+
+.noteInput {
+  flex-grow: 1;
+  background-color: transparent;
+  border: none;
+  color: var(--notes-text-primary);
+  font-family: var(--notes-font-family);
+  font-size: 1em;
+  padding: calc(var(--notes-spacing-unit) * 2);
+  resize: none;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.6;
+}
+
+.noteInput::placeholder {
+  color: var(--notes-text-placeholder);
+  opacity: 1;
+}
+
+.noteInput:focus {
+  border-color: var(--notes-accent-color);
+}
+
+.expanded {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  border-radius: 0;
+  background-color: var(--notes-bg-secondary);
+  border-radius: var(--notes-border-radius);
+  border: 1px solid var(--notes-border-color);
+  box-shadow: 0 8px 25px var(--notes-shadow-color);
+  display: flex;
+  flex-direction: column;
+  transition: all var(--notes-transition-speed) ease-in-out;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  .notesContainer {
+    min-height: 200px;
+    height: 300px;
+  }
+  .noteInput {
+    font-size: 0.95em;
+    padding: calc(var(--notes-spacing-unit) * 1.5);
+  }
+}
+
+@media (max-width: 480px) {
+  .notesContainer {
+    min-height: 180px;
+    height: 250px;
+  }
+  .notesHeader {
+    padding: calc(var(--notes-spacing-unit) * 0.75) var(--notes-spacing-unit);
+  }
+  .noteInput {
+    font-size: 0.9em;
+    padding: var(--notes-spacing-unit);
+  }
+} 
