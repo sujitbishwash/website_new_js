@@ -52,3 +52,4 @@ yarn-error.log*
 
 # Vite
 .vite 
+package-lock.json
