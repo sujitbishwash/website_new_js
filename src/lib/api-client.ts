@@ -425,4 +425,3 @@ export const quizApi = {
     return response.json();
   },
 };
-

@@ -1,4 +1,4 @@
- import React, { useState } from 'react';
+import React, { useState } from 'react';
 
 // --- CSS Styles Component ---
 // The CSS is included directly in the component to avoid file resolution errors.

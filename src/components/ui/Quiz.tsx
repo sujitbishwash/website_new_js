@@ -160,4 +160,4 @@ const Quiz: React.FC<QuizProps> = ({ videoId }) => {
   );
 };
 
-export default Quiz; 
+export default Quiz;

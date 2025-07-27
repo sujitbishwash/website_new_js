@@ -72,4 +72,4 @@ const Notes: React.FC<NotesProps> = ({ initialNotes = '', onNotesChange }) => {
   );
 };
 
-export default Notes; 
+export default Notes;

@@ -322,4 +322,4 @@ const Flashcard: React.FC<FlashcardProps> = ({ videoId }) => {
   );
 };
 
-export default Flashcard; 
+export default Flashcard;

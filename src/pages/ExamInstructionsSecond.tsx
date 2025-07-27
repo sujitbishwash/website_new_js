@@ -89,4 +89,4 @@ const ExamInstructionsSecond: React.FC = () => {
   );
 };
 
-export default ExamInstructionsSecond; 
+export default ExamInstructionsSecond;
