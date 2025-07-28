@@ -12,6 +12,10 @@ export const ROUTES = {
     EXAM_INSTRUCTIONS: '/exam-instructions',
     EXAM_INSTRUCTIONS_SECOND: '/exam-instructions-second',
     QUIZ: '/quiz',
+    HISTORY: '/history',
+    CHAT: '/chat',
+    FLASHCARDS: '/flashcards',
+    QUIZZES: '/quizzes',
 } as const;
 
 // Route groups
@@ -69,6 +73,26 @@ export const ROUTE_METADATA = {
     [ROUTES.QUIZ]: {
         title: 'Quiz',
         description: 'Take a quiz',
+        requiresAuth: true,
+    },
+    [ROUTES.HISTORY]: {
+        title: 'History',
+        description: 'View your history',
+        requiresAuth: true,
+    },
+    [ROUTES.CHAT]: {
+        title: 'Chat',
+        description: 'Chat with our AI',
+        requiresAuth: true,
+    },
+    [ROUTES.FLASHCARDS]: {
+        title: 'Flashcards',
+        description: 'View your flashcards',
+        requiresAuth: true,
+    },
+    [ROUTES.QUIZZES]: {
+        title: 'Quizzes',
+        description: 'View your quizzes',
         requiresAuth: true,
     },
 } as const; 

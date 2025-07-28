@@ -389,4 +389,20 @@
     width: 18px;
     height: 18px;
   }
+}
+
+/* Main content area adjustments */
+.main-content-with-sidebar {
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+}
+
+.main-content-with-sidebar.sidebar-closed {
+  margin-left: 0;
+}
+
+@media (max-width: 768px) {
+  .main-content-with-sidebar {
+    margin-left: 0;
+  }
 } 

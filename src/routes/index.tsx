@@ -1,3 +1,7 @@
+import Chat from "@/components/Chat";
+import Flashcards from "@/components/Flashcards";
+import History from "@/components/History";
+import Quizzes from "@/components/Quizzes";
 import ComingSoon from "@/pages/ComingSoon";
 import DashboardPage from "@/pages/DashboardPage";
 import ExamGoalPage from "@/pages/ExamGoalPage";
@@ -58,6 +62,22 @@ export const protectedRoutes: RouteObject[] = [
   {
     path: ROUTES.QUIZ,
     element: <Quiz />,
+  },
+  {
+    path: ROUTES.HISTORY,
+    element: <History />,
+  },
+  {
+    path: ROUTES.CHAT,
+    element: <Chat />,
+  },
+  {
+    path: ROUTES.FLASHCARDS,
+    element: <Flashcards />,
+  },
+  {
+    path: ROUTES.QUIZZES,
+    element: <Quizzes />,
   },
 ];
 
