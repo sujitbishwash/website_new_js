@@ -275,4 +275,4 @@ const Chat: React.FC<ChatProps> = ({ videoId }) => {
   );
 };
 
-export default Chat; 
+export default Chat;

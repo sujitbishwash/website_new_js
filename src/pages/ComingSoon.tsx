@@ -55,4 +55,4 @@ const ComingSoon: React.FC = () => {
   );
 };
 
-export default ComingSoon; 
+export default ComingSoon;

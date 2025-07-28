@@ -152,4 +152,4 @@ const ExamGoalPage: React.FC = () => {
   );
 };
 
-export default ExamGoalPage; 
+export default ExamGoalPage;

@@ -1,5 +1,16 @@
+import {
+  Award,
+  Book,
+  Clock,
+  FileCheck,
+  FileQuestion,
+  FileText,
+  Gift,
+  Home,
+  Star,
+} from "lucide-react";
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import "../styles/Sidebar.css";
 
 interface SidebarProps {
@@ -15,7 +26,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onToggle,
   onLogout,
 }) => {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const location = useLocation();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -31,6 +42,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  /*
   const menuItems = [
     {
       id: "home",
@@ -234,16 +246,34 @@ const Sidebar: React.FC<SidebarProps> = ({
     },
   ];
 
-  const handleNavigation = (path: string) => {
-    navigate(path);
-    if (onClose) {
-      onClose();
-    }
-  };
+  */
 
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+
+  const navItems = [
+    { path: "/", icon: Home, label: "Home" },
+    { path: "/history", icon: Clock, label: "History" },
+    { path: "/books", icon: Book, label: "Books" },
+    { path: "/test-series", icon: FileCheck, label: "Test Series" },
+    {
+      path: "/previous-year-papers",
+      icon: FileQuestion,
+      label: "Previous Year Papers",
+    },
+    { path: "/attempted-tests", icon: FileText, label: "Attempted Tests" },
+    { path: "/premium", icon: Star, label: "Premium" },
+    { path: "/exams", icon: Award, label: "Exams" },
+    { path: "/refer-and-earn", icon: Gift, label: "Refer and Earn" },
+  ];
+
+  // const handleNavigation = (path: string) => {
+  //   navigate(path);
+  //   if (onClose) {
+  //     onClose();
+  //   }
+  // };
 
   return (
     <>
@@ -273,168 +303,51 @@ const Sidebar: React.FC<SidebarProps> = ({
         </button>
       )}
 
-      <aside className={`sidebar ${isOpen ? "open" : ""}`}>
-        <div className="sidebar-header">
-          <div className="sidebar-header-content">
-            <h1 className="sidebar-title">AI Padhai</h1>
-            {onToggle && (
-              <button
-                className="sidebar-toggle-btn"
-                onClick={onToggle}
-                aria-label="Close sidebar"
-              >
-                X
-              </button>
-            )}
-          </div>
+      <aside
+        className={`w-64 bg-gray-800 border-r border-gray-700 flex flex-col ${
+          isOpen ? "open" : ""
+        }`}
+      >
+        <div className="p-4 border-b border-gray-700">
+          <h1 className="text-xl font-bold">AI Padhai</h1>
+          {onToggle && (
+            <button
+              className="sidebar-toggle-btn"
+              onClick={onToggle}
+              aria-label="Close sidebar"
+            >
+              X
+            </button>
+          )}
+          {/* </div> */}
         </div>
 
-        <nav className="sidebar-nav">
-          <ul>
-            {/* Home */}
-            <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/dashboard");
-                }}
-                className={isActive("/dashboard") ? "active" : ""}
-              >
-                {menuItems[0].icon}
-                <span>Home</span>
-              </a>
-            </li>
-
-            {/* History */}
-            <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/history");
-                }}
-                className={isActive("/history") ? "active" : ""}
-              >
-                {menuItems[1].icon}
-                <span>History</span>
-              </a>
-            </li>
-
-            {/* Books */}
-            <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/books");
-                }}
-                className={isActive("/books") ? "active" : ""}
-              >
-                {menuItems[2].icon}
-                <span>Books</span>
-              </a>
-            </li>
-
-            <li className="sidebar-divider"></li>
-
-            {/* Test Series */}
-            <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/test-series");
-                }}
-                className={isActive("/test-series") ? "active" : ""}
-              >
-                {menuItems[3].icon}
-                <span>Test Series</span>
-              </a>
-            </li>
-
-            {/* Previous Year Paper */}
-            <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/previous-year");
-                }}
-                className={isActive("/previous-year") ? "active" : ""}
-              >
-                {menuItems[4].icon}
-                <span>Previous Year Paper</span>
-              </a>
-            </li>
-
-            {/* Attempted Test */}
-            <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/attempted-test");
-                }}
-                className={isActive("/attempted-test") ? "active" : ""}
-              >
-                {menuItems[5].icon}
-                <span>Attempted Test</span>
-              </a>
-            </li>
-
-            <li className="sidebar-divider"></li>
-
-            {/* Premium */}
-            <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/premium");
-                }}
-                className={isActive("/premium") ? "active" : ""}
-              >
-                {menuItems[6].icon}
-                <span>Premium</span>
-              </a>
-            </li>
-
-            {/* Exams */}
-            <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/exams");
-                }}
-                className={isActive("/exams") ? "active" : ""}
-              >
-                {menuItems[7].icon}
-                <span>Exams</span>
-              </a>
-            </li>
-
-            {/* Refer and Earn */}
-            <li>
-              <a
-                href="#"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/refer-earn");
-                }}
-                className={isActive("/refer-earn") ? "active" : ""}
-              >
-                {menuItems[8].icon}
-                <span>Refer and Earn</span>
-              </a>
-            </li>
+        <nav className="flex-1 p-4">
+          <ul className="space-y-2">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              return (
+                <li key={item.path}>
+                  <Link
+                    to={item.path}
+                    className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                      isActive(item.path)
+                        ? "bg-blue-600 text-white"
+                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                    }`}
+                  >
+                    <Icon size={20} />
+                    <span>{item.label}</span>
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         </nav>
 
-        <div className="sidebar-footer">
-          <div className="sidebar-plan-info">
-            <div className="user-avatar">
+        <div className="p-4 border-t border-gray-700">
+          <div className="flex items-center space-x-3">
+            <div className="bg-gray-600 rounded-full p-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="36"
@@ -451,9 +364,11 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path>
               </svg>
             </div>
-            <div className="user-details">
-              <span className="plan-name">Free Plan</span>
-              <span className="user-email">learner@aipadhai.com</span>
+            <div>
+              <span className="font-medium">Free Plan</span>
+              <span className="text-sm text-gray-400">
+                learner@aipadhai.com
+              </span>
             </div>
           </div>
           {onLogout && (
