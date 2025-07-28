@@ -1,4 +1,4 @@
- import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 // To make this a self-contained component, we'll use inline SVGs for icons
 // instead of an external library like lucide-react.
