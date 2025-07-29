@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+ import React, { useState } from 'react';
 
 // --- SVG ICONS ---
 // Using inline SVGs to keep the component self-contained.
@@ -30,6 +30,25 @@ const CheckCircleIcon = ({ className }) => (
 const XCircleIcon = ({ className }) => (
     <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+
+const PlayCircleIcon = ({ className }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z" />
+    </svg>
+);
+
+const ClipboardDocumentListIcon = ({ className }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75c0-.231-.035-.454-.1-.664M6.75 7.5h.75v.75h-.75V7.5zM6.75 10.5h.75v.75h-.75V10.5zM6.75 13.5h.75v.75h-.75V13.5zM6.75 16.5h.75v.75h-.75V16.5zm-5.25-9a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v10.5a2.25 2.25 0 01-2.25 2.25H5.25a2.25 2.25 0 01-2.25-2.25V7.5z" />
+    </svg>
+);
+
+const DocumentTextIcon = ({ className }) => (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
     </svg>
 );
 
@@ -97,6 +116,24 @@ const initialAttemptedTests = [
     { id: 'at3', title: 'Data Structures Challenge', score: 78, date: '2025-07-24', questions: 30, correct: 23, wrong: 7 },
 ];
 
+const suggestedVideos = [
+    { id: 'sv1', title: 'The Paradox of Black Holes', topic: 'Astrophysics', thumbnailUrl: 'https://placehold.co/600x400/1E293B/FFFFFF?text=Video' },
+    { id: 'sv2', title: 'Machine Learning Fundamentals', topic: 'AI & CS', thumbnailUrl: 'https://placehold.co/600x400/3B291E/FFFFFF?text=Video' },
+    { id: 'sv3', title: 'A Deep Dive into Neuroscience', topic: 'Biology', thumbnailUrl: 'https://placehold.co/600x400/8A2BE2/FFFFFF?text=Video' }
+];
+
+const suggestedReadings = [
+    { id: 'sr1', title: 'A Brief History of Time', topic: 'Cosmology' },
+    { id: 'sr2', title: 'The Double Helix', topic: 'Genetics' },
+    { id: 'sr3', title: 'Introduction to Algorithms', topic: 'Computer Science' }
+];
+
+const suggestedTests = [
+    { id: 'st1', title: 'Organic Chemistry Basics', topic: 'Science' },
+    { id: 'st2', title: 'Renaissance Art History', topic: 'Arts' },
+    { id: 'st3', title: 'Intro to Javascript', topic: 'Coding' }
+];
+
 // --- MAIN COMPONENT ---
 export default function App() {
     const [learningItems, setLearningItems] = useState(initialLearningItems);
@@ -129,14 +166,73 @@ export default function App() {
                         <div className="group flex items-center space-x-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-800/90 transition-all duration-300 cursor-pointer border border-slate-700 hover:border-green-500">
                             <PasteIcon className="h-8 w-8 text-green-400 transition-transform group-hover:scale-110" />
                             <div>
-                                <h2 className="font-semibold text-white">Paste Text</h2>
-                                <p className="text-xs text-slate-400">copy youtube videos</p>
+                                <h2 className="font-semibold text-white">Paste Link</h2>
+                                <p className="text-xs text-slate-400">paste youtube links</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* --- SEQUENTIAL LAYOUT --- */}
+
+                {/* Recommended Videos Card */}
+                <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
+                    <h2 className="text-2xl font-bold text-white mb-5">Recommended Videos</h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {suggestedVideos.map(video => (
+                            <div key={video.id} className="group relative bg-slate-800/60 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-slate-600 border border-slate-700/80 hover:-translate-y-1 cursor-pointer">
+                                <div className="relative">
+                                    <img src={video.thumbnailUrl} alt={video.title} className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105" />
+                                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                                        <PlayCircleIcon className="h-12 w-12 text-white/70 group-hover:text-white/90 group-hover:scale-110 transition-all duration-300" />
+                                    </div>
+                                </div>
+                                <div className="p-4">
+                                    <h4 className="font-semibold text-white truncate">{video.title}</h4>
+                                    <p className="text-xs text-slate-400">{video.topic}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Recommended Reading Card */}
+                 <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
+                    <h2 className="text-2xl font-bold text-white mb-5">Recommended Reading</h2>
+                    <div className="space-y-4">
+                        {suggestedReadings.map(item => (
+                            <div key={item.id} className="group flex items-center space-x-4 bg-slate-800/60 p-3 rounded-lg border border-slate-700/80 hover:border-slate-600 transition-all duration-300 hover:bg-slate-800/90">
+                                <div className="flex-shrink-0 bg-slate-700/80 w-16 h-16 rounded-lg flex items-center justify-center">
+                                    <DocumentTextIcon className="h-8 w-8 text-orange-400"/>
+                                </div>
+                                <div className="flex-grow">
+                                    <h4 className="font-semibold text-white">{item.title}</h4>
+                                    <p className="text-xs text-slate-400">{item.topic}</p>
+                                </div>
+                                <button className="px-3 py-1.5 text-sm font-semibold bg-orange-600/80 text-white rounded-md hover:bg-orange-600 transition-colors">Read</button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Recommended Tests Card */}
+                <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
+                    <h2 className="text-2xl font-bold text-white mb-5">Recommended Tests</h2>
+                    <div className="space-y-4">
+                        {suggestedTests.map(test => (
+                            <div key={test.id} className="group flex items-center space-x-4 bg-slate-800/60 p-3 rounded-lg border border-slate-700/80 hover:border-slate-600 transition-all duration-300 hover:bg-slate-800/90">
+                                <div className="flex-shrink-0 bg-slate-700/80 w-16 h-16 rounded-lg flex items-center justify-center">
+                                    <ClipboardDocumentListIcon className="h-8 w-8 text-purple-400"/>
+                                </div>
+                                <div className="flex-grow">
+                                    <h4 className="font-semibold text-white">{test.title}</h4>
+                                    <p className="text-xs text-slate-400">{test.topic}</p>
+                                </div>
+                                <button className="px-3 py-1.5 text-sm font-semibold bg-purple-600/80 text-white rounded-md hover:bg-purple-600 transition-colors">Start</button>
+                            </div>
+                        ))}
+                    </div>
+                </div>
 
                 {/* Continue Learning Card */}
                 <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
