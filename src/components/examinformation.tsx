@@ -1,4 +1,4 @@
- import React from 'react';
+import React from 'react';
 
 // To make this component work, you need to have React and Tailwind CSS set up in your project.
 // You can use this component by importing it and rendering it in your main App file.

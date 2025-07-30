@@ -100,4 +100,3 @@ const ExamConfirmationPage = ({ examDetails }) => {
     </div>
   );
 };
- 
