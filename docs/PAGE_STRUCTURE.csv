@@ -1,0 +1,11 @@
+Page_Name,Route_Path,File_Path,Description,Components_Used,Status,Last_Modified,Developer
+Home,/,src/pages/new/maindashboardpage.tsx,Main dashboard page,"Sidebar;CourseCard",Active,2024-01-01,AI Assistant
+History,/history,src/pages/new/HistoryPage.tsx,User history and progress page,"Sidebar;History",Active,2024-01-01,AI Assistant
+Test Configuration,/test-config,src/pages/new/TestConfigurationPage.tsx,Test setup and configuration,"Sidebar;Form components",Active,2024-01-01,AI Assistant
+Test Page,/test,src/pages/new/TestPage.tsx,Active test taking interface,"Sidebar;Quiz components",Active,2024-01-01,AI Assistant
+Test Results,/test-results,src/pages/new/TestResultpage.tsx,Test results and analysis,"Sidebar;Chart components",Active,2024-01-01,AI Assistant
+Detailed Analysis,/analysis,src/pages/new/DetailedAnalysisPage.ts,Detailed test analysis page,"Sidebar;Chart components",Active,2024-01-01,AI Assistant
+Subscription,/subscription,src/pages/new/SubscriptionPage.tsx,Premium subscription page,"Sidebar;Payment components",Active,2024-01-01,AI Assistant
+Exam Reconfirmation,/exam-reconfirm,src/pages/new/ExamReConfirmationPage.tsx,Exam confirmation page,"Sidebar;Form components",Active,2024-01-01,AI Assistant
+Login,/login,src/components/LoginPage.tsx,User authentication,"Form components",Active,2024-01-01,AI Assistant
+Refer and Earn,/refer,src/components/ReferralPage.tsx,Referral program,"Social components",Active,2024-01-01,AI Assistant 
