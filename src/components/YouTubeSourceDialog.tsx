@@ -209,7 +209,7 @@ const AddSourceModal: React.FC<AddSourceModalProps> = ({ isOpen, onClose }) => {
 };
 
 // Main App Component to demonstrate the modal
-export default function YouTubeSourceModal() {
+export default function YouTubeSourceDialog() {
   const [isModalOpen, setIsModalOpen] = useState(true);
 
   return (
