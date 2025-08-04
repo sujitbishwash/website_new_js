@@ -135,7 +135,7 @@ const suggestedTests = [
 ];
 
 // --- MAIN COMPONENT ---
-export default function App() {
+export default function MainDashboardPage() {
     const [learningItems, setLearningItems] = useState(initialLearningItems);
     const [attemptedTests, setAttemptedTests] = useState(initialAttemptedTests);
 
