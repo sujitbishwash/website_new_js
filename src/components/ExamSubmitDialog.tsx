@@ -1,5 +1,3 @@
-import React, { useState } from 'react';
-
 // --- Helper Components ---
 
 // Icon for the close button
@@ -12,7 +10,11 @@ const CloseIcon = () => (
     stroke="currentColor"
     strokeWidth={2}
   >
-    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M6 18L18 6M6 6l12 12"
+    />
   </svg>
 );
 
@@ -61,23 +63,48 @@ const SummaryTable = ({ summaryData }) => (
     <table className="min-w-full text-sm">
       <thead className="bg-indigo-600">
         <tr className="text-white">
-          <th className="border-r border-indigo-500 px-4 py-3 text-left font-semibold">Section</th>
-          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">No. of questions</th>
-          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">Answered</th>
-          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">Not Answered</th>
-          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">Marked for Review</th>
+          <th className="border-r border-indigo-500 px-4 py-3 text-left font-semibold">
+            Section
+          </th>
+          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">
+            No. of questions
+          </th>
+          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">
+            Answered
+          </th>
+          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">
+            Not Answered
+          </th>
+          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">
+            Marked for Review
+          </th>
           <th className="px-4 py-3 text-center font-semibold">Not Visited</th>
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-200 bg-white">
         {summaryData.map((section) => (
-          <tr key={section.name} className="transition-colors hover:bg-gray-50/50">
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 font-medium text-gray-900">{section.name}</td>
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center text-gray-700">{section.stats.total}</td>
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center font-semibold text-green-600">{section.stats.answered}</td>
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center font-semibold text-red-600">{section.stats.notAnswered}</td>
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center font-semibold text-blue-600">{section.stats.markedForReview}</td>
-            <td className="whitespace-nowrap px-4 py-4 text-center text-gray-700">{section.stats.notVisited}</td>
+          <tr
+            key={section.name}
+            className="transition-colors hover:bg-gray-50/50"
+          >
+            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 font-medium text-gray-900">
+              {section.name}
+            </td>
+            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center text-gray-700">
+              {section.stats.total}
+            </td>
+            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center font-semibold text-green-600">
+              {section.stats.answered}
+            </td>
+            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center font-semibold text-red-600">
+              {section.stats.notAnswered}
+            </td>
+            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center font-semibold text-blue-600">
+              {section.stats.markedForReview}
+            </td>
+            <td className="whitespace-nowrap px-4 py-4 text-center text-gray-700">
+              {section.stats.notVisited}
+            </td>
           </tr>
         ))}
       </tbody>
@@ -98,19 +125,27 @@ const SummaryCard = ({ section }) => (
       </div>
       <div className="flex justify-between">
         <span className="text-gray-600">Answered:</span>
-        <span className="font-semibold text-green-600">{section.stats.answered}</span>
+        <span className="font-semibold text-green-600">
+          {section.stats.answered}
+        </span>
       </div>
       <div className="flex justify-between">
         <span className="text-gray-600">Not Answered:</span>
-        <span className="font-semibold text-red-600">{section.stats.notAnswered}</span>
+        <span className="font-semibold text-red-600">
+          {section.stats.notAnswered}
+        </span>
       </div>
       <div className="flex justify-between">
         <span className="text-gray-600">Marked for Review:</span>
-        <span className="font-semibold text-blue-600">{section.stats.markedForReview}</span>
+        <span className="font-semibold text-blue-600">
+          {section.stats.markedForReview}
+        </span>
       </div>
       <div className="flex justify-between">
         <span className="text-gray-600">Not Visited:</span>
-        <span className="font-medium text-gray-800">{section.stats.notVisited}</span>
+        <span className="font-medium text-gray-800">
+          {section.stats.notVisited}
+        </span>
       </div>
     </div>
   </div>
@@ -139,10 +174,9 @@ const ActionButtons = ({ onClose, onSubmit }) => (
   </>
 );
 
+// --- Main Exam Submit Dialog Component ---
 
-// --- Main Exam Submit Component ---
-
-const ExamSubmitComponent = ({ summaryData, onClose, onSubmit }) => {
+const ExamSubmitDialog = ({ summaryData, onClose, onSubmit }) => {
   return (
     <Modal onClose={onClose}>
       <ModalHeader onClose={onClose} />
@@ -162,40 +196,4 @@ const ExamSubmitComponent = ({ summaryData, onClose, onSubmit }) => {
   );
 };
 
-
-// --- Main App Component (to demonstrate the modal) ---
-
-export default function App() {
-  const [isModalOpen, setIsModalOpen] = useState(true);
-
-  const examData = [
-    { name: 'Quiz', stats: { total: 5, answered: 0, notAnswered: 1, markedForReview: 0, notVisited: 4 } },
-    { name: 'Aptitude', stats: { total: 20, answered: 15, notAnswered: 2, markedForReview: 1, notVisited: 2 } },
-    { name: 'Technical', stats: { total: 15, answered: 10, notAnswered: 1, markedForReview: 3, notVisited: 1 } },
-  ];
-
-  const handleCloseModal = () => setIsModalOpen(false);
-  const handleSubmit = () => {
-    console.log("Submit button clicked. Submitting test...");
-    setIsModalOpen(false);
-  };
-
-  return (
-    <div className="flex h-screen w-full items-center justify-center bg-gray-50 font-sans">
-      <button
-        onClick={() => setIsModalOpen(true)}
-        className="transform rounded-lg bg-indigo-600 px-6 py-3 font-bold text-white shadow-lg transition-transform hover:scale-105 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-      >
-        Show Submit Dialog
-      </button>
-
-      {isModalOpen && (
-        <ExamSubmitComponent
-          summaryData={examData}
-          onClose={handleCloseModal}
-          onSubmit={handleSubmit}
-        />
-      )}
-    </div>
-  );
-}
+export default ExamSubmitDialog;

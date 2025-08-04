@@ -1,11 +1,13 @@
 Page_Name,Route_Path,File_Path,Description,Components_Used,Status,Last_Modified,Developer
-Home,/,src/pages/new/maindashboardpage.tsx,Main dashboard page,"Sidebar;CourseCard",Active,2024-01-01,AI Assistant
-History,/history,src/pages/new/HistoryPage.tsx,User history and progress page,"Sidebar;History",Active,2024-01-01,AI Assistant
-Test Configuration,/test-config,src/pages/new/TestConfigurationPage.tsx,Test setup and configuration,"Sidebar;Form components",Active,2024-01-01,AI Assistant
-Test Page,/test,src/pages/new/TestPage.tsx,Active test taking interface,"Sidebar;Quiz components",Active,2024-01-01,AI Assistant
-Test Results,/test-results,src/pages/new/TestResultpage.tsx,Test results and analysis,"Sidebar;Chart components",Active,2024-01-01,AI Assistant
-Detailed Analysis,/analysis,src/pages/new/DetailedAnalysisPage.ts,Detailed test analysis page,"Sidebar;Chart components",Active,2024-01-01,AI Assistant
-Subscription,/subscription,src/pages/new/SubscriptionPage.tsx,Premium subscription page,"Sidebar;Payment components",Active,2024-01-01,AI Assistant
-Exam Reconfirmation,/exam-reconfirm,src/pages/new/ExamReConfirmationPage.tsx,Exam confirmation page,"Sidebar;Form components",Active,2024-01-01,AI Assistant
-Login,/login,src/components/LoginPage.tsx,User authentication,"Form components",Active,2024-01-01,AI Assistant
-Refer and Earn,/refer,src/components/ReferralPage.tsx,Referral program,"Social components",Active,2024-01-01,AI Assistant 
+Main Dashboard,/,src/pages/new/MainDashboardPage.tsx,Main dashboard page with modern design,"Sidebar;CourseCard",Active,2024-01-15,AI Assistant
+History,/history,src/pages/new/HistoryPage.tsx,User history and progress tracking page,"Sidebar;History",Active,2024-01-15,AI Assistant
+Login,/login,src/pages/new/LoginPage.tsx,User authentication page,"Form components",Active,2024-01-15,AI Assistant
+Referral,/refer,src/pages/new/ReferralPage.tsx,Referral program page,"Social components",Active,2024-01-15,AI Assistant
+Subscription,/subscription,src/pages/new/SubscriptionPage.tsx,Premium subscription management page,"Payment components",Active,2024-01-15,AI Assistant
+Test Configuration,/test-config,src/pages/new/TestConfigurationPage.tsx,Test setup and configuration page,"Form components",Active,2024-01-15,AI Assistant
+Test Main,/test,src/pages/new/TestMainPage.tsx,Main test taking interface,"Quiz components",Active,2024-01-15,AI Assistant
+Detailed Analysis,/analysis,src/pages/new/DetailedAnalysisPage.tsx,Detailed test analysis and insights page,"Chart components",Active,2024-01-15,AI Assistant
+Exam Reconfirmation,/exam-reconfirm,src/pages/new/ExamReconfirmationPage.tsx,Exam confirmation and setup page,"Form components",Active,2024-01-15,AI Assistant
+Exam Information,/exam-info,src/pages/new/ExamInformationPage.tsx,Exam instructions and information page,"Instruction components",Active,2024-01-15,AI Assistant
+Chat,/chat,src/components/Chat.tsx,Chat interface component,"Chat components",Legacy,2024-01-15,AI Assistant
+Flashcards,/flashcards,src/components/Flashcards.tsx,Flashcard learning component,"Flashcard components",Legacy,2024-01-15,AI Assistant 

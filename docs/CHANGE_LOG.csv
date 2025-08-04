@@ -3,4 +3,16 @@ Date,Component,Change_Type,Description,Files_Modified,Developer,Priority,Status
 2024-01-01,UI,Setup,Shadcn/ui components setup with Tailwind CSS,components.json;src/components/ui/*,AI Assistant,High,Completed
 2024-01-01,Sidebar,Feature,Basic sidebar navigation component,src/components/Sidebar.tsx,AI Assistant,Medium,Completed
 2024-01-01,Routing,Setup,React Router setup for navigation,src/App.tsx;src/main.tsx,AI Assistant,High,Completed
-2024-01-15,TestResultPage,Refactor,Renamed test_result_page.tsx to TestResultPage.tsx for better naming convention,src/components/test_result_page.tsx → src/components/TestResultPage.tsx,AI Assistant,Low,Completed 
+2024-01-15,TestResultPage,Refactor,Renamed test_result_page.tsx to TestResultPage.tsx for better naming convention,src/components/test_result_page.tsx → src/components/TestResultPage.tsx,AI Assistant,Low,Completed
+2024-01-15,File Organization,Refactor,Created to-be-deleted directory and moved obsolete dashboard files,src/components/Dashboard.tsx → src/components/to-be-deleted/Dashboard.tsx;src/components/dashboardpage.tsx → src/components/to-be-deleted/dashboardpage.tsx,AI Assistant,Medium,Completed
+2024-01-15,File Organization,Refactor,Moved obsolete History.tsx and Quizzes.tsx components to to-be-deleted directory,src/components/History.tsx → src/components/to-be-deleted/History.tsx;src/components/Quizzes.tsx → src/components/to-be-deleted/Quizzes.tsx,AI Assistant,Medium,Completed
+2024-01-15,File Organization,Refactor,Created new and obsolete directories under pages and moved all current pages to obsolete,src/pages/* → src/pages/obsolete/*,AI Assistant,High,Completed
+2024-01-15,File Organization,Refactor,Moved page components from components to pages/new with improved naming conventions,src/components/* → src/pages/new/*,AI Assistant,High,Completed
+2024-01-15,Code Quality,Refactor,Updated default export function names to match file names for better consistency,src/pages/new/*.tsx,AI Assistant,Medium,Completed
+2024-01-15,Routing,Update,Updated App.tsx routing to use all new pages from pages/new directory with organized route structure,src/App.tsx,AI Assistant,High,Completed
+2024-01-15,File Organization,Refactor,Moved examinformation.tsx to pages/new and renamed to ExamInformationPage.tsx with updated function name,src/components/examinformation.tsx → src/pages/new/ExamInformationPage.tsx,AI Assistant,Medium,Completed
+2024-01-15,Routing,Update,Added ExamInformationPage route to App.tsx with /exam-info path,src/App.tsx,AI Assistant,Medium,Completed
+2024-01-15,Navigation,Update,Updated TestConfigurationPage handleContinue method to navigate to /exam-info instead of /test,src/pages/new/TestConfigurationPage.tsx,AI Assistant,Medium,Completed
+2024-01-15,Component Refactor,Refactor,Refactored examsubmit_componentpage.tsx to ExamSubmitDialog.tsx as a pure component,src/components/examsubmit_componentpage.tsx → src/components/ExamSubmitDialog.tsx,AI Assistant,Medium,Completed
+2024-01-15,Component Refactor,Refactor,Refactored TestResultPage.tsx to TestResultDialog.tsx as a pure component,src/components/TestResultPage.tsx → src/components/TestResultDialog.tsx,AI Assistant,Medium,Completed
+2024-01-15,Integration,Feature,Integrated ExamSubmitDialog into TestMainPage with dynamic summary data calculation,src/pages/new/TestMainPage.tsx,AI Assistant,Medium,Completed 

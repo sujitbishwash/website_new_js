@@ -1,11 +1,20 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Sidebar from "./components/Sidebar";
-import Dashboard from "./components/Dashboard";
+import React from "react";
+import { Route, BrowserRouter as Router, Routes } from "react-router-dom";
 import Chat from "./components/Chat";
 import Flashcards from "./components/Flashcards";
-import Quizzes from "./components/Quizzes";
-import History from "./components/History";
+import Sidebar from "./components/Sidebar";
+
+// Import new pages from pages/new
+import DetailedAnalysisPage from "./pages/new/DetailedAnalysisPage";
+import ExamInformationPage from "./pages/new/ExamInformationPage";
+import ExamReconfirmationPage from "./pages/new/ExamReconfirmationPage";
+import HistoryPage from "./pages/new/HistoryPage";
+import LoginPage from "./pages/new/LoginPage";
+import MainDashboardPage from "./pages/new/MainDashboardPage";
+import ReferralPage from "./pages/new/ReferralPage";
+import SubscriptionPage from "./pages/new/SubscriptionPage";
+import TestConfigurationPage from "./pages/new/TestConfigurationPage";
+import TestMainPage from "./pages/new/TestMainPage";
 
 const App: React.FC = () => {
   return (
@@ -14,11 +23,28 @@ const App: React.FC = () => {
         <Sidebar />
         <main className="flex-1 p-6 overflow-auto">
           <Routes>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/history" element={<History />} />
+            {/* Main Dashboard */}
+            <Route path="/" element={<MainDashboardPage />} />
+
+            {/* User Pages */}
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/refer-and-earn" element={<ReferralPage />} />
+            <Route path="/premium" element={<SubscriptionPage />} />
+
+            {/* Test Related Pages */}
+            <Route path="/test-series" element={<TestConfigurationPage />} />
+            <Route path="/test-main-page" element={<TestMainPage />} />
+            <Route path="/analysis" element={<DetailedAnalysisPage />} />
+            <Route path="/exam-info" element={<ExamInformationPage />} />
+            <Route
+              path="/exam-reconfirm"
+              element={<ExamReconfirmationPage />}
+            />
+
+            {/* Legacy Components (keeping for backward compatibility) */}
             <Route path="/chat" element={<Chat />} />
             <Route path="/flashcards" element={<Flashcards />} />
-            <Route path="/quizzes" element={<Quizzes />} />
           </Routes>
         </main>
       </div>
