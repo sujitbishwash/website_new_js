@@ -25,7 +25,7 @@ const CloseIcon = () => (
  */
 const Modal = ({ children, onClose }) => (
   <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 p-4 backdrop-blur-sm"
+    className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 p-4 backdrop-blur-sm"
     onClick={onClose}
   >
     <div

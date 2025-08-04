@@ -25,6 +25,7 @@ const App: React.FC = () => {
           <Routes>
             {/* Main Dashboard */}
             <Route path="/" element={<MainDashboardPage />} />
+            <Route path="/dashbaord" element={<MainDashboardPage />} />
 
             {/* User Pages */}
             <Route path="/login" element={<LoginPage />} />

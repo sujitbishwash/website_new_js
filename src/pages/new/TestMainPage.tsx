@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
+import TestResultDialog from "../../components/TestResultDialog";
 
 // --- Helper Components ---
 
@@ -53,6 +55,8 @@ const TestMainPage = () => {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const langDropdownRef = useRef(null);
+  const [showTestResultDialog, setShowTestResultDialog] = useState(false);
+  const navigate = useNavigate();
 
   // --- Demo Data ---
   // In a real app, this would come from an API
@@ -247,7 +251,7 @@ const TestMainPage = () => {
   const handleConfirmSubmit = () => {
     console.log("Test submitted");
     setShowSubmitDialog(false);
-    // Here you would typically navigate to results page or show results
+    setShowTestResultDialog(true);
   };
 
   const handlePaletteClick = (index) => {
@@ -301,6 +305,11 @@ const TestMainPage = () => {
   };
 
   const currentQuestion = questions[currentQuestionIndex];
+
+  const handleCloseTestResultDialog = () => {
+    setShowTestResultDialog(false);
+    navigate("/dashbaord");
+  };
 
   // --- Render Method ---
   return (
@@ -539,7 +548,9 @@ const TestMainPage = () => {
             onClick={handleMarkForReview}
             className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
           >
-            Mark for Review & Next
+            {currentQuestionIndex === questions.length - 1
+              ? "Mark for Review"
+              : "Mark for Review & Next"}
           </button>
           <button
             onClick={handleClearResponse}
@@ -550,9 +561,16 @@ const TestMainPage = () => {
         </div>
         <button
           onClick={handleSaveAndNext}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 text-lg w-full sm:w-auto"
+          disabled={currentQuestionIndex === questions.length - 1}
+          className={`bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-200 text-lg w-full sm:w-auto ${
+            currentQuestionIndex === questions.length - 1
+              ? "opacity-50 cursor-not-allowed"
+              : ""
+          }`}
         >
-          Save & Next
+          {currentQuestionIndex === questions.length - 1
+            ? "Last Question"
+            : "Save & Next"}
         </button>
       </footer>
 
@@ -578,6 +596,33 @@ const TestMainPage = () => {
           ]}
           onClose={handleCloseSubmitDialog}
           onSubmit={handleConfirmSubmit}
+        />
+      )}
+
+      {/* Test Result Dialog */}
+      {showTestResultDialog && (
+        <TestResultDialog
+          results={{
+            attemptedQuestions: questions.filter(
+              (q) => q.status === "answered" || q.status === "marked-answered"
+            ).length,
+            correctQuestions: questions.filter(
+              (q) => q.status === "answered" || q.status === "marked-answered"
+            ).length, // Assuming all answered are correct for demo
+            totalQuestions: questions.length,
+            positiveMarks: questions.filter(
+              (q) => q.status === "answered" || q.status === "marked-answered"
+            ).length,
+            negativeMarks: 0,
+            totalMarks: questions.filter(
+              (q) => q.status === "answered" || q.status === "marked-answered"
+            ).length,
+            timeTaken: formatTime(600 - timeLeft),
+            rank: 5,
+            totalStudents: 150,
+          }}
+          onClose={handleCloseTestResultDialog}
+          navigate={() => navigate("/analysis")}
         />
       )}
     </div>

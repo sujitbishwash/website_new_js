@@ -15,4 +15,5 @@ Date,Component,Change_Type,Description,Files_Modified,Developer,Priority,Status
 2024-01-15,Navigation,Update,Updated TestConfigurationPage handleContinue method to navigate to /exam-info instead of /test,src/pages/new/TestConfigurationPage.tsx,AI Assistant,Medium,Completed
 2024-01-15,Component Refactor,Refactor,Refactored examsubmit_componentpage.tsx to ExamSubmitDialog.tsx as a pure component,src/components/examsubmit_componentpage.tsx → src/components/ExamSubmitDialog.tsx,AI Assistant,Medium,Completed
 2024-01-15,Component Refactor,Refactor,Refactored TestResultPage.tsx to TestResultDialog.tsx as a pure component,src/components/TestResultPage.tsx → src/components/TestResultDialog.tsx,AI Assistant,Medium,Completed
-2024-01-15,Integration,Feature,Integrated ExamSubmitDialog into TestMainPage with dynamic summary data calculation,src/pages/new/TestMainPage.tsx,AI Assistant,Medium,Completed 
+2024-01-15,Integration,Feature,Integrated ExamSubmitDialog into TestMainPage with dynamic summary data calculation,src/pages/new/TestMainPage.tsx,AI Assistant,Medium,Completed
+2024-01-15,Integration,Feature,Integrated TestResultDialog into TestMainPage to show results after test submission,src/pages/new/TestMainPage.tsx,AI Assistant,Medium,Completed 
