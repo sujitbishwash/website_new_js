@@ -531,7 +531,9 @@ const TestMainPage = () => {
             <button className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">
               Question Paper
             </button>
-            <button className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">Instructions</button>
+            <button className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">
+              Instructions
+            </button>
             <button
               onClick={handleSubmitTest}
               className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg"
@@ -555,7 +557,12 @@ const TestMainPage = () => {
           </button>
           <button
             onClick={handleClearResponse}
-            className="bg-yellow-600 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200"
+            disabled={currentQuestion.answer === null}
+            className={`font-bold py-2 px-4 rounded-lg transition-colors duration-200 ${
+              currentQuestion.answer === null
+                ? "bg-gray-500 text-gray-300 cursor-not-allowed opacity-50"
+                : "bg-yellow-600 hover:bg-yellow-700 text-white"
+            }`}
           >
             Clear Response
           </button>
