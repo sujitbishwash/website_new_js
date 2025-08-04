@@ -1,3 +1,47 @@
+import React from "react";
+
+// --- Type Definitions ---
+interface SummaryStats {
+  total: number;
+  answered: number;
+  notAnswered: number;
+  markedForReview: number;
+  notVisited: number;
+}
+
+interface SummarySection {
+  name: string;
+  stats: SummaryStats;
+}
+
+interface ModalProps {
+  children: React.ReactNode;
+  onClose: () => void;
+}
+
+interface ModalHeaderProps {
+  onClose: () => void;
+}
+
+interface SummaryTableProps {
+  summaryData: SummarySection[];
+}
+
+interface SummaryCardProps {
+  section: SummarySection;
+}
+
+interface ActionButtonsProps {
+  onClose: () => void;
+  onSubmit: () => void;
+}
+
+interface ExamSubmitDialogProps {
+  summaryData: SummarySection[];
+  onClose: () => void;
+  onSubmit: () => void;
+}
+
 // --- Helper Components ---
 
 // Icon for the close button
@@ -23,7 +67,7 @@ const CloseIcon = () => (
 /**
  * A reusable Modal component for the main container and backdrop.
  */
-const Modal = ({ children, onClose }) => (
+const Modal = ({ children, onClose }: ModalProps) => (
   <div
     className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 p-4 backdrop-blur-sm"
     onClick={onClose}
@@ -40,7 +84,7 @@ const Modal = ({ children, onClose }) => (
 /**
  * The header section of the modal.
  */
-const ModalHeader = ({ onClose }) => (
+const ModalHeader = ({ onClose }: ModalHeaderProps) => (
   <>
     <button
       onClick={onClose}
@@ -58,7 +102,7 @@ const ModalHeader = ({ onClose }) => (
 /**
  * The table view for desktop screens.
  */
-const SummaryTable = ({ summaryData }) => (
+const SummaryTable = ({ summaryData }: SummaryTableProps) => (
   <div className="overflow-hidden rounded-lg border border-gray-200">
     <table className="min-w-full text-sm">
       <thead className="bg-indigo-600">
@@ -82,7 +126,7 @@ const SummaryTable = ({ summaryData }) => (
         </tr>
       </thead>
       <tbody className="divide-y divide-gray-200 bg-white">
-        {summaryData.map((section) => (
+        {summaryData.map((section: SummarySection) => (
           <tr
             key={section.name}
             className="transition-colors hover:bg-gray-50/50"
@@ -115,7 +159,7 @@ const SummaryTable = ({ summaryData }) => (
 /**
  * The card-based view for mobile screens.
  */
-const SummaryCard = ({ section }) => (
+const SummaryCard = ({ section }: SummaryCardProps) => (
   <div className="rounded-lg border border-gray-200 bg-white p-4">
     <h3 className="mb-3 text-lg font-bold text-indigo-700">{section.name}</h3>
     <div className="space-y-2 text-sm">
@@ -154,7 +198,7 @@ const SummaryCard = ({ section }) => (
 /**
  * The action buttons at the bottom of the modal.
  */
-const ActionButtons = ({ onClose, onSubmit }) => (
+const ActionButtons = ({ onClose, onSubmit }: ActionButtonsProps) => (
   <>
     <div className="my-6 h-px bg-gray-200" />
     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
@@ -176,7 +220,11 @@ const ActionButtons = ({ onClose, onSubmit }) => (
 
 // --- Main Exam Submit Dialog Component ---
 
-const ExamSubmitDialog = ({ summaryData, onClose, onSubmit }) => {
+const ExamSubmitDialog = ({
+  summaryData,
+  onClose,
+  onSubmit,
+}: ExamSubmitDialogProps) => {
   return (
     <Modal onClose={onClose}>
       <ModalHeader onClose={onClose} />
@@ -186,7 +234,7 @@ const ExamSubmitDialog = ({ summaryData, onClose, onSubmit }) => {
         <SummaryTable summaryData={summaryData} />
       </div>
       <div className="block space-y-4 sm:hidden">
-        {summaryData.map((section) => (
+        {summaryData.map((section: SummarySection) => (
           <SummaryCard key={section.name} section={section} />
         ))}
       </div>

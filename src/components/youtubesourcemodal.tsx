@@ -1,9 +1,26 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from "react";
+
+// --- Type Definitions ---
+interface IconProps {
+  className?: string;
+}
+
+interface AddSourceModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+interface SuggestedVideo {
+  id: number;
+  title: string;
+  topic: string;
+  thumbnailUrl: string;
+}
 
 // To make this a self-contained component, we'll use inline SVGs for icons
 // instead of an external library like lucide-react.
 
-const LinkIcon = ({ className }) => (
+const LinkIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -21,7 +38,7 @@ const LinkIcon = ({ className }) => (
   </svg>
 );
 
-const XIcon = ({ className }) => (
+const XIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width="24"
@@ -40,7 +57,7 @@ const XIcon = ({ className }) => (
 );
 
 // Mock data for video suggestions with thumbnails
-const suggestedVideos = [
+const suggestedVideos: SuggestedVideo[] = [
   {
     id: 1,
     title: "React Hooks in 10 Minutes",
@@ -62,23 +79,26 @@ const suggestedVideos = [
 ];
 
 // The Modal Component
-const AddSourceModal = ({ isOpen, onClose }) => {
-  const modalRef = useRef(null);
+const AddSourceModal: React.FC<AddSourceModalProps> = ({ isOpen, onClose }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
 
   // Effect to handle clicks outside the modal
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        modalRef.current &&
+        !modalRef.current.contains(event.target as Node)
+      ) {
         onClose();
       }
     };
 
     if (isOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
     }
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose]);
 
@@ -87,16 +107,16 @@ const AddSourceModal = ({ isOpen, onClose }) => {
   }
 
   const handleAdd = () => {
-      console.log("Add button clicked. Implement your logic here.");
-      onClose(); // Close modal on add
-  }
+    console.log("Add button clicked. Implement your logic here.");
+    onClose(); // Close modal on add
+  };
 
   return (
     // Backdrop
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 font-sans">
       {/* Modal Panel */}
-      <div 
-        ref={modalRef} 
+      <div
+        ref={modalRef}
         className="w-full max-w-lg transform rounded-xl bg-[#202123] text-gray-200 shadow-2xl transition-all"
       >
         <div className="p-6 sm:p-8">
@@ -135,23 +155,35 @@ const AddSourceModal = ({ isOpen, onClose }) => {
 
             {/* Video Suggestions */}
             <div>
-                <h3 className="text-sm font-medium text-gray-400">Suggested Videos</h3>
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                    {suggestedVideos.map((video) => (
-                        <div key={video.id} className="group cursor-pointer overflow-hidden rounded-lg bg-gray-700/50 transition-all hover:bg-gray-700 hover:shadow-lg">
-                            <img 
-                                src={video.thumbnailUrl} 
-                                alt={`Thumbnail for ${video.title}`}
-                                className="h-24 w-full object-cover transition-transform group-hover:scale-105"
-                                onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/400x225/333/FFF?text=Error'; }}
-                            />
-                            <div className="p-3">
-                                <p className="truncate font-semibold text-white">{video.title}</p>
-                                <p className="text-xs text-gray-400">{video.topic}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+              <h3 className="text-sm font-medium text-gray-400">
+                Suggested Videos
+              </h3>
+              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                {suggestedVideos.map((video) => (
+                  <div
+                    key={video.id}
+                    className="group cursor-pointer overflow-hidden rounded-lg bg-gray-700/50 transition-all hover:bg-gray-700 hover:shadow-lg"
+                  >
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={`Thumbnail for ${video.title}`}
+                      className="h-24 w-full object-cover transition-transform group-hover:scale-105"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null;
+                        target.src =
+                          "https://placehold.co/400x225/333/FFF?text=Error";
+                      }}
+                    />
+                    <div className="p-3">
+                      <p className="truncate font-semibold text-white">
+                        {video.title}
+                      </p>
+                      <p className="text-xs text-gray-400">{video.topic}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
@@ -177,7 +209,7 @@ const AddSourceModal = ({ isOpen, onClose }) => {
 };
 
 // Main App Component to demonstrate the modal
-export default function App() {
+export default function YouTubeSourceModal() {
   const [isModalOpen, setIsModalOpen] = useState(true);
 
   return (
@@ -189,7 +221,10 @@ export default function App() {
         Open Source Adder
       </button>
 
-      <AddSourceModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <AddSourceModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 }

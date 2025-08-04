@@ -1,4 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
+
+// --- Type Definitions ---
+interface CourseMetadata {
+  exam: string;
+  subject: string;
+  year: string;
+}
+
+interface CourseCardProps {
+  title: string;
+  description: string;
+  imageUrl: string;
+  metadata?: CourseMetadata;
+}
+
+interface LearningHistoryItem {
+  id: number;
+  title: string;
+  description: string;
+  imageUrl: string;
+  metadata: CourseMetadata;
+}
 
 // --- CSS Styles Component ---
 // The CSS is now included directly in the component to avoid file resolution errors.
@@ -106,10 +128,14 @@ const HistoryStyles = () => (
   `}</style>
 );
 
-
 // --- Reusable CourseCard Component ---
 // This component displays a single course card.
-const CourseCard = ({ title, description, imageUrl, metadata }) => {
+const CourseCard: React.FC<CourseCardProps> = ({
+  title,
+  description,
+  imageUrl,
+  metadata,
+}) => {
   const [isHovered, setIsHovered] = useState(false);
   const hasMetadata = metadata && Object.keys(metadata).length > 0;
 
@@ -130,7 +156,7 @@ const CourseCard = ({ title, description, imageUrl, metadata }) => {
 
       {/* This is the overlay that appears on hover if metadata exists */}
       {hasMetadata && (
-        <div className={`metadata-overlay ${isHovered ? 'visible' : ''}`}>
+        <div className={`metadata-overlay ${isHovered ? "visible" : ""}`}>
           <div className="metadata-item">
             <span>Exam:</span> {metadata.exam}
           </div>
@@ -146,43 +172,45 @@ const CourseCard = ({ title, description, imageUrl, metadata }) => {
   );
 };
 
-
 // --- Main Page Component ---
 // This component holds the title and the grid of cards.
 const HistoryPage = () => {
   // Sample data. In a real app, this would come from an API.
-  const learningHistoryData = [
+  const learningHistoryData: LearningHistoryItem[] = [
     {
       id: 1,
-      title: 'Mastering Percentage Problems for IBPS PO',
-      description: 'Quick tricks and concepts for solving percentage questions efficiently.',
-      imageUrl: 'https://placehold.co/600x400/1a2a45/ffffff?text=Math',
+      title: "Mastering Percentage Problems for IBPS PO",
+      description:
+        "Quick tricks and concepts for solving percentage questions efficiently.",
+      imageUrl: "https://placehold.co/600x400/1a2a45/ffffff?text=Math",
       metadata: {
-        exam: 'IBPS PO',
-        subject: 'Mathematics',
-        year: '2024',
+        exam: "IBPS PO",
+        subject: "Mathematics",
+        year: "2024",
       },
     },
     {
       id: 2,
-      title: 'SSC CGL English Vocabulary Session',
-      description: 'Learn important vocabulary words frequently asked in SSC CGL exams.',
-      imageUrl: 'https://placehold.co/600x400/1a2a45/ffffff?text=English',
+      title: "SSC CGL English Vocabulary Session",
+      description:
+        "Learn important vocabulary words frequently asked in SSC CGL exams.",
+      imageUrl: "https://placehold.co/600x400/1a2a45/ffffff?text=English",
       metadata: {
-        exam: 'SSC CGL',
-        subject: 'English Language',
-        year: '2024',
+        exam: "SSC CGL",
+        subject: "English Language",
+        year: "2024",
       },
     },
     {
       id: 3,
-      title: 'Railway NTPC General Awareness Mock Test',
-      description: 'Practice key General Awareness questions based on the latest NTPC syllabus.',
-      imageUrl: 'https://placehold.co/600x400/1a2a45/ffffff?text=GK',
+      title: "Railway NTPC General Awareness Mock Test",
+      description:
+        "Practice key General Awareness questions based on the latest NTPC syllabus.",
+      imageUrl: "https://placehold.co/600x400/1a2a45/ffffff?text=GK",
       metadata: {
-        exam: 'Railway NTPC',
-        subject: 'General Awareness',
-        year: '2024',
+        exam: "Railway NTPC",
+        subject: "General Awareness",
+        year: "2024",
       },
     },
   ];

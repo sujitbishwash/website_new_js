@@ -1,9 +1,29 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+// --- Type Definitions ---
+interface RadioButtonProps {
+  id: string;
+  name: string;
+  value: string;
+  label: string;
+  checked: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
+}
+
+interface TestData {
+  subjects: string[];
+  subTopics: {
+    [key: string]: string[];
+  };
+  difficulties: string[];
+  languages: string[];
+}
 
 // --- Mock Data ---
 // This data structure now maps subjects to their specific sub-topics.
-const testData = {
+const testData: TestData = {
   subjects: [
     "English",
     "Aptitude",
@@ -42,14 +62,14 @@ const testData = {
     ],
     "Full Test": [], // 'Full Test' has no sub-topics.
   },
-  difficultyLevels: ["Easy", "Medium", "Hard"],
+  difficulties: ["Easy", "Medium", "Hard"],
   languages: ["English", "Hindi"],
 };
 
 // --- Helper Components for UI elements ---
 
 // Custom Radio Button Component
-const RadioButton = ({
+const RadioButton: React.FC<RadioButtonProps> = ({
   id,
   name,
   value,
@@ -154,7 +174,9 @@ const TestConfigurationPageComponent = () => {
                   value={subject}
                   label={subject}
                   checked={selectedSubject === subject}
-                  onChange={(e) => setSelectedSubject(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSelectedSubject(e.target.value)
+                  }
                 />
               ))}
             </div>
@@ -167,7 +189,7 @@ const TestConfigurationPageComponent = () => {
             </h2>
             <div className="flex flex-wrap gap-4">
               {currentSubTopics.length > 0 ? (
-                currentSubTopics.map((topic) => (
+                currentSubTopics.map((topic: string) => (
                   <RadioButton
                     key={topic}
                     id={`subtopic-${topic}`}
@@ -175,7 +197,9 @@ const TestConfigurationPageComponent = () => {
                     value={topic}
                     label={topic}
                     checked={selectedSubTopic === topic}
-                    onChange={(e) => setSelectedSubTopic(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setSelectedSubTopic(e.target.value)
+                    }
                   />
                 ))
               ) : (
@@ -192,7 +216,7 @@ const TestConfigurationPageComponent = () => {
               3. Select Difficulty Level
             </h2>
             <div className="flex flex-wrap gap-4">
-              {testData.difficultyLevels.map((level) => (
+              {testData.difficulties.map((level) => (
                 <RadioButton
                   key={level}
                   id={`difficulty-${level}`}
@@ -200,7 +224,9 @@ const TestConfigurationPageComponent = () => {
                   value={level}
                   label={level}
                   checked={selectedDifficulty === level}
-                  onChange={(e) => setSelectedDifficulty(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSelectedDifficulty(e.target.value)
+                  }
                 />
               ))}
             </div>
@@ -220,7 +246,9 @@ const TestConfigurationPageComponent = () => {
                   value={lang}
                   label={lang}
                   checked={selectedLanguage === lang}
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                    setSelectedLanguage(e.target.value)
+                  }
                 />
               ))}
             </div>

@@ -3,6 +3,15 @@ import { useNavigate } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
 import TestResultDialog from "../../components/TestResultDialog";
 
+// --- Type Definitions ---
+interface Question {
+  id: number;
+  question: string;
+  options: string[];
+  status: string;
+  answer: number | null;
+}
+
 // --- Helper Components ---
 
 // Icon for the student in the sidebar
@@ -54,14 +63,14 @@ const TestMainPage = () => {
   const [language, setLanguage] = useState("English");
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
-  const langDropdownRef = useRef(null);
   const [showTestResultDialog, setShowTestResultDialog] = useState(false);
   const [isTimeLow, setIsTimeLow] = useState(false);
   const navigate = useNavigate();
+  const langDropdownRef = useRef<HTMLDivElement>(null);
 
   // --- Demo Data ---
   // In a real app, this would come from an API
-  const quizData = [
+  const quizData: Question[] = [
     {
       id: 1,
       question:
@@ -145,7 +154,7 @@ const TestMainPage = () => {
     },
   ];
 
-  const [questions, setQuestions] = useState(quizData);
+  const [questions, setQuestions] = useState<Question[]>(quizData);
 
   // --- Effects ---
 
@@ -168,10 +177,10 @@ const TestMainPage = () => {
 
   // Handle clicking outside the language dropdown
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (
         langDropdownRef.current &&
-        !langDropdownRef.current.contains(event.target)
+        !langDropdownRef.current.contains(event.target as Node)
       ) {
         setIsLangDropdownOpen(false);
       }
@@ -180,9 +189,9 @@ const TestMainPage = () => {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [langDropdownRef]);
+  }, []);
 
-  const formatTime = (seconds) => {
+  const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${String(minutes).padStart(2, "0")}:${String(secs).padStart(
@@ -192,7 +201,7 @@ const TestMainPage = () => {
   };
 
   // --- Event Handlers ---
-  const handleOptionSelect = (optionIndex) => {
+  const handleOptionSelect = (optionIndex: number) => {
     const newQuestions = [...questions];
     const currentStatus = newQuestions[currentQuestionIndex].status;
 
@@ -269,7 +278,7 @@ const TestMainPage = () => {
     setShowTestResultDialog(true);
   };
 
-  const handlePaletteClick = (index) => {
+  const handlePaletteClick = (index: number) => {
     if (questions[currentQuestionIndex].status === "not-visited") {
       const newQuestions = [...questions];
       newQuestions[currentQuestionIndex].status = "not-answered";
@@ -278,7 +287,7 @@ const TestMainPage = () => {
     setCurrentQuestionIndex(index);
   };
 
-  const handleLanguageChange = (lang) => {
+  const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
     setIsLangDropdownOpen(false);
   };
@@ -295,7 +304,7 @@ const TestMainPage = () => {
           await document.exitFullscreen();
         }
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error(
         `Error attempting to enable full-screen mode: ${err.message}. This is often due to security restrictions in iframes.`
       );
@@ -303,7 +312,7 @@ const TestMainPage = () => {
   };
 
   // --- Dynamic Styles for Palette ---
-  const getPaletteClass = (status) => {
+  const getPaletteClass = (status: string) => {
     switch (status) {
       case "answered":
         return "bg-green-600 text-white";

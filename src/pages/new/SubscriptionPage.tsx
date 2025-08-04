@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from "react";
 
 // --- CSS Styles Component ---
 // The CSS is included directly in the component to avoid file resolution errors.
@@ -187,7 +187,7 @@ const SubscriptionStyles = () => (
 
 // --- Main Subscription Page Component ---
 const SubscriptionPage = () => {
-  const [selectedPlan, setSelectedPlan] = useState('annual'); // 'annual' or 'monthly'
+  const [selectedPlan, setSelectedPlan] = useState("annual"); // 'annual' or 'monthly'
 
   const features = [
     "Unlimited uploads, pastes, and records",
@@ -195,7 +195,7 @@ const SubscriptionPage = () => {
     "Unlimited quiz generation",
     "Unlimited practice exams",
     "Extended voice mode usage",
-    "Upload files up to 100 pages / 15 MB"
+    "Upload files up to 100 pages / 15 MB",
   ];
 
   const handleSelectPlan = () => {
@@ -210,12 +210,21 @@ const SubscriptionPage = () => {
         <div className="subscription-container">
           <div className="offer-banner">
             <div className="limited-time">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641l2.5-8.5z"/>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="16"
+                height="16"
+                fill="currentColor"
+                viewBox="0 0 16 16"
+              >
+                <path d="M5.52.359A.5.5 0 0 1 6 0h4a.5.5 0 0 1 .474.658L8.694 6H12.5a.5.5 0 0 1 .395.807l-7 9a.5.5 0 0 1-.873-.454L6.823 9.5H3.5a.5.5 0 0 1-.48-.641l2.5-8.5z" />
               </svg>
               Limited Time Offer!
             </div>
-            <p>Get <strong>25% OFF</strong> Premium! Use code: <span className="promo-code">FINALS25</span></p>
+            <p>
+              Get <strong>25% OFF</strong> Premium! Use code:{" "}
+              <span className="promo-code">FINALS25</span>
+            </p>
             <div className="valid-until">(Valid until April 30)</div>
           </div>
 
@@ -224,31 +233,49 @@ const SubscriptionPage = () => {
           <ul className="feature-list">
             {features.map((feature, index) => (
               <li key={index}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="#238636" viewBox="0 0 16 16">
-                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  fill="#238636"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
                 </svg>
                 {feature}
-                {feature === "Unlimited AI chats" && <span className="sub-text">(Learn+ mode: 100 chats/month)</span>}
+                {feature === "Unlimited AI chats" && (
+                  <span className="sub-text">
+                    (Learn+ mode: 100 chats/month)
+                  </span>
+                )}
               </li>
             ))}
           </ul>
 
           <div className="plan-selection">
-            <div 
-              className={`plan-card ${selectedPlan === 'annual' ? 'active' : ''}`}
-              onClick={() => setSelectedPlan('annual')}
+            <div
+              className={`plan-card ${
+                selectedPlan === "annual" ? "active" : ""
+              }`}
+              onClick={() => setSelectedPlan("annual")}
             >
               <div className="save-badge">Save 40%</div>
               <h3>Annual</h3>
-              <div className="price">₹199<span className="price-per"> / month</span></div>
+              <div className="price">
+                ₹199<span className="price-per"> / month</span>
+              </div>
               <div className="billing-info">Billed annually</div>
             </div>
-            <div 
-              className={`plan-card ${selectedPlan === 'monthly' ? 'active' : ''}`}
-              onClick={() => setSelectedPlan('monthly')}
+            <div
+              className={`plan-card ${
+                selectedPlan === "monthly" ? "active" : ""
+              }`}
+              onClick={() => setSelectedPlan("monthly")}
             >
               <h3>Monthly</h3>
-              <div className="price">₹399<span className="price-per"> / month</span></div>
+              <div className="price">
+                ₹399<span className="price-per"> / month</span>
+              </div>
               <div className="billing-info">Billed monthly</div>
             </div>
           </div>
@@ -257,7 +284,9 @@ const SubscriptionPage = () => {
             Select Plan
           </button>
 
-          <p className="footer-text">Join 1M+ learners studying smarter with Ai Padhai</p>
+          <p className="footer-text">
+            Join 1M+ learners studying smarter with Ai Padhai
+          </p>
         </div>
       </div>
     </>

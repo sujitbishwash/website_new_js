@@ -1,9 +1,46 @@
 import { FileText, X } from "lucide-react";
 
+// --- Type Definitions ---
+interface TestResults {
+  attemptedQuestions: number;
+  correctQuestions: number;
+  totalQuestions: number;
+  positiveMarks: number;
+  negativeMarks: number;
+  totalMarks: number;
+  timeTaken: string;
+  rank: number;
+  totalStudents: number;
+}
+
+interface StatRowProps {
+  label: string;
+  value: string | number;
+}
+
+interface ResultModalHeaderProps {
+  onClose: () => void;
+}
+
+interface ResultModalBodyProps {
+  results: TestResults;
+}
+
+interface ResultModalFooterProps {
+  onClose: () => void;
+  navigate: () => void;
+}
+
+interface TestResultDialogProps {
+  results: TestResults;
+  onClose: () => void;
+  navigate: () => void;
+}
+
 // --- Reusable Helper Components ---
 
 // Helper component for individual statistic rows
-const StatRow = ({ label, value }) => (
+const StatRow = ({ label, value }: StatRowProps) => (
   <div className="flex justify-between items-center py-4 border-b border-gray-700 last:border-b-0">
     <p className="text-gray-400 text-sm md:text-base">{label}</p>
     <p className="text-white font-semibold text-sm md:text-base">{value}</p>
@@ -13,7 +50,7 @@ const StatRow = ({ label, value }) => (
 // --- Modular Modal Components ---
 
 // Header for the results modal
-const ResultModalHeader = ({ onClose }) => (
+const ResultModalHeader = ({ onClose }: ResultModalHeaderProps) => (
   <div className="flex justify-between items-center p-5 border-b border-gray-700">
     <h2 className="text-xl md:text-2xl font-bold flex items-center">
       <FileText className="mr-3 text-blue-400" size={24} />
@@ -30,7 +67,7 @@ const ResultModalHeader = ({ onClose }) => (
 );
 
 // Body/Content for the results modal
-const ResultModalBody = ({ results }) => {
+const ResultModalBody = ({ results }: ResultModalBodyProps) => {
   const {
     attemptedQuestions,
     correctQuestions,
@@ -75,7 +112,7 @@ const ResultModalBody = ({ results }) => {
 };
 
 // Footer for the results modal
-const ResultModalFooter = ({ onClose, navigate }) => (
+const ResultModalFooter = ({ onClose, navigate }: ResultModalFooterProps) => (
   <div className="flex flex-col sm:flex-row gap-3 p-5 bg-gray-800/50 rounded-b-2xl">
     <button
       onClick={onClose}
@@ -94,7 +131,11 @@ const ResultModalFooter = ({ onClose, navigate }) => (
 
 // --- Main Component: TestResultDialog ---
 // This component now composes the smaller modular parts.
-const TestResultDialog = ({ results, onClose, navigate }) => {
+const TestResultDialog = ({
+  results,
+  onClose,
+  navigate,
+}: TestResultDialogProps) => {
   if (!results) {
     return null; // Don't render if there are no results
   }

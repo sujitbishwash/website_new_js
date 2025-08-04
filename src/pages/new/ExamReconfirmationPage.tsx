@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+// --- Type Definitions ---
+interface ExamDetails {
+  title: string;
+  duration: string;
+  maxMarks: string;
+  instructions: string[];
+  languageNote: string;
+  agreementText: string;
+}
+
 // Main App Component
 export default function ExamReconfirmationPage() {
   // Demo data for the exam confirmation page
@@ -28,7 +38,9 @@ export default function ExamReconfirmationPage() {
 }
 
 // Main Exam Confirmation Page Component
-const ExamConfirmationPage = ({ examDetails }) => {
+const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
+  examDetails,
+}) => {
   const navigate = useNavigate();
   const [isConfirmed, setIsConfirmed] = useState(false);
 
@@ -61,9 +73,11 @@ const ExamConfirmationPage = ({ examDetails }) => {
 
             {/* Instructions List */}
             <ul className="space-y-3 text-gray-300 list-decimal list-inside mb-8">
-              {examDetails.instructions.map((instruction, index) => (
-                <li key={index}>{instruction}</li>
-              ))}
+              {examDetails.instructions.map(
+                (instruction: string, index: number) => (
+                  <li key={index}>{instruction}</li>
+                )
+              )}
             </ul>
 
             {/* Language Note */}
