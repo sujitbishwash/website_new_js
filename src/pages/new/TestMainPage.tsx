@@ -56,6 +56,7 @@ const TestMainPage = () => {
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const langDropdownRef = useRef(null);
   const [showTestResultDialog, setShowTestResultDialog] = useState(false);
+  const [isTimeLow, setIsTimeLow] = useState(false);
   const navigate = useNavigate();
 
   // --- Demo Data ---
@@ -150,7 +151,15 @@ const TestMainPage = () => {
 
   // Timer Logic
   useEffect(() => {
-    if (timeLeft <= 0) return;
+    if (timeLeft <= 0) {
+      // Auto-submit test when time runs out
+      handleAutoSubmit();
+      return;
+    }
+
+    // Set low time warning when less than 2 minutes remaining
+    setIsTimeLow(timeLeft <= 120);
+
     const timer = setInterval(() => {
       setTimeLeft((prevTime) => prevTime - 1);
     }, 1000);
@@ -254,6 +263,12 @@ const TestMainPage = () => {
     setShowTestResultDialog(true);
   };
 
+  const handleAutoSubmit = () => {
+    console.log("Test auto-submitted due to time expiration");
+    // Auto-submit without showing the confirmation dialog
+    setShowTestResultDialog(true);
+  };
+
   const handlePaletteClick = (index) => {
     if (questions[currentQuestionIndex].status === "not-visited") {
       const newQuestions = [...questions];
@@ -323,7 +338,13 @@ const TestMainPage = () => {
         <div className="flex items-center">
           <div className="flex items-center mr-2 sm:mr-4">
             <span className="text-sm mr-2 hidden sm:inline">Time Left:</span>
-            <span className="font-mono text-base sm:text-lg bg-gray-700 text-white py-1 px-2 sm:px-3 rounded-md">
+            <span
+              className={`font-mono text-base sm:text-lg py-1 px-2 sm:px-3 rounded-md ${
+                isTimeLow
+                  ? "bg-red-600 text-white animate-pulse"
+                  : "bg-gray-700 text-white"
+              }`}
+            >
               {formatTime(timeLeft)}
             </span>
           </div>
