@@ -62,6 +62,20 @@ export const apiRequest = async <T>(
 
 // Auth related API calls
 export const authApi = {
+  sendOtp: async (email: string) => {
+    return apiRequest<{ success: boolean; message: string }>('POST', '/auth/send-otp', {
+      email,
+    });
+  },
+
+  verifyOtp: async (email: string, otp: string) => {
+    return apiRequest<{ access_token: string; success: boolean; message: string }>('POST', '/auth/verify-otp', {
+      email,
+      otp,
+    });
+  },
+
+  // Keep the old login method for backward compatibility if needed
   login: async (email: string, password: string) => {
     return apiRequest<{ access_token: string }>('POST', '/ums/login', {
       email,
@@ -209,10 +223,10 @@ interface ChatStartResponse {
   content: string;
 }
 
-interface ChatSendResponse{
-    role: 'assistant';
-    content: string;
-  }
+interface ChatSendResponse {
+  role: 'assistant';
+  content: string;
+}
 
 export const chatApi = {
   getChatHistory: async (videoId: string): Promise<ChatHistoryResponse> => {

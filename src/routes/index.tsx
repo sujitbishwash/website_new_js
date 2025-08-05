@@ -1,4 +1,4 @@
-import LoginPageNew from "@/pages/new/LoginPageNew";
+import LoginPage from "@/pages/new/LoginPage";
 import ExamGoalPage from "@/pages/obsolete/ExamGoalPage";
 import { createBrowserRouter } from "react-router-dom";
 import Chat from "../components/Chat";
@@ -8,7 +8,6 @@ import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
 import ExamInformationPage from "../pages/new/ExamInformationPage";
 import ExamReconfirmationPage from "../pages/new/ExamReconfirmationPage";
 import HistoryPage from "../pages/new/HistoryPage";
-import LoginPage from "../pages/new/LoginPage";
 import MainDashboardPage from "../pages/new/MainDashboardPage";
 import ReferralPage from "../pages/new/ReferralPage";
 import SubscriptionPage from "../pages/new/SubscriptionPage";
@@ -106,12 +105,6 @@ export const routes = [
     path: "login",
     element: <LoginPage />,
     name: "Login",
-    description: "User authentication page",
-  },
-  {
-    path: "login-new",
-    element: <LoginPageNew />,
-    name: "Login New",
     description: "User authentication page",
   },
 ];
