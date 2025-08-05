@@ -584,7 +584,10 @@ export default function HomePage() {
                   <h4 className="font-semibold text-white">{test.title}</h4>
                   <p className="text-xs text-slate-400">{test.topic}</p>
                 </div>
-                <button className="px-3 py-1.5 text-sm font-semibold bg-purple-600/80 text-white rounded-md hover:bg-purple-600 transition-colors">
+                <button
+                  onClick={() => navigate("/exam-info")}
+                  className="px-3 py-1.5 text-sm font-semibold bg-purple-600/80 text-white rounded-md hover:bg-purple-600 transition-colors"
+                >
                   Start
                 </button>
               </div>
@@ -692,7 +695,10 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                <button className="px-4 py-2 text-sm font-semibold bg-blue-600/80 text-white rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto">
+                <button
+                  onClick={() => navigate("/analysis")}
+                  className="px-4 py-2 text-sm font-semibold bg-blue-600/80 text-white rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto"
+                >
                   Review Test
                 </button>
                 <button
