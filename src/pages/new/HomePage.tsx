@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { AddSourceModal } from "../../components/YouTubeSourceDialog";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -460,6 +461,7 @@ const suggestedTests: SuggestedTest[] = [
 export default function HomePage() {
   const [learningItems, setLearningItems] = useState(initialLearningItems);
   const [attemptedTests, setAttemptedTests] = useState(initialAttemptedTests);
+  const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
 
   const handleRemoveRecord = (id: string, type: "learning" | "test") => {
     if (type === "learning") {
@@ -488,7 +490,10 @@ export default function HomePage() {
                 <p className="text-xs text-slate-400">PDF, DOC, TXT</p>
               </div>
             </div>
-            <div className="group flex items-center space-x-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-800/90 transition-all duration-300 cursor-pointer border border-slate-700 hover:border-green-500">
+            <div
+              onClick={() => setIsYouTubeModalOpen(true)}
+              className="group flex items-center space-x-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-800/90 transition-all duration-300 cursor-pointer border border-slate-700 hover:border-green-500"
+            >
               <PasteIcon className="h-8 w-8 text-green-400 transition-transform group-hover:scale-110" />
               <div>
                 <h2 className="font-semibold text-white">Paste Link</h2>
@@ -720,6 +725,12 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* YouTube Source Dialog Modal */}
+      <AddSourceModal
+        isOpen={isYouTubeModalOpen}
+        onClose={() => setIsYouTubeModalOpen(false)}
+      />
     </div>
   );
 }

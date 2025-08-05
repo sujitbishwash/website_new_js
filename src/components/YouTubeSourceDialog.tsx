@@ -74,6 +74,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   onClose,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -177,15 +178,23 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       // You can add an API call here to save the video
       // await videoApi.addToLibrary(details);
 
-      // Close modal on successful add
+      // Close modal and navigate to VideoPage on successful add
       onClose();
+      navigate("/video-learning");
     } catch (err: any) {
       setError(
         err.message ||
           "Failed to add video. Please check the URL and try again."
       );
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
+
+      // dummy flow for Close modal and navigate to VideoPage on successful add
+      setTimeout(() => {
+        setIsLoading(false);
+        onClose();
+        navigate("/video-learning");
+      }, 1000);
     }
   };
 
@@ -202,14 +211,22 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       // You can add an API call here to save the video
       // await videoApi.addToLibrary(details);
 
-      // Close modal on successful add
+      // Close modal and navigate to VideoPage on successful add
       onClose();
+      navigate("/video-learning");
     } catch (err: any) {
       setError(
         err.message || "Failed to add suggested video. Please try again."
       );
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
+
+      // dummy flow for Close modal and navigate to VideoPage on successful add
+      setTimeout(() => {
+        setIsLoading(false);
+        onClose();
+        navigate("/video-learning");
+      }, 1000);
     }
   };
 
@@ -219,7 +236,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   return (
     // Backdrop
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-sm p-4 font-sans">
       {/* Modal Panel */}
       <div
         ref={modalRef}
