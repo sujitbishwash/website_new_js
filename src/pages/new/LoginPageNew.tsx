@@ -16,8 +16,7 @@ const theme = {
 
 // --- Style Objects ---
 // This approach uses 100% inline styles to avoid dependency on any CSS framework.
-
-const styles: Record<string, React.CSSProperties> = {
+const styles = {
   appContainer: {
     backgroundColor: theme.background,
     minHeight: "100vh",
@@ -30,28 +29,29 @@ const styles: Record<string, React.CSSProperties> = {
   loginCard: {
     backgroundColor: theme.cardBackground,
     color: theme.primaryText,
-    borderRadius: "1rem", // rounded-2xl
+    borderRadius: "1rem",
     boxShadow:
-      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)", // shadow-xl
-    padding: "2rem", // p-8
-    maxWidth: "28rem", // max-w-md
+      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+    padding: "2rem",
+    maxWidth: "28rem",
     width: "100%",
+    boxSizing: "border-box" as const,
   },
   headerContainer: {
     textAlign: "center" as const,
   },
   headerTitle: {
     color: theme.accent,
-    fontSize: "2.25rem", // text-4xl
+    fontSize: "2.25rem",
     lineHeight: "2.5rem",
     fontWeight: "bold",
   },
   headerSubtitle: {
     color: theme.secondaryText,
-    marginTop: "0.5rem", // mt-2
+    marginTop: "0.5rem",
   },
   formContainer: {
-    marginTop: "2rem", // mt-8
+    marginTop: "2rem",
   },
   googleButton: {
     backgroundColor: theme.inputBackground,
@@ -60,9 +60,9 @@ const styles: Record<string, React.CSSProperties> = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontWeight: "600", // font-semibold
-    padding: "0.75rem 1rem", // py-3 px-4
-    borderRadius: "0.5rem", // rounded-lg
+    fontWeight: "600",
+    padding: "0.75rem 1rem",
+    borderRadius: "0.5rem",
     border: "none",
     cursor: "pointer",
     transition: "background-color 0.3s",
@@ -70,7 +70,7 @@ const styles: Record<string, React.CSSProperties> = {
   dividerContainer: {
     display: "flex",
     alignItems: "center",
-    margin: "1.5rem 0", // space-y-6 equivalent
+    margin: "1.5rem 0",
   },
   hr: {
     width: "100%",
@@ -81,63 +81,288 @@ const styles: Record<string, React.CSSProperties> = {
     color: theme.mutedText,
     padding: "0 1rem",
   },
-  emailInput: {
+  inputField: {
     backgroundColor: theme.inputBackground,
     color: theme.primaryText,
     width: "100%",
-    padding: "0.75rem 1rem", // py-3 px-4
-    borderRadius: "0.5rem", // rounded-lg
+    padding: "0.75rem 1rem",
+    borderRadius: "0.5rem",
     border: "none",
-    boxSizing: "border-box" as const, // Prevents padding from affecting width
-    margin: "1.5rem 0", // space-y-6 equivalent
+    boxSizing: "border-box" as const,
+    marginBottom: "1.5rem",
   },
-  PasswordInput: {
+  otpInfoContainer: {
+    textAlign: "center" as const,
+    marginBottom: "1rem",
+  },
+  otpInfoText: {
+    color: theme.secondaryText,
+    fontSize: "0.875rem",
+  },
+  changeEmailButton: {
+    color: theme.accent,
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    textDecoration: "underline",
+    marginLeft: "0.5rem",
+    fontSize: "0.875rem",
+  },
+  otpInputContainer: {
+    display: "flex",
+    justifyContent: "space-between",
+    gap: "0.5rem",
+    marginBottom: "1.5rem",
+  },
+  otpInputBox: {
     backgroundColor: theme.inputBackground,
     color: theme.primaryText,
-    width: "100%",
-    padding: "0.75rem 1rem", // py-3 px-4
-    borderRadius: "0.5rem", // rounded-lg
-    border: "none",
-    boxSizing: "border-box" as const, // Prevents padding from affecting width
-    margin: "1.5rem 0", // space-y-6 equivalent
+    width: "3rem",
+    height: "3.5rem",
+    borderRadius: "0.5rem",
+    border: "1px solid transparent",
+    textAlign: "center" as const,
+    fontSize: "1.5rem",
+    fontWeight: "bold",
+    transition: "border-color 0.3s, box-shadow 0.3s",
   },
-  loginButton: {
+  actionButton: {
     width: "100%",
     background: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
     color: theme.primaryText,
     fontWeight: "bold",
-    padding: "0.75rem 1rem", // py-3 px-4
-    borderRadius: "0.5rem", // rounded-lg
+    padding: "0.75rem 1rem",
+    borderRadius: "0.5rem",
     border: "none",
     cursor: "pointer",
     boxShadow:
-      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", // shadow-lg
+      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
     transition: "all 0.3s",
   },
   privacyPolicy: {
     color: theme.mutedText,
     textAlign: "center" as const,
-    fontSize: "0.875rem", // text-sm
+    fontSize: "0.875rem",
     lineHeight: "1.25rem",
-    marginTop: "2rem", // mt-8
+    marginTop: "2rem",
   },
   privacyLink: {
     color: theme.accent,
     textDecoration: "none",
   },
+  errorMessage: {
+    color: "#EF4444", // red-500
+    fontSize: "0.875rem",
+    marginTop: "0.5rem",
+    textAlign: "center" as const,
+  },
+  inputFieldError: {
+    backgroundColor: theme.inputBackground,
+    color: theme.primaryText,
+    width: "100%",
+    padding: "0.75rem 1rem",
+    borderRadius: "0.5rem",
+    border: "1px solid #EF4444", // red border for error
+    boxSizing: "border-box" as const,
+    marginBottom: "0.5rem", // reduced margin to make room for error
+  },
+  actionButtonDisabled: {
+    width: "100%",
+    background: "#6B7280", // gray-500
+    color: "#9CA3AF", // gray-400
+    fontWeight: "bold",
+    padding: "0.75rem 1rem",
+    borderRadius: "0.5rem",
+    border: "none",
+    cursor: "not-allowed",
+    opacity: 0.6,
+    transition: "all 0.3s",
+  },
 };
 
-// --- Components ---
+// --- Main App Component ---
 
-const LoginPageNew = () => (
-  <div style={styles.appContainer}>
-    <LoginCard />
-  </div>
+const LoginPageNew = () => {
+  return (
+    <>
+      {/* We inject a style tag here for the animations */}
+      <style>
+        {`
+          @keyframes focus-animation {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.3); }
+            50% { transform: scale(1.05); box-shadow: 0 0 10px 5px rgba(96, 165, 250, 0.3); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(96, 165, 250, 0.3); }
+          }
+          .otp-input-box:focus {
+            border-color: ${theme.accent};
+            outline: none;
+            animation: focus-animation 1.5s infinite;
+          }
+        `}
+      </style>
+      <div style={styles.appContainer}>
+        <LoginCard />
+      </div>
+    </>
+  );
+};
+
+// --- Child Components ---
+
+interface EmailInputProps {
+  email: string;
+  setEmail: (email: string) => void;
+  hasError?: boolean;
+}
+const EmailInput: React.FC<EmailInputProps> = ({
+  email,
+  setEmail,
+  hasError = false,
+}) => (
+  <input
+    type="email"
+    value={email}
+    onChange={(e) => setEmail(e.target.value)}
+    placeholder="Enter any email id"
+    style={hasError ? styles.inputFieldError : styles.inputField}
+  />
 );
 
-const LoginCard = () => {
+interface OtpInputProps {
+  otp: string[];
+  setOtp: (otp: string[]) => void;
+}
+const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp }) => {
+  const handleChange = (element: HTMLInputElement, index: number) => {
+    if (isNaN(Number(element.value))) return false;
+    const newOtp = [...otp];
+    newOtp[index] = element.value;
+    setOtp(newOtp);
+    if (element.value && element.nextSibling instanceof HTMLInputElement) {
+      element.nextSibling.focus();
+    }
+  };
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement>,
+    index: number
+  ) => {
+    if (
+      e.key === "Backspace" &&
+      !otp[index] &&
+      e.currentTarget.previousSibling instanceof HTMLInputElement
+    ) {
+      e.currentTarget.previousSibling.focus();
+    }
+  };
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const value = e.clipboardData.getData("text");
+    if (isNaN(Number(value)) || value.length !== 6) return;
+    const newOtp = value.split("");
+    setOtp(newOtp);
+    // Focus the last input box after paste
+    if (e.currentTarget.parentNode instanceof HTMLElement) {
+      const inputs = e.currentTarget.parentNode.querySelectorAll("input");
+      if (inputs.length === 6) (inputs[5] as HTMLInputElement).focus();
+    }
+  };
+  return (
+    <div style={styles.otpInputContainer}>
+      {otp.map((data, index) => (
+        <input
+          key={index}
+          type="text"
+          name="otp"
+          maxLength={1}
+          value={data}
+          onChange={(e) => handleChange(e.target, index)}
+          onKeyDown={(e) => handleKeyDown(e, index)}
+          onFocus={(e) => e.currentTarget.select()}
+          onPaste={index === 0 ? handlePaste : () => {}}
+          style={{
+            ...styles.otpInputBox,
+            ...(data ? { borderColor: theme.accent } : {}),
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+interface ActionButtonProps {
+  text: string;
+  onClick: () => void;
+  disabled?: boolean;
+}
+const ActionButton: React.FC<ActionButtonProps> = ({
+  text,
+  onClick,
+  disabled = false,
+}) => (
+  <button
+    onClick={onClick}
+    style={disabled ? styles.actionButtonDisabled : styles.actionButton}
+    disabled={disabled}
+  >
+    {text}
+  </button>
+);
+
+const LoginCard: React.FC = () => {
   const [email, setEmail] = useState("");
-  const handleLogin = () => console.log(`Logging in with email: ${email}`);
+  const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
+  const [otpSent, setOtpSent] = useState(false);
+  const [error, setError] = useState("");
+
+  const validateEmail = (email: string) => {
+    const re =
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
+  };
+
+  const isEmailValid = validateEmail(email);
+  const isOtpComplete = otp.join("").length === 6;
+
+  const handleSendOtp = () => {
+    setError(""); // Clear previous errors
+
+    if (!email) {
+      setError("Please enter an email address.");
+      return;
+    }
+
+    if (!isEmailValid) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    console.log(`Sending OTP to: ${email}`);
+    setOtpSent(true);
+    setError(""); // Clear any previous errors
+  };
+
+  const handleLogin = () => {
+    setError(""); // Clear previous errors
+
+    const finalOtp = otp.join("");
+    if (finalOtp.length !== 6) {
+      setError("Please enter the complete 6-digit OTP.");
+      return;
+    }
+
+    console.log(`Logging in with email: ${email} and OTP: ${finalOtp}`);
+    // Add your login logic here
+  };
+
+  const handleChangeEmail = () => {
+    setOtpSent(false);
+    setOtp(new Array(6).fill(""));
+    setError(""); // Clear errors when changing email
+  };
+
+  const handleEmailChange = (newEmail: string) => {
+    setEmail(newEmail);
+    setError(""); // Clear errors when user types
+  };
 
   return (
     <div style={styles.loginCard}>
@@ -145,15 +370,52 @@ const LoginCard = () => {
       <div style={styles.formContainer}>
         <GoogleSignInButton />
         <OrDivider />
-        <EmailInput email={email} setEmail={setEmail} />
-        <LoginButton onClick={handleLogin} />
+
+        {!otpSent ? (
+          <>
+            <EmailInput
+              email={email}
+              setEmail={handleEmailChange}
+              hasError={Boolean(error && !isEmailValid)}
+            />
+            {error && !otpSent && (
+              <div style={styles.errorMessage}>{error}</div>
+            )}
+            <ActionButton
+              text="Send OTP"
+              onClick={handleSendOtp}
+              disabled={!isEmailValid}
+            />
+          </>
+        ) : (
+          <>
+            <div style={styles.otpInfoContainer}>
+              <span style={styles.otpInfoText}>
+                Enter the OTP sent to <strong>{email}</strong>
+              </span>
+              <button
+                onClick={handleChangeEmail}
+                style={styles.changeEmailButton}
+              >
+                Change
+              </button>
+            </div>
+            <OtpInput otp={otp} setOtp={setOtp} />
+            {error && otpSent && <div style={styles.errorMessage}>{error}</div>}
+            <ActionButton
+              text="Login"
+              onClick={handleLogin}
+              disabled={!isOtpComplete}
+            />
+          </>
+        )}
       </div>
       <PrivacyPolicyLink />
     </div>
   );
 };
 
-const Header = () => (
+const Header: React.FC = () => (
   <div style={styles.headerContainer}>
     <h1 style={styles.headerTitle}>Welcome Back</h1>
     <p style={styles.headerSubtitle}>
@@ -162,7 +424,7 @@ const Header = () => (
   </div>
 );
 
-const GoogleSignInButton = () => (
+const GoogleSignInButton: React.FC = () => (
   <button style={styles.googleButton}>
     <svg
       style={{ width: "1.5rem", height: "1.5rem", marginRight: "0.75rem" }}
@@ -189,7 +451,7 @@ const GoogleSignInButton = () => (
   </button>
 );
 
-const OrDivider = () => (
+const OrDivider: React.FC = () => (
   <div style={styles.dividerContainer}>
     <hr style={styles.hr} />
     <span style={styles.dividerText}>OR</span>
@@ -197,50 +459,7 @@ const OrDivider = () => (
   </div>
 );
 
-interface EmailInputProps {
-  email: string;
-  setEmail: (email: string) => void;
-}
-
-interface PasswordInputProps {
-  password: string;
-  setPassword: (password: string) => void;
-}
-
-const EmailInput: React.FC<EmailInputProps> = ({ email, setEmail }) => (
-  <input
-    type="email"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    placeholder="Enter any email id to login"
-    style={styles.emailInput}
-  />
-);
-
-const PasswordInput: React.FC<PasswordInputProps> = ({
-  password,
-  setPassword,
-}) => (
-  <input
-    type="password"
-    value={password}
-    onChange={(e) => setPassword(e.target.value)}
-    placeholder="Enter password"
-    style={styles.emailInput}
-  />
-);
-
-interface LoginButtonProps {
-  onClick: () => void;
-}
-
-const LoginButton: React.FC<LoginButtonProps> = ({ onClick }) => (
-  <button onClick={onClick} style={styles.loginButton}>
-    Login
-  </button>
-);
-
-const PrivacyPolicyLink = () => (
+const PrivacyPolicyLink: React.FC = () => (
   <p style={styles.privacyPolicy}>
     By continuing, you agree to our{" "}
     <a href="#" style={styles.privacyLink}>
