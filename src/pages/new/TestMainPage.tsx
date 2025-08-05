@@ -1,3 +1,8 @@
+import {
+  quizApi,
+  SubmitTestRequest,
+  SubmitTestResponse,
+} from "@/lib/api-client";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
@@ -9,6 +14,7 @@ type QuestionType =
   | "FillInTheBlank"
   | "MatchTheFollowing"
   | "Subjective";
+
 interface Question {
   id: number;
   question: string;
@@ -17,6 +23,23 @@ interface Question {
   answer: number | null;
   questionType: QuestionType;
 }
+
+// API Response mapping interface
+interface ApiQuestion {
+  questionId: number;
+  questionType: string;
+  content: string;
+  option: string[];
+  answer: string | null;
+}
+
+// Configuration for API integration
+const API_CONFIG = {
+  // Set to false when backend is permanently online
+  USE_DUMMY_DATA_FALLBACK: true,
+  // Session ID for the test - this should come from route params or props
+  DEFAULT_SESSION_ID: 1,
+};
 
 // --- Helper Components ---
 
@@ -167,12 +190,121 @@ const TestMainPage = () => {
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [showTestResultDialog, setShowTestResultDialog] = useState(false);
   const [isTimeLow, setIsTimeLow] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [sessionId, setSessionId] = useState<number>(
+    API_CONFIG.DEFAULT_SESSION_ID
+  );
   const navigate = useNavigate();
   const langDropdownRef = useRef<HTMLDivElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [questions, setQuestions] = useState<Question[]>(quizData);
+  const [questions, setQuestions] = useState<Question[]>([]);
+
+  // --- Data Fetching and API Integration ---
+
+  // Convert API response to internal Question format
+  const mapApiQuestionToQuestion = (apiQuestion: ApiQuestion): Question => ({
+    id: apiQuestion.questionId,
+    question: apiQuestion.content,
+    options: apiQuestion.option,
+    status: "not-visited",
+    answer: null,
+    questionType: apiQuestion.questionType as QuestionType,
+  });
+
+  // Fetch questions from API with fallback to dummy data
+  const fetchQuestions = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      console.log("Attempting to fetch questions from API...");
+      const response = await quizApi.getQuestions(sessionId);
+
+      if (response && response.questions) {
+        const mappedQuestions = response.questions.map(
+          mapApiQuestionToQuestion
+        );
+        setQuestions(mappedQuestions);
+        console.log(
+          "Successfully fetched questions from API:",
+          mappedQuestions.length
+        );
+        return;
+      }
+    } catch (apiError) {
+      console.warn("API fetch failed, falling back to dummy data:", apiError);
+
+      if (!API_CONFIG.USE_DUMMY_DATA_FALLBACK) {
+        setError(
+          "Failed to fetch questions from server. Please try again later."
+        );
+        setIsLoading(false);
+        return;
+      }
+    }
+
+    // Fallback to dummy data
+    console.log("Using dummy data as fallback");
+    setQuestions(quizData);
+    setIsLoading(false);
+  };
+
+  // Submit test to API with fallback
+  const submitTestToAPI = async (): Promise<SubmitTestResponse | null> => {
+    try {
+      console.log("Attempting to submit test to API...");
+
+      const submitData: SubmitTestRequest = {
+        session_id: sessionId,
+        answers: questions.map((q) => ({
+          question_id: q.id,
+          selected_option: q.answer !== null ? q.options[q.answer] : null,
+          answer: q.answer !== null ? q.options[q.answer] : null,
+        })),
+      };
+
+      const response = await quizApi.submitTest(submitData);
+      console.log("Successfully submitted test to API:", response);
+      return response;
+    } catch (apiError) {
+      console.warn("API submit failed:", apiError);
+
+      if (!API_CONFIG.USE_DUMMY_DATA_FALLBACK) {
+        throw apiError;
+      }
+
+      // Return dummy response for fallback
+      return {
+        session_id: sessionId,
+        score: questions.filter(
+          (q) => q.status === "answered" || q.status === "marked-answered"
+        ).length,
+        total: questions.length,
+        attempt: 1,
+      };
+    }
+  };
 
   // --- Effects ---
+
+  // Get session ID from URL parameters (optional enhancement)
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionIdParam = urlParams.get("sessionId");
+    if (sessionIdParam) {
+      const parsedSessionId = parseInt(sessionIdParam, 10);
+      if (!isNaN(parsedSessionId)) {
+        setSessionId(parsedSessionId);
+      }
+    }
+  }, []);
+
+  // Fetch questions on component mount
+  useEffect(() => {
+    fetchQuestions();
+  }, [sessionId]);
 
   // Timer Logic
   useEffect(() => {
@@ -282,16 +414,43 @@ const TestMainPage = () => {
     setShowSubmitDialog(false);
   };
 
-  const handleConfirmSubmit = () => {
-    console.log("Test submitted");
-    setShowSubmitDialog(false);
-    setShowTestResultDialog(true);
+  const handleConfirmSubmit = async () => {
+    try {
+      setShowSubmitDialog(false);
+      setIsSubmitting(true);
+
+      const apiResponse = await submitTestToAPI();
+
+      if (apiResponse) {
+        console.log("Test submitted successfully:", apiResponse);
+        setShowTestResultDialog(true);
+      }
+    } catch (error) {
+      console.error("Failed to submit test:", error);
+      setError("Failed to submit test. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleAutoSubmit = () => {
+  const handleAutoSubmit = async () => {
     console.log("Test auto-submitted due to time expiration");
-    // Auto-submit without showing the confirmation dialog
-    setShowTestResultDialog(true);
+    try {
+      setIsSubmitting(true);
+      const apiResponse = await submitTestToAPI();
+
+      if (apiResponse) {
+        console.log("Test auto-submitted successfully:", apiResponse);
+        setShowTestResultDialog(true);
+      }
+    } catch (error) {
+      console.error("Failed to auto-submit test:", error);
+      setError("Failed to auto-submit test.");
+      // Still show results dialog with dummy data
+      setShowTestResultDialog(true);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handlePaletteClick = (index: number) => {
@@ -348,8 +507,58 @@ const TestMainPage = () => {
 
   const handleCloseTestResultDialog = () => {
     setShowTestResultDialog(false);
-    navigate("/dashbaord");
+    navigate("/dashboard");
   };
+
+  // --- Loading and Error States ---
+  if (isLoading && questions.length === 0) {
+    return (
+      <div className="bg-gray-900 text-gray-200 font-sans min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-lg">Loading questions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && questions.length === 0) {
+    return (
+      <div className="bg-gray-900 text-gray-200 font-sans min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 text-lg mb-4">{error}</p>
+          <button
+            onClick={fetchQuestions}
+            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (questions.length === 0) {
+    return (
+      <div className="bg-gray-900 text-gray-200 font-sans min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-lg">No questions available.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Place this check just before the main render return (after error/loading checks, before the main return)
+  if (isSubmitting) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-lg text-white">Submitting your quiz...</p>
+        </div>
+      </div>
+    );
+  }
 
   // --- Render Method ---
   return (
@@ -582,9 +791,14 @@ const TestMainPage = () => {
             </button>
             <button
               onClick={handleSubmitTest}
-              className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg"
+              disabled={isLoading}
+              className={`w-full font-bold py-3 px-4 rounded-lg transition-colors duration-200 ${
+                isLoading
+                  ? "bg-gray-500 text-gray-300 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700 text-white"
+              }`}
             >
-              Submit Test
+              {isLoading ? "Submitting..." : "Submit Test"}
             </button>
           </div>
         </aside>
