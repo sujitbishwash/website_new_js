@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { fetchTestSeriesFormData, testSeriesApi } from "../../lib/api-client";
 
 // --- Type Definitions ---
 interface RadioButtonProps {
@@ -12,58 +13,69 @@ interface RadioButtonProps {
   disabled?: boolean;
 }
 
-interface TestData {
-  subjects: string[];
-  subTopics: {
-    [key: string]: string[];
-  };
-  difficulties: string[];
-  languages: string[];
+interface SubTopic {
+  subject: string;
+  sub_topic: string[];
 }
 
-// --- Mock Data ---
-// This data structure now maps subjects to their specific sub-topics.
-const testData: TestData = {
+interface TestSeriesFormData {
+  subjects: SubTopic[];
+  level: string[];
+  language: string[];
+}
+
+// --- Fallback Dummy Data ---
+const fallbackTestData: TestSeriesFormData = {
   subjects: [
-    "English",
-    "Aptitude",
-    "Reasoning",
-    "General Awareness",
-    "Computer",
-    "Full Test",
+    {
+      subject: "English",
+      sub_topic: [
+        "Reading Comprehension",
+        "Grammar",
+        "Vocabulary",
+        "Para Jumbles",
+      ],
+    },
+    {
+      subject: "Aptitude",
+      sub_topic: [
+        "Percentages",
+        "Profit and Loss",
+        "Time and Work",
+        "Ratio and Proportion",
+        "Number Systems",
+      ],
+    },
+    {
+      subject: "Reasoning",
+      sub_topic: [
+        "Puzzles",
+        "Seating Arrangement",
+        "Syllogism",
+        "Blood Relations",
+      ],
+    },
+    {
+      subject: "General Awareness",
+      sub_topic: ["Current Affairs", "History", "Geography", "Static GK"],
+    },
+    {
+      subject: "Computer",
+      sub_topic: [
+        "Data Structures",
+        "Algorithms",
+        "Networking",
+        "Operating Systems",
+        "DBMS",
+      ],
+    },
+    {
+      subject: "Full Test",
+      sub_topic: [],
+    },
   ],
-  subTopics: {
-    English: ["Reading Comprehension", "Grammar", "Vocabulary", "Para Jumbles"],
-    Aptitude: [
-      "Percentages",
-      "Profit and Loss",
-      "Time and Work",
-      "Ratio and Proportion",
-      "Number Systems",
-    ],
-    Reasoning: [
-      "Puzzles",
-      "Seating Arrangement",
-      "Syllogism",
-      "Blood Relations",
-    ],
-    "General Awareness": [
-      "Current Affairs",
-      "History",
-      "Geography",
-      "Static GK",
-    ],
-    Computer: [
-      "Data Structures",
-      "Algorithms",
-      "Networking",
-      "Operating Systems",
-      "DBMS",
-    ],
-    "Full Test": [], // 'Full Test' has no sub-topics.
-  },
-  difficulties: ["Easy", "Medium", "Hard"],
-  languages: ["English", "Hindi"],
+  level: ["Easy", "Medium", "Hard"],
+  language: ["English", "Hindi"],
 };
 
 // --- Helper Components for UI elements ---
@@ -118,32 +130,167 @@ const TestConfigurationPageComponent = () => {
   const navigate = useNavigate();
 
   // State to hold user selections
-  const [selectedSubject, setSelectedSubject] = useState("Aptitude");
-  const [selectedSubTopic, setSelectedSubTopic] = useState("Percentages"); // Now a single string
-  const [selectedDifficulty, setSelectedDifficulty] = useState("Medium");
-  const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [selectedSubTopic, setSelectedSubTopic] = useState("");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState("");
 
-  const currentSubTopics = testData.subTopics[selectedSubject] || [];
+  // State for dynamic data
+  const [testData, setTestData] = useState<TestSeriesFormData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [usingFallbackData, setUsingFallbackData] = useState(false);
+
+  // Get available subjects from API data
+  const subjects = testData?.subjects.map((subject) => subject.subject) || [];
+
+  // Get sub-topics for selected subject
+  const currentSubTopics =
+    testData?.subjects.find((subject) => subject.subject === selectedSubject)
+      ?.sub_topic || [];
+
+  // Get difficulties and languages from API data
+  const difficulties = testData?.level || [];
+  const languages = testData?.language || [];
+
+  // Fetch test configuration data on component mount
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        setUsingFallbackData(false);
+
+        const data = await fetchTestSeriesFormData();
+        setTestData(data);
+
+        // Set default selections if data is available
+        if (data.subjects.length > 0) {
+          setSelectedSubject(data.subjects[0].subject);
+          if (data.subjects[0].sub_topic.length > 0) {
+            setSelectedSubTopic(data.subjects[0].sub_topic[0]);
+          }
+        }
+        if (data.level.length > 0) {
+          setSelectedDifficulty(data.level[0]);
+        }
+        if (data.language.length > 0) {
+          setSelectedLanguage(data.language[0]);
+        }
+      } catch (err: any) {
+        console.warn("API failed, using fallback data:", err.message);
+        setError("Using sample data (API unavailable)");
+        setTestData(fallbackTestData);
+        setUsingFallbackData(true);
+
+        // Set default selections from fallback data
+        if (fallbackTestData.subjects.length > 0) {
+          setSelectedSubject(fallbackTestData.subjects[0].subject);
+          if (fallbackTestData.subjects[0].sub_topic.length > 0) {
+            setSelectedSubTopic(fallbackTestData.subjects[0].sub_topic[0]);
+          }
+        }
+        if (fallbackTestData.level.length > 0) {
+          setSelectedDifficulty(fallbackTestData.level[0]);
+        }
+        if (fallbackTestData.language.length > 0) {
+          setSelectedLanguage(fallbackTestData.language[0]);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   // Effect to update sub-topic when subject changes
   useEffect(() => {
-    const newSubTopics = testData.subTopics[selectedSubject] || [];
-    // Set the default selected sub-topic to the first one in the list, or empty if none exist.
-    setSelectedSubTopic(newSubTopics.length > 0 ? newSubTopics[0] : "");
-  }, [selectedSubject]);
+    if (testData) {
+      const newSubTopics =
+        testData.subjects.find((subject) => subject.subject === selectedSubject)
+          ?.sub_topic || [];
+
+      // Set the default selected sub-topic to the first one in the list, or empty if none exist.
+      setSelectedSubTopic(newSubTopics.length > 0 ? newSubTopics[0] : "");
+    }
+  }, [selectedSubject, testData]);
 
   // Handler for the continue button click
-  const handleContinue = () => {
-    // In a real app, you would navigate to the test or send this data to a server.
-    console.log("Test Configuration:", {
-      subject: selectedSubject,
-      subTopic: selectedSubTopic,
-      difficulty: selectedDifficulty,
-      language: selectedLanguage,
-    });
-    navigate("/exam-info");
-    // You could show a confirmation modal here instead of an alert
+  const handleContinue = async () => {
+    if (!selectedSubject || !selectedDifficulty || !selectedLanguage) {
+      setError("Please select all required fields");
+      return;
+    }
+
+    try {
+      setIsSubmitting(true);
+      setError(null);
+
+      const testData = {
+        subject: selectedSubject,
+        sub_topic: selectedSubTopic ? [selectedSubTopic] : [],
+        level: selectedDifficulty,
+        language: selectedLanguage,
+      };
+
+      console.log("Creating test with configuration:", testData);
+
+      // If using fallback data, simulate API call
+      if (usingFallbackData) {
+        // Simulate API delay
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        // Simulate successful response
+        const mockResponse = {
+          testId: `demo-${Date.now()}`,
+          status: "created",
+        };
+
+        console.log("Demo test created successfully:", mockResponse);
+
+        // Navigate to exam info page with the demo test ID
+        navigate("/exam-info", {
+          state: {
+            testId: mockResponse.testId,
+            testConfig: testData,
+            isDemo: true,
+          },
+        });
+      } else {
+        const response = await testSeriesApi.createTest(testData);
+
+        console.log("Test created successfully:", response);
+
+        // Navigate to exam info page with the test ID
+        navigate("/exam-info", {
+          state: {
+            testId: response.testId,
+            testConfig: testData,
+            isDemo: false,
+          },
+        });
+      }
+    } catch (err: any) {
+      console.error("Failed to create test:", err);
+      setError(err.message || "Failed to create test. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  // Loading state
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-br from-gray-900 to-black min-h-screen text-white font-sans p-4 sm:p-6 md:p-8 flex items-center justify-center">
+        <div className="w-full max-w-2xl mx-auto bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-6 sm:p-8 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading test configuration options...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-br from-gray-900 to-black min-h-screen text-white font-sans p-4 sm:p-6 md:p-8 flex items-center justify-center">
@@ -156,7 +303,21 @@ const TestConfigurationPageComponent = () => {
           <p className="text-gray-400 mt-2">
             Select your preferences to start a practice test.
           </p>
+          {usingFallbackData && (
+            <div className="mt-2">
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                Sample Data
+              </span>
+            </div>
+          )}
         </div>
+
+        {/* --- Error Display --- */}
+        {error && (
+          <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
+            <p className="text-red-400 text-sm">{error}</p>
+          </div>
+        )}
 
         {/* --- Form Sections --- */}
         <div className="space-y-10">
@@ -166,7 +327,7 @@ const TestConfigurationPageComponent = () => {
               1. Select Subject
             </h2>
             <div className="flex flex-wrap gap-4">
-              {testData.subjects.map((subject) => (
+              {subjects.map((subject) => (
                 <RadioButton
                   key={subject}
                   id={`subject-${subject}`}
@@ -182,7 +343,7 @@ const TestConfigurationPageComponent = () => {
             </div>
           </div>
 
-          {/* 2. Select Sub-Topic (now dynamic) */}
+          {/* 2. Select Sub-Topic (dynamic) */}
           <div className="p-6 bg-black/20 border border-gray-700/80 rounded-xl">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">
               2. Select Sub-Topic (Optional)
@@ -216,7 +377,7 @@ const TestConfigurationPageComponent = () => {
               3. Select Difficulty Level
             </h2>
             <div className="flex flex-wrap gap-4">
-              {testData.difficulties.map((level) => (
+              {difficulties.map((level) => (
                 <RadioButton
                   key={level}
                   id={`difficulty-${level}`}
@@ -238,7 +399,7 @@ const TestConfigurationPageComponent = () => {
               4. Select Language
             </h2>
             <div className="flex flex-wrap gap-4">
-              {testData.languages.map((lang) => (
+              {languages.map((lang) => (
                 <RadioButton
                   key={lang}
                   id={`language-${lang}`}
@@ -259,9 +420,22 @@ const TestConfigurationPageComponent = () => {
         <div className="pt-6 flex justify-center">
           <button
             onClick={handleContinue}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-12 rounded-full text-lg transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-500/50"
+            disabled={
+              isSubmitting ||
+              !selectedSubject ||
+              !selectedDifficulty ||
+              !selectedLanguage
+            }
+            className={`font-bold py-3 px-12 rounded-full text-lg transition-all duration-300 ease-in-out transform focus:outline-none focus:ring-4 focus:ring-blue-500/50 ${
+              isSubmitting ||
+              !selectedSubject ||
+              !selectedDifficulty ||
+              !selectedLanguage
+                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700 text-white hover:scale-105"
+            }`}
           >
-            Continue
+            {isSubmitting ? "Creating Test..." : "Continue"}
           </button>
         </div>
       </div>

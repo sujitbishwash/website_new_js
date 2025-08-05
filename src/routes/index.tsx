@@ -1,4 +1,5 @@
 import BookPage from "@/pages/new/BookPage";
+import ComingSoonPage from "@/pages/new/ComingSoonPage";
 import LoginPage from "@/pages/new/LoginPage";
 import ProfilePage from "@/pages/new/ProfilePage";
 import VideoPage from "@/pages/new/VideoPage";
@@ -12,6 +13,7 @@ import ExamInformationPage from "../pages/new/ExamInformationPage";
 import ExamReconfirmationPage from "../pages/new/ExamReconfirmationPage";
 import HistoryPage from "../pages/new/HistoryPage";
 import HomePage from "../pages/new/HomePage";
+import NotFoundPage from "../pages/new/NotFoundPage";
 import ReferralPage from "../pages/new/ReferralPage";
 import SubscriptionPage from "../pages/new/SubscriptionPage";
 import TestConfigurationPage from "../pages/new/TestConfigurationPage";
@@ -71,7 +73,6 @@ export const routes = [
         name: "Learning History",
         description: "View learning history and progress",
       },
-
       {
         path: "refer-and-earn",
         element: <ReferralPage />,
@@ -114,6 +115,27 @@ export const routes = [
         name: "Video Learning",
         description: "Video Learning Page",
       },
+      // Coming Soon Routes - Pages not yet implemented
+      {
+        path: "previous-year-papers",
+        element: <ComingSoonPage />,
+        name: "Previous Year Papers",
+        description: "Previous year question papers",
+      },
+
+      {
+        path: "/attempted-tests",
+        element: <ComingSoonPage />,
+        name: "Attempted Tests",
+        description: "Attempted Tests",
+      },
+
+      {
+        path: "/exams",
+        element: <ComingSoonPage />,
+        name: "Exams Page",
+        description: "Exams Page",
+      },
     ],
   },
   {
@@ -127,6 +149,13 @@ export const routes = [
     element: <ExamGoalPage />,
     name: "Exam Goal",
     description: "Select Exam Goal",
+  },
+  // Catch-all route for 404 - must be last
+  {
+    path: "*",
+    element: <NotFoundPage />,
+    name: "Not Found",
+    description: "Page not found",
   },
 ];
 
