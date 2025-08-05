@@ -1,5 +1,7 @@
 import Chat from "@/components/learning/Chat";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation, useParams } from "react-router-dom";
+import { videoApi, VideoDetail } from "../../lib/api-client";
 
 // Type definitions
 interface IconProps {
@@ -17,8 +19,55 @@ interface Chapter {
   content: string;
 }
 
+// Fallback data for when API fails
+const fallbackChapters: Chapter[] = [
+  {
+    time: "00:55",
+    title: "Course Overview and Logistics",
+    content:
+      "Participants are encouraged to visit the course website and sign up for the mailing list. The instructor will provide logistical details and outline the course goals before diving into the content.",
+  },
+  {
+    time: "01:39",
+    title: "Grading Components",
+    content:
+      "The course grading consists of three components, with scribing accounting for 10% of the overall grade, problem sets for 60%, and a final project for the remaining 30%.",
+  },
+  {
+    time: "05:20",
+    title: "Scribing Requirement",
+    content:
+      "Each student is required to scribe one lecture, with the option to collaborate with a partner. Scribing involves taking detailed notes and creating a polished document.",
+  },
+  {
+    time: "08:45",
+    title: "Introduction to Algorithms",
+    content:
+      "A brief overview of what algorithms are and why they are fundamental to computer science and problem-solving in various domains.",
+  },
+];
+
+const fallbackVideoDetail: VideoDetail = {
+  external_source_id: "Q8g9zL-JL8E",
+  title: "Introduction To Galan Nelson's Lecture On Advanced Algorithms",
+  description:
+    "A comprehensive introduction to advanced algorithms and their applications in computer science.",
+  tags: ["algorithms", "computer science", "lecture"],
+  url: "https://www.youtube.com/watch?v=Q8g9zL-JL8E",
+  type: "youtube",
+  user_code: "user123",
+  topics: ["Computer Science", "Algorithms"],
+  created_at: "2024-01-01T00:00:00Z",
+};
+
 interface ContentTabsProps {
   chapters: Chapter[];
+  transcript: string;
+  isLoadingChapters: boolean;
+  isLoadingTranscript: boolean;
+  chaptersError: string | null;
+  transcriptError: string | null;
+  usingFallbackData: boolean;
 }
 
 // --- Icon Components (using inline SVG for portability) ---
@@ -47,11 +96,18 @@ const ShareIcon: React.FC = () => (
 
 // --- Sub-Components for Modularity ---
 
-const Header: React.FC = () => (
+interface HeaderProps {
+  videoDetail: VideoDetail | null;
+  isLoading: boolean;
+}
+
+const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading }) => (
   <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
     <div>
       <p className="text-sm text-gray-500">
-        Introduction To Galan Nelson's Lecture On Advanced Algorithms
+        {isLoading
+          ? "Loading..."
+          : videoDetail?.title || "Video Title Not Available"}
       </p>
     </div>
     <div className="flex items-center space-x-2 sm:space-x-4 w-full sm:w-auto">
@@ -90,7 +146,15 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => (
   </div>
 );
 
-const ContentTabs: React.FC<ContentTabsProps> = ({ chapters }) => {
+const ContentTabs: React.FC<ContentTabsProps> = ({
+  chapters,
+  transcript,
+  isLoadingChapters,
+  isLoadingTranscript,
+  chaptersError,
+  transcriptError,
+  usingFallbackData,
+}) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-1">
@@ -118,6 +182,11 @@ const ContentTabs: React.FC<ContentTabsProps> = ({ chapters }) => {
           </button>
         </div>
         <div className="flex items-center space-x-2 self-end sm:self-center">
+          {usingFallbackData && (
+            <span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
+              Sample Data
+            </span>
+          )}
           <label
             htmlFor="auto-scroll"
             className="text-sm font-medium text-gray-600 cursor-pointer"
@@ -140,20 +209,52 @@ const ContentTabs: React.FC<ContentTabsProps> = ({ chapters }) => {
       </div>
       <div className="p-4 space-y-5 max-h-[300px] overflow-y-auto">
         {activeTab === "chapters" ? (
-          chapters.map((chapter: Chapter, index: number) => (
-            <div
-              key={index}
-              className="grid grid-cols-[auto,1fr] gap-x-4 group cursor-pointer"
-            >
-              <div className="text-sm font-mono text-gray-500 pt-1">
-                {chapter.time}
-              </div>
-              <div className="border-l-2 border-gray-200 pl-4 group-hover:border-blue-500 transition-colors">
-                <h3 className="font-semibold text-gray-800">{chapter.title}</h3>
-                <p className="text-sm text-gray-600 mt-1">{chapter.content}</p>
-              </div>
+          isLoadingChapters ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+              <p className="mt-2 text-sm text-gray-500">Loading chapters...</p>
             </div>
-          ))
+          ) : chaptersError && !usingFallbackData ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-red-500">{chaptersError}</p>
+            </div>
+          ) : chapters.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-500">No chapters available</p>
+            </div>
+          ) : (
+            chapters.map((chapter: Chapter, index: number) => (
+              <div
+                key={index}
+                className="grid grid-cols-[auto,1fr] gap-x-4 group cursor-pointer"
+              >
+                <div className="text-sm font-mono text-gray-500 pt-1">
+                  {chapter.time}
+                </div>
+                <div className="border-l-2 border-gray-200 pl-4 group-hover:border-blue-500 transition-colors">
+                  <h3 className="font-semibold text-gray-800">
+                    {chapter.title}
+                  </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    {chapter.content}
+                  </p>
+                </div>
+              </div>
+            ))
+          )
+        ) : isLoadingTranscript ? (
+          <div className="text-center py-8">
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+            <p className="mt-2 text-sm text-gray-500">Loading transcript...</p>
+          </div>
+        ) : transcriptError ? (
+          <div className="text-center py-8">
+            <p className="text-sm text-red-500">{transcriptError}</p>
+          </div>
+        ) : transcript ? (
+          <div className="text-sm text-gray-700 leading-relaxed">
+            {transcript}
+          </div>
         ) : (
           <div className="text-center text-gray-500 py-8">
             <p>Transcript content would appear here.</p>
@@ -175,41 +276,125 @@ const AITutorPanel: React.FC = () => (
 
 // --- Main App Component ---
 const VideoPage: React.FC = () => {
-  const chapters: Chapter[] = [
-    {
-      time: "00:55",
-      title: "Course Overview and Logistics",
-      content:
-        "Participants are encouraged to visit the course website and sign up for the mailing list. The instructor will provide logistical details and outline the course goals before diving into the content.",
-    },
-    {
-      time: "01:39",
-      title: "Grading Components",
-      content:
-        "The course grading consists of three components, with scribing accounting for 10% of the overall grade, problem sets for 60%, and a final project for the remaining 30%.",
-    },
-    {
-      time: "05:20",
-      title: "Scribing Requirement",
-      content:
-        "Each student is required to scribe one lecture, with the option to collaborate with a partner. Scribing involves taking detailed notes and creating a polished document.",
-    },
-    {
-      time: "08:45",
-      title: "Introduction to Algorithms",
-      content:
-        "A brief overview of what algorithms are and why they are fundamental to computer science and problem-solving in various domains.",
-    },
-  ];
+  const { videoId } = useParams<{ videoId: string }>();
+  const location = useLocation();
+
+  // State for video data
+  const [videoDetail, setVideoDetail] = useState<VideoDetail | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [transcript, setTranscript] = useState<string>("");
+  const [isLoadingVideo, setIsLoadingVideo] = useState(true);
+  const [isLoadingChapters, setIsLoadingChapters] = useState(false);
+  const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
+  const [videoError, setVideoError] = useState<string | null>(null);
+  const [chaptersError, setChaptersError] = useState<string | null>(null);
+  const [transcriptError, setTranscriptError] = useState<string | null>(null);
+  const [usingFallbackData, setUsingFallbackData] = useState(false);
+
+  // Get video ID from URL params or location state
+  const currentVideoId = videoId || location.state?.videoId || "Q8g9zL-JL8E";
+
+  // Fetch video details
+  useEffect(() => {
+    const fetchVideoDetails = async () => {
+      try {
+        setIsLoadingVideo(true);
+        setVideoError(null);
+        setUsingFallbackData(false);
+
+        // Try to get video details from API
+        const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
+        const details = await videoApi.getVideoDetail(videoUrl);
+        setVideoDetail(details);
+      } catch (err: any) {
+        console.warn("API failed, using fallback data:", err.message);
+        setVideoError("Using sample data (API unavailable)");
+        setVideoDetail(fallbackVideoDetail);
+        setUsingFallbackData(true);
+      } finally {
+        setIsLoadingVideo(false);
+      }
+    };
+
+    fetchVideoDetails();
+  }, [currentVideoId]);
+
+  // Fetch chapters
+  useEffect(() => {
+    const fetchChapters = async () => {
+      if (!videoDetail?.external_source_id) return;
+
+      try {
+        setIsLoadingChapters(true);
+        setChaptersError(null);
+
+        const response = await videoApi.getVideoChapters(
+          videoDetail.external_source_id
+        );
+        const transformedChapters: Chapter[] = response.chapters.map(
+          (chapter) => ({
+            time: chapter.timestamp,
+            title: chapter.title,
+            content: chapter.description,
+          })
+        );
+        setChapters(transformedChapters);
+      } catch (err: any) {
+        console.warn("API failed, using fallback chapters:", err.message);
+        setChaptersError("Using sample chapters (API unavailable)");
+        setChapters(fallbackChapters);
+        setUsingFallbackData(true);
+      } finally {
+        setIsLoadingChapters(false);
+      }
+    };
+
+    fetchChapters();
+  }, [videoDetail?.external_source_id]);
+
+  // Fetch transcript
+  useEffect(() => {
+    const fetchTranscript = async () => {
+      if (!videoDetail?.external_source_id) return;
+
+      try {
+        setIsLoadingTranscript(true);
+        setTranscriptError(null);
+
+        const response = await videoApi.getVideoTranscript(
+          videoDetail.external_source_id
+        );
+        setTranscript(response.transcript);
+      } catch (err: any) {
+        console.warn("API failed, transcript unavailable:", err.message);
+        setTranscriptError("Transcript unavailable");
+        setUsingFallbackData(true);
+      } finally {
+        setIsLoadingTranscript(false);
+      }
+    };
+
+    fetchTranscript();
+  }, [videoDetail?.external_source_id]);
 
   return (
     <div className="bg-gray-50 min-h-screen font-sans text-gray-800">
       <div className="container mx-auto px-4 py-6">
-        <Header />
+        <Header videoDetail={videoDetail} isLoading={isLoadingVideo} />
         <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <VideoPlayer src="https://www.youtube.com/embed/Q8g9zL-JL8E" />
-            <ContentTabs chapters={chapters} />
+            <VideoPlayer
+              src={`https://www.youtube.com/embed/${currentVideoId}`}
+            />
+            <ContentTabs
+              chapters={chapters}
+              transcript={transcript}
+              isLoadingChapters={isLoadingChapters}
+              isLoadingTranscript={isLoadingTranscript}
+              chaptersError={chaptersError}
+              transcriptError={transcriptError}
+              usingFallbackData={usingFallbackData}
+            />
           </div>
           <div className="lg:col-span-1">
             <AITutorPanel />
