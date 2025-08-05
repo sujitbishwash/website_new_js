@@ -4,12 +4,18 @@ import ExamSubmitDialog from "../../components/ExamSubmitDialog";
 import TestResultDialog from "../../components/TestResultDialog";
 
 // --- Type Definitions ---
+type QuestionType =
+  | "MCQ"
+  | "FillInTheBlank"
+  | "MatchTheFollowing"
+  | "Subjective";
 interface Question {
   id: number;
   question: string;
   options: string[];
   status: string;
   answer: number | null;
+  questionType: QuestionType;
 }
 
 // --- Helper Components ---
@@ -55,6 +61,102 @@ const FullscreenIcon = () => (
 
 // --- Main Application Component ---
 
+// --- Demo Data ---
+// In a real app, this would come from an API
+const quizData: Question[] = [
+  {
+    id: 1,
+    questionType: "MCQ",
+    question:
+      "This is the text for Question 1. It might be longer to test wrapping and layout. What is the correct option?",
+    options: [
+      "Option A for Q1",
+      "Option B for Q1",
+      "Option C for Q1",
+      "Option D for Q1",
+    ],
+    status: "not-visited",
+    answer: null,
+  },
+  {
+    id: 2,
+    questionType: "MCQ",
+    question: "What is the capital of France?",
+    options: ["Berlin", "Madrid", "Paris", "Rome"],
+    status: "not-visited",
+    answer: null,
+  },
+  {
+    id: 3,
+    questionType: "MCQ",
+    question: "Which planet is known as the Red Planet?",
+    options: ["Earth", "Mars", "Jupiter", "Venus"],
+    status: "not-visited",
+    answer: null,
+  },
+  {
+    id: 4,
+    questionType: "MCQ",
+    question: "Who wrote 'To Kill a Mockingbird'?",
+    options: ["Harper Lee", "J.K. Rowling", "Ernest Hemingway", "Mark Twain"],
+    status: "not-visited",
+    answer: null,
+  },
+  {
+    id: 5,
+    questionType: "MCQ",
+    question: "What is the largest ocean on Earth?",
+    options: [
+      "Atlantic Ocean",
+      "Indian Ocean",
+      "Arctic Ocean",
+      "Pacific Ocean",
+    ],
+    status: "not-visited",
+    answer: null,
+  },
+  {
+    id: 6,
+    questionType: "MCQ",
+    question: "Question 6",
+    options: ["A", "B", "C", "D"],
+    status: "not-visited",
+    answer: null,
+  },
+  {
+    id: 7,
+    questionType: "MCQ",
+    question: "Question 7",
+    options: ["A", "B", "C", "D"],
+    status: "not-visited",
+    answer: null,
+  },
+  {
+    id: 8,
+    questionType: "MCQ",
+    question: "Question 8",
+    options: ["A", "B", "C", "D"],
+    status: "not-visited",
+    answer: null,
+  },
+  {
+    id: 9,
+    questionType: "MCQ",
+    question: "Question 9",
+    options: ["A", "B", "C", "D"],
+    status: "not-visited",
+    answer: null,
+  },
+  {
+    id: 10,
+    questionType: "MCQ",
+    question: "Question 10",
+    options: ["A", "B", "C", "D"],
+    status: "not-visited",
+    answer: null,
+  },
+];
+
 const TestMainPage = () => {
   // --- State Management ---
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -67,92 +169,6 @@ const TestMainPage = () => {
   const [isTimeLow, setIsTimeLow] = useState(false);
   const navigate = useNavigate();
   const langDropdownRef = useRef<HTMLDivElement>(null);
-
-  // --- Demo Data ---
-  // In a real app, this would come from an API
-  const quizData: Question[] = [
-    {
-      id: 1,
-      question:
-        "This is the text for Question 1. It might be longer to test wrapping and layout. What is the correct option?",
-      options: [
-        "Option A for Q1",
-        "Option B for Q1",
-        "Option C for Q1",
-        "Option D for Q1",
-      ],
-      status: "not-visited",
-      answer: null,
-    },
-    {
-      id: 2,
-      question: "What is the capital of France?",
-      options: ["Berlin", "Madrid", "Paris", "Rome"],
-      status: "not-visited",
-      answer: null,
-    },
-    {
-      id: 3,
-      question: "Which planet is known as the Red Planet?",
-      options: ["Earth", "Mars", "Jupiter", "Venus"],
-      status: "not-visited",
-      answer: null,
-    },
-    {
-      id: 4,
-      question: "Who wrote 'To Kill a Mockingbird'?",
-      options: ["Harper Lee", "J.K. Rowling", "Ernest Hemingway", "Mark Twain"],
-      status: "not-visited",
-      answer: null,
-    },
-    {
-      id: 5,
-      question: "What is the largest ocean on Earth?",
-      options: [
-        "Atlantic Ocean",
-        "Indian Ocean",
-        "Arctic Ocean",
-        "Pacific Ocean",
-      ],
-      status: "not-visited",
-      answer: null,
-    },
-    {
-      id: 6,
-      question: "Question 6",
-      options: ["A", "B", "C", "D"],
-      status: "not-visited",
-      answer: null,
-    },
-    {
-      id: 7,
-      question: "Question 7",
-      options: ["A", "B", "C", "D"],
-      status: "not-visited",
-      answer: null,
-    },
-    {
-      id: 8,
-      question: "Question 8",
-      options: ["A", "B", "C", "D"],
-      status: "not-visited",
-      answer: null,
-    },
-    {
-      id: 9,
-      question: "Question 9",
-      options: ["A", "B", "C", "D"],
-      status: "not-visited",
-      answer: null,
-    },
-    {
-      id: 10,
-      question: "Question 10",
-      options: ["A", "B", "C", "D"],
-      status: "not-visited",
-      answer: null,
-    },
-  ];
 
   const [questions, setQuestions] = useState<Question[]>(quizData);
 

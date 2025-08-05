@@ -8,7 +8,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { authApi } from "@/lib/api-client";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -24,10 +23,10 @@ const LoginPage: React.FC = () => {
       setIsLoading(true);
       setError(null);
 
-      const response = await authApi.login(email, password);
+      // const response = await authApi.login(email, password);
 
       // Store the token in localStorage
-      localStorage.setItem("authToken", response.data.access_token);
+      // localStorage.setItem("authToken", response.data.access_token);
 
       // Navigate to exam goal page using React Router
       console.log("Navigating to exam goal page");

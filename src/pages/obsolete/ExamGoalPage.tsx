@@ -1,32 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { examGoalApi, ExamType } from '@/lib/api-client';
-import styles from './ExamGoalPage.module.css';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { AddSourceModal } from "@/components/YouTubeSourceDialog";
+import { ExamType } from "@/lib/api-client";
+import React, { useEffect, useState } from "react";
+import styles from "./ExamGoalPage.module.css";
 
 const ExamGoalPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [examType, setExamType] = useState<string>('');
-  const [specificExam, setSpecificExam] = useState<string>('');
+  const [examType, setExamType] = useState<string>("");
+  const [specificExam, setSpecificExam] = useState<string>("");
   const [specificExamOptions, setSpecificExamOptions] = useState<string[]>([]);
   const [examTypeOptions, setExamTypeOptions] = useState<ExamType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchExamTypes = async () => {
       try {
+        // commenting until the API is ready
+        /*
         const response = await examGoalApi.getExamTypes();
         if (response.data.success) {
           setExamTypeOptions(response.data.data);
         } else {
-          setError('Failed to fetch exam types');
+          setError("Failed to fetch exam types");
         }
+          */
       } catch (err: any) {
-        setError(err.message || 'Failed to fetch exam types');
+        setError(err.message || "Failed to fetch exam types");
       } finally {
         setIsLoading(false);
       }
@@ -37,10 +46,12 @@ const ExamGoalPage: React.FC = () => {
 
   const handleExamTypeChange = (value: string) => {
     setExamType(value);
-    setSpecificExam('');
-    
+    setSpecificExam("");
+
     // Find the selected exam type and use its group data
-    const selectedExamType = examTypeOptions.find(option => option.value === value);
+    const selectedExamType = examTypeOptions.find(
+      (option) => option.value === value
+    );
     if (selectedExamType) {
       setSpecificExamOptions(selectedExamType.group);
     } else {
@@ -51,16 +62,22 @@ const ExamGoalPage: React.FC = () => {
   const handleContinue = async () => {
     try {
       setIsSubmitting(true);
+      setIsModalOpen(true);
+      // commenting until the API is ready
+      /*
       const response = await examGoalApi.addExamGoal(examType, specificExam);
-      
+
       if (response.data.success) {
-        console.log('Exam goal saved successfully');
-        navigate('/link-input');
+        console.log("Exam goal saved successfully");
+        setIsModalOpen(true); // Open the YouTube source dialog instead of navigating
       } else {
-        throw new Error(response.data.message || 'Failed to save exam preferences');
+        throw new Error(
+          response.data.message || "Failed to save exam preferences"
+        );
       }
+        */
     } catch (err: any) {
-      setError(err.message || 'Failed to save exam preferences');
+      setError(err.message || "Failed to save exam preferences");
     } finally {
       setIsSubmitting(false);
     }
@@ -96,12 +113,15 @@ const ExamGoalPage: React.FC = () => {
         <div className={styles.header}>
           <h1 className={styles.title}>Select Your Exam Goal</h1>
           <p className={styles.description}>
-            Choose the exam you are preparing for to personalize your learning experience
+            Choose the exam you are preparing for to personalize your learning
+            experience
           </p>
         </div>
 
         <div className={styles.formGroup}>
-          <Label htmlFor="examType" className={styles.label}>Exam Type</Label>
+          <Label htmlFor="examType" className={styles.label}>
+            Exam Type
+          </Label>
           <Select value={examType} onValueChange={handleExamTypeChange}>
             <SelectTrigger className={styles.select}>
               <SelectValue placeholder="Select Exam Type" />
@@ -117,9 +137,11 @@ const ExamGoalPage: React.FC = () => {
         </div>
 
         <div className={styles.formGroup}>
-          <Label htmlFor="specificExam" className={styles.label}>Specific Exam / Board</Label>
-          <Select 
-            value={specificExam} 
+          <Label htmlFor="specificExam" className={styles.label}>
+            Specific Exam / Board
+          </Label>
+          <Select
+            value={specificExam}
             onValueChange={setSpecificExam}
             disabled={!examType}
           >
@@ -138,16 +160,22 @@ const ExamGoalPage: React.FC = () => {
 
         <Button
           onClick={handleContinue}
-          disabled={!examType || !specificExam || isSubmitting}
+          // disabled={!examType || !specificExam || isSubmitting}
           className={styles.button}
         >
-          {isSubmitting ? 'Saving...' : 'Continue to Dashboard'}
+          {isSubmitting ? "Saving..." : "Continue to Dashboard"}
         </Button>
 
         <div className={styles.footer}>
           <p>&copy; 2024 AI Padhai. All rights reserved.</p>
         </div>
       </div>
+
+      {/* YouTube Source Dialog Modal */}
+      <AddSourceModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
     </div>
   );
 };

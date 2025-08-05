@@ -1,3 +1,5 @@
+import LoginPageNew from "@/pages/new/LoginPageNew";
+import ExamGoalPage from "@/pages/obsolete/ExamGoalPage";
 import { createBrowserRouter } from "react-router-dom";
 import Chat from "../components/Chat";
 import Flashcards from "../components/Flashcards";
@@ -42,6 +44,12 @@ export const routes = [
         element: <ExamInformationPage />,
         name: "Exam Information",
         description: "View exam details and instructions",
+      },
+      {
+        path: "exam-goal",
+        element: <ExamGoalPage />,
+        name: "Exam Goal",
+        description: "Select Exam Goal",
       },
       {
         path: "exam-reconfirm",
@@ -98,6 +106,12 @@ export const routes = [
     path: "login",
     element: <LoginPage />,
     name: "Login",
+    description: "User authentication page",
+  },
+  {
+    path: "login-new",
+    element: <LoginPageNew />,
+    name: "Login New",
     description: "User authentication page",
   },
 ];

@@ -79,7 +79,10 @@ const suggestedVideos: SuggestedVideo[] = [
 ];
 
 // The Modal Component
-const AddSourceModal: React.FC<AddSourceModalProps> = ({ isOpen, onClose }) => {
+export const AddSourceModal: React.FC<AddSourceModalProps> = ({
+  isOpen,
+  onClose,
+}) => {
   const modalRef = useRef<HTMLDivElement>(null);
 
   // Effect to handle clicks outside the modal
