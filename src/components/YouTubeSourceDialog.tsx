@@ -198,6 +198,11 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     }
   };
 
+  const navigateToHome = () => {
+    onClose();
+    navigate("/home");
+  };
+
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
     try {
       setIsLoading(true);
@@ -353,7 +358,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           {/* Footer */}
           <div className="mt-8 flex justify-end space-x-4">
             <button
-              onClick={onClose}
+              onClick={navigateToHome}
               className="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400"
             >
               Go to Home
@@ -377,8 +382,8 @@ export default function YouTubeSourceDialog() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const navigate = useNavigate();
   const handleClose = () => {
-    setIsModalOpen(false);
     navigate("/home");
+    setIsModalOpen(false);
   };
 
   return (

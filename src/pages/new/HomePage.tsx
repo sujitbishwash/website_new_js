@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { AddSourceModal } from "../../components/YouTubeSourceDialog";
 
 // --- Type Definitions ---
@@ -462,6 +463,7 @@ export default function HomePage() {
   const [learningItems, setLearningItems] = useState(initialLearningItems);
   const [attemptedTests, setAttemptedTests] = useState(initialAttemptedTests);
   const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleRemoveRecord = (id: string, type: "learning" | "test") => {
     if (type === "learning") {
@@ -514,6 +516,7 @@ export default function HomePage() {
             {suggestedVideos.map((video) => (
               <div
                 key={video.id}
+                onClick={() => navigate("/video-learning")}
                 className="group relative bg-slate-800/60 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-slate-600 border border-slate-700/80 hover:-translate-y-1 cursor-pointer"
               >
                 <div className="relative">

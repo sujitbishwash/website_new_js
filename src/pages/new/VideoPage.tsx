@@ -1,3 +1,4 @@
+import Chat from "@/components/learning/Chat";
 import { useState } from "react";
 
 // Type definitions
@@ -166,7 +167,9 @@ const ContentTabs: React.FC<ContentTabsProps> = ({ chapters }) => {
 const AITutorPanel: React.FC = () => (
   <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col h-full">
     {/* The content area is now empty, ready for components to be added. */}
-    <div className="flex-grow">{/* Your custom components will go here */}</div>
+    <div className="flex-grow">
+      <Chat />
+    </div>
   </div>
 );
 

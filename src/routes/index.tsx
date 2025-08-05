@@ -1,9 +1,9 @@
 import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
+import ExamGoalPage from "@/pages/new/ExamGoalPage";
 import LoginPage from "@/pages/new/LoginPage";
 import ProfilePage from "@/pages/new/ProfilePage";
 import VideoPage from "@/pages/new/VideoPage";
-import ExamGoalPage from "@/pages/obsolete/ExamGoalPage";
 import { createBrowserRouter } from "react-router-dom";
 import Chat from "../components/Chat";
 import Flashcards from "../components/Flashcards";
