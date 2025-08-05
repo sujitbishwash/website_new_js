@@ -125,6 +125,16 @@ export interface VideoDetail {
   created_at: string;
 }
 
+export interface SuggestedVideo {
+  id: number;
+  title: string;
+  topic: string;
+  thumbnailUrl: string;
+  url: string;
+  description?: string;
+  tags?: string[];
+}
+
 export interface VideoChapter {
   timestamp: string;
   title: string;
@@ -159,6 +169,28 @@ export const videoApi = {
     if (!response.ok) {
       const errorData = await response.json();
       throw new Error(errorData.detail || 'Failed to fetch video details');
+    }
+
+    return response.json();
+  },
+
+  getSuggestedVideos: async (): Promise<SuggestedVideo[]> => {
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+
+    const response = await fetch(`${API_CONFIG.baseURL}/video/suggested`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Failed to fetch suggested videos');
     }
 
     return response.json();

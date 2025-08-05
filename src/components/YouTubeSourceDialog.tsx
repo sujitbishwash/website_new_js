@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { SuggestedVideo, videoApi } from "../lib/api-client";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -8,13 +10,6 @@ interface IconProps {
 interface AddSourceModalProps {
   isOpen: boolean;
   onClose: () => void;
-}
-
-interface SuggestedVideo {
-  id: number;
-  title: string;
-  topic: string;
-  thumbnailUrl: string;
 }
 
 // To make this a self-contained component, we'll use inline SVGs for icons
@@ -56,27 +51,22 @@ const XIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-// Mock data for video suggestions with thumbnails
-const suggestedVideos: SuggestedVideo[] = [
-  {
-    id: 1,
-    title: "React Hooks in 10 Minutes",
-    topic: "Web Development",
-    thumbnailUrl: "https://placehold.co/400x225/E84343/FFFFFF?text=React",
-  },
-  {
-    id: 2,
-    title: "A Brief History of the Cosmos",
-    topic: "Science",
-    thumbnailUrl: "https://placehold.co/400x225/4361E8/FFFFFF?text=Cosmos",
-  },
-  {
-    id: 3,
-    title: "Perfect Sourdough for Beginners",
-    topic: "Cooking",
-    thumbnailUrl: "https://placehold.co/400x225/E8A243/FFFFFF?text=Cooking",
-  },
-];
+const LoadingIcon: React.FC<IconProps> = ({ className }) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M21 12a9 9 0 11-6.219-8.56" />
+  </svg>
+);
 
 // The Modal Component
 export const AddSourceModal: React.FC<AddSourceModalProps> = ({
@@ -84,6 +74,13 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   onClose,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const [url, setUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [suggestedVideos, setSuggestedVideos] = useState<SuggestedVideo[]>([]);
+  const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
+  const [suggestionsError, setSuggestionsError] = useState("");
+  const [usingFallbackData, setUsingFallbackData] = useState(false);
 
   // Effect to handle clicks outside the modal
   useEffect(() => {
@@ -105,14 +102,120 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     };
   }, [isOpen, onClose]);
 
+  // Reset state when modal opens/closes
+  useEffect(() => {
+    if (!isOpen) {
+      setUrl("");
+      setError("");
+      setIsLoading(false);
+    }
+  }, [isOpen]);
+
+  // Fetch suggested videos when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      fetchSuggestedVideos();
+    }
+  }, [isOpen]);
+
+  const fetchSuggestedVideos = async () => {
+    try {
+      setIsLoadingSuggestions(true);
+      setSuggestionsError("");
+      setUsingFallbackData(false);
+
+      const videos = await videoApi.getSuggestedVideos();
+      setSuggestedVideos(videos);
+    } catch (err: any) {
+      console.warn("API failed, using fallback data:", err.message);
+      setSuggestionsError("Using sample videos (API unavailable)");
+      // Fallback to dummy data if API fails
+      setSuggestedVideos(getRandomItems(fallbackSuggestedVideos, 3));
+      setUsingFallbackData(true);
+    } finally {
+      setIsLoadingSuggestions(false);
+    }
+  };
+
+  const validateUrl = (url: string): boolean => {
+    try {
+      new URL(url);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
+  const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newUrl = e.target.value;
+    setUrl(newUrl);
+    setError("");
+  };
+
+  const handleAdd = async () => {
+    if (!url.trim()) {
+      setError("Please enter a URL");
+      return;
+    }
+
+    if (!validateUrl(url)) {
+      setError("Please enter a valid URL");
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setError("");
+
+      // Fetch video details first
+      const details = await videoApi.getVideoDetail(url);
+
+      // Here you can add logic to save the video to user's library
+      // For now, we'll just log the details
+      console.log("Adding video to library:", details);
+
+      // You can add an API call here to save the video
+      // await videoApi.addToLibrary(details);
+
+      // Close modal on successful add
+      onClose();
+    } catch (err: any) {
+      setError(
+        err.message ||
+          "Failed to add video. Please check the URL and try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
+    try {
+      setIsLoading(true);
+      setError("");
+
+      // Use the video URL from the suggested video
+      const details = await videoApi.getVideoDetail(video.url);
+
+      console.log("Adding suggested video to library:", details);
+
+      // You can add an API call here to save the video
+      // await videoApi.addToLibrary(details);
+
+      // Close modal on successful add
+      onClose();
+    } catch (err: any) {
+      setError(
+        err.message || "Failed to add suggested video. Please try again."
+      );
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   if (!isOpen) {
     return null;
   }
-
-  const handleAdd = () => {
-    console.log("Add button clicked. Implement your logic here.");
-    onClose(); // Close modal on add
-  };
 
   return (
     // Backdrop
@@ -145,9 +248,15 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             <input
               id="url-input"
               type="text"
+              value={url}
+              onChange={handleUrlChange}
               placeholder="https://youtu.be/example"
               className="mt-2 w-full rounded-lg border border-gray-600 bg-[#2f3032] px-4 py-2.5 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              disabled={isLoading}
             />
+
+            {/* Error Message */}
+            {error && <div className="mt-2 text-sm text-red-400">{error}</div>}
 
             {/* Separator */}
             <div className="my-6 flex items-center" aria-hidden="true">
@@ -158,35 +267,69 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
             {/* Video Suggestions */}
             <div>
-              <h3 className="text-sm font-medium text-gray-400">
-                Suggested Videos
-              </h3>
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                {suggestedVideos.map((video) => (
-                  <div
-                    key={video.id}
-                    className="group cursor-pointer overflow-hidden rounded-lg bg-gray-700/50 transition-all hover:bg-gray-700 hover:shadow-lg"
-                  >
-                    <img
-                      src={video.thumbnailUrl}
-                      alt={`Thumbnail for ${video.title}`}
-                      className="h-24 w-full object-cover transition-transform group-hover:scale-105"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null;
-                        target.src =
-                          "https://placehold.co/400x225/333/FFF?text=Error";
-                      }}
-                    />
-                    <div className="p-3">
-                      <p className="truncate font-semibold text-white">
-                        {video.title}
-                      </p>
-                      <p className="text-xs text-gray-400">{video.topic}</p>
-                    </div>
-                  </div>
-                ))}
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-400">
+                  Suggested Videos
+                </h3>
+                {usingFallbackData && (
+                  <span className="text-xs text-yellow-400 bg-yellow-900/20 px-2 py-1 rounded">
+                    Sample Data
+                  </span>
+                )}
               </div>
+
+              {isLoadingSuggestions ? (
+                <div className="mt-4 flex items-center justify-center py-8">
+                  <LoadingIcon className="h-6 w-6 animate-spin text-gray-400" />
+                  <span className="ml-2 text-sm text-gray-400">
+                    Loading suggestions...
+                  </span>
+                </div>
+              ) : suggestionsError && !usingFallbackData ? (
+                <div className="mt-4 text-center py-8">
+                  <p className="text-sm text-red-400">{suggestionsError}</p>
+                  <button
+                    onClick={fetchSuggestedVideos}
+                    className="mt-2 text-sm text-blue-400 hover:text-blue-300"
+                  >
+                    Try again
+                  </button>
+                </div>
+              ) : suggestedVideos.length === 0 ? (
+                <div className="mt-4 text-center py-8">
+                  <p className="text-sm text-gray-400">
+                    No suggested videos available
+                  </p>
+                </div>
+              ) : (
+                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  {suggestedVideos.map((video) => (
+                    <div
+                      key={video.id}
+                      onClick={() => handleSuggestedVideoClick(video)}
+                      className="group cursor-pointer overflow-hidden rounded-lg bg-gray-700/50 transition-all hover:bg-gray-700 hover:shadow-lg"
+                    >
+                      <img
+                        src={video.thumbnailUrl}
+                        alt={`Thumbnail for ${video.title}`}
+                        className="h-24 w-full object-cover transition-transform group-hover:scale-105"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null;
+                          target.src =
+                            "https://placehold.co/400x225/333/FFF?text=Error";
+                        }}
+                      />
+                      <div className="p-3">
+                        <p className="truncate font-semibold text-white">
+                          {video.title}
+                        </p>
+                        <p className="text-xs text-gray-400">{video.topic}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -196,13 +339,14 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               onClick={onClose}
               className="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400"
             >
-              Cancel
+              Go to Home
             </button>
             <button
               onClick={handleAdd}
-              className="rounded-lg bg-[#343541] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500"
+              disabled={!url.trim() || isLoading}
+              className="rounded-lg bg-[#343541] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:bg-gray-600 disabled:cursor-not-allowed"
             >
-              Add
+              {isLoading ? "Adding..." : "Add"}
             </button>
           </div>
         </div>
@@ -214,6 +358,11 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 // Main App Component to demonstrate the modal
 export default function YouTubeSourceDialog() {
   const [isModalOpen, setIsModalOpen] = useState(true);
+  const navigate = useNavigate();
+  const handleClose = () => {
+    setIsModalOpen(false);
+    navigate("/home");
+  };
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-gray-900">
@@ -224,10 +373,73 @@ export default function YouTubeSourceDialog() {
         Open Source Adder
       </button>
 
-      <AddSourceModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      <AddSourceModal isOpen={isModalOpen} onClose={handleClose} />
     </div>
   );
 }
+
+const getRandomItems = (
+  array: SuggestedVideo[],
+  count: number
+): SuggestedVideo[] => {
+  const shuffled = [...array].sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+};
+
+// Fallback dummy data for suggested videos when API fails
+const fallbackSuggestedVideos: SuggestedVideo[] = [
+  {
+    id: 1,
+    title: "React Hooks in 10 Minutes",
+    topic: "Web Development",
+    thumbnailUrl: "https://placehold.co/400x225/E84343/FFFFFF?text=React",
+    url: "https://www.youtube.com/watch?v=example1",
+    description: "Learn React Hooks quickly with practical examples",
+    tags: ["react", "javascript", "web-development"],
+  },
+  {
+    id: 2,
+    title: "A Brief History of the Cosmos",
+    topic: "Science",
+    thumbnailUrl: "https://placehold.co/400x225/4361E8/FFFFFF?text=Cosmos",
+    url: "https://www.youtube.com/watch?v=example2",
+    description: "Explore the fascinating history of our universe",
+    tags: ["science", "cosmos", "astronomy"],
+  },
+  {
+    id: 3,
+    title: "Perfect Sourdough for Beginners",
+    topic: "Cooking",
+    thumbnailUrl: "https://placehold.co/400x225/E8A243/FFFFFF?text=Cooking",
+    url: "https://www.youtube.com/watch?v=example3",
+    description: "Master the art of sourdough bread making",
+    tags: ["cooking", "baking", "sourdough"],
+  },
+  {
+    id: 4,
+    title: "Machine Learning Fundamentals",
+    topic: "Technology",
+    thumbnailUrl: "https://placehold.co/400x225/10B981/FFFFFF?text=ML",
+    url: "https://www.youtube.com/watch?v=example4",
+    description: "Essential concepts in machine learning",
+    tags: ["machine-learning", "ai", "technology"],
+  },
+  {
+    id: 5,
+    title: "Photography Composition Tips",
+    topic: "Art",
+    thumbnailUrl: "https://placehold.co/400x225/8B5CF6/FFFFFF?text=Photo",
+    url: "https://www.youtube.com/watch?v=example5",
+    description: "Improve your photography with composition techniques",
+    tags: ["photography", "art", "composition"],
+  },
+  {
+    id: 6,
+    title: "Financial Planning Basics",
+    topic: "Finance",
+    thumbnailUrl: "https://placehold.co/400x225/F59E0B/FFFFFF?text=Finance",
+    url: "https://www.youtube.com/watch?v=example6",
+    description: "Essential financial planning for beginners",
+    tags: ["finance", "planning", "money"],
+  },
+];

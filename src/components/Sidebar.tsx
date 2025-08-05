@@ -1,34 +1,38 @@
-import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { 
-  Home, 
-  FileText, 
-  Clock, 
-  Book, 
-  FileCheck, 
-  FileQuestion,
-  Star,
+import {
   Award,
-  Gift
-} from 'lucide-react';
+  Book,
+  Clock,
+  FileCheck,
+  FileQuestion,
+  FileText,
+  Gift,
+  Home,
+  Star,
+} from "lucide-react";
+import React from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
-
+  const navigate = useNavigate();
   const isActive = (path: string) => {
     return location.pathname === path;
   };
 
   const navItems = [
-    { path: '/', icon: Home, label: 'Home' },
-    { path: '/history', icon: Clock, label: 'History' },
-    { path: '/books', icon: Book, label: 'Books' },
-    { path: '/test-series', icon: FileCheck, label: 'Test Series' },
-    { path: '/previous-year-papers', icon: FileQuestion, label: 'Previous Year Papers' },
-    { path: '/attempted-tests', icon: FileText, label: 'Attempted Tests' },
-    { path: '/premium', icon: Star, label: 'Premium' },
-    { path: '/exams', icon: Award, label: 'Exams' },
-    { path: '/refer-and-earn', icon: Gift, label: 'Refer and Earn' },
+    { path: "/", icon: Home, label: "Home" },
+    { path: "/history", icon: Clock, label: "History" },
+    { path: "/books", icon: Book, label: "Books" },
+    { path: "/test-series", icon: FileCheck, label: "Test Series" },
+    {
+      path: "/previous-year-papers",
+      icon: FileQuestion,
+      label: "Previous Year Papers",
+    },
+    { path: "/attempted-tests", icon: FileText, label: "Attempted Tests" },
+    { path: "/premium", icon: Star, label: "Premium" },
+    { path: "/exams", icon: Award, label: "Exams" },
+    { path: "/refer-and-earn", icon: Gift, label: "Refer and Earn" },
   ];
 
   return (
@@ -36,7 +40,7 @@ const Sidebar: React.FC = () => {
       <div className="p-4 border-b border-gray-700">
         <h1 className="text-xl font-bold">AI Padhai</h1>
       </div>
-      
+
       <nav className="flex-1 p-4">
         <ul className="space-y-2">
           {navItems.map((item) => {
@@ -47,8 +51,8 @@ const Sidebar: React.FC = () => {
                   to={item.path}
                   className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
                     isActive(item.path)
-                      ? 'bg-blue-600 text-white'
-                      : 'text-gray-300 hover:bg-gray-700 hover:text-white'
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
                   }`}
                 >
                   <Icon size={20} />
@@ -59,11 +63,24 @@ const Sidebar: React.FC = () => {
           })}
         </ul>
       </nav>
-      
-      <div className="p-4 border-t border-gray-700">
+
+      <div
+        onClick={() => navigate("/profile")}
+        className="p-4 border-t border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white"
+      >
         <div className="flex items-center space-x-3">
           <div className="bg-gray-600 rounded-full p-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <circle cx="12" cy="12" r="10"></circle>
               <circle cx="12" cy="10" r="3"></circle>
               <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path>

@@ -1,4 +1,7 @@
+import BookPage from "@/pages/new/BookPage";
 import LoginPage from "@/pages/new/LoginPage";
+import ProfilePage from "@/pages/new/ProfilePage";
+import VideoPage from "@/pages/new/VideoPage";
 import ExamGoalPage from "@/pages/obsolete/ExamGoalPage";
 import { createBrowserRouter } from "react-router-dom";
 import Chat from "../components/Chat";
@@ -8,7 +11,7 @@ import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
 import ExamInformationPage from "../pages/new/ExamInformationPage";
 import ExamReconfirmationPage from "../pages/new/ExamReconfirmationPage";
 import HistoryPage from "../pages/new/HistoryPage";
-import MainDashboardPage from "../pages/new/MainDashboardPage";
+import HomePage from "../pages/new/HomePage";
 import ReferralPage from "../pages/new/ReferralPage";
 import SubscriptionPage from "../pages/new/SubscriptionPage";
 import TestConfigurationPage from "../pages/new/TestConfigurationPage";
@@ -22,14 +25,14 @@ export const routes = [
     children: [
       {
         index: true,
-        element: <MainDashboardPage />,
-        name: "Dashboard",
+        element: <HomePage />,
+        name: "Home",
         description: "Main dashboard page",
       },
       {
-        path: "dashboard",
-        element: <MainDashboardPage />,
-        name: "Dashboard",
+        path: "home",
+        element: <HomePage />,
+        name: "Home",
         description: "Main dashboard page",
       },
       {
@@ -43,12 +46,6 @@ export const routes = [
         element: <ExamInformationPage />,
         name: "Exam Information",
         description: "View exam details and instructions",
-      },
-      {
-        path: "exam-goal",
-        element: <ExamGoalPage />,
-        name: "Exam Goal",
-        description: "Select Exam Goal",
       },
       {
         path: "exam-reconfirm",
@@ -99,6 +96,24 @@ export const routes = [
         name: "Flashcards",
         description: "Flashcard learning interface",
       },
+      {
+        path: "profile",
+        element: <ProfilePage />,
+        name: "UserProfile",
+        description: "UserProfile Page",
+      },
+      {
+        path: "books",
+        element: <BookPage />,
+        name: "Books",
+        description: "Book Page",
+      },
+      {
+        path: "video-learning",
+        element: <VideoPage />,
+        name: "Video Learning",
+        description: "Video Learning Page",
+      },
     ],
   },
   {
@@ -106,6 +121,12 @@ export const routes = [
     element: <LoginPage />,
     name: "Login",
     description: "User authentication page",
+  },
+  {
+    path: "exam-goal",
+    element: <ExamGoalPage />,
+    name: "Exam Goal",
+    description: "Select Exam Goal",
   },
 ];
 
