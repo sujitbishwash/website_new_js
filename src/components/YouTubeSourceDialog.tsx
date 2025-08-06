@@ -171,16 +171,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       // Fetch video details first
       const details = await videoApi.getVideoDetail(url);
 
-      // Here you can add logic to save the video to user's library
-      // For now, we'll just log the details
-      console.log("Adding video to library:", details);
-
-      // You can add an API call here to save the video
-      // await videoApi.addToLibrary(details);
-
-      // Close modal and navigate to VideoPage on successful add
       onClose();
-      navigate("/video-learning");
+      navigate(`/video-learning/${details.external_source_id}`);
     } catch (err: any) {
       setError(
         err.message ||
@@ -204,10 +196,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       // Use the video URL from the suggested video
       const details = await videoApi.getVideoDetail(video.url);
 
-      console.log("Adding suggested video to library:", details);
-
       onClose();
-      navigate("/video-learning");
+      navigate(`/video-learning/${details.external_source_id}`);
     } catch (err: any) {
       setError(
         err.message || "Failed to add suggested video. Please try again."
@@ -243,8 +233,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               <XIcon className="h-6 w-6" />
             </button>
           </div>
-
           {/* Body */}
+
           <div className="mt-6">
             <label htmlFor="url-input" className="text-sm text-gray-400">
               Enter a YouTube Link, Website URL, Doc, ArXiv, Etc.

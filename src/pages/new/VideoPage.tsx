@@ -19,47 +19,6 @@ interface Chapter {
   content: string;
 }
 
-// Fallback data for when API fails
-const fallbackChapters: Chapter[] = [
-  {
-    time: "00:55",
-    title: "Course Overview and Logistics",
-    content:
-      "Participants are encouraged to visit the course website and sign up for the mailing list. The instructor will provide logistical details and outline the course goals before diving into the content.",
-  },
-  {
-    time: "01:39",
-    title: "Grading Components",
-    content:
-      "The course grading consists of three components, with scribing accounting for 10% of the overall grade, problem sets for 60%, and a final project for the remaining 30%.",
-  },
-  {
-    time: "05:20",
-    title: "Scribing Requirement",
-    content:
-      "Each student is required to scribe one lecture, with the option to collaborate with a partner. Scribing involves taking detailed notes and creating a polished document.",
-  },
-  {
-    time: "08:45",
-    title: "Introduction to Algorithms",
-    content:
-      "A brief overview of what algorithms are and why they are fundamental to computer science and problem-solving in various domains.",
-  },
-];
-
-const fallbackVideoDetail: VideoDetail = {
-  external_source_id: "Q8g9zL-JL8E",
-  title: "Introduction To Galan Nelson's Lecture On Advanced Algorithms",
-  description:
-    "A comprehensive introduction to advanced algorithms and their applications in computer science.",
-  tags: ["algorithms", "computer science", "lecture"],
-  url: "https://www.youtube.com/watch?v=Q8g9zL-JL8E",
-  type: "youtube",
-  user_code: "user123",
-  topics: ["Computer Science", "Algorithms"],
-  created_at: "2024-01-01T00:00:00Z",
-};
-
 interface ContentTabsProps {
   chapters: Chapter[];
   transcript: string;
@@ -67,7 +26,6 @@ interface ContentTabsProps {
   isLoadingTranscript: boolean;
   chaptersError: string | null;
   transcriptError: string | null;
-  usingFallbackData: boolean;
 }
 
 // --- Icon Components (using inline SVG for portability) ---
@@ -153,7 +111,6 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   isLoadingTranscript,
   chaptersError,
   transcriptError,
-  usingFallbackData,
 }) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
@@ -182,11 +139,6 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
           </button>
         </div>
         <div className="flex items-center space-x-2 self-end sm:self-center">
-          {usingFallbackData && (
-            <span className="text-xs text-yellow-600 bg-yellow-100 px-2 py-1 rounded">
-              Sample Data
-            </span>
-          )}
           <label
             htmlFor="auto-scroll"
             className="text-sm font-medium text-gray-600 cursor-pointer"
@@ -214,7 +166,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
               <div className="inline-block animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
               <p className="mt-2 text-sm text-gray-500">Loading chapters...</p>
             </div>
-          ) : chaptersError && !usingFallbackData ? (
+          ) : chaptersError ? (
             <div className="text-center py-8">
               <p className="text-sm text-red-500">{chaptersError}</p>
             </div>
@@ -289,10 +241,10 @@ const VideoPage: React.FC = () => {
   const [videoError, setVideoError] = useState<string | null>(null);
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
-  const [usingFallbackData, setUsingFallbackData] = useState(false);
 
   // Get video ID from URL params or location state
-  const currentVideoId = videoId || location.state?.videoId || "Q8g9zL-JL8E";
+  console.log("videoId check her .....:", videoId, location.state?.videoId);
+  const currentVideoId = videoId || location.state?.videoId;
 
   // Fetch video details
   useEffect(() => {
@@ -300,17 +252,14 @@ const VideoPage: React.FC = () => {
       try {
         setIsLoadingVideo(true);
         setVideoError(null);
-        setUsingFallbackData(false);
 
         // Try to get video details from API
         const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
         const details = await videoApi.getVideoDetail(videoUrl);
         setVideoDetail(details);
       } catch (err: any) {
-        console.warn("API failed, using fallback data:", err.message);
-        setVideoError("Using sample data (API unavailable)");
-        setVideoDetail(fallbackVideoDetail);
-        setUsingFallbackData(true);
+        console.error("Failed to fetch video details:", err);
+        setVideoError("Failed to load video details. Please try again.");
       } finally {
         setIsLoadingVideo(false);
       }
@@ -340,10 +289,8 @@ const VideoPage: React.FC = () => {
         );
         setChapters(transformedChapters);
       } catch (err: any) {
-        console.warn("API failed, using fallback chapters:", err.message);
-        setChaptersError("Using sample chapters (API unavailable)");
-        setChapters(fallbackChapters);
-        setUsingFallbackData(true);
+        console.error("Failed to fetch chapters:", err);
+        setChaptersError("Failed to load chapters. Please try again.");
       } finally {
         setIsLoadingChapters(false);
       }
@@ -366,9 +313,8 @@ const VideoPage: React.FC = () => {
         );
         setTranscript(response.transcript);
       } catch (err: any) {
-        console.warn("API failed, transcript unavailable:", err.message);
-        setTranscriptError("Transcript unavailable");
-        setUsingFallbackData(true);
+        console.error("Failed to fetch transcript:", err);
+        setTranscriptError("Failed to load transcript. Please try again.");
       } finally {
         setIsLoadingTranscript(false);
       }
@@ -393,7 +339,6 @@ const VideoPage: React.FC = () => {
               isLoadingTranscript={isLoadingTranscript}
               chaptersError={chaptersError}
               transcriptError={transcriptError}
-              usingFallbackData={usingFallbackData}
             />
           </div>
           <div className="lg:col-span-1">

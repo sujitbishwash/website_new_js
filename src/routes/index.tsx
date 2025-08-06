@@ -110,7 +110,7 @@ export const routes = [
         description: "Book Page",
       },
       {
-        path: "video-learning",
+        path: "video-learning/:videoId",
         element: <VideoPage />,
         name: "Video Learning",
         description: "Video Learning Page",
