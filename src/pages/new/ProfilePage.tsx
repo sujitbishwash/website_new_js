@@ -10,7 +10,7 @@ interface UserProfile {
   state: string;
   country: string;
   gender: "Male" | "Female" | "Other" | "Prefer not to say" | "";
-  dob: string; // Date of Birth, format YYYY-MM-DD
+  dob: string; // Date of Birth, format YYYY-MM-DDc
 }
 
 interface ProfileFieldProps {

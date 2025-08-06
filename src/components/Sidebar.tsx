@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import MoreOptions from "./MoreOptions";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -99,8 +100,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
             })}
           </ul>
         </nav>
-
+        {<MoreOptions></MoreOptions>}
         {/* User Profile Section */}
+        {/*
         <div
           onClick={() => {
             navigate("/profile");
@@ -135,6 +137,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
             </div>
           </div>
         </div>
+          */}
       </aside>
     </>
   );
