@@ -177,6 +177,11 @@ const TestMainPage = () => {
 
   // Timer Logic
   useEffect(() => {
+    // Stop timer if test is submitted or auto-submitted
+    if (showTestResultDialog || isSubmitting) {
+      return;
+    }
+
     if (timeLeft <= 0) {
       // Auto-submit test when time runs out
       handleAutoSubmit();
@@ -190,7 +195,7 @@ const TestMainPage = () => {
       setTimeLeft((prevTime) => prevTime - 1);
     }, 1000);
     return () => clearInterval(timer);
-  }, [timeLeft]);
+  }, [timeLeft, showTestResultDialog, isSubmitting]);
 
   // Handle clicking outside the language dropdown
   useEffect(() => {
@@ -722,8 +727,9 @@ const TestMainPage = () => {
                 notAnswered: questions.filter(
                   (q) => q.status === "not-answered"
                 ).length,
-                markedForReview: questions.filter((q) => q.status === "marked")
-                  .length,
+                markedForReview: questions.filter(
+                  (q) => q.status === "marked" || q.status === "marked-answered"
+                ).length,
                 notVisited: questions.filter((q) => q.status === "not-visited")
                   .length,
               },

@@ -1,4 +1,6 @@
 import Chat from "@/components/learning/Chat";
+import Flashcards from "@/components/learning/Flashcards";
+import Quiz from "@/components/learning/Quiz";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { videoApi, VideoDetail } from "../../lib/api-client";
@@ -27,6 +29,9 @@ interface ContentTabsProps {
   chaptersError: string | null;
   transcriptError: string | null;
 }
+
+// Learning mode types
+type LearningMode = "chat" | "flashcards" | "quiz";
 
 // --- Icon Components (using inline SVG for portability) ---
 // Note: In a real project, it's better to use a library like lucide-react
@@ -217,14 +222,64 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   );
 };
 
-const AITutorPanel: React.FC = () => (
-  <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col h-full">
-    {/* The content area is now empty, ready for components to be added. */}
-    <div className="flex-grow">
-      <Chat />
+const AITutorPanel: React.FC<{
+  currentMode: LearningMode;
+  onModeChange: (mode: LearningMode) => void;
+}> = ({ currentMode, onModeChange }) => {
+  const renderComponent = () => {
+    switch (currentMode) {
+      case "chat":
+        return <Chat />;
+      case "flashcards":
+        return <Flashcards />;
+      case "quiz":
+        return <Quiz />;
+      default:
+        return <Chat />;
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col h-full">
+      {/* Mode Selector */}
+      <div className="flex justify-center mb-4 space-x-2">
+        <button
+          onClick={() => onModeChange("chat")}
+          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+            currentMode === "chat"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Chat
+        </button>
+        <button
+          onClick={() => onModeChange("flashcards")}
+          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+            currentMode === "flashcards"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Flashcards
+        </button>
+        <button
+          onClick={() => onModeChange("quiz")}
+          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+            currentMode === "quiz"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+          }`}
+        >
+          Quiz
+        </button>
+      </div>
+
+      {/* Component Container */}
+      <div className="flex-grow overflow-hidden">{renderComponent()}</div>
     </div>
-  </div>
-);
+  );
+};
 
 // --- Main App Component ---
 const VideoPage: React.FC = () => {
@@ -241,6 +296,9 @@ const VideoPage: React.FC = () => {
   const [videoError, setVideoError] = useState<string | null>(null);
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
+
+  // State for learning mode
+  const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
 
   // Get video ID from URL params or location state
   console.log("videoId check her .....:", videoId, location.state?.videoId);
@@ -323,6 +381,10 @@ const VideoPage: React.FC = () => {
     fetchTranscript();
   }, [videoDetail?.external_source_id]);
 
+  const handleModeChange = (mode: LearningMode) => {
+    setCurrentMode(mode);
+  };
+
   return (
     <div className="bg-gray-50 min-h-screen font-sans text-gray-800">
       <div className="container mx-auto px-4 py-6">
@@ -342,7 +404,10 @@ const VideoPage: React.FC = () => {
             />
           </div>
           <div className="lg:col-span-1">
-            <AITutorPanel />
+            <AITutorPanel
+              currentMode={currentMode}
+              onModeChange={handleModeChange}
+            />
           </div>
         </main>
       </div>
