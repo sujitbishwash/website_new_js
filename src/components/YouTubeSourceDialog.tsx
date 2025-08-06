@@ -187,14 +187,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           "Failed to add video. Please check the URL and try again."
       );
     } finally {
-      // setIsLoading(false);
-
-      // dummy flow for Close modal and navigate to VideoPage on successful add
-      setTimeout(() => {
-        setIsLoading(false);
-        onClose();
-        navigate("/video-learning");
-      }, 1000);
+      setIsLoading(false);
     }
   };
 
@@ -213,10 +206,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
       console.log("Adding suggested video to library:", details);
 
-      // You can add an API call here to save the video
-      // await videoApi.addToLibrary(details);
-
-      // Close modal and navigate to VideoPage on successful add
       onClose();
       navigate("/video-learning");
     } catch (err: any) {
@@ -224,14 +213,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         err.message || "Failed to add suggested video. Please try again."
       );
     } finally {
-      // setIsLoading(false);
-
-      // dummy flow for Close modal and navigate to VideoPage on successful add
-      setTimeout(() => {
-        setIsLoading(false);
-        onClose();
-        navigate("/video-learning");
-      }, 1000);
+      setIsLoading(false);
     }
   };
 
@@ -415,7 +397,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "React Hooks in 10 Minutes",
     topic: "Web Development",
     thumbnailUrl: "https://placehold.co/400x225/E84343/FFFFFF?text=React",
-    url: "https://www.youtube.com/watch?v=example1",
+    url: "https://www.youtube.com/watch?v=TNhaISOUy6Q",
     description: "Learn React Hooks quickly with practical examples",
     tags: ["react", "javascript", "web-development"],
   },
@@ -424,7 +406,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "A Brief History of the Cosmos",
     topic: "Science",
     thumbnailUrl: "https://placehold.co/400x225/4361E8/FFFFFF?text=Cosmos",
-    url: "https://www.youtube.com/watch?v=example2",
+    url: "https://www.youtube.com/watch?v=OUnYkixy3ug",
     description: "Explore the fascinating history of our universe",
     tags: ["science", "cosmos", "astronomy"],
   },
@@ -433,7 +415,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "Perfect Sourdough for Beginners",
     topic: "Cooking",
     thumbnailUrl: "https://placehold.co/400x225/E8A243/FFFFFF?text=Cooking",
-    url: "https://www.youtube.com/watch?v=example3",
+    url: "https://www.youtube.com/watch?v=-9Osn7JsP1Y",
     description: "Master the art of sourdough bread making",
     tags: ["cooking", "baking", "sourdough"],
   },
@@ -442,7 +424,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "Machine Learning Fundamentals",
     topic: "Technology",
     thumbnailUrl: "https://placehold.co/400x225/10B981/FFFFFF?text=ML",
-    url: "https://www.youtube.com/watch?v=example4",
+    url: "https://www.youtube.com/watch?v=bLHqHRWUUWg&list=PLwdnzlV3ogoVDlDwuB9SLJzhaZT0tTil3",
     description: "Essential concepts in machine learning",
     tags: ["machine-learning", "ai", "technology"],
   },
@@ -451,7 +433,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "Photography Composition Tips",
     topic: "Art",
     thumbnailUrl: "https://placehold.co/400x225/8B5CF6/FFFFFF?text=Photo",
-    url: "https://www.youtube.com/watch?v=example5",
+    url: "https://www.youtube.com/watch?v=8XBYt-_U4WE",
     description: "Improve your photography with composition techniques",
     tags: ["photography", "art", "composition"],
   },
@@ -460,7 +442,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "Financial Planning Basics",
     topic: "Finance",
     thumbnailUrl: "https://placehold.co/400x225/F59E0B/FFFFFF?text=Finance",
-    url: "https://www.youtube.com/watch?v=example6",
+    url: "https://www.youtube.com/watch?v=MabD5R8kRak",
     description: "Essential financial planning for beginners",
     tags: ["finance", "planning", "money"],
   },

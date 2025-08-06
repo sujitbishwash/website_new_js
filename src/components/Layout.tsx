@@ -1,7 +1,7 @@
 import { Menu } from "lucide-react";
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
-import Sidebar from "./Sidebar";
+import Sidebar from "./sidebar/Sidebar";
 
 const Layout: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);

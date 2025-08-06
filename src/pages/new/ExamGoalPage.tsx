@@ -22,15 +22,6 @@ interface ExamData {
   [key: string]: string[];
 }
 
-// --- Fallback Data ---
-// This data is used when API fails
-const fallbackExamData: ExamData = {
-  SSC: ["CGL", "CHSL", "MTS", "Stenographer", "GD Constable"],
-  Railways: ["RRB NTPC", "RRB Group D", "RRB JE", "RRB ALP"],
-  "Class 10th": ["CBSE Board", "ICSE Board", "State Board"],
-  Bank: ["IBPS PO", "SBI PO", "IBPS Clerk", "SBI Clerk", "RBI Grade B"],
-};
-
 // --- Reusable Components ---
 
 // Props for the Dropdown component
@@ -113,7 +104,7 @@ const ExamGoalSelector: FC = () => {
   const navigate = useNavigate();
   const [examType, setExamType] = useState<string>("");
   const [specificExam, setSpecificExam] = useState<string>("");
-  const [examData, setExamData] = useState<ExamData>(fallbackExamData);
+  const [examData, setExamData] = useState<ExamData>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -138,9 +129,8 @@ const ExamGoalSelector: FC = () => {
           throw new Error("Failed to fetch exam data");
         }
       } catch (err: any) {
-        console.warn("API failed, using fallback data:", err.message);
-        setError("Using sample data (API unavailable)");
-        setExamData(fallbackExamData);
+        console.error("Failed to fetch exam data:", err);
+        setError("Failed to load exam data. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -171,7 +161,6 @@ const ExamGoalSelector: FC = () => {
       setIsSubmitting(true);
 
       // commenting until the API is ready
-      /*
       const response = await examGoalApi.addExamGoal(specificExam, examType);
       if (response.data.success) {
         // Navigate to dashboard or show success message
@@ -179,17 +168,11 @@ const ExamGoalSelector: FC = () => {
         console.log("Exam goal added successfully:", response.data.message);
         // You can add navigation logic here
       }
-      */
     } catch (err: any) {
       console.error("Failed to add exam goal:", err.message);
       // You can add error handling logic here
     } finally {
-      //   setIsSubmitting(false);
-
-      setTimeout(() => {
-        setIsSubmitting(false);
-        setIsModalOpen(true);
-      }, 1000);
+      setIsSubmitting(false);
     }
   };
 
@@ -218,8 +201,8 @@ const ExamGoalSelector: FC = () => {
 
       <div className="mt-10 space-y-8">
         {error && (
-          <div className="text-center p-3 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
-            <p className="text-sm text-yellow-400">{error}</p>
+          <div className="text-center p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+            <p className="text-sm text-red-400">{error}</p>
           </div>
         )}
 
