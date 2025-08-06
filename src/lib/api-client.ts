@@ -454,7 +454,7 @@ export const quizApi = {
       throw new Error('No authentication token found');
     }
 
-    const response = await fetch(`${API_CONFIG.baseURL}/test-series/submit-test-session`, {
+    const response = await fetch(`${API_CONFIG.baseURL}/test-series/submit-test-session/`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,

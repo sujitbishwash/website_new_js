@@ -33,14 +33,6 @@ interface ApiQuestion {
   answer: string | null;
 }
 
-// Configuration for API integration
-const API_CONFIG = {
-  // Set to false when backend is permanently online
-  USE_DUMMY_DATA_FALLBACK: true,
-  // Session ID for the test - this should come from route params or props
-  DEFAULT_SESSION_ID: 1,
-};
-
 // --- Helper Components ---
 
 // Icon for the student in the sidebar
@@ -84,102 +76,6 @@ const FullscreenIcon = () => (
 
 // --- Main Application Component ---
 
-// --- Demo Data ---
-// In a real app, this would come from an API
-const quizData: Question[] = [
-  {
-    id: 1,
-    questionType: "MCQ",
-    question:
-      "This is the text for Question 1. It might be longer to test wrapping and layout. What is the correct option?",
-    options: [
-      "Option A for Q1",
-      "Option B for Q1",
-      "Option C for Q1",
-      "Option D for Q1",
-    ],
-    status: "not-visited",
-    answer: null,
-  },
-  {
-    id: 2,
-    questionType: "MCQ",
-    question: "What is the capital of France?",
-    options: ["Berlin", "Madrid", "Paris", "Rome"],
-    status: "not-visited",
-    answer: null,
-  },
-  {
-    id: 3,
-    questionType: "MCQ",
-    question: "Which planet is known as the Red Planet?",
-    options: ["Earth", "Mars", "Jupiter", "Venus"],
-    status: "not-visited",
-    answer: null,
-  },
-  {
-    id: 4,
-    questionType: "MCQ",
-    question: "Who wrote 'To Kill a Mockingbird'?",
-    options: ["Harper Lee", "J.K. Rowling", "Ernest Hemingway", "Mark Twain"],
-    status: "not-visited",
-    answer: null,
-  },
-  {
-    id: 5,
-    questionType: "MCQ",
-    question: "What is the largest ocean on Earth?",
-    options: [
-      "Atlantic Ocean",
-      "Indian Ocean",
-      "Arctic Ocean",
-      "Pacific Ocean",
-    ],
-    status: "not-visited",
-    answer: null,
-  },
-  {
-    id: 6,
-    questionType: "MCQ",
-    question: "Question 6",
-    options: ["A", "B", "C", "D"],
-    status: "not-visited",
-    answer: null,
-  },
-  {
-    id: 7,
-    questionType: "MCQ",
-    question: "Question 7",
-    options: ["A", "B", "C", "D"],
-    status: "not-visited",
-    answer: null,
-  },
-  {
-    id: 8,
-    questionType: "MCQ",
-    question: "Question 8",
-    options: ["A", "B", "C", "D"],
-    status: "not-visited",
-    answer: null,
-  },
-  {
-    id: 9,
-    questionType: "MCQ",
-    question: "Question 9",
-    options: ["A", "B", "C", "D"],
-    status: "not-visited",
-    answer: null,
-  },
-  {
-    id: 10,
-    questionType: "MCQ",
-    question: "Question 10",
-    options: ["A", "B", "C", "D"],
-    status: "not-visited",
-    answer: null,
-  },
-];
-
 const TestMainPage = () => {
   // --- State Management ---
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -192,9 +88,7 @@ const TestMainPage = () => {
   const [isTimeLow, setIsTimeLow] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<number>(
-    API_CONFIG.DEFAULT_SESSION_ID
-  );
+  const [sessionId, setSessionId] = useState<number>(7);
   const navigate = useNavigate();
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -213,7 +107,7 @@ const TestMainPage = () => {
     questionType: apiQuestion.questionType as QuestionType,
   });
 
-  // Fetch questions from API with fallback to dummy data
+  // Fetch questions from API
   const fetchQuestions = async () => {
     setIsLoading(true);
     setError(null);
@@ -231,60 +125,35 @@ const TestMainPage = () => {
           "Successfully fetched questions from API:",
           mappedQuestions.length
         );
-        return;
+      } else {
+        throw new Error("Invalid response format from API");
       }
     } catch (apiError) {
-      console.warn("API fetch failed, falling back to dummy data:", apiError);
-
-      if (!API_CONFIG.USE_DUMMY_DATA_FALLBACK) {
-        setError(
-          "Failed to fetch questions from server. Please try again later."
-        );
-        setIsLoading(false);
-        return;
-      }
+      console.error("Failed to fetch questions:", apiError);
+      setError(
+        "Failed to fetch questions from server. Please try again later."
+      );
+    } finally {
+      setIsLoading(false);
     }
-
-    // Fallback to dummy data
-    console.log("Using dummy data as fallback");
-    setQuestions(quizData);
-    setIsLoading(false);
   };
 
-  // Submit test to API with fallback
-  const submitTestToAPI = async (): Promise<SubmitTestResponse | null> => {
-    try {
-      console.log("Attempting to submit test to API...");
+  // Submit test to API
+  const submitTestToAPI = async (): Promise<SubmitTestResponse> => {
+    console.log("Attempting to submit test to API...");
 
-      const submitData: SubmitTestRequest = {
-        session_id: sessionId,
-        answers: questions.map((q) => ({
-          question_id: q.id,
-          selected_option: q.answer !== null ? q.options[q.answer] : null,
-          answer: q.answer !== null ? q.options[q.answer] : null,
-        })),
-      };
+    const submitData: SubmitTestRequest = {
+      session_id: sessionId,
+      answers: questions.map((q) => ({
+        question_id: q.id,
+        selected_option: q.answer !== null ? q.options[q.answer] : null,
+        answer: q.answer !== null ? q.options[q.answer] : null,
+      })),
+    };
 
-      const response = await quizApi.submitTest(submitData);
-      console.log("Successfully submitted test to API:", response);
-      return response;
-    } catch (apiError) {
-      console.warn("API submit failed:", apiError);
-
-      if (!API_CONFIG.USE_DUMMY_DATA_FALLBACK) {
-        throw apiError;
-      }
-
-      // Return dummy response for fallback
-      return {
-        session_id: sessionId,
-        score: questions.filter(
-          (q) => q.status === "answered" || q.status === "marked-answered"
-        ).length,
-        total: questions.length,
-        attempt: 1,
-      };
-    }
+    const response = await quizApi.submitTest(submitData);
+    console.log("Successfully submitted test to API:", response);
+    return response;
   };
 
   // --- Effects ---
@@ -446,8 +315,6 @@ const TestMainPage = () => {
     } catch (error) {
       console.error("Failed to auto-submit test:", error);
       setError("Failed to auto-submit test.");
-      // Still show results dialog with dummy data
-      setShowTestResultDialog(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -507,7 +374,7 @@ const TestMainPage = () => {
 
   const handleCloseTestResultDialog = () => {
     setShowTestResultDialog(false);
-    navigate("/dashboard");
+    navigate("/home");
   };
 
   // --- Loading and Error States ---

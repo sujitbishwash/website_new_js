@@ -1,7 +1,7 @@
 // To make this component work, you need to have React and Tailwind CSS set up in your project.
 // You can use this component by importing it and rendering it in your main App file.
 
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // Icon components for the legend - using inline SVG for simplicity
 const NotVisitedIcon = () => (
@@ -76,48 +76,9 @@ const AnsweredAndMarkedIcon = () => (
 // Main component for the instructions page
 export default function ExamInformationPage() {
   const navigate = useNavigate();
-  const instructions = {
-    general: [
-      "The clock has been set at the server and the countdown timer at the top right corner of the screen will display the remaining time available for you to complete the examination. When the timer reaches zero, the examination will end by itself. You will not be required to end or submit your examination.",
-      "The Question Palette displayed on the right side of screen will show the status of each question using one of the following symbols:",
-    ],
-    legend: [
-      {
-        icon: <NotVisitedIcon />,
-        text: "You have not visited the question yet.",
-      },
-      {
-        icon: <NotAnsweredIcon />,
-        text: "You have not answered the question.",
-      },
-      { icon: <AnsweredIcon />, text: "You have answered the question." },
-      {
-        icon: <MarkedForReviewIcon />,
-        text: "You have not answered the question, but have marked the question for review.",
-      },
-      {
-        icon: <AnsweredAndMarkedIcon />,
-        text: "You have answered the question, but marked it for review.",
-      },
-    ],
-    markedForReviewNote:
-      "The Marked for Review status for a question simply indicates that you would like to look at that question again. If a question is answered and Marked for Review, your answer for that question will be considered in the evaluation.",
-    navigating: [
-      "To answer a question, do the following:",
-      "a. Click on the question number in the Question Palette at the right of your screen to go to that numbered question directly. Note that using this option does NOT save your answer to the current question.",
-      "b. Click on Save & Next to save your answer for the current question and then go to the next question.",
-      "c. Click on Mark for Review & Next to save your answer for the current question, mark it for review, and then go to the next question.",
-      "Caution: Note that your answer for the current question will not be saved if you navigate to another question directly (without saving) by clicking on its question number.",
-    ],
-    answering: [
-      "Procedure for answering a multiple choice type question:",
-      "a. To select your answer, click on the button of one of the options.",
-      "b. To deselect your chosen answer, click on the button of the chosen option again or click on the Clear Response button.",
-      "c. To change your chosen answer, click on the button of another option.",
-      "d. To save your answer, you MUST click on the Save & Next button.",
-      "e. To mark the question for review, click on the Mark for Review & Next button. If an answer is selected for a question that is Marked for Review, that answer will be considered in the evaluation.",
-    ],
-  };
+  const location = useLocation();
+  const testId = location.state?.testId;
+  const testConfig = location.state?.testConfig;
 
   return (
     <div className="bg-gray-900 text-gray-300 min-h-screen font-sans p-4 sm:p-6 lg:p-8">
@@ -211,13 +172,24 @@ export default function ExamInformationPage() {
         {/* Footer with Navigation Buttons */}
         <footer className="flex justify-between items-center p-6 border-t border-gray-700">
           <button
-            onClick={() => navigate("/test-series")}
+            onClick={() =>
+              navigate("/test-series", {
+                state: {
+                  testId: testId,
+                  isDemo: false,
+                },
+              })
+            }
             className="px-6 py-2 font-semibold text-white bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
           >
             Previous
           </button>
           <button
-            onClick={() => navigate("/exam-reconfirm")}
+            onClick={() =>
+              navigate("/exam-reconfirm", {
+                state: { testId: testId, testConfig: testConfig },
+              })
+            }
             className="px-8 py-2 font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-lg shadow-indigo-500/30"
           >
             Next
@@ -227,3 +199,46 @@ export default function ExamInformationPage() {
     </div>
   );
 }
+
+const instructions = {
+  general: [
+    "The clock has been set at the server and the countdown timer at the top right corner of the screen will display the remaining time available for you to complete the examination. When the timer reaches zero, the examination will end by itself. You will not be required to end or submit your examination.",
+    "The Question Palette displayed on the right side of screen will show the status of each question using one of the following symbols:",
+  ],
+  legend: [
+    {
+      icon: <NotVisitedIcon />,
+      text: "You have not visited the question yet.",
+    },
+    {
+      icon: <NotAnsweredIcon />,
+      text: "You have not answered the question.",
+    },
+    { icon: <AnsweredIcon />, text: "You have answered the question." },
+    {
+      icon: <MarkedForReviewIcon />,
+      text: "You have not answered the question, but have marked the question for review.",
+    },
+    {
+      icon: <AnsweredAndMarkedIcon />,
+      text: "You have answered the question, but marked it for review.",
+    },
+  ],
+  markedForReviewNote:
+    "The Marked for Review status for a question simply indicates that you would like to look at that question again. If a question is answered and Marked for Review, your answer for that question will be considered in the evaluation.",
+  navigating: [
+    "To answer a question, do the following:",
+    "a. Click on the question number in the Question Palette at the right of your screen to go to that numbered question directly. Note that using this option does NOT save your answer to the current question.",
+    "b. Click on Save & Next to save your answer for the current question and then go to the next question.",
+    "c. Click on Mark for Review & Next to save your answer for the current question, mark it for review, and then go to the next question.",
+    "Caution: Note that your answer for the current question will not be saved if you navigate to another question directly (without saving) by clicking on its question number.",
+  ],
+  answering: [
+    "Procedure for answering a multiple choice type question:",
+    "a. To select your answer, click on the button of one of the options.",
+    "b. To deselect your chosen answer, click on the button of the chosen option again or click on the Clear Response button.",
+    "c. To change your chosen answer, click on the button of another option.",
+    "d. To save your answer, you MUST click on the Save & Next button.",
+    "e. To mark the question for review, click on the Mark for Review & Next button. If an answer is selected for a question that is Marked for Review, that answer will be considered in the evaluation.",
+  ],
+};

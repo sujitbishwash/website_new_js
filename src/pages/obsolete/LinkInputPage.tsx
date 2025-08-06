@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { videoApi } from '@/lib/api-client';
-import styles from './LinkInputPage.module.css';
+import { videoApi } from "@/lib/api-client";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import styles from "./LinkInputPage.module.css";
 
 const LinkInputPage: React.FC = () => {
   const navigate = useNavigate();
-  const [url, setUrl] = useState('');
-  const [notes, setNotes] = useState('');
+  const [url, setUrl] = useState("");
+  const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -20,19 +20,19 @@ const LinkInputPage: React.FC = () => {
       setError(null);
 
       if (!url) {
-        throw new Error('Please enter a URL');
+        throw new Error("Please enter a URL");
       }
 
       const videoDetails = await videoApi.getVideoDetail(url);
-      navigate('/dashboard', { 
-        state: { 
+      navigate("/home", {
+        state: {
           videoDetails,
-          notes: notes.trim() || undefined 
-        } 
+          notes: notes.trim() || undefined,
+        },
       });
     } catch (err: any) {
-      setError(err.message || 'Failed to process video');
-      console.error('Error:', err);
+      setError(err.message || "Failed to process video");
+      console.error("Error:", err);
     } finally {
       setIsLoading(false);
     }
@@ -47,11 +47,7 @@ const LinkInputPage: React.FC = () => {
         </header>
 
         <main className={styles.modalBody}>
-          {error && (
-            <div className={styles.errorMessage}>
-              {error}
-            </div>
-          )}
+          {error && <div className={styles.errorMessage}>{error}</div>}
 
           <div className={styles.formGroup}>
             <input
@@ -110,7 +106,7 @@ const LinkInputPage: React.FC = () => {
             onClick={handleAdd}
             disabled={isLoading}
           >
-            {isLoading ? 'Processing...' : 'Add'}
+            {isLoading ? "Processing..." : "Add"}
           </button>
         </footer>
       </div>
@@ -118,4 +114,4 @@ const LinkInputPage: React.FC = () => {
   );
 };
 
-export default LinkInputPage; 
+export default LinkInputPage;

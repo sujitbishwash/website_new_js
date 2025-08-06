@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // --- Type Definitions ---
 interface ExamDetails {
@@ -43,6 +43,9 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
 }) => {
   const navigate = useNavigate();
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const location = useLocation();
+  const testId = location.state?.testId;
+  const testConfig = location.state?.testConfig;
 
   return (
     <div className="bg-gray-900 min-h-screen font-sans text-gray-200 p-4 sm:p-6 lg:p-8">
@@ -115,7 +118,11 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
           </button>
           <button
             disabled={!isConfirmed}
-            onClick={() => navigate("/test-main-page")}
+            onClick={() =>
+              navigate("/test-main-page", {
+                state: { testId: testId, testConfig: testConfig },
+              })
+            }
             className={`font-bold py-2 px-6 rounded-lg transition-all ${
               isConfirmed
                 ? "bg-blue-600 hover:bg-blue-500 text-white cursor-pointer"
