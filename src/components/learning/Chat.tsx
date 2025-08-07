@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import { chatApi } from "../../lib/api-client";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -23,6 +22,10 @@ interface MessageType {
 
 interface ChatProps {
   videoId: string;
+  messages: Array<{ text: string; isUser: boolean }>;
+  isLoading: boolean;
+  error: string | null;
+  onSendMessage: (message: string) => void;
 }
 
 // --- SVG Icons ---
@@ -124,7 +127,7 @@ const MessageList: React.FC<{ messages: MessageType[] }> = ({ messages }) => {
   useEffect(scrollToBottom, [messages]);
 
   return (
-    <div className="flex-grow p-3 sm:p-4 md:p-6 overflow-y-auto">
+    <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto">
       {messages.map((msg, index) => (
         <Message key={index} text={msg.text} isUser={msg.isUser} />
       ))}
@@ -158,16 +161,16 @@ const PlanSelector: React.FC = () => {
     <div className="relative" ref={wrapperRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-700 transition-colors"
+        className="flex items-center space-x-1 sm:space-x-2 p-1.5 sm:p-2 rounded-lg hover:bg-gray-700 transition-colors"
       >
         <span
-          className="text-sm font-medium"
+          className="text-xs sm:text-sm font-medium"
           style={{ color: theme.primaryText }}
         >
           {selectedPlan}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform duration-200 ${
+          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
           fill="none"
@@ -231,14 +234,14 @@ const ModeSelector: React.FC = () => {
       {/* Changed styling from green to blue */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center ml-2 space-x-2 px-3 py-1.5 bg-blue-900/50 rounded-full border border-blue-400/50 hover:bg-blue-800/60 hover:border-blue-300/70 transition-all duration-300 cursor-pointer"
+        className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1.5 bg-blue-900/50 rounded-full border border-blue-400/50 hover:bg-blue-800/60 hover:border-blue-300/70 transition-all duration-300 cursor-pointer"
       >
         <BrainIcon />
-        <span className="hidden sm:inline text-blue-300 text-sm font-medium">
+        <span className="hidden sm:inline text-blue-300 text-xs sm:text-sm font-medium">
           {selectedMode}
         </span>
         <svg
-          className={`w-4 h-4 text-blue-300 transition-transform duration-200 ${
+          className={`w-3 h-3 sm:w-4 sm:h-4 text-blue-300 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
           fill="none"
@@ -297,49 +300,59 @@ const ChatInput: React.FC<{
   };
 
   return (
-    <div className="px-2 sm:px-4 md:px-6 py-4">
+    <div className="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
       <div
-        className="flex items-center p-2 rounded-2xl"
+        className="flex items-center p-2 sm:p-3 rounded-2xl"
         style={{ backgroundColor: theme.cardBackground }}
       >
-        <PlanSelector />
-        <ModeSelector />
+        {/* Plan Selector - Hidden on very small screens */}
+        <div className="hidden sm:block">
+          <PlanSelector />
+        </div>
 
-        <div className="flex-grow mx-2 sm:mx-4">
+        {/* Mode Selector - More compact on small screens */}
+        <div className="sm:ml-2">
+          <ModeSelector />
+        </div>
+
+        {/* Text Input - Gets more space on mobile */}
+        <div className="flex-grow mx-1 sm:mx-2 md:mx-4 min-w-0">
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask anything"
-            className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none pl-4 pr-4"
+            className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none pl-2 sm:pl-4 pr-2 sm:pr-4 text-sm sm:text-base min-w-0"
           />
         </div>
 
+        {/* Send Button - Compact on mobile */}
         <button
           onClick={handleSend}
           disabled={isLoading}
-          className="ml-2 sm:ml-4 px-3 sm:px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="ml-1 sm:ml-2 md:ml-4 px-2 sm:px-3 md:px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center space-x-1 sm:space-x-2 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
         >
           {isLoading ? (
-            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+            <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
           ) : (
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
+              width="16"
+              height="16"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
+              className="sm:w-5 sm:h-5"
             >
               <path d="M5 12h14" />
               <path d="m12 5 7 7-7 7" />
             </svg>
           )}
-          <span className="hidden sm:inline">
+          <span className="hidden sm:inline text-sm">
             {isLoading ? "Sending..." : "Send"}
           </span>
         </button>
@@ -349,86 +362,22 @@ const ChatInput: React.FC<{
 };
 
 // --- Main App Component ---
-export default function Chat({ videoId }: ChatProps) {
-  const [messages, setMessages] = useState<MessageType[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const fetchChatHistory = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const history = await chatApi.getChatHistory(videoId);
-      if (history.memory && history.memory.length > 0) {
-        const convertedMessages = history.memory.map((msg) => ({
-          text: msg.content,
-          isUser: msg.role === "user",
-        }));
-        setMessages(convertedMessages);
-      } else {
-        // If no history, start a new chat
-        try {
-          const startResponse = await chatApi.startChat(videoId);
-          setMessages([{ text: startResponse.content, isUser: false }]);
-        } catch (startErr) {
-          console.error("Failed to start chat:", startErr);
-          setError("Failed to start new chat.");
-        }
-      }
-    } catch (err) {
-      console.error("Failed to fetch chat history:", err);
-      setError("Failed to load chat history. Starting new chat.");
-
-      // Try to start a new chat if history fails
-      try {
-        const startResponse = await chatApi.startChat(videoId);
-        setMessages([{ text: startResponse.content, isUser: false }]);
-      } catch (startErr) {
-        console.error("Failed to start chat:", startErr);
-        setError("Failed to start new chat.");
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleSendMessage = async (message: string) => {
-    if (!message.trim()) return;
-
-    // Add user message immediately
-    const userMessage = { text: message, isUser: true };
-    setMessages((prev) => [...prev, userMessage]);
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await chatApi.sendMessage(videoId, message);
-      const assistantMessage = { text: response.content, isUser: false };
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error("Failed to send message:", err);
-      setError("Failed to send message. Please try again.");
-      // Remove the user message if sending failed
-      setMessages((prev) => prev.slice(0, -1));
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchChatHistory();
-  }, [videoId]);
-
+export default function Chat({
+  videoId,
+  messages,
+  isLoading,
+  error,
+  onSendMessage,
+}: ChatProps) {
   return (
     <div
-      className="font-sans flex flex-col h-screen"
+      className="font-sans flex flex-col h-full"
       style={{ backgroundColor: theme.background }}
     >
-      <main className="flex-grow flex flex-col max-w-5xl w-full mx-auto">
-        <div className="flex-grow flex flex-col justify-end min-h-0">
+      <main className="flex flex-col h-full">
+        <div className="flex-1 flex flex-col min-h-0">
           {messages.length === 0 && (
-            <div className="flex-grow flex flex-col justify-center items-center">
+            <div className="flex-1 flex flex-col justify-center items-center p-4">
               <ChatHeader />
               <SuggestionChips />
             </div>
@@ -440,7 +389,7 @@ export default function Chat({ videoId }: ChatProps) {
             </div>
           )}
         </div>
-        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
+        <ChatInput onSendMessage={onSendMessage} isLoading={isLoading} />
       </main>
     </div>
   );

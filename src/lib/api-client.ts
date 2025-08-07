@@ -423,6 +423,59 @@ export interface SubmitTestResponse {
   attempt: number;
 }
 
+// URL Validation API
+export interface UrlValidationResponse {
+  isValid: boolean;
+  isOutOfSyllabus: boolean;
+  message?: string;
+}
+
+export const validateUrl = async (url: string): Promise<UrlValidationResponse> => {
+  try {
+    console.log('Validating URL:', url); // Debug log
+    // For now, implement dummy logic
+    // In a real implementation, this would call the backend API
+    const lowerUrl = url.toLowerCase();
+
+    // Check if URL contains "out of syllabus" in any form
+    if (lowerUrl.includes('out of syllabus') ||
+      lowerUrl.includes('outofsyllabus') ||
+      lowerUrl.includes('out-of-syllabus') ||
+      lowerUrl.includes('out_of_syllabus')) {
+      console.log('Out of syllabus detected!'); // Debug log
+      return {
+        isValid: false,
+        isOutOfSyllabus: true,
+        message: "This content is out of syllabus"
+      };
+    }
+
+    // Basic URL validation
+    try {
+      new URL(url);
+    } catch {
+      return {
+        isValid: false,
+        isOutOfSyllabus: false,
+        message: "Invalid URL format"
+      };
+    }
+
+    // For now, accept all valid URLs
+    return {
+      isValid: true,
+      isOutOfSyllabus: false
+    };
+  } catch (error) {
+    console.error('URL validation error:', error);
+    return {
+      isValid: false,
+      isOutOfSyllabus: false,
+      message: "Failed to validate URL"
+    };
+  }
+};
+
 export const quizApi = {
   getQuestions: async (sessionId: number): Promise<QuestionResponse> => {
     const token = localStorage.getItem('authToken');

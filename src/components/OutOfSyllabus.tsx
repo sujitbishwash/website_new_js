@@ -103,7 +103,11 @@ const LightbulbIcon: React.FC = () => (
 
 // --- Main App Component ---
 
-const OutOfSyllabus: React.FC = () => {
+interface OutOfSyllabusProps {
+  onGoBack: () => void;
+}
+
+const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
 
@@ -123,6 +127,7 @@ const OutOfSyllabus: React.FC = () => {
     // Wait for the animation to finish before removing the element
     setTimeout(() => {
       setIsVisible(false);
+      onGoBack(); // Call the onGoBack function after animation
     }, 500); // This duration should match the fadeOut animation time
   };
 
