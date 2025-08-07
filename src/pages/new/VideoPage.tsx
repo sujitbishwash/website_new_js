@@ -1,6 +1,7 @@
 import Chat from "@/components/learning/Chat";
 import Flashcards from "@/components/learning/Flashcards";
 import Quiz from "@/components/learning/Quiz";
+import Summary from "@/components/learning/Summary";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { videoApi, VideoDetail } from "../../lib/api-client";
@@ -31,7 +32,7 @@ interface ContentTabsProps {
 }
 
 // Learning mode types
-type LearningMode = "chat" | "flashcards" | "quiz";
+type LearningMode = "chat" | "flashcards" | "quiz" | "summary";
 
 // --- Icon Components (using inline SVG for portability) ---
 // Note: In a real project, it's better to use a library like lucide-react
@@ -226,57 +227,41 @@ const AITutorPanel: React.FC<{
   currentMode: LearningMode;
   onModeChange: (mode: LearningMode) => void;
 }> = ({ currentMode, onModeChange }) => {
-  const renderComponent = () => {
-    switch (currentMode) {
-      case "chat":
-        return <Chat />;
-      case "flashcards":
-        return <Flashcards />;
-      case "quiz":
-        return <Quiz />;
-      default:
-        return <Chat />;
-    }
+  const modes: { key: LearningMode; label: string }[] = [
+    { key: "chat", label: "Chat" },
+    { key: "flashcards", label: "Flashcards" },
+    { key: "quiz", label: "Quiz" },
+    { key: "summary", label: "Summary" },
+  ];
+
+  const components = {
+    chat: <Chat />,
+    flashcards: <Flashcards />,
+    quiz: <Quiz />,
+    summary: <Summary />,
   };
 
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-4 flex flex-col h-full">
       {/* Mode Selector */}
       <div className="flex justify-center mb-4 space-x-2">
-        <button
-          onClick={() => onModeChange("chat")}
-          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-            currentMode === "chat"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-        >
-          Chat
-        </button>
-        <button
-          onClick={() => onModeChange("flashcards")}
-          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-            currentMode === "flashcards"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-        >
-          Flashcards
-        </button>
-        <button
-          onClick={() => onModeChange("quiz")}
-          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
-            currentMode === "quiz"
-              ? "bg-blue-600 text-white"
-              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-          }`}
-        >
-          Quiz
-        </button>
+        {modes.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => onModeChange(key)}
+            className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+              currentMode === key
+                ? "bg-blue-600 text-white"
+                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Component Container */}
-      <div className="flex-grow overflow-hidden">{renderComponent()}</div>
+      <div className="flex-grow overflow-hidden">{components[currentMode]}</div>
     </div>
   );
 };
@@ -301,7 +286,6 @@ const VideoPage: React.FC = () => {
   const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
 
   // Get video ID from URL params or location state
-  console.log("videoId check her .....:", videoId, location.state?.videoId);
   const currentVideoId = videoId || location.state?.videoId;
 
   // Fetch video details
