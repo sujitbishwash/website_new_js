@@ -226,7 +226,8 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
 const AITutorPanel: React.FC<{
   currentMode: LearningMode;
   onModeChange: (mode: LearningMode) => void;
-}> = ({ currentMode, onModeChange }) => {
+  videoId: string;
+}> = ({ currentMode, onModeChange, videoId }) => {
   const modes: { key: LearningMode; label: string }[] = [
     { key: "chat", label: "Chat" },
     { key: "flashcards", label: "Flashcards" },
@@ -235,7 +236,7 @@ const AITutorPanel: React.FC<{
   ];
 
   const components = {
-    chat: <Chat />,
+    chat: <Chat videoId={videoId} />,
     flashcards: <Flashcards />,
     quiz: <Quiz />,
     summary: <Summary />,
@@ -278,7 +279,7 @@ const VideoPage: React.FC = () => {
   const [isLoadingVideo, setIsLoadingVideo] = useState(true);
   const [isLoadingChapters, setIsLoadingChapters] = useState(false);
   const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
-  const [videoError, setVideoError] = useState<string | null>(null);
+
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
 
@@ -293,7 +294,6 @@ const VideoPage: React.FC = () => {
     const fetchVideoDetails = async () => {
       try {
         setIsLoadingVideo(true);
-        setVideoError(null);
 
         // Try to get video details from API
         const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
@@ -301,7 +301,6 @@ const VideoPage: React.FC = () => {
         setVideoDetail(details);
       } catch (err: any) {
         console.error("Failed to fetch video details:", err);
-        setVideoError("Failed to load video details. Please try again.");
       } finally {
         setIsLoadingVideo(false);
       }
@@ -391,6 +390,7 @@ const VideoPage: React.FC = () => {
             <AITutorPanel
               currentMode={currentMode}
               onModeChange={handleModeChange}
+              videoId={currentVideoId}
             />
           </div>
         </main>

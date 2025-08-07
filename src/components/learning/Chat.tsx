@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { chatApi } from "../../lib/api-client";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -20,8 +21,8 @@ interface MessageType {
   isUser: boolean;
 }
 
-interface IconProps {
-  className?: string;
+interface ChatProps {
+  videoId: string;
 }
 
 // --- SVG Icons ---
@@ -275,13 +276,14 @@ const ModeSelector: React.FC = () => {
   );
 };
 
-const ChatInput: React.FC<{ onSendMessage: (text: string) => void }> = ({
-  onSendMessage,
-}) => {
+const ChatInput: React.FC<{
+  onSendMessage: (text: string) => void;
+  isLoading?: boolean;
+}> = ({ onSendMessage, isLoading = false }) => {
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleSend = () => {
-    if (inputValue.trim()) {
+    if (inputValue.trim() && !isLoading) {
       onSendMessage(inputValue);
       setInputValue("");
     }
@@ -316,23 +318,30 @@ const ChatInput: React.FC<{ onSendMessage: (text: string) => void }> = ({
 
         <button
           onClick={handleSend}
-          className="ml-2 sm:ml-4 px-3 sm:px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center space-x-2"
+          disabled={isLoading}
+          className="ml-2 sm:ml-4 px-3 sm:px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-          <span className="hidden sm:inline">Send</span>
+          {isLoading ? (
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          )}
+          <span className="hidden sm:inline">
+            {isLoading ? "Sending..." : "Send"}
+          </span>
         </button>
       </div>
     </div>
@@ -340,31 +349,76 @@ const ChatInput: React.FC<{ onSendMessage: (text: string) => void }> = ({
 };
 
 // --- Main App Component ---
-export default function Chat() {
-  const [messages, setMessages] = useState<MessageType[]>([
-    {
-      text: "Hello! I'm your AI Padhai assistant. How can I help you learn something new today?",
-      isUser: false,
-    },
-    {
-      text: "You can ask me to generate a quiz, create flashcards, or summarize a topic for you. What would you like to do?",
-      isUser: false,
-    },
-  ]);
+export default function Chat({ videoId }: ChatProps) {
+  const [messages, setMessages] = useState<MessageType[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSendMessage = (text: string) => {
-    const newUserMessage: MessageType = { text, isUser: true };
-    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
+  const fetchChatHistory = async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const history = await chatApi.getChatHistory(videoId);
+      if (history.memory && history.memory.length > 0) {
+        const convertedMessages = history.memory.map((msg) => ({
+          text: msg.content,
+          isUser: msg.role === "user",
+        }));
+        setMessages(convertedMessages);
+      } else {
+        // If no history, start a new chat
+        try {
+          const startResponse = await chatApi.startChat(videoId);
+          setMessages([{ text: startResponse.content, isUser: false }]);
+        } catch (startErr) {
+          console.error("Failed to start chat:", startErr);
+          setError("Failed to start new chat.");
+        }
+      }
+    } catch (err) {
+      console.error("Failed to fetch chat history:", err);
+      setError("Failed to load chat history. Starting new chat.");
 
-    // Mock AI response
-    setTimeout(() => {
-      const aiResponse: MessageType = {
-        text: `You asked about "${text}". Let's dive deeper into that topic! I'll prepare some information for you.`,
-        isUser: false,
-      };
-      setMessages((prevMessages) => [...prevMessages, aiResponse]);
-    }, 1000);
+      // Try to start a new chat if history fails
+      try {
+        const startResponse = await chatApi.startChat(videoId);
+        setMessages([{ text: startResponse.content, isUser: false }]);
+      } catch (startErr) {
+        console.error("Failed to start chat:", startErr);
+        setError("Failed to start new chat.");
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleSendMessage = async (message: string) => {
+    if (!message.trim()) return;
+
+    // Add user message immediately
+    const userMessage = { text: message, isUser: true };
+    setMessages((prev) => [...prev, userMessage]);
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await chatApi.sendMessage(videoId, message);
+      const assistantMessage = { text: response.content, isUser: false };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (err) {
+      console.error("Failed to send message:", err);
+      setError("Failed to send message. Please try again.");
+      // Remove the user message if sending failed
+      setMessages((prev) => prev.slice(0, -1));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchChatHistory();
+  }, [videoId]);
 
   return (
     <div
@@ -373,15 +427,20 @@ export default function Chat() {
     >
       <main className="flex-grow flex flex-col max-w-5xl w-full mx-auto">
         <div className="flex-grow flex flex-col justify-end min-h-0">
-          {messages.length <= 2 && (
+          {messages.length === 0 && (
             <div className="flex-grow flex flex-col justify-center items-center">
               <ChatHeader />
               <SuggestionChips />
             </div>
           )}
-          {messages.length > 2 && <MessageList messages={messages} />}
+          {messages.length > 0 && <MessageList messages={messages} />}
+          {error && (
+            <div className="p-4 text-center">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
         </div>
-        <ChatInput onSendMessage={handleSendMessage} />
+        <ChatInput onSendMessage={handleSendMessage} isLoading={isLoading} />
       </main>
     </div>
   );
