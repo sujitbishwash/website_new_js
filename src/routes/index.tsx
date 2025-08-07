@@ -6,6 +6,7 @@ import ProfilePage from "@/pages/new/ProfilePage";
 import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/Layout";
+import ProtectedRoute from "../components/ProtectedRoute";
 import Chat from "../components/to-be-deleted/Chat";
 import Flashcards from "../components/to-be-deleted/Flashcards";
 import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
@@ -24,7 +25,11 @@ import { ROUTES } from "./constants";
 export const routes = [
   {
     path: ROUTES.HOME,
-    element: <Layout />,
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,

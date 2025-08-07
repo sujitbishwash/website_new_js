@@ -7,12 +7,14 @@ import {
   FileText,
   Gift,
   Home,
+  LogOut,
   Star,
   X,
 } from "lucide-react";
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ROUTES } from "../../routes/constants";
+import { useAuth } from "../../contexts/AuthContext";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -22,6 +24,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -102,17 +105,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         </nav>
 
         {/* User Profile Section */}
-        <div
-          onClick={() => {
-            navigate(ROUTES.PROFILE);
-            // Close sidebar on mobile when clicking profile
-            if (window.innerWidth < 1024) {
-              onToggle();
-            }
-          }}
-          className="p-4 border-t border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer flex-shrink-0"
-        >
-          <div className="flex items-center space-x-3">
+        <div className="p-4 border-t border-gray-700 flex-shrink-0">
+          <div className="flex items-center space-x-3 mb-3">
             <div className="bg-gray-600 rounded-full p-2">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -130,10 +124,55 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                 <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path>
               </svg>
             </div>
-            <div>
-              <p className="font-medium">Free Plan</p>
-              <p className="text-sm text-gray-400">learner@aipadhai.com</p>
+            <div className="flex-1">
+              <p className="font-medium text-gray-300">Free Plan</p>
+              <p className="text-sm text-gray-400">{user?.email || 'learner@aipadhai.com'}</p>
             </div>
+          </div>
+          
+          {/* Profile and Logout Buttons */}
+          <div className="space-y-2">
+            <button
+              onClick={() => {
+                navigate(ROUTES.PROFILE);
+                // Close sidebar on mobile when clicking profile
+                if (window.innerWidth < 1024) {
+                  onToggle();
+                }
+              }}
+              className="w-full flex items-center space-x-3 p-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span className="text-sm">Profile</span>
+            </button>
+            
+            <button
+              onClick={() => {
+                logout();
+                navigate(ROUTES.LOGIN);
+                // Close sidebar on mobile when logging out
+                if (window.innerWidth < 1024) {
+                  onToggle();
+                }
+              }}
+              className="w-full flex items-center space-x-3 p-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+            >
+              <LogOut size={20} />
+              <span className="text-sm">Logout</span>
+            </button>
           </div>
         </div>
       </aside>

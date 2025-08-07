@@ -110,6 +110,14 @@ export const examGoalApi = {
         Authorization: `Bearer ${token}`
       }
     });
+  },
+  getUserExamGoal: async () => {
+    const token = localStorage.getItem('authToken');
+    return apiRequest<{ success: boolean; data: { exam: string; group_type: string } | null }>('GET', '/exam-goal/user', undefined, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
   }
 };
 

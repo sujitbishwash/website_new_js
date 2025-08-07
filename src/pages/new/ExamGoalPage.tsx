@@ -1,6 +1,7 @@
 import { AddSourceModal } from "@/components/YouTubeSourceDialog";
 import { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
 import { examGoalApi, ExamType } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 
@@ -103,6 +104,7 @@ const Dropdown: FC<DropdownProps> = ({
 // Main Card Component
 const ExamGoalSelector: FC = () => {
   const navigate = useNavigate();
+  const { checkExamGoal } = useAuth();
   const [examType, setExamType] = useState<string>("");
   const [specificExam, setSpecificExam] = useState<string>("");
   const [examData, setExamData] = useState<ExamData>({});
@@ -164,6 +166,8 @@ const ExamGoalSelector: FC = () => {
       // commenting until the API is ready
       const response = await examGoalApi.addExamGoal(specificExam, examType);
       if (response.data.success) {
+        // Update exam goal state
+        await checkExamGoal();
         // Navigate to dashboard or show success message
         setIsModalOpen(true);
         console.log("Exam goal added successfully:", response.data.message);
@@ -273,6 +277,16 @@ const ExamGoalSelector: FC = () => {
 
 // Main App Component
 const ExamGoalPage: FC = () => {
+  const { isAuthenticated, isLoading, hasExamGoal } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to dashboard if user is authenticated and has exam goal
+  useEffect(() => {
+    if (!isLoading && isAuthenticated && hasExamGoal) {
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    }
+  }, [isAuthenticated, isLoading, hasExamGoal, navigate]);
+
   // This hook runs once when the component mounts to load Tailwind CSS.
   useEffect(() => {
     // Check if the script already exists to avoid adding it multiple times
@@ -284,6 +298,31 @@ const ExamGoalPage: FC = () => {
       document.head.appendChild(script);
     }
   }, []); // The empty dependency array ensures this effect runs only once.
+
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <main
+        className="flex min-h-screen w-full items-center justify-center p-4"
+        style={{
+          backgroundColor: theme.background,
+          fontFamily: "'Inter', sans-serif",
+        }}
+      >
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+          <p className="mt-2 text-sm" style={{ color: theme.secondaryText }}>
+            Loading...
+          </p>
+        </div>
+      </main>
+    );
+  }
+
+  // Don't render exam goal form if user is authenticated and has exam goal
+  if (isAuthenticated && hasExamGoal) {
+    return null;
+  }
 
   return (
     <main
