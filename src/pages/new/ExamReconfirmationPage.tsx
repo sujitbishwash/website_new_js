@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
 interface ExamDetails {
@@ -111,7 +112,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
         {/* Footer Buttons */}
         <footer className="mt-8 pt-6 border-t border-gray-700 flex justify-between items-center">
           <button
-            onClick={() => navigate("/exam-info")}
+            onClick={() => navigate(ROUTES.EXAM_INFO)}
             className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
           >
             Previous
@@ -119,7 +120,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
           <button
             disabled={!isConfirmed}
             onClick={() =>
-              navigate("/test-main-page", {
+              navigate(ROUTES.TEST_MAIN_PAGE, {
                 state: { testId: testId, testConfig: testConfig },
               })
             }

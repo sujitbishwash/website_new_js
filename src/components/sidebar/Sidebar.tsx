@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { ROUTES } from "../../routes/constants";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -27,19 +28,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   };
 
   const navItems = [
-    { path: "/", icon: Home, label: "Home" },
-    { path: "/history", icon: Clock, label: "History" },
-    { path: "/books", icon: Book, label: "Books" },
-    { path: "/test-series", icon: FileCheck, label: "Test Series" },
+    { path: ROUTES.HOME, icon: Home, label: "Home" },
+    { path: ROUTES.HISTORY, icon: Clock, label: "History" },
+    { path: ROUTES.BOOKS, icon: Book, label: "Books" },
+    { path: ROUTES.TEST_SERIES, icon: FileCheck, label: "Test Series" },
     {
-      path: "/previous-year-papers",
+      path: ROUTES.PREVIOUS_YEAR_PAPERS,
       icon: FileQuestion,
       label: "Previous Year Papers",
     },
-    { path: "/attempted-tests", icon: FileText, label: "Attempted Tests" },
-    { path: "/premium", icon: Star, label: "Premium" },
-    { path: "/exams", icon: Award, label: "Exams" },
-    { path: "/refer-and-earn", icon: Gift, label: "Refer and Earn" },
+    { path: ROUTES.ATTEMPTED_TESTS, icon: FileText, label: "Attempted Tests" },
+    { path: ROUTES.PREMIUM, icon: Star, label: "Premium" },
+    { path: ROUTES.EXAMS, icon: Award, label: "Exams" },
+    { path: ROUTES.REFER_AND_EARN, icon: Gift, label: "Refer and Earn" },
   ];
 
   return (
@@ -103,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         {/* User Profile Section */}
         <div
           onClick={() => {
-            navigate("/profile");
+            navigate(ROUTES.PROFILE);
             // Close sidebar on mobile when clicking profile
             if (window.innerWidth < 1024) {
               onToggle();

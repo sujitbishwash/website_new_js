@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
+import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import OutOfSyllabus from "./OutOfSyllabus";
 
 // --- Type Definitions ---
@@ -192,7 +193,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       const details = await videoApi.getVideoDetail(url);
 
       onClose();
-      navigate(`/video-learning/${details.external_source_id}`);
+      navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
       setError(
         err.message ||
@@ -205,7 +206,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   const navigateToHome = () => {
     onClose();
-    navigate("/home");
+    navigate(ROUTES.DASHBOARD);
   };
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
@@ -233,7 +234,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       const details = await videoApi.getVideoDetail(video.url);
 
       onClose();
-      navigate(`/video-learning/${details.external_source_id}`);
+      navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
       setError(
         err.message || "Failed to add suggested video. Please try again."
@@ -415,7 +416,7 @@ export default function YouTubeSourceDialog() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const navigate = useNavigate();
   const handleClose = () => {
-    navigate("/home");
+    navigate(ROUTES.DASHBOARD);
     setIsModalOpen(false);
   };
 

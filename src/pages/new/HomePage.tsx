@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSourceModal } from "../../components/YouTubeSourceDialog";
+import { ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -516,7 +517,7 @@ export default function HomePage() {
             {suggestedVideos.map((video) => (
               <div
                 key={video.id}
-                onClick={() => navigate("/video-learning")}
+                onClick={() => navigate(ROUTES.VIDEO_LEARNING)}
                 className="group relative bg-slate-800/60 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-slate-600 border border-slate-700/80 hover:-translate-y-1 cursor-pointer"
               >
                 <div className="relative">
@@ -585,7 +586,7 @@ export default function HomePage() {
                   <p className="text-xs text-slate-400">{test.topic}</p>
                 </div>
                 <button
-                  onClick={() => navigate("/exam-info")}
+                  onClick={() => navigate(ROUTES.EXAM_INFO)}
                   className="px-3 py-1.5 text-sm font-semibold bg-purple-600/80 text-white rounded-md hover:bg-purple-600 transition-colors"
                 >
                   Start
@@ -696,7 +697,7 @@ export default function HomePage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate("/analysis")}
+                  onClick={() => navigate(ROUTES.ANALYSIS)}
                   className="px-4 py-2 text-sm font-semibold bg-blue-600/80 text-white rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto"
                 >
                   Review Test

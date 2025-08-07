@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchTestSeriesFormData, testSeriesApi } from "../../lib/api-client";
+import { ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
 interface RadioButtonProps {
@@ -167,7 +168,7 @@ const TestConfigurationPageComponent = () => {
       const response = await testSeriesApi.createTest(testData);
 
       // Navigate to exam info page with the test ID
-      navigate("/exam-info", {
+      navigate(ROUTES.EXAM_INFO, {
         state: {
           testId: response.testId,
           testConfig: testData,

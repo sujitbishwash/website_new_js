@@ -2,6 +2,7 @@ import { AddSourceModal } from "@/components/YouTubeSourceDialog";
 import { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { examGoalApi, ExamType } from "../../lib/api-client";
+import { ROUTES } from "../../routes/constants";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -263,7 +264,7 @@ const ExamGoalSelector: FC = () => {
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          navigate("/home");
+          navigate(ROUTES.DASHBOARD);
         }}
       />
     </div>

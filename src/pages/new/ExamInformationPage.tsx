@@ -2,6 +2,7 @@
 // You can use this component by importing it and rendering it in your main App file.
 
 import { useLocation, useNavigate } from "react-router-dom";
+import { ROUTES } from "../../routes/constants";
 
 // Icon components for the legend - using inline SVG for simplicity
 const NotVisitedIcon = () => (
@@ -173,7 +174,7 @@ export default function ExamInformationPage() {
         <footer className="flex justify-between items-center p-6 border-t border-gray-700">
           <button
             onClick={() =>
-              navigate("/test-series", {
+              navigate(ROUTES.TEST_SERIES, {
                 state: {
                   testId: testId,
                   isDemo: false,
@@ -186,7 +187,7 @@ export default function ExamInformationPage() {
           </button>
           <button
             onClick={() =>
-              navigate("/exam-reconfirm", {
+              navigate(ROUTES.EXAM_RECONFIRM, {
                 state: { testId: testId, testConfig: testConfig },
               })
             }

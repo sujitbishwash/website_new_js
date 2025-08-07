@@ -18,11 +18,12 @@ import ReferralPage from "../pages/new/ReferralPage";
 import SubscriptionPage from "../pages/new/SubscriptionPage";
 import TestConfigurationPage from "../pages/new/TestConfigurationPage";
 import TestMainPage from "../pages/new/TestMainPage";
+import { ROUTES } from "./constants";
 
 // Route configuration object for easy maintenance
 export const routes = [
   {
-    path: "/",
+    path: ROUTES.HOME,
     element: <Layout />,
     children: [
       {
@@ -122,16 +123,14 @@ export const routes = [
         name: "Previous Year Papers",
         description: "Previous year question papers",
       },
-
       {
-        path: "/attempted-tests",
+        path: "attempted-tests",
         element: <ComingSoonPage />,
         name: "Attempted Tests",
         description: "Attempted Tests",
       },
-
       {
-        path: "/exams",
+        path: "exams",
         element: <ComingSoonPage />,
         name: "Exams Page",
         description: "Exams Page",

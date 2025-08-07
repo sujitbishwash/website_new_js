@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
 import TestResultDialog from "../../components/TestResultDialog";
+import { ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
 type QuestionType =
@@ -379,7 +380,7 @@ const TestMainPage = () => {
 
   const handleCloseTestResultDialog = () => {
     setShowTestResultDialog(false);
-    navigate("/home");
+    navigate(ROUTES.DASHBOARD);
   };
 
   // --- Loading and Error States ---
@@ -763,7 +764,7 @@ const TestMainPage = () => {
             totalStudents: 150,
           }}
           onClose={handleCloseTestResultDialog}
-          navigate={() => navigate("/analysis")}
+          navigate={() => navigate(ROUTES.ANALYSIS)}
         />
       )}
     </div>

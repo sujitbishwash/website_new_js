@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ROUTES } from "../../routes/constants";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -431,7 +432,7 @@ const LoginCard: React.FC = () => {
 
       // Navigate to exam goal page after a short delay
       setTimeout(() => {
-        navigate("/exam-goal");
+        navigate(ROUTES.EXAM_GOAL);
         setIsLoading(false);
       }, 1000);
     } catch (err: any) {
