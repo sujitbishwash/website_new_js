@@ -474,7 +474,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0d121e] to-[#1a1a2e] text-gray-300 font-sans">
+    <div className="min-h-full bg-gradient-to-br from-[#0d121e] to-[#1a1a2e] text-gray-300 font-sans p-6">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl">
         {/* Header Card */}
         <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">

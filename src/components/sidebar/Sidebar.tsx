@@ -54,13 +54,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-gray-800 border-r border-gray-700 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-screen bg-gray-800 border-r border-gray-700 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 lg:static lg:z-auto`}
         style={{ width: "256px" }}
       >
         {/* Header with close button for mobile */}
-        <div className="p-4 border-b border-gray-700 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
           <h1 className="text-xl font-bold">AI Padhai</h1>
           <button
             onClick={onToggle}
@@ -71,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 overflow-y-auto">
+        <nav className="flex-1 p-4 overflow-y-auto min-h-0">
           <ul className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -109,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
               onToggle();
             }
           }}
-          className="p-4 border-t border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer"
+          className="p-4 border-t border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer flex-shrink-0"
         >
           <div className="flex items-center space-x-3">
             <div className="bg-gray-600 rounded-full p-2">
