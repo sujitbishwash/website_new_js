@@ -1,5 +1,8 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { authApi } from "@/lib/api-client";
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import { ROUTES } from "../../routes/constants";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -202,6 +205,44 @@ const styles = {
 // --- Main App Component ---
 
 const LoginPage: React.FC = () => {
+  const { isAuthenticated, isLoading, hasExamGoal, checkExamGoal } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect to appropriate page if already authenticated
+  React.useEffect(() => {
+    const handleAuthenticatedUser = async () => {
+      if (!isLoading && isAuthenticated) {
+        // Check if user has exam goal
+        const hasGoal = await checkExamGoal();
+        if (hasGoal) {
+          navigate(ROUTES.DASHBOARD, { replace: true });
+        } else {
+          navigate(ROUTES.EXAM_GOAL, { replace: true });
+        }
+      }
+    };
+
+    handleAuthenticatedUser();
+  }, [isAuthenticated, isLoading, navigate, checkExamGoal]);
+
+  // Show loading spinner while checking authentication
+  if (isLoading) {
+    return (
+      <div style={styles.appContainer}>
+        <div style={{ ...styles.loginCard, textAlign: "center" }}>
+          <div style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>
+            Loading...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Don't render login form if already authenticated
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <>
       {/* We inject a style tag here for the animations */}
@@ -344,12 +385,19 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 
 const LoginCard: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { login, checkExamGoal } = useAuth();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [otpSent, setOtpSent] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Get the return URL from location state, or default to dashboard
+  const from =
+    (location.state as { from?: { pathname: string } })?.from?.pathname ||
+    ROUTES.DASHBOARD;
 
   const validateEmail = (email: string): boolean => {
     const re =
@@ -429,9 +477,23 @@ const LoginCard: React.FC = () => {
       }
         */
 
-      // Navigate to exam goal page after a short delay
-      setTimeout(() => {
-        navigate("/exam-goal");
+      // Navigate to appropriate page after a short delay
+      setTimeout(async () => {
+        // dummy code need to be removed when api is ready
+        const response = await authApi.login(email, "securepassword");
+
+        // Use the auth context to login
+        login(response.data.access_token, { email });
+
+        // Check if user has exam goal and navigate accordingly
+        const hasGoal = await checkExamGoal();
+        if (hasGoal) {
+          // User has exam goal, navigate to return URL or dashboard
+          navigate(from);
+        } else {
+          // User doesn't have exam goal, navigate to exam goal page
+          navigate(ROUTES.EXAM_GOAL);
+        }
         setIsLoading(false);
       }, 1000);
     } catch (err: any) {

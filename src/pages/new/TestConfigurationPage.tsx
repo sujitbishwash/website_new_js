@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchTestSeriesFormData, testSeriesApi } from "../../lib/api-client";
+import { ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
 interface RadioButtonProps {
@@ -158,19 +159,16 @@ const TestConfigurationPageComponent = () => {
 
       const testData = {
         subject: selectedSubject,
-        sub_topic: selectedSubTopic ? [selectedSubTopic] : [],
-        level: selectedDifficulty,
+        // sub_topic: selectedSubTopic ? [selectedSubTopic] : [],
+        sub_topic: [],
+        level: selectedDifficulty.toLowerCase(),
         language: selectedLanguage,
       };
 
-      console.log("Creating test with configuration:", testData);
-
       const response = await testSeriesApi.createTest(testData);
 
-      console.log("Test created successfully:", response);
-
       // Navigate to exam info page with the test ID
-      navigate("/exam-info", {
+      navigate(ROUTES.EXAM_INFO, {
         state: {
           testId: response.testId,
           testConfig: testData,
@@ -303,7 +301,7 @@ const TestConfigurationPageComponent = () => {
                   id={`language-${lang}`}
                   name="language"
                   value={lang}
-                  label={lang}
+                  label={languageMapper(lang)}
                   checked={selectedLanguage === lang}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                     setSelectedLanguage(e.target.value)
@@ -345,3 +343,13 @@ const TestConfigurationPageComponent = () => {
 export default function TestConfigurationPage() {
   return <TestConfigurationPageComponent />;
 }
+const languageMapper = (code: string): string => {
+  switch (code) {
+    case "en":
+      return "English";
+    case "hi":
+      return "Hindi";
+    default:
+      return "English";
+  }
+};

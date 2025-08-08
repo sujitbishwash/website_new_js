@@ -7,11 +7,11 @@ const Layout: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-gray-900 text-white">
+    <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
       <Sidebar isOpen={isOpen} onToggle={() => setIsOpen(!isOpen)} />
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0">
         {/* Header with hamburger menu */}
-        <header className="bg-gray-800 border-b border-gray-700 p-4 lg:hidden">
+        <header className="bg-gray-800 border-b border-gray-700 p-4 lg:hidden flex-shrink-0">
           <button
             onClick={() => setIsOpen(!isOpen)}
             className="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-2"
@@ -19,7 +19,7 @@ const Layout: React.FC = () => {
             <Menu size={24} />
           </button>
         </header>
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 overflow-auto">
           <Outlet />
         </main>
       </div>

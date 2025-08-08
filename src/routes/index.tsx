@@ -5,9 +5,10 @@ import LoginPage from "@/pages/new/LoginPage";
 import ProfilePage from "@/pages/new/ProfilePage";
 import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
-import Chat from "../components/Chat";
-import Flashcards from "../components/Flashcards";
 import Layout from "../components/Layout";
+import ProtectedRoute from "../components/ProtectedRoute";
+import Chat from "../components/to-be-deleted/Chat";
+import Flashcards from "../components/to-be-deleted/Flashcards";
 import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
 import ExamInformationPage from "../pages/new/ExamInformationPage";
 import ExamReconfirmationPage from "../pages/new/ExamReconfirmationPage";
@@ -18,12 +19,17 @@ import ReferralPage from "../pages/new/ReferralPage";
 import SubscriptionPage from "../pages/new/SubscriptionPage";
 import TestConfigurationPage from "../pages/new/TestConfigurationPage";
 import TestMainPage from "../pages/new/TestMainPage";
+import { ROUTES } from "./constants";
 
 // Route configuration object for easy maintenance
 export const routes = [
   {
-    path: "/",
-    element: <Layout />,
+    path: ROUTES.HOME,
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         index: true,
@@ -122,16 +128,14 @@ export const routes = [
         name: "Previous Year Papers",
         description: "Previous year question papers",
       },
-
       {
-        path: "/attempted-tests",
+        path: "attempted-tests",
         element: <ComingSoonPage />,
         name: "Attempted Tests",
         description: "Attempted Tests",
       },
-
       {
-        path: "/exams",
+        path: "exams",
         element: <ComingSoonPage />,
         name: "Exams Page",
         description: "Exams Page",

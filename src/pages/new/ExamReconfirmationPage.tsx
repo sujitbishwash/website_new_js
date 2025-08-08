@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import { ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
 interface ExamDetails {
@@ -43,6 +44,9 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
 }) => {
   const navigate = useNavigate();
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const location = useLocation();
+  const testId = location.state?.testId;
+  const testConfig = location.state?.testConfig;
 
   return (
     <div className="bg-gray-900 min-h-screen font-sans text-gray-200 p-4 sm:p-6 lg:p-8">
@@ -108,14 +112,18 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
         {/* Footer Buttons */}
         <footer className="mt-8 pt-6 border-t border-gray-700 flex justify-between items-center">
           <button
-            onClick={() => navigate("/exam-info")}
+            onClick={() => navigate(ROUTES.EXAM_INFO)}
             className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
           >
             Previous
           </button>
           <button
             disabled={!isConfirmed}
-            onClick={() => navigate("/test-main-page")}
+            onClick={() =>
+              navigate(ROUTES.TEST_MAIN_PAGE, {
+                state: { testId: testId, testConfig: testConfig },
+              })
+            }
             className={`font-bold py-2 px-6 rounded-lg transition-all ${
               isConfirmed
                 ? "bg-blue-600 hover:bg-blue-500 text-white cursor-pointer"

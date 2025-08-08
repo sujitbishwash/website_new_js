@@ -20,8 +20,12 @@ interface MessageType {
   isUser: boolean;
 }
 
-interface IconProps {
-  className?: string;
+interface ChatProps {
+  videoId: string;
+  messages: Array<{ text: string; isUser: boolean }>;
+  isLoading: boolean;
+  error: string | null;
+  onSendMessage: (message: string) => void;
 }
 
 // --- SVG Icons ---
@@ -123,7 +127,7 @@ const MessageList: React.FC<{ messages: MessageType[] }> = ({ messages }) => {
   useEffect(scrollToBottom, [messages]);
 
   return (
-    <div className="flex-grow p-3 sm:p-4 md:p-6 overflow-y-auto">
+    <div className="flex-1 p-3 sm:p-4 md:p-6 overflow-y-auto">
       {messages.map((msg, index) => (
         <Message key={index} text={msg.text} isUser={msg.isUser} />
       ))}
@@ -157,16 +161,16 @@ const PlanSelector: React.FC = () => {
     <div className="relative" ref={wrapperRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-700 transition-colors"
+        className="flex items-center space-x-1 sm:space-x-2 p-1.5 sm:p-2 rounded-lg hover:bg-gray-700 transition-colors"
       >
         <span
-          className="text-sm font-medium"
+          className="text-xs sm:text-sm font-medium"
           style={{ color: theme.primaryText }}
         >
           {selectedPlan}
         </span>
         <svg
-          className={`w-4 h-4 transition-transform duration-200 ${
+          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
           fill="none"
@@ -230,14 +234,14 @@ const ModeSelector: React.FC = () => {
       {/* Changed styling from green to blue */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center ml-2 space-x-2 px-3 py-1.5 bg-blue-900/50 rounded-full border border-blue-400/50 hover:bg-blue-800/60 hover:border-blue-300/70 transition-all duration-300 cursor-pointer"
+        className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-1.5 bg-blue-900/50 rounded-full border border-blue-400/50 hover:bg-blue-800/60 hover:border-blue-300/70 transition-all duration-300 cursor-pointer"
       >
         <BrainIcon />
-        <span className="hidden sm:inline text-blue-300 text-sm font-medium">
+        <span className="hidden sm:inline text-blue-300 text-xs sm:text-sm font-medium">
           {selectedMode}
         </span>
         <svg
-          className={`w-4 h-4 text-blue-300 transition-transform duration-200 ${
+          className={`w-3 h-3 sm:w-4 sm:h-4 text-blue-300 transition-transform duration-200 ${
             isOpen ? "rotate-180" : ""
           }`}
           fill="none"
@@ -275,13 +279,14 @@ const ModeSelector: React.FC = () => {
   );
 };
 
-const ChatInput: React.FC<{ onSendMessage: (text: string) => void }> = ({
-  onSendMessage,
-}) => {
+const ChatInput: React.FC<{
+  onSendMessage: (text: string) => void;
+  isLoading?: boolean;
+}> = ({ onSendMessage, isLoading = false }) => {
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleSend = () => {
-    if (inputValue.trim()) {
+    if (inputValue.trim() && !isLoading) {
       onSendMessage(inputValue);
       setInputValue("");
     }
@@ -295,44 +300,61 @@ const ChatInput: React.FC<{ onSendMessage: (text: string) => void }> = ({
   };
 
   return (
-    <div className="px-2 sm:px-4 md:px-6 py-4">
+    <div className="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
       <div
-        className="flex items-center p-2 rounded-2xl"
+        className="flex items-center p-2 sm:p-3 rounded-2xl"
         style={{ backgroundColor: theme.cardBackground }}
       >
-        <PlanSelector />
-        <ModeSelector />
+        {/* Plan Selector - Hidden on very small screens */}
+        <div className="hidden sm:block">
+          <PlanSelector />
+        </div>
 
-        <div className="flex-grow mx-2 sm:mx-4">
+        {/* Mode Selector - More compact on small screens */}
+        <div className="sm:ml-2">
+          <ModeSelector />
+        </div>
+
+        {/* Text Input - Gets more space on mobile */}
+        <div className="flex-grow mx-1 sm:mx-2 md:mx-4 min-w-0">
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyPress={handleKeyPress}
             placeholder="Ask anything"
-            className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none pl-4 pr-4"
+            className="w-full bg-transparent text-white placeholder-gray-400 focus:outline-none pl-2 sm:pl-4 pr-2 sm:pr-4 text-sm sm:text-base min-w-0"
           />
         </div>
 
+        {/* Send Button - Compact on mobile */}
         <button
           onClick={handleSend}
-          className="ml-2 sm:ml-4 px-3 sm:px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center space-x-2"
+          disabled={isLoading}
+          className="ml-1 sm:ml-2 md:ml-4 px-2 sm:px-3 md:px-4 py-2 rounded-lg text-white font-semibold bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center space-x-1 sm:space-x-2 disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M5 12h14" />
-            <path d="m12 5 7 7-7 7" />
-          </svg>
-          <span className="hidden sm:inline">Send</span>
+          {isLoading ? (
+            <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-b-2 border-white"></div>
+          ) : (
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="sm:w-5 sm:h-5"
+            >
+              <path d="M5 12h14" />
+              <path d="m12 5 7 7-7 7" />
+            </svg>
+          )}
+          <span className="hidden sm:inline text-sm">
+            {isLoading ? "Sending..." : "Send"}
+          </span>
         </button>
       </div>
     </div>
@@ -340,48 +362,34 @@ const ChatInput: React.FC<{ onSendMessage: (text: string) => void }> = ({
 };
 
 // --- Main App Component ---
-export default function Chat() {
-  const [messages, setMessages] = useState<MessageType[]>([
-    {
-      text: "Hello! I'm your AI Padhai assistant. How can I help you learn something new today?",
-      isUser: false,
-    },
-    {
-      text: "You can ask me to generate a quiz, create flashcards, or summarize a topic for you. What would you like to do?",
-      isUser: false,
-    },
-  ]);
-
-  const handleSendMessage = (text: string) => {
-    const newUserMessage: MessageType = { text, isUser: true };
-    setMessages((prevMessages) => [...prevMessages, newUserMessage]);
-
-    // Mock AI response
-    setTimeout(() => {
-      const aiResponse: MessageType = {
-        text: `You asked about "${text}". Let's dive deeper into that topic! I'll prepare some information for you.`,
-        isUser: false,
-      };
-      setMessages((prevMessages) => [...prevMessages, aiResponse]);
-    }, 1000);
-  };
-
+export default function Chat({
+  videoId,
+  messages,
+  isLoading,
+  error,
+  onSendMessage,
+}: ChatProps) {
   return (
     <div
-      className="font-sans flex flex-col h-screen"
+      className="font-sans flex flex-col h-full"
       style={{ backgroundColor: theme.background }}
     >
-      <main className="flex-grow flex flex-col max-w-5xl w-full mx-auto">
-        <div className="flex-grow flex flex-col justify-end min-h-0">
-          {messages.length <= 2 && (
-            <div className="flex-grow flex flex-col justify-center items-center">
+      <main className="flex flex-col h-full">
+        <div className="flex-1 flex flex-col min-h-0">
+          {messages.length === 0 && (
+            <div className="flex-1 flex flex-col justify-center items-center p-4">
               <ChatHeader />
               <SuggestionChips />
             </div>
           )}
-          {messages.length > 2 && <MessageList messages={messages} />}
+          {messages.length > 0 && <MessageList messages={messages} />}
+          {error && (
+            <div className="p-4 text-center">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
         </div>
-        <ChatInput onSendMessage={handleSendMessage} />
+        <ChatInput onSendMessage={onSendMessage} isLoading={isLoading} />
       </main>
     </div>
   );

@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SuggestedVideo, videoApi } from "../lib/api-client";
+import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
+import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
+import OutOfSyllabus from "./OutOfSyllabus";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -82,10 +84,16 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState("");
   const [usingFallbackData, setUsingFallbackData] = useState(false);
+  const [showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
 
   // Effect to handle clicks outside the modal
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
+      // Don't close if OutOfSyllabus modal is open
+      if (showOutOfSyllabus) {
+        return;
+      }
+
       if (
         modalRef.current &&
         !modalRef.current.contains(event.target as Node)
@@ -101,7 +109,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, onClose, showOutOfSyllabus]);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -138,7 +146,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     }
   };
 
-  const validateUrl = (url: string): boolean => {
+  const validateUrlFormat = (url: string): boolean => {
     try {
       new URL(url);
       return true;
@@ -159,20 +167,33 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       return;
     }
 
-    if (!validateUrl(url)) {
-      setError("Please enter a valid URL");
-      return;
-    }
-
     try {
       setIsLoading(true);
       setError("");
 
-      // Fetch video details first
+      // First validate the URL
+      const validationResult = await validateUrl(url);
+      console.log("Validation result:", validationResult); // Debug log
+
+      if (!validationResult.isValid) {
+        if (validationResult.isOutOfSyllabus) {
+          console.log("Setting showOutOfSyllabus to true"); // Debug log
+          // Show OutOfSyllabus modal
+          setShowOutOfSyllabus(true);
+          setIsLoading(false);
+          return;
+        } else {
+          setError(validationResult.message || "Invalid URL");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // If validation passes, fetch video details
       const details = await videoApi.getVideoDetail(url);
 
       onClose();
-      navigate(`/video-learning/${details.external_source_id}`);
+      navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
       setError(
         err.message ||
@@ -185,7 +206,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   const navigateToHome = () => {
     onClose();
-    navigate("/home");
+    navigate(ROUTES.DASHBOARD);
   };
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
@@ -193,11 +214,27 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       setIsLoading(true);
       setError("");
 
-      // Use the video URL from the suggested video
+      // First validate the URL
+      const validationResult = await validateUrl(video.url);
+
+      if (!validationResult.isValid) {
+        if (validationResult.isOutOfSyllabus) {
+          // Show OutOfSyllabus modal
+          setShowOutOfSyllabus(true);
+          setIsLoading(false);
+          return;
+        } else {
+          setError(validationResult.message || "Invalid URL");
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      // If validation passes, fetch video details
       const details = await videoApi.getVideoDetail(video.url);
 
       onClose();
-      navigate(`/video-learning/${details.external_source_id}`);
+      navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
       setError(
         err.message || "Failed to add suggested video. Please try again."
@@ -210,6 +247,11 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   if (!isOpen) {
     return null;
   }
+
+  console.log(
+    "YouTubeSourceDialog render - showOutOfSyllabus:",
+    showOutOfSyllabus
+  ); // Debug log
 
   return (
     // Backdrop
@@ -345,6 +387,26 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* OutOfSyllabus Modal Overlay */}
+      {showOutOfSyllabus && (
+        <div
+          className="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50"
+          onClick={(e) => {
+            // Only close if clicking on the backdrop, not on the modal content
+            if (e.target === e.currentTarget) {
+              setShowOutOfSyllabus(false);
+            }
+          }}
+        >
+          <OutOfSyllabus
+            onGoBack={() => {
+              console.log("Closing OutOfSyllabus modal"); // Debug log
+              setShowOutOfSyllabus(false);
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
@@ -354,7 +416,7 @@ export default function YouTubeSourceDialog() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const navigate = useNavigate();
   const handleClose = () => {
-    navigate("/home");
+    navigate(ROUTES.DASHBOARD);
     setIsModalOpen(false);
   };
 
