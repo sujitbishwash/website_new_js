@@ -606,32 +606,60 @@ const Header: React.FC = () => (
   </div>
 );
 
-const GoogleSignInButton: React.FC = () => (
-  <button style={styles.googleButton}>
-    <svg
-      style={{ width: "1.5rem", height: "1.5rem", marginRight: "0.75rem" }}
-      viewBox="0 0 48 48"
+const GoogleSignInButton: React.FC = () => {
+  const { signInWithGoogle } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      const { data, error } = await signInWithGoogle();
+
+      if (error) {
+        console.error("Google sign-in error:", error);
+        // You can add error handling here (e.g., show a toast notification)
+      }
+
+      // If successful, the user will be redirected to the callback URL
+      // and the auth state will be updated automatically
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <button
+      style={styles.googleButton}
+      onClick={handleGoogleSignIn}
+      disabled={isLoading}
     >
-      <path
-        fill="#FFC107"
-        d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039L38.802 8.841C34.553 4.806 29.602 2.5 24 2.5C11.983 2.5 2.5 11.983 2.5 24s9.483 21.5 21.5 21.5c11.147 0 20.25-8.673 20.25-19.75c0-1.343-.138-2.65-.389-3.917z"
-      ></path>
-      <path
-        fill="#FF3D00"
-        d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12.5 24 12.5c3.059 0 5.842 1.154 7.961 3.039l5.841-5.841C34.553 4.806 29.602 2.5 24 2.5C16.318 2.5 9.642 6.735 6.306 14.691z"
-      ></path>
-      <path
-        fill="#4CAF50"
-        d="M24 45.5c5.842 0 11.017-1.939 14.686-5.22l-6.571-4.819c-1.926 1.386-4.32 2.22-6.815 2.22c-5.22 0-9.651-3.657-11.303-8.841l-6.571 4.82C9.642 38.265 16.318 45.5 24 45.5z"
-      ></path>
-      <path
-        fill="#1976D2"
-        d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.16-4.082 5.581l6.571 4.82c3.584-3.264 6.282-8.132 6.282-14.318c0-1.343-.138-2.65-.389-3.917z"
-      ></path>
-    </svg>
-    Sign in with Google
-  </button>
-);
+      <svg
+        style={{ width: "1.5rem", height: "1.5rem", marginRight: "0.75rem" }}
+        viewBox="0 0 48 48"
+      >
+        <path
+          fill="#FFC107"
+          d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039L38.802 8.841C34.553 4.806 29.602 2.5 24 2.5C11.983 2.5 2.5 11.983 2.5 24s9.483 21.5 21.5 21.5c11.147 0 20.25-8.673 20.25-19.75c0-1.343-.138-2.65-.389-3.917z"
+        ></path>
+        <path
+          fill="#FF3D00"
+          d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12.5 24 12.5c3.059 0 5.842 1.154 7.961 3.039l5.841-5.841C34.553 4.806 29.602 2.5 24 2.5C16.318 2.5 9.642 6.735 6.306 14.691z"
+        ></path>
+        <path
+          fill="#4CAF50"
+          d="M24 45.5c5.842 0 11.017-1.939 14.686-5.22l-6.571-4.819c-1.926 1.386-4.32 2.22-6.815 2.22c-5.22 0-9.651-3.657-11.303-8.841l-6.571 4.82C9.642 38.265 16.318 45.5 24 45.5z"
+        ></path>
+        <path
+          fill="#1976D2"
+          d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.16-4.082 5.581l6.571 4.82c3.584-3.264 6.282-8.132 6.282-14.318c0-1.343-.138-2.65-.389-3.917z"
+        ></path>
+      </svg>
+      {isLoading ? "Signing in..." : "Sign in with Google"}
+    </button>
+  );
+};
 
 const OrDivider: React.FC = () => (
   <div style={styles.dividerContainer}>

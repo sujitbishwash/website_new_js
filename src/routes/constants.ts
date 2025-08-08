@@ -32,6 +32,7 @@ export const ROUTES = {
     // Auth routes
     LOGIN: "/login",
     EXAM_GOAL: "/exam-goal",
+    AUTH_CALLBACK: "/auth/callback",
 } as const;
 
 // Route names for navigation
@@ -55,6 +56,7 @@ export const ROUTE_NAMES = {
     [ROUTES.EXAMS]: "Exams",
     [ROUTES.LOGIN]: "Login",
     [ROUTES.EXAM_GOAL]: "Exam Goal",
+    [ROUTES.AUTH_CALLBACK]: "Auth Callback",
 } as const;
 
 // Helper function to build video learning route with ID
