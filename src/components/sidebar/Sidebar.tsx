@@ -144,7 +144,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
           </div>
           
           {/* Profile and Logout Buttons */}
-          <div className="space-y-2">
+          {/*<div className="space-y-2">
             <button
               onClick={() => {
                 navigate(ROUTES.PROFILE);
@@ -186,7 +186,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
               <LogOut size={20} />
               <span className="text-sm">Logout</span>
             </button>
-          </div>
+          </div>*/}
       </aside>
     </>
   );

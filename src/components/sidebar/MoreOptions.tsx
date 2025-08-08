@@ -183,7 +183,7 @@ const ProfileMenu = () => {
       <div ref={menuRef} className="relative font-sans">
         <button
           onClick={toggleMenu}
-          className={`flex items-center justify-between w-full space-x-4 p-2 rounded-lg transition-colors duration-200
+          className={`flex items-center justify-between w-full space-x-4 p-4 transition-colors duration-200
                     bg-[${theme.inputBackground}] hover:bg-[${theme.divider}] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[${theme.background}] focus:ring-[${theme.accent}]`}
         >
           <div className="flex items-center space-x-3">
@@ -290,7 +290,7 @@ const ProfileMenu = () => {
 const Moreoptions = () => {
   return (
     <div
-      className={`w-screen h-screen flex flex-col justify-end p-8 bg-[${theme.background}]`}
+      className={`flex flex-col justify-end bg-[${theme.background}]`}
     >
       <style>{`
           @keyframes fade-in {
@@ -304,7 +304,7 @@ const Moreoptions = () => {
           .animate-fade-in { animation: fade-in 0.2s ease-out; }
           .animate-fade-in-up { animation: fade-in-up 0.2s ease-out; }
         `}</style>
-      <div className="w-72">
+      <div>
         <ProfileMenu />
       </div>
     </div>
