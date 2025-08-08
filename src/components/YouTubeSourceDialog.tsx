@@ -74,6 +74,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   onClose,
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
@@ -170,15 +171,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       // Fetch video details first
       const details = await videoApi.getVideoDetail(url);
 
-      // Here you can add logic to save the video to user's library
-      // For now, we'll just log the details
-      console.log("Adding video to library:", details);
-
-      // You can add an API call here to save the video
-      // await videoApi.addToLibrary(details);
-
-      // Close modal on successful add
       onClose();
+      navigate(`/video-learning/${details.external_source_id}`);
     } catch (err: any) {
       setError(
         err.message ||
@@ -189,6 +183,11 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     }
   };
 
+  const navigateToHome = () => {
+    onClose();
+    navigate("/home");
+  };
+
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
     try {
       setIsLoading(true);
@@ -197,13 +196,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       // Use the video URL from the suggested video
       const details = await videoApi.getVideoDetail(video.url);
 
-      console.log("Adding suggested video to library:", details);
-
-      // You can add an API call here to save the video
-      // await videoApi.addToLibrary(details);
-
-      // Close modal on successful add
       onClose();
+      navigate(`/video-learning/${details.external_source_id}`);
     } catch (err: any) {
       setError(
         err.message || "Failed to add suggested video. Please try again."
@@ -219,7 +213,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   return (
     // Backdrop
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4 font-sans">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-sm p-4 font-sans">
       {/* Modal Panel */}
       <div
         ref={modalRef}
@@ -239,8 +233,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               <XIcon className="h-6 w-6" />
             </button>
           </div>
-
           {/* Body */}
+
           <div className="mt-6">
             <label htmlFor="url-input" className="text-sm text-gray-400">
               Enter a YouTube Link, Website URL, Doc, ArXiv, Etc.
@@ -336,7 +330,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           {/* Footer */}
           <div className="mt-8 flex justify-end space-x-4">
             <button
-              onClick={onClose}
+              onClick={navigateToHome}
               className="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400"
             >
               Go to Home
@@ -360,8 +354,8 @@ export default function YouTubeSourceDialog() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const navigate = useNavigate();
   const handleClose = () => {
-    setIsModalOpen(false);
     navigate("/home");
+    setIsModalOpen(false);
   };
 
   return (
@@ -393,7 +387,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "React Hooks in 10 Minutes",
     topic: "Web Development",
     thumbnailUrl: "https://placehold.co/400x225/E84343/FFFFFF?text=React",
-    url: "https://www.youtube.com/watch?v=example1",
+    url: "https://www.youtube.com/watch?v=TNhaISOUy6Q",
     description: "Learn React Hooks quickly with practical examples",
     tags: ["react", "javascript", "web-development"],
   },
@@ -402,7 +396,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "A Brief History of the Cosmos",
     topic: "Science",
     thumbnailUrl: "https://placehold.co/400x225/4361E8/FFFFFF?text=Cosmos",
-    url: "https://www.youtube.com/watch?v=example2",
+    url: "https://www.youtube.com/watch?v=OUnYkixy3ug",
     description: "Explore the fascinating history of our universe",
     tags: ["science", "cosmos", "astronomy"],
   },
@@ -411,7 +405,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "Perfect Sourdough for Beginners",
     topic: "Cooking",
     thumbnailUrl: "https://placehold.co/400x225/E8A243/FFFFFF?text=Cooking",
-    url: "https://www.youtube.com/watch?v=example3",
+    url: "https://www.youtube.com/watch?v=-9Osn7JsP1Y",
     description: "Master the art of sourdough bread making",
     tags: ["cooking", "baking", "sourdough"],
   },
@@ -420,7 +414,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "Machine Learning Fundamentals",
     topic: "Technology",
     thumbnailUrl: "https://placehold.co/400x225/10B981/FFFFFF?text=ML",
-    url: "https://www.youtube.com/watch?v=example4",
+    url: "https://www.youtube.com/watch?v=bLHqHRWUUWg&list=PLwdnzlV3ogoVDlDwuB9SLJzhaZT0tTil3",
     description: "Essential concepts in machine learning",
     tags: ["machine-learning", "ai", "technology"],
   },
@@ -429,7 +423,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "Photography Composition Tips",
     topic: "Art",
     thumbnailUrl: "https://placehold.co/400x225/8B5CF6/FFFFFF?text=Photo",
-    url: "https://www.youtube.com/watch?v=example5",
+    url: "https://www.youtube.com/watch?v=8XBYt-_U4WE",
     description: "Improve your photography with composition techniques",
     tags: ["photography", "art", "composition"],
   },
@@ -438,7 +432,7 @@ const fallbackSuggestedVideos: SuggestedVideo[] = [
     title: "Financial Planning Basics",
     topic: "Finance",
     thumbnailUrl: "https://placehold.co/400x225/F59E0B/FFFFFF?text=Finance",
-    url: "https://www.youtube.com/watch?v=example6",
+    url: "https://www.youtube.com/watch?v=MabD5R8kRak",
     description: "Essential financial planning for beginners",
     tags: ["finance", "planning", "money"],
   },

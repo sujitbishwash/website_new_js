@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AddSourceModal } from "../../components/YouTubeSourceDialog";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -460,6 +462,8 @@ const suggestedTests: SuggestedTest[] = [
 export default function HomePage() {
   const [learningItems, setLearningItems] = useState(initialLearningItems);
   const [attemptedTests, setAttemptedTests] = useState(initialAttemptedTests);
+  const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
+  const navigate = useNavigate();
 
   const handleRemoveRecord = (id: string, type: "learning" | "test") => {
     if (type === "learning") {
@@ -488,7 +492,10 @@ export default function HomePage() {
                 <p className="text-xs text-slate-400">PDF, DOC, TXT</p>
               </div>
             </div>
-            <div className="group flex items-center space-x-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-800/90 transition-all duration-300 cursor-pointer border border-slate-700 hover:border-green-500">
+            <div
+              onClick={() => setIsYouTubeModalOpen(true)}
+              className="group flex items-center space-x-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-800/90 transition-all duration-300 cursor-pointer border border-slate-700 hover:border-green-500"
+            >
               <PasteIcon className="h-8 w-8 text-green-400 transition-transform group-hover:scale-110" />
               <div>
                 <h2 className="font-semibold text-white">Paste Link</h2>
@@ -509,6 +516,7 @@ export default function HomePage() {
             {suggestedVideos.map((video) => (
               <div
                 key={video.id}
+                onClick={() => navigate("/video-learning")}
                 className="group relative bg-slate-800/60 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-slate-600 border border-slate-700/80 hover:-translate-y-1 cursor-pointer"
               >
                 <div className="relative">
@@ -576,7 +584,10 @@ export default function HomePage() {
                   <h4 className="font-semibold text-white">{test.title}</h4>
                   <p className="text-xs text-slate-400">{test.topic}</p>
                 </div>
-                <button className="px-3 py-1.5 text-sm font-semibold bg-purple-600/80 text-white rounded-md hover:bg-purple-600 transition-colors">
+                <button
+                  onClick={() => navigate("/exam-info")}
+                  className="px-3 py-1.5 text-sm font-semibold bg-purple-600/80 text-white rounded-md hover:bg-purple-600 transition-colors"
+                >
                   Start
                 </button>
               </div>
@@ -684,7 +695,10 @@ export default function HomePage() {
                     </div>
                   </div>
                 </div>
-                <button className="px-4 py-2 text-sm font-semibold bg-blue-600/80 text-white rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto">
+                <button
+                  onClick={() => navigate("/analysis")}
+                  className="px-4 py-2 text-sm font-semibold bg-blue-600/80 text-white rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto"
+                >
                   Review Test
                 </button>
                 <button
@@ -720,6 +734,12 @@ export default function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* YouTube Source Dialog Modal */}
+      <AddSourceModal
+        isOpen={isYouTubeModalOpen}
+        onClose={() => setIsYouTubeModalOpen(false)}
+      />
     </div>
   );
 }

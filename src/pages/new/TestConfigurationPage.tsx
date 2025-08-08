@@ -24,60 +24,6 @@ interface TestSeriesFormData {
   language: string[];
 }
 
-// --- Fallback Dummy Data ---
-const fallbackTestData: TestSeriesFormData = {
-  subjects: [
-    {
-      subject: "English",
-      sub_topic: [
-        "Reading Comprehension",
-        "Grammar",
-        "Vocabulary",
-        "Para Jumbles",
-      ],
-    },
-    {
-      subject: "Aptitude",
-      sub_topic: [
-        "Percentages",
-        "Profit and Loss",
-        "Time and Work",
-        "Ratio and Proportion",
-        "Number Systems",
-      ],
-    },
-    {
-      subject: "Reasoning",
-      sub_topic: [
-        "Puzzles",
-        "Seating Arrangement",
-        "Syllogism",
-        "Blood Relations",
-      ],
-    },
-    {
-      subject: "General Awareness",
-      sub_topic: ["Current Affairs", "History", "Geography", "Static GK"],
-    },
-    {
-      subject: "Computer",
-      sub_topic: [
-        "Data Structures",
-        "Algorithms",
-        "Networking",
-        "Operating Systems",
-        "DBMS",
-      ],
-    },
-    {
-      subject: "Full Test",
-      sub_topic: [],
-    },
-  ],
-  level: ["Easy", "Medium", "Hard"],
-  language: ["English", "Hindi"],
-};
-
 // --- Helper Components for UI elements ---
 
 // Custom Radio Button Component
@@ -140,7 +86,6 @@ const TestConfigurationPageComponent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [usingFallbackData, setUsingFallbackData] = useState(false);
 
   // Get available subjects from API data
   const subjects = testData?.subjects.map((subject) => subject.subject) || [];
@@ -160,7 +105,6 @@ const TestConfigurationPageComponent = () => {
       try {
         setIsLoading(true);
         setError(null);
-        setUsingFallbackData(false);
 
         const data = await fetchTestSeriesFormData();
         setTestData(data);
@@ -179,24 +123,8 @@ const TestConfigurationPageComponent = () => {
           setSelectedLanguage(data.language[0]);
         }
       } catch (err: any) {
-        console.warn("API failed, using fallback data:", err.message);
-        setError("Using sample data (API unavailable)");
-        setTestData(fallbackTestData);
-        setUsingFallbackData(true);
-
-        // Set default selections from fallback data
-        if (fallbackTestData.subjects.length > 0) {
-          setSelectedSubject(fallbackTestData.subjects[0].subject);
-          if (fallbackTestData.subjects[0].sub_topic.length > 0) {
-            setSelectedSubTopic(fallbackTestData.subjects[0].sub_topic[0]);
-          }
-        }
-        if (fallbackTestData.level.length > 0) {
-          setSelectedDifficulty(fallbackTestData.level[0]);
-        }
-        if (fallbackTestData.language.length > 0) {
-          setSelectedLanguage(fallbackTestData.language[0]);
-        }
+        console.error("Failed to fetch test configuration data:", err);
+        setError("Failed to load test configuration. Please try again.");
       } finally {
         setIsLoading(false);
       }
@@ -237,41 +165,18 @@ const TestConfigurationPageComponent = () => {
 
       console.log("Creating test with configuration:", testData);
 
-      // If using fallback data, simulate API call
-      if (usingFallbackData) {
-        // Simulate API delay
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+      const response = await testSeriesApi.createTest(testData);
 
-        // Simulate successful response
-        const mockResponse = {
-          testId: `demo-${Date.now()}`,
-          status: "created",
-        };
+      console.log("Test created successfully:", response);
 
-        console.log("Demo test created successfully:", mockResponse);
-
-        // Navigate to exam info page with the demo test ID
-        navigate("/exam-info", {
-          state: {
-            testId: mockResponse.testId,
-            testConfig: testData,
-            isDemo: true,
-          },
-        });
-      } else {
-        const response = await testSeriesApi.createTest(testData);
-
-        console.log("Test created successfully:", response);
-
-        // Navigate to exam info page with the test ID
-        navigate("/exam-info", {
-          state: {
-            testId: response.testId,
-            testConfig: testData,
-            isDemo: false,
-          },
-        });
-      }
+      // Navigate to exam info page with the test ID
+      navigate("/exam-info", {
+        state: {
+          testId: response.testId,
+          testConfig: testData,
+          isDemo: false,
+        },
+      });
     } catch (err: any) {
       console.error("Failed to create test:", err);
       setError(err.message || "Failed to create test. Please try again.");
@@ -303,13 +208,6 @@ const TestConfigurationPageComponent = () => {
           <p className="text-gray-400 mt-2">
             Select your preferences to start a practice test.
           </p>
-          {usingFallbackData && (
-            <div className="mt-2">
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                Sample Data
-              </span>
-            </div>
-          )}
         </div>
 
         {/* --- Error Display --- */}
