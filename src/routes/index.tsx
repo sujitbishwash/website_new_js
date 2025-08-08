@@ -1,3 +1,4 @@
+import AuthCallbackPage from "@/pages/new/AuthCallbackPage";
 import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
 import ExamGoalPage from "@/pages/new/ExamGoalPage";
@@ -140,6 +141,12 @@ export const routes = [
     element: <LoginPage />,
     name: "Login",
     description: "User authentication page",
+  },
+  {
+    path: "auth/callback",
+    element: <AuthCallbackPage />,
+    name: "Auth Callback",
+    description: "OAuth callback handler",
   },
   {
     path: "exam-goal",

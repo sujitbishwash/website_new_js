@@ -1,4 +1,6 @@
+import type { User as SupabaseUser } from "@supabase/supabase-js";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { authHelpers } from "../lib/supabase";
 
 interface User {
   id: string;
@@ -14,8 +16,9 @@ interface AuthContextType {
   examGoalLoading: boolean;
   login: (token: string, userData?: Partial<User>) => void;
   logout: () => void;
-  checkAuth: () => boolean;
+  checkAuth: () => Promise<boolean>;
   checkExamGoal: () => Promise<boolean>;
+  signInWithGoogle: () => Promise<{ data: any; error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -38,22 +41,60 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [hasExamGoal, setHasExamGoal] = useState(false);
   const [examGoalLoading, setExamGoalLoading] = useState(false);
 
-  const checkAuth = (): boolean => {
-    const token = localStorage.getItem("authToken");
-    const userData = localStorage.getItem("userData");
+  // Convert Supabase user to our User interface
+  const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
+    return {
+      id: supabaseUser.id,
+      email: supabaseUser.email || "",
+      name:
+        supabaseUser.user_metadata?.full_name ||
+        supabaseUser.user_metadata?.name ||
+        "",
+    };
+  };
 
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-        return true;
-      } catch (error) {
-        console.error("Error parsing user data:", error);
-        logout();
+  const checkAuth = async (): Promise<boolean> => {
+    try {
+      // First try to get session from Supabase
+      const { session, error } = await authHelpers.getSession();
+
+      if (error) {
+        console.error("Error getting session:", error);
         return false;
       }
+
+      if (session?.user) {
+        const convertedUser = convertSupabaseUser(session.user);
+        setUser(convertedUser);
+
+        // Store token for backward compatibility with existing API
+        localStorage.setItem("authToken", session.access_token);
+        localStorage.setItem("userData", JSON.stringify(convertedUser));
+
+        return true;
+      }
+
+      // Fallback to localStorage for backward compatibility
+      const token = localStorage.getItem("authToken");
+      const userData = localStorage.getItem("userData");
+
+      if (token && userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+          return true;
+        } catch (error) {
+          console.error("Error parsing user data:", error);
+          logout();
+          return false;
+        }
+      }
+
+      return false;
+    } catch (error) {
+      console.error("Error checking auth:", error);
+      return false;
     }
-    return false;
   };
 
   const login = (token: string, userData?: Partial<User>) => {
@@ -70,11 +111,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      // Sign out from Supabase
+      await authHelpers.signOut();
+    } catch (error) {
+      console.error("Error signing out from Supabase:", error);
+    }
+
+    // Clear localStorage
     localStorage.removeItem("authToken");
     localStorage.removeItem("userData");
     setUser(null);
-    setHasExamGoal(false);
+    //setHasExamGoal(false);
+  };
+
+  const signInWithGoogle = async () => {
+    return await authHelpers.signInWithGoogle();
   };
 
   const checkExamGoal = async (): Promise<boolean> => {
@@ -100,8 +153,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    checkAuth();
-    setIsLoading(false);
+    const initializeAuth = async () => {
+      await checkAuth();
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const value: AuthContextType = {
@@ -114,6 +171,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     checkAuth,
     checkExamGoal,
+    signInWithGoogle,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
