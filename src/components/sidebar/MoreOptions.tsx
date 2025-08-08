@@ -201,11 +201,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 
       {isMenuOpen && (
         <div
-          style={{
-            backgroundColor: theme.cardBackground,
-            borderColor: theme.divider,
-          }}
-          className="absolute bottom-full left-0 mb-1 w-64 p-2 rounded-lg shadow-2xl z-20 border animate-fade-in-up"
+          className="bg-gray-700  border border-gray-500 absolute bottom-full left-0 w-64 p-2 rounded-t-lg shadow-2xl z-20 border animate-fade-in-up"
         >
           <div className="space-y-1">
             {menuOptions.map((item) =>
@@ -258,11 +254,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
 
                   {item.children && activeSubMenu === item.label && (
                     <div
-                      style={{
-                        backgroundColor: theme.cardBackground,
-                        borderColor: theme.divider,
-                      }}
-                      className="absolute left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 border animate-fade-in-up"
+                      className="bg-gray-700  border border-gray-500 absolute left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 border animate-fade-in-up"
                     >
                       <div className="space-y-1">
                         {item.children.map((child) => (
@@ -286,7 +278,8 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                             }}
                           >
                             {child.icon}
-                            <span>{child.label}</span>
+                            
+                      <span className="text-gray-300 hover:bg-gray-700 hover:text-white">{child.label}</span>
                           </button>
                         ))}
                       </div>

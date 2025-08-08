@@ -58,7 +58,7 @@ const Layout: React.FC = () => {
         />
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header with hamburger menu */}
-          <header className="bg-gray-800 border-b border-gray-700 p-4 lg:hidden flex-shrink-0">
+          <header className="bg-gray-800 border-b border-gray-700 lg:hidden flex-shrink-0">
             <button
               onClick={() => setIsOpen(!isOpen)}
               className="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-2"
