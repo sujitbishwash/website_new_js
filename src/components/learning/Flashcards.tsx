@@ -1,18 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-
-// Centralized theme colors for a more refined design
-const theme = {
-  background: "#0F172A", // Darker slate background
-  cardBackground: "#1E293B", // Slightly lighter slate for cards
-  primaryText: "#F1F5F9", // Off-white for better readability
-  secondaryText: "#94A3B8", // Softer secondary text
-  accent: "#38BDF8", // A vibrant, light blue accent
-  accentDark: "#0EA5E9",
-  divider: "#334155",
-  shuffleIcon: "#94A3B8",
-  progressBarBackground: "#334155",
-  success: "#22C55E",
-};
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // --- TYPE DEFINITIONS ---
 interface Card {
@@ -74,230 +61,248 @@ const initialCards: Card[] = [
 ];
 
 // --- STYLES ---
-const GlobalStyles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+const GlobalStyles = () => {
+  const theme = useThemeColors();
 
-    body {
-      background-color: ${theme.background};
-      color: ${theme.primaryText};
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow: hidden;
-    }
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    .flashcard-app-container {
-      width: 100%;
-      max-width: 1600px; /* Further increased width for a wider layout */
-      padding: 1.5rem;
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem; /* Adjusted gap */
-    }
-
-    /* --- Flashcard Animation --- */
-    @keyframes slideInFromRight {
-      from { transform: translateX(100%) rotate(5deg); opacity: 0; }
-      to { transform: translateX(0) rotate(0deg); opacity: 1; }
-    }
-    @keyframes slideInFromLeft {
-      from { transform: translateX(-100%) rotate(-5deg); opacity: 0; }
-      to { transform: translateX(0) rotate(0deg); opacity: 1; }
-    }
-
-    .slide-in-right {
-      animation: slideInFromRight 0.5s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    .slide-in-left {
-      animation: slideInFromLeft 0.5s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    /* --- Flashcard Component --- */
-    .flashcard-scene {
-      width: 100%;
-      height: 420px; /* Increased height for better aspect ratio */
-      perspective: 1200px;
-    }
-
-    .flashcard {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-      cursor: pointer;
-      border-radius: 1.5rem; /* More rounded corners */
-      box-shadow: 0 0 0 1px ${theme.divider}, 0 25px 50px -12px rgba(0,0,0,0.25);
-    }
-    
-    .flashcard.is-flipped {
-      transform: rotateY(180deg);
-    }
-
-    .flashcard-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 2.5rem;
-      box-sizing: border-box;
-      background: linear-gradient(145deg, ${theme.cardBackground}, #273449);
-      border-radius: 1.5rem;
-    }
-
-    .flashcard-face--back {
-      transform: rotateY(180deg);
-      background: linear-gradient(145deg, #2A3B52, ${theme.cardBackground});
-    }
-    
-    .card-label {
-        position: absolute;
-        top: 1.5rem;
-        left: 2rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: ${theme.accent};
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .card-content {
-      /* Dynamic font size using clamp() - adjusted to be smaller */
-      /* min: 1.25rem, preferred: 3vw, max: 2.5rem */
-      font-size: clamp(1.25rem, 3vw, 2.5rem);
-      font-weight: 700;
-      text-align: center;
-      color: ${theme.primaryText};
-      line-height: 1.3;
-    }
-    
-    .card-hint {
-        position: absolute;
-        bottom: 1.5rem;
-        font-size: 0.875rem;
-        color: ${theme.secondaryText};
-        font-weight: 500;
-    }
-
-    /* --- Progress Bar --- */
-    .progress-bar-container {
-        width: 100%;
-        height: 8px;
-        background-color: ${theme.progressBarBackground};
-        border-radius: 4px;
+      body {
+        background-color: ${theme.background};
+        color: ${theme.primaryText};
+        font-family: 'Inter', sans-serif;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100vh;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
         overflow: hidden;
-    }
-    .progress-bar-fill {
-        height: 100%;
-        background-color: ${theme.accent};
-        border-radius: 4px;
-        transition: width 0.4s ease-out;
-    }
+      }
 
-    /* --- Navigation Component --- */
-    .navigation-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr); /* Use 3 equal columns for balanced alignment */
-      align-items: center;
-      gap: 1rem;
-    }
+      .flashcard-app-container {
+        width: 100%;
+        max-width: 1600px; /* Further increased width for a wider layout */
+        padding: 1.5rem;
+        box-sizing: border-box;
+      }
 
-    .nav-button {
-      background-color: ${theme.cardBackground};
-      color: ${theme.secondaryText};
-      border: 1px solid ${theme.divider};
-      padding: 1rem;
-      border-radius: 50%;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 64px;
-      height: 64px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-    }
-    
-    /* Align the first button to the start of its grid cell */
-    .navigation-container > .nav-button:first-of-type {
-      justify-self: start;
-    }
-
-    /* Align the last button to the end of its grid cell */
-    .navigation-container > .nav-button:last-of-type {
-      justify-self: end;
-    }
-
-    .nav-button:hover:not(:disabled) {
-      background-color: ${theme.divider};
-      color: ${theme.primaryText};
-      transform: translateY(-2px);
-    }
-    
-    .nav-button:active:not(:disabled) {
-        transform: translateY(0);
-    }
-
-    .nav-button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    
-    .shuffle-button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0.5rem;
-        color: ${theme.shuffleIcon};
-        transition: color 0.2s, transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    
-    .shuffle-button:hover {
-        color: ${theme.accent};
-        transform: rotate(360deg) scale(1.1);
-    }
-
-    .card-counter-container {
+      .flashcard-container {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 0.5rem;
-        justify-self: center; /* Center this container in its grid cell */
-    }
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-    .card-counter {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: ${theme.primaryText};
-    }
-  `}</style>
-);
+      .flashcard {
+        width: 100%;
+        max-width: 800px;
+        height: 400px;
+        perspective: 1000px;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .flashcard-inner {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        text-align: center;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      }
+
+      .flashcard.flipped .flashcard-inner {
+        transform: rotateY(180deg);
+      }
+
+      .flashcard-front,
+      .flashcard-back {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+        border-radius: 20px;
+        font-size: 1.5rem;
+        font-weight: 500;
+        line-height: 1.6;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+      }
+
+      .flashcard-front {
+        background: linear-gradient(135deg, ${theme.card} 0%, ${theme.cardSecondary} 100%);
+        color: ${theme.primaryText};
+        border: 2px solid ${theme.border};
+      }
+
+      .flashcard-back {
+        background: linear-gradient(135deg, ${theme.accent} 0%, ${theme.accentHover} 100%);
+        color: ${theme.primaryText};
+        transform: rotateY(180deg);
+        border: 2px solid ${theme.accent};
+      }
+
+      .navigation {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 800px;
+        gap: 1rem;
+      }
+
+      .nav-button {
+        background: ${theme.input};
+        border: 2px solid ${theme.border};
+        color: ${theme.primaryText};
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 120px;
+        justify-content: center;
+      }
+
+      .nav-button:hover:not(:disabled) {
+        background: ${theme.cardHover};
+        border-color: ${theme.accent};
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .nav-button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .shuffle-button {
+        background: ${theme.accent};
+        border: 2px solid ${theme.accent};
+        color: ${theme.primaryText};
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 120px;
+        justify-content: center;
+      }
+
+      .shuffle-button:hover {
+        background: ${theme.accentHover};
+        border-color: ${theme.accentHover};
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+      }
+
+      .progress-bar {
+        width: 100%;
+        max-width: 800px;
+        height: 8px;
+        background: ${theme.input};
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, ${theme.accent} 0%, ${theme.accentHover} 100%);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      .progress-text {
+        text-align: center;
+        font-size: 1rem;
+        font-weight: 600;
+        color: ${theme.secondaryText};
+        margin-bottom: 1rem;
+      }
+
+      .card-counter {
+        text-align: center;
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: ${theme.accent};
+        margin-bottom: 1rem;
+      }
+
+      .flip-hint {
+        text-align: center;
+        font-size: 0.9rem;
+        color: ${theme.mutedText};
+        margin-top: 1rem;
+        font-style: italic;
+      }
+
+      .keyboard-hint {
+        text-align: center;
+        font-size: 0.8rem;
+        color: ${theme.mutedText};
+        margin-top: 0.5rem;
+        opacity: 0.7;
+      }
+
+      @media (max-width: 768px) {
+        .flashcard-app-container {
+          padding: 1rem;
+        }
+
+        .flashcard {
+          height: 300px;
+        }
+
+        .flashcard-front,
+        .flashcard-back {
+          font-size: 1.2rem;
+          padding: 1.5rem;
+        }
+
+        .navigation {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+
+        .nav-button,
+        .shuffle-button {
+          width: 100%;
+          min-width: auto;
+        }
+      }
+    `}</style>
+  );
+};
 
 // --- MODULAR COMPONENTS ---
 
 const ProgressBar: React.FC<ProgressBarProps> = ({ current, total }) => {
   const progress = total > 0 ? ((current + 1) / total) * 100 : 0;
   return (
-    <div className="progress-bar-container">
-      <div
-        className="progress-bar-fill"
-        style={{ width: `${progress}%` }}
-      ></div>
+    <div className="progress-bar">
+      <div className="progress-fill" style={{ width: `${progress}%` }}></div>
     </div>
   );
 };
@@ -340,7 +345,7 @@ const Navigation: React.FC<NavigationProps> = ({
   onShuffle,
 }) => {
   return (
-    <div className="navigation-container">
+    <div className="navigation">
       <button
         className="nav-button"
         onClick={() => onNavigate("prev")}

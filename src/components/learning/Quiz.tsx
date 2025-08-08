@@ -1,4 +1,5 @@
 import React from "react";
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // --- Setup ---
 
@@ -19,22 +20,6 @@ interface Question {
   questionText: string;
   answerOptions: AnswerOption[];
 }
-
-// Centralized theme colors for a polished look
-const theme = {
-  background: "#0F172A", // Darker slate background
-  cardBackground: "#1E293B", // Lighter slate for the card
-  inputBackground: "#334155",
-  primaryText: "#F1F5F9", // Off-white for main text
-  secondaryText: "#94A3B8", // Muted slate for secondary text
-  accent: "#38BDF8", // A vibrant sky blue accent
-  accentHover: "#7DD3FC",
-  buttonGradientFrom: "#0EA5E9",
-  buttonGradientTo: "#2563EB",
-  divider: "#334155",
-  correct: "#22C55E",
-  incorrect: "#F43F5E",
-};
 
 // --- Data ---
 const quizQuestions: Question[] = [
@@ -83,11 +68,12 @@ const ProgressBar: React.FC<{ current: number; total: number }> = ({
   current,
   total,
 }) => {
+  const theme = useThemeColors();
   const progressPercentage = (current / total) * 100;
   const styles = {
     container: {
       width: "100%",
-      backgroundColor: theme.inputBackground,
+      backgroundColor: theme.input,
       borderRadius: "10px",
       height: "10px",
       marginBottom: "24px",
@@ -98,12 +84,13 @@ const ProgressBar: React.FC<{ current: number; total: number }> = ({
       width: `${progressPercentage}%`,
       backgroundColor: theme.accent,
       borderRadius: "10px",
-      transition: "width 0.5s ease-in-out",
+      transition: "width 0.3s ease-in-out",
     },
   };
+
   return (
     <div style={styles.container}>
-      <div style={styles.filler}></div>
+      <div style={styles.filler} />
     </div>
   );
 };
@@ -113,54 +100,89 @@ const ScoreView: React.FC<{
   totalQuestions: number;
   restartQuiz: () => void;
 }> = ({ score, totalQuestions, restartQuiz }) => {
-  const styles = {
-    scoreSection: {
-      display: "flex",
-      flexDirection: "column" as "column",
-      alignItems: "center",
-      justifyContent: "center",
-      textAlign: "center" as "center",
-    },
-    scoreText: {
-      fontSize: "24px",
-      fontWeight: "600" as "600",
-      color: theme.secondaryText,
-    },
-    scoreValue: {
-      fontSize: "48px",
-      fontWeight: "700" as "700",
-      color: theme.primaryText,
-      margin: "8px 0 24px 0",
-    },
-    restartButton: {
-      background: `linear-gradient(45deg, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
-      border: "none",
-      padding: "12px 24px",
-      borderRadius: "12px",
-      color: theme.primaryText,
-      fontSize: "18px",
-      fontWeight: "600" as "600",
-      cursor: "pointer",
-      transition: "transform 0.2s ease, box-shadow 0.2s ease",
-      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-    },
+  const theme = useThemeColors();
+  const percentage = Math.round((score / totalQuestions) * 100);
+  const isGoodScore = percentage >= 70;
+  const isAverageScore = percentage >= 50;
+
+  const getScoreColor = () => {
+    if (isGoodScore) return theme.success;
+    if (isAverageScore) return theme.warning;
+    return theme.error;
   };
+
+  const getScoreMessage = () => {
+    if (isGoodScore) return "Excellent! You're doing great!";
+    if (isAverageScore) return "Good effort! Keep practicing!";
+    return "Keep studying! You'll get better!";
+  };
+
   return (
-    <div style={styles.scoreSection}>
-      <div style={styles.scoreText}>Your Score</div>
-      <div style={styles.scoreValue}>
-        {score} / {totalQuestions}
-      </div>
-      <button
-        style={styles.restartButton}
-        onClick={restartQuiz}
-        onMouseOver={(e) => {
-          e.currentTarget.style.transform = "scale(1.05)";
-          e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.3)";
+    <div
+      style={{
+        textAlign: "center",
+        padding: "2rem",
+        backgroundColor: theme.card,
+        borderRadius: "1rem",
+        boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+      }}
+    >
+      <h2
+        style={{
+          fontSize: "2rem",
+          fontWeight: "bold",
+          marginBottom: "1rem",
+          color: theme.primaryText,
         }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.2)";
+      >
+        Quiz Complete!
+      </h2>
+      <div
+        style={{
+          fontSize: "4rem",
+          fontWeight: "bold",
+          marginBottom: "1rem",
+          color: getScoreColor(),
+        }}
+      >
+        {percentage}%
+      </div>
+      <p
+        style={{
+          fontSize: "1.2rem",
+          marginBottom: "2rem",
+          color: theme.secondaryText,
+        }}
+      >
+        {getScoreMessage()}
+      </p>
+      <p
+        style={{
+          fontSize: "1rem",
+          marginBottom: "2rem",
+          color: theme.mutedText,
+        }}
+      >
+        You got {score} out of {totalQuestions} questions correct.
+      </p>
+      <button
+        onClick={restartQuiz}
+        style={{
+          backgroundColor: theme.accent,
+          color: theme.primaryText,
+          border: "none",
+          padding: "1rem 2rem",
+          borderRadius: "0.5rem",
+          fontSize: "1.1rem",
+          fontWeight: "600",
+          cursor: "pointer",
+          transition: "background-color 0.3s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = theme.accentHover;
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = theme.accent;
         }}
       >
         Try Again
@@ -175,6 +197,7 @@ const Navigation: React.FC<{
   currentQuestion: number;
   isAnswered: boolean;
 }> = ({ handlePrev, handleNext, currentQuestion, isAnswered }) => {
+  const theme = useThemeColors();
   const styles = {
     navigationContainer: {
       display: "flex",
@@ -184,7 +207,7 @@ const Navigation: React.FC<{
       gap: "12px",
     },
     arrowButton: {
-      backgroundColor: theme.inputBackground,
+      backgroundColor: theme.input,
       border: "none",
       color: theme.primaryText,
       width: "44px",
@@ -194,7 +217,7 @@ const Navigation: React.FC<{
       alignItems: "center",
       justifyContent: "center",
       fontSize: "20px",
-      fontWeight: "bold" as "bold",
+      fontWeight: "bold",
       cursor: "pointer",
       transition: "all 0.2s ease-in-out",
     },
@@ -217,7 +240,7 @@ const Navigation: React.FC<{
         }}
         onMouseOut={(e) => {
           if (!(currentQuestion === 0 || isAnswered))
-            e.currentTarget.style.backgroundColor = theme.inputBackground;
+            e.currentTarget.style.backgroundColor = theme.input;
         }}
       >
         {"<"}
@@ -234,8 +257,7 @@ const Navigation: React.FC<{
             e.currentTarget.style.backgroundColor = theme.divider;
         }}
         onMouseOut={(e) => {
-          if (!isAnswered)
-            e.currentTarget.style.backgroundColor = theme.inputBackground;
+          if (!isAnswered) e.currentTarget.style.backgroundColor = theme.input;
         }}
       >
         {">"}
@@ -263,6 +285,7 @@ const QuestionView: React.FC<{
   handlePrev,
   handleNext,
 }) => {
+  const theme = useThemeColors();
   const getButtonStyles = (
     answerOption: AnswerOption,
     index: number
@@ -272,7 +295,7 @@ const QuestionView: React.FC<{
       fontSize: "16px",
       fontWeight: "600",
       color: theme.secondaryText,
-      backgroundColor: theme.inputBackground,
+      backgroundColor: theme.input,
       borderRadius: "12px",
       // FIX: Use longhand properties to avoid conflicts
       borderWidth: "2px",
@@ -292,8 +315,8 @@ const QuestionView: React.FC<{
         return {
           ...baseStyle,
           color: theme.primaryText,
-          backgroundColor: theme.correct,
-          borderColor: theme.correct,
+          backgroundColor: theme.success,
+          borderColor: theme.success,
           cursor: "not-allowed",
         };
       }
@@ -301,8 +324,8 @@ const QuestionView: React.FC<{
         return {
           ...baseStyle,
           color: theme.primaryText,
-          backgroundColor: theme.incorrect,
-          borderColor: theme.incorrect,
+          backgroundColor: theme.error,
+          borderColor: theme.error,
           cursor: "not-allowed",
         };
       }
@@ -431,6 +454,7 @@ const Quiz: React.FC = () => {
     setSelectedAnswerIndex(null);
   };
 
+  const theme = useThemeColors();
   const styles = {
     app: {
       backgroundColor: theme.background,
@@ -444,7 +468,7 @@ const Quiz: React.FC = () => {
       color: theme.primaryText,
     },
     quizCard: {
-      backgroundColor: theme.cardBackground,
+      backgroundColor: theme.card,
       width: "100%",
       maxWidth: "600px",
       minHeight: "400px",

@@ -28,5 +28,9 @@
       ]
     }
   },
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/components/to-be-deleted/**",
+    "src/pages/obsolete/**"
+  ]
 }

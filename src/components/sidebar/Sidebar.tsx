@@ -13,8 +13,9 @@ import {
 } from "lucide-react";
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ROUTES } from "../../routes/constants";
 import { useAuth } from "../../contexts/AuthContext";
+import { ROUTES } from "../../routes/constants";
+import ThemeToggle from "../ThemeToggle";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -51,27 +52,47 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
       {/* Overlay for mobile */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-opacity-10 backdrop-blur-sm z-30 lg:hidden "
+          className="fixed inset-0 backdrop-blur-sm z-30 lg:hidden"
+          style={{ backgroundColor: "var(--color-overlay)" }}
           onClick={onToggle}
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-gray-800 border-r border-gray-700 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-screen flex flex-col z-40 transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 lg:static lg:z-auto`}
-        style={{ width: "256px" }}
+        style={{
+          width: "256px",
+          backgroundColor: "var(--color-background-secondary)",
+          borderRight: "1px solid var(--color-border)",
+        }}
       >
         {/* Header with close button for mobile */}
-        <div className="p-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
-          <h1 className="text-xl font-bold">AI Padhai</h1>
-          <button
-            onClick={onToggle}
-            className="lg:hidden text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-1"
+        <div
+          className="p-4 flex items-center justify-between flex-shrink-0"
+          style={{ borderBottom: "1px solid var(--color-border)" }}
+        >
+          <h1
+            className="text-xl font-bold"
+            style={{ color: "var(--color-primary-text)" }}
           >
-            <X size={20} />
-          </button>
+            AI Padhai
+          </h1>
+          <div className="flex items-center space-x-2">
+            <ThemeToggle size="sm" variant="icon" />
+            <button
+              onClick={onToggle}
+              className="lg:hidden rounded-lg p-1 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+              style={{
+                color: "var(--color-secondary-text)",
+                backgroundColor: "transparent",
+              }}
+            >
+              <X size={20} />
+            </button>
+          </div>
         </div>
 
         {/* Navigation */}
@@ -91,8 +112,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                     }}
                     className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
                       isActive(item.path)
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                        ? "bg-[var(--color-primary)] text-[var(--color-inverse-text)] hover:bg-[var(--color-primary-hover)]"
+                        : "text-[var(--color-secondary-text)] hover:bg-[var(--color-card-hover)] hover:text-[var(--color-primary-text)]"
                     }`}
                   >
                     <Icon size={20} />
@@ -105,9 +126,15 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
         </nav>
 
         {/* User Profile Section */}
-        <div className="p-4 border-t border-gray-700 flex-shrink-0">
+        <div
+          className="p-4 flex-shrink-0"
+          style={{ borderTop: "1px solid var(--color-border)" }}
+        >
           <div className="flex items-center space-x-3 mb-3">
-            <div className="bg-gray-600 rounded-full p-2">
+            <div
+              className="rounded-full p-2"
+              style={{ backgroundColor: "var(--color-background-tertiary)" }}
+            >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -118,6 +145,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
+                style={{ color: "var(--color-secondary-text)" }}
               >
                 <circle cx="12" cy="12" r="10"></circle>
                 <circle cx="12" cy="10" r="3"></circle>
@@ -125,11 +153,21 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
               </svg>
             </div>
             <div className="flex-1">
-              <p className="font-medium text-gray-300">Free Plan</p>
-              <p className="text-sm text-gray-400">{user?.email || 'learner@aipadhai.com'}</p>
+              <p
+                className="font-medium"
+                style={{ color: "var(--color-primary-text)" }}
+              >
+                Free Plan
+              </p>
+              <p
+                className="text-sm"
+                style={{ color: "var(--color-secondary-text)" }}
+              >
+                {user?.email || "learner@aipadhai.com"}
+              </p>
             </div>
           </div>
-          
+
           {/* Profile and Logout Buttons */}
           <div className="space-y-2">
             <button
@@ -140,7 +178,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                   onToggle();
                 }
               }}
-              className="w-full flex items-center space-x-3 p-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+              className="w-full flex items-center space-x-3 p-2 rounded-lg transition-colors"
+              style={{
+                color: "var(--color-secondary-text)",
+                backgroundColor: "transparent",
+              }}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -158,7 +200,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
               </svg>
               <span className="text-sm">Profile</span>
             </button>
-            
+
             <button
               onClick={() => {
                 logout();
@@ -168,7 +210,11 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
                   onToggle();
                 }
               }}
-              className="w-full flex items-center space-x-3 p-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+              className="w-full flex items-center space-x-3 p-2 rounded-lg transition-colors"
+              style={{
+                color: "var(--color-secondary-text)",
+                backgroundColor: "transparent",
+              }}
             >
               <LogOut size={20} />
               <span className="text-sm">Logout</span>

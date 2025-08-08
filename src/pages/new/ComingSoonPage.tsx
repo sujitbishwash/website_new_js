@@ -1,30 +1,29 @@
 import React, { useEffect, useState } from "react";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827", // A very dark blue, almost black
-  cardBackground: "#1F2937", // Dark slate gray
-  inputBackground: "#374151", // Lighter slate gray
-  primaryText: "#FFFFFF", // White
-  secondaryText: "#9CA3AF", // Light gray
-  mutedText: "#6B7280", // Medium gray
-  accent: "#60A5FA", // A bright, friendly blue
-  buttonGradientFrom: "#3B82F6", // A vibrant blue for gradients
-  buttonGradientTo: "#2563EB", // A deeper blue for gradients
-  divider: "#4B5563", // A subtle gray for dividers
-};
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // --- Helper Components ---
 
 // A simple, reusable component for the animated background dots
-const BackgroundDots: React.FC = () => (
-  <div
-    className="absolute top-0 left-0 w-full h-full overflow-hidden z-0"
-    style={{ backgroundColor: theme.background }}
-  >
-    <div className="absolute w-full h-full bg-[radial-gradient(#374151_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,#000_70%,transparent_100%)]"></div>
-  </div>
-);
+const BackgroundDots: React.FC = () => {
+  const theme = useThemeColors();
+
+  return (
+    <div
+      className="absolute top-0 left-0 w-full h-full overflow-hidden z-0"
+      style={{ backgroundColor: theme.background }}
+    >
+      <div
+        className="absolute w-full h-full"
+        style={{
+          background: `radial-gradient(${theme.input} 1px, transparent 1px)`,
+          backgroundSize: "16px 16px",
+          maskImage:
+            "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(0,0,0,1) 70%, transparent 100%)",
+        }}
+      ></div>
+    </div>
+  );
+};
 
 // Component for each unit of the countdown timer (Days, Hours, etc.)
 interface TimeCardProps {
@@ -32,22 +31,26 @@ interface TimeCardProps {
   label: string;
 }
 
-const TimeCard: React.FC<TimeCardProps> = ({ value, label }) => (
-  <div className="flex flex-col items-center">
-    <div
-      className="text-4xl md:text-6xl lg:text-7xl font-bold"
-      style={{ color: theme.primaryText }}
-    >
-      {String(value).padStart(2, "0")}
+const TimeCard: React.FC<TimeCardProps> = ({ value, label }) => {
+  const theme = useThemeColors();
+
+  return (
+    <div className="flex flex-col items-center">
+      <div
+        className="text-4xl md:text-6xl lg:text-7xl font-bold"
+        style={{ color: theme.primaryText }}
+      >
+        {String(value).padStart(2, "0")}
+      </div>
+      <div
+        className="text-sm md:text-base"
+        style={{ color: theme.secondaryText }}
+      >
+        {label}
+      </div>
     </div>
-    <div
-      className="text-sm md:text-base"
-      style={{ color: theme.secondaryText }}
-    >
-      {label}
-    </div>
-  </div>
-);
+  );
+};
 
 // --- Main Coming Soon Component ---
 
@@ -57,10 +60,22 @@ interface ComingSoonProps {
 }
 
 const ComingSoon: React.FC<ComingSoonProps> = ({ targetDate }) => {
+  const theme = useThemeColors();
+
   // Function to calculate time remaining
   const calculateTimeLeft = () => {
     const difference = +new Date(targetDate) - +new Date();
-    let timeLeft = {};
+    let timeLeft: {
+      days: number;
+      hours: number;
+      minutes: number;
+      seconds: number;
+    } = {
+      days: 0,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+    };
 
     if (difference > 0) {
       timeLeft = {
@@ -105,7 +120,7 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ targetDate }) => {
       <BackgroundDots />
       <div
         className="relative z-10 w-full max-w-4xl mx-auto p-6 md:p-10 rounded-2xl shadow-2xl text-center"
-        style={{ backgroundColor: theme.cardBackground }}
+        style={{ backgroundColor: theme.card }}
       >
         {/* Header Section */}
         <h1
@@ -165,13 +180,13 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ targetDate }) => {
               placeholder="Enter your email"
               required
               className="flex-grow px-4 py-3 rounded-md text-white border-0 outline-none focus:ring-2 focus:ring-blue-400 transition-shadow duration-300"
-              style={{ backgroundColor: theme.inputBackground }}
+              style={{ backgroundColor: theme.input }}
             />
             <button
               type="submit"
               className="px-6 py-3 rounded-md text-white font-semibold transition-transform duration-300 ease-in-out transform hover:scale-105"
               style={{
-                backgroundImage: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
+                backgroundImage: `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`,
               }}
             >
               Notify Me
@@ -192,7 +207,7 @@ export default function ComingSoonPage() {
   futureDate.setDate(futureDate.getDate() + 30);
 
   return (
-    <div style={{ backgroundColor: theme.background }}>
+    <div>
       <ComingSoon targetDate={futureDate.toISOString()} />
     </div>
   );

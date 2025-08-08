@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSourceModal } from "../../components/YouTubeSourceDialog";
+import { useThemeColors } from "../../contexts/ThemeContext";
 import { ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
 interface IconProps {
   className?: string;
+  style?: React.CSSProperties;
 }
 
 interface LearningItem {
@@ -461,10 +463,11 @@ const suggestedTests: SuggestedTest[] = [
 
 // --- MAIN COMPONENT ---
 export default function HomePage() {
+  const navigate = useNavigate();
+  const theme = useThemeColors();
+  const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
   const [learningItems, setLearningItems] = useState(initialLearningItems);
   const [attemptedTests, setAttemptedTests] = useState(initialAttemptedTests);
-  const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
-  const navigate = useNavigate();
 
   const handleRemoveRecord = (id: string, type: "learning" | "test") => {
     if (type === "learning") {
@@ -475,32 +478,77 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-[#0d121e] to-[#1a1a2e] text-gray-300 font-sans p-6">
+    <div
+      className="min-h-full font-sans p-6"
+      style={{
+        background: `linear-gradient(135deg, ${theme.background} 0%, ${theme.backgroundSecondary} 100%)`,
+        color: theme.primaryText,
+      }}
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl">
         {/* Header Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+        <div
+          className="rounded-xl p-6 mb-10 shadow-2xl backdrop-blur-sm"
+          style={{
+            backgroundColor: `${theme.card}80`,
+            border: `1px solid ${theme.border}80`,
+          }}
+        >
+          <h1
+            className="text-3xl sm:text-4xl font-bold mb-2"
+            style={{ color: theme.primaryText }}
+          >
             What do you want to learn today?
           </h1>
-          <p className="text-slate-400 mb-6">
+          <p className="mb-6" style={{ color: theme.secondaryText }}>
             Start by uploading a file or pasting a video link.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="group flex items-center space-x-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-800/90 transition-all duration-300 cursor-pointer border border-slate-700 hover:border-blue-500">
-              <UploadIcon className="h-8 w-8 text-blue-400 transition-transform group-hover:scale-110" />
+            <div
+              className="group flex items-center space-x-4 p-4 rounded-lg transition-all duration-300 cursor-pointer border hover:border-blue-500"
+              style={{
+                backgroundColor: `${theme.cardSecondary}80`,
+                borderColor: theme.border,
+              }}
+            >
+              <UploadIcon
+                className="h-8 w-8 transition-transform group-hover:scale-110"
+                style={{ color: theme.accent }}
+              />
               <div>
-                <h2 className="font-semibold text-white">Upload File</h2>
-                <p className="text-xs text-slate-400">PDF, DOC, TXT</p>
+                <h2
+                  className="font-semibold"
+                  style={{ color: theme.primaryText }}
+                >
+                  Upload File
+                </h2>
+                <p className="text-xs" style={{ color: theme.secondaryText }}>
+                  PDF, DOC, TXT
+                </p>
               </div>
             </div>
             <div
               onClick={() => setIsYouTubeModalOpen(true)}
-              className="group flex items-center space-x-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-800/90 transition-all duration-300 cursor-pointer border border-slate-700 hover:border-green-500"
+              className="group flex items-center space-x-4 p-4 rounded-lg transition-all duration-300 cursor-pointer border hover:border-green-500"
+              style={{
+                backgroundColor: `${theme.cardSecondary}80`,
+                borderColor: theme.border,
+              }}
             >
-              <PasteIcon className="h-8 w-8 text-green-400 transition-transform group-hover:scale-110" />
+              <PasteIcon
+                className="h-8 w-8 transition-transform group-hover:scale-110"
+                style={{ color: theme.success }}
+              />
               <div>
-                <h2 className="font-semibold text-white">Paste Link</h2>
-                <p className="text-xs text-slate-400">paste youtube links</p>
+                <h2
+                  className="font-semibold"
+                  style={{ color: theme.primaryText }}
+                >
+                  Paste Link
+                </h2>
+                <p className="text-xs" style={{ color: theme.secondaryText }}>
+                  paste youtube links
+                </p>
               </div>
             </div>
           </div>
@@ -509,8 +557,17 @@ export default function HomePage() {
         {/* --- SEQUENTIAL LAYOUT --- */}
 
         {/* Recommended Videos Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5">
+        <div
+          className="rounded-xl p-6 mb-10 shadow-2xl backdrop-blur-sm"
+          style={{
+            backgroundColor: `${theme.card}80`,
+            border: `1px solid ${theme.border}80`,
+          }}
+        >
+          <h2
+            className="text-2xl font-bold mb-5"
+            style={{ color: theme.primaryText }}
+          >
             Recommended Videos
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -518,7 +575,11 @@ export default function HomePage() {
               <div
                 key={video.id}
                 onClick={() => navigate(ROUTES.VIDEO_LEARNING)}
-                className="group relative bg-slate-800/60 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-slate-600 border border-slate-700/80 hover:-translate-y-1 cursor-pointer"
+                className="group relative rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 cursor-pointer border"
+                style={{
+                  backgroundColor: `${theme.cardSecondary}80`,
+                  borderColor: `${theme.border}80`,
+                }}
               >
                 <div className="relative">
                   <img
@@ -531,10 +592,15 @@ export default function HomePage() {
                   </div>
                 </div>
                 <div className="p-4">
-                  <h4 className="font-semibold text-white truncate">
+                  <h4
+                    className="font-semibold truncate"
+                    style={{ color: theme.primaryText }}
+                  >
                     {video.title}
                   </h4>
-                  <p className="text-xs text-slate-400">{video.topic}</p>
+                  <p className="text-xs" style={{ color: theme.secondaryText }}>
+                    {video.topic}
+                  </p>
                 </div>
               </div>
             ))}
@@ -542,24 +608,53 @@ export default function HomePage() {
         </div>
 
         {/* Recommended Reading Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5">
+        <div
+          className="rounded-xl p-6 mb-10 shadow-2xl backdrop-blur-sm"
+          style={{
+            backgroundColor: `${theme.card}80`,
+            border: `1px solid ${theme.border}80`,
+          }}
+        >
+          <h2
+            className="text-2xl font-bold mb-5"
+            style={{ color: theme.primaryText }}
+          >
             Recommended Reading
           </h2>
           <div className="space-y-4">
             {suggestedReadings.map((item) => (
               <div
                 key={item.id}
-                className="group flex items-center space-x-4 bg-slate-800/60 p-3 rounded-lg border border-slate-700/80 hover:border-slate-600 transition-all duration-300 hover:bg-slate-800/90"
+                className="group flex items-center space-x-4 p-3 rounded-lg border transition-all duration-300"
+                style={{
+                  backgroundColor: `${theme.cardSecondary}80`,
+                  borderColor: `${theme.border}80`,
+                }}
               >
-                <div className="flex-shrink-0 bg-slate-700/80 w-16 h-16 rounded-lg flex items-center justify-center">
-                  <DocumentTextIcon className="h-8 w-8 text-orange-400" />
+                <div
+                  className="flex-shrink-0 w-16 h-16 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: `${theme.backgroundTertiary}80` }}
+                >
+                  <DocumentTextIcon
+                    className="h-8 w-8"
+                    style={{ color: theme.warning }}
+                  />
                 </div>
                 <div className="flex-grow">
-                  <h4 className="font-semibold text-white">{item.title}</h4>
-                  <p className="text-xs text-slate-400">{item.topic}</p>
+                  <h4
+                    className="font-semibold"
+                    style={{ color: theme.primaryText }}
+                  >
+                    {item.title}
+                  </h4>
+                  <p className="text-xs" style={{ color: theme.secondaryText }}>
+                    {item.topic}
+                  </p>
                 </div>
-                <button className="px-3 py-1.5 text-sm font-semibold bg-orange-600/80 text-white rounded-md hover:bg-orange-600 transition-colors">
+                <button
+                  className="px-3 py-1.5 text-sm font-semibold text-white rounded-md transition-colors"
+                  style={{ backgroundColor: `${theme.warning}80` }}
+                >
                   Read
                 </button>
               </div>
@@ -568,26 +663,53 @@ export default function HomePage() {
         </div>
 
         {/* Recommended Tests Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5">
+        <div
+          className="rounded-xl p-6 mb-10 shadow-2xl backdrop-blur-sm"
+          style={{
+            backgroundColor: `${theme.card}80`,
+            border: `1px solid ${theme.border}80`,
+          }}
+        >
+          <h2
+            className="text-2xl font-bold mb-5"
+            style={{ color: theme.primaryText }}
+          >
             Recommended Tests
           </h2>
           <div className="space-y-4">
             {suggestedTests.map((test) => (
               <div
                 key={test.id}
-                className="group flex items-center space-x-4 bg-slate-800/60 p-3 rounded-lg border border-slate-700/80 hover:border-slate-600 transition-all duration-300 hover:bg-slate-800/90"
+                className="group flex items-center space-x-4 p-3 rounded-lg border transition-all duration-300"
+                style={{
+                  backgroundColor: `${theme.cardSecondary}80`,
+                  borderColor: `${theme.border}80`,
+                }}
               >
-                <div className="flex-shrink-0 bg-slate-700/80 w-16 h-16 rounded-lg flex items-center justify-center">
-                  <ClipboardDocumentListIcon className="h-8 w-8 text-purple-400" />
+                <div
+                  className="flex-shrink-0 w-16 h-16 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: `${theme.backgroundTertiary}80` }}
+                >
+                  <ClipboardDocumentListIcon
+                    className="h-8 w-8"
+                    style={{ color: theme.info }}
+                  />
                 </div>
                 <div className="flex-grow">
-                  <h4 className="font-semibold text-white">{test.title}</h4>
-                  <p className="text-xs text-slate-400">{test.topic}</p>
+                  <h4
+                    className="font-semibold"
+                    style={{ color: theme.primaryText }}
+                  >
+                    {test.title}
+                  </h4>
+                  <p className="text-xs" style={{ color: theme.secondaryText }}>
+                    {test.topic}
+                  </p>
                 </div>
                 <button
                   onClick={() => navigate(ROUTES.EXAM_INFO)}
-                  className="px-3 py-1.5 text-sm font-semibold bg-purple-600/80 text-white rounded-md hover:bg-purple-600 transition-colors"
+                  className="px-3 py-1.5 text-sm font-semibold text-white rounded-md transition-colors"
+                  style={{ backgroundColor: `${theme.info}80` }}
                 >
                   Start
                 </button>
@@ -597,12 +719,22 @@ export default function HomePage() {
         </div>
 
         {/* Continue Learning Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5 flex justify-between items-center">
+        <div
+          className="rounded-xl p-6 mb-10 shadow-2xl backdrop-blur-sm"
+          style={{
+            backgroundColor: `${theme.card}80`,
+            border: `1px solid ${theme.border}80`,
+          }}
+        >
+          <h2
+            className="text-2xl font-bold mb-5 flex justify-between items-center"
+            style={{ color: theme.primaryText }}
+          >
             <span>Continue Learning</span>
             <a
               href="#"
               className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
+              style={{ color: theme.accent }}
             >
               View all
             </a>
@@ -611,7 +743,11 @@ export default function HomePage() {
             {learningItems.map((item) => (
               <div
                 key={item.id}
-                className="group relative bg-slate-800/60 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-slate-600 border border-slate-700/80 hover:-translate-y-1"
+                className="group relative rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1 border"
+                style={{
+                  backgroundColor: `${theme.cardSecondary}80`,
+                  borderColor: `${theme.border}80`,
+                }}
               >
                 <img
                   src={item.thumbnailUrl}
@@ -625,24 +761,42 @@ export default function HomePage() {
                   }}
                 />
                 <div className="p-4">
-                  <h3 className="font-bold text-white truncate text-lg">
+                  <h3
+                    className="font-bold truncate text-lg"
+                    style={{ color: theme.primaryText }}
+                  >
                     {item.title}
                   </h3>
-                  <p className="text-sm text-slate-400 mb-4">{item.subject}</p>
-                  <div className="w-full bg-slate-700 rounded-full h-2.5 mb-2">
+                  <p className="text-sm" style={{ color: theme.secondaryText }}>
+                    {item.subject}
+                  </p>
+                  <div
+                    className="w-full rounded-full h-2.5 mb-2"
+                    style={{ backgroundColor: theme.backgroundTertiary }}
+                  >
                     <div
-                      className="bg-blue-500 h-2.5 rounded-full"
-                      style={{ width: `${item.progress}%` }}
+                      className="h-2.5 rounded-full"
+                      style={{
+                        width: `${item.progress}%`,
+                        backgroundColor: theme.primary,
+                      }}
                     ></div>
                   </div>
-                  <div className="flex justify-between items-center text-xs text-slate-500">
+                  <div
+                    className="flex justify-between items-center text-xs"
+                    style={{ color: theme.secondaryText }}
+                  >
                     <span>{item.progress}% Complete</span>
                     <span>{item.lastStudied}</span>
                   </div>
                 </div>
                 <button
                   onClick={() => handleRemoveRecord(item.id, "learning")}
-                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+                  className="absolute top-3 right-3 p-1.5 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    backgroundColor: "rgba(0, 0, 0, 0.4)",
+                    color: theme.secondaryText,
+                  }}
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>
@@ -652,12 +806,22 @@ export default function HomePage() {
         </div>
 
         {/* Attempted Tests Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5 flex justify-between items-center">
+        <div
+          className="rounded-xl p-6 mb-10 shadow-2xl backdrop-blur-sm"
+          style={{
+            backgroundColor: `${theme.card}80`,
+            border: `1px solid ${theme.border}80`,
+          }}
+        >
+          <h2
+            className="text-2xl font-bold mb-5 flex justify-between items-center"
+            style={{ color: theme.primaryText }}
+          >
             <span>Attempted Tests</span>
             <a
               href="#"
               className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
+              style={{ color: theme.accent }}
             >
               View all
             </a>
@@ -666,31 +830,50 @@ export default function HomePage() {
             {attemptedTests.map((test) => (
               <div
                 key={test.id}
-                className="group relative bg-slate-800/60 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 transition-all duration-300 hover:shadow-xl hover:bg-slate-800/90 border border-slate-700/80 hover:border-slate-600"
+                className="group relative rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 transition-all duration-300 hover:shadow-xl hover:bg-slate-800/90 border"
+                style={{
+                  backgroundColor: `${theme.cardSecondary}80`,
+                  borderColor: `${theme.border}80`,
+                }}
               >
                 <div className="flex-shrink-0 text-center w-24">
                   <p
-                    className={`text-4xl font-bold ${
-                      test.score >= 80 ? "text-green-400" : "text-yellow-400"
-                    }`}
+                    className="text-4xl font-bold"
+                    style={{
+                      color: test.score >= 80 ? theme.success : theme.warning,
+                    }}
                   >
                     {test.score}%
                   </p>
-                  <p className="text-xs text-slate-500">Overall Score</p>
+                  <p className="text-xs" style={{ color: theme.secondaryText }}>
+                    Overall Score
+                  </p>
                 </div>
-                <div className="flex-grow w-full border-t sm:border-t-0 sm:border-l border-slate-700 pt-3 sm:pt-0 sm:pl-4">
-                  <h3 className="font-semibold text-white text-lg">
+                <div
+                  className="flex-grow w-full border-t sm:border-t-0 sm:border-l pt-3 sm:pt-0 sm:pl-4"
+                  style={{ borderColor: theme.border }}
+                >
+                  <h3
+                    className="font-semibold text-lg"
+                    style={{ color: theme.primaryText }}
+                  >
                     {test.title}
                   </h3>
-                  <p className="text-sm text-slate-400 mb-2">
+                  <p className="text-sm" style={{ color: theme.secondaryText }}>
                     Attempted: {test.date}
                   </p>
                   <div className="flex items-center space-x-4 text-sm">
-                    <div className="flex items-center text-green-400">
+                    <div
+                      className="flex items-center"
+                      style={{ color: theme.success }}
+                    >
                       <CheckCircleIcon className="h-5 w-5 mr-1.5" />
                       <span>{test.correct} Correct</span>
                     </div>
-                    <div className="flex items-center text-red-400">
+                    <div
+                      className="flex items-center"
+                      style={{ color: theme.error }}
+                    >
                       <XCircleIcon className="h-5 w-5 mr-1.5" />
                       <span>{test.wrong} Wrong</span>
                     </div>
@@ -698,13 +881,18 @@ export default function HomePage() {
                 </div>
                 <button
                   onClick={() => navigate(ROUTES.ANALYSIS)}
-                  className="px-4 py-2 text-sm font-semibold bg-blue-600/80 text-white rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto"
+                  className="px-4 py-2 text-sm font-semibold text-white rounded-md transition-colors"
+                  style={{ backgroundColor: `${theme.info}80` }}
                 >
                   Review Test
                 </button>
                 <button
                   onClick={() => handleRemoveRecord(test.id, "test")}
-                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+                  className="absolute top-3 right-3 p-1.5 backdrop-blur-sm rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                  style={{
+                    backgroundColor: "rgba(0, 0, 0, 0.4)",
+                    color: theme.secondaryText,
+                  }}
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>
@@ -714,20 +902,51 @@ export default function HomePage() {
         </div>
 
         {/* Explore Topics Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5">Explore Topics</h2>
+        <div
+          className="rounded-xl p-6 shadow-2xl backdrop-blur-sm"
+          style={{
+            backgroundColor: `${theme.card}80`,
+            border: `1px solid ${theme.border}80`,
+          }}
+        >
+          <h2
+            className="text-2xl font-bold mb-5"
+            style={{ color: theme.primaryText }}
+          >
+            Explore Topics
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {initialTopics.map((topic) => {
               const Icon = topic.icon;
               return (
                 <div
                   key={topic.id}
-                  className={`group flex flex-col items-center justify-center text-center p-4 rounded-lg cursor-pointer transition-all duration-300 border ${topic.color} hover:bg-opacity-25`}
+                  className={`group flex flex-col items-center justify-center text-center p-4 rounded-lg cursor-pointer transition-all duration-300 border`}
+                  style={{
+                    borderColor: `${topic.color
+                      .replace("text-", "border-")
+                      .replace("bg-", "border-")}80`,
+                    backgroundColor: `${topic.color
+                      .replace("text-", "bg-")
+                      .replace("bg-", "bg-")
+                      .replace("border-", "bg-")
+                      .replace("/20", "/100")}80`,
+                  }}
                 >
                   <Icon className="h-8 w-8 mb-2 transition-transform duration-300 group-hover:scale-110" />
                   <div>
-                    <p className="font-semibold">{topic.name}</p>
-                    <p className="text-xs opacity-70">{topic.description}</p>
+                    <p
+                      className="font-semibold"
+                      style={{ color: theme.primaryText }}
+                    >
+                      {topic.name}
+                    </p>
+                    <p
+                      className="text-xs opacity-70"
+                      style={{ color: theme.secondaryText }}
+                    >
+                      {topic.description}
+                    </p>
                   </div>
                 </div>
               );

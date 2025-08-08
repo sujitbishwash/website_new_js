@@ -1,18 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  buttonGradientFrom: "#3B82F6",
-  buttonGradientTo: "#2563EB",
-  divider: "#4B5563",
-};
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // --- Type Definitions ---
 interface MessageType {
@@ -58,38 +45,61 @@ const BrainIcon: React.FC = () => (
 
 // --- Components ---
 
-const ChatHeader: React.FC = () => (
-  <div className="text-center p-4 md:p-6">
-    <div className="inline-block p-4 bg-gray-800 rounded-full mb-4">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="40"
-        height="40"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={theme.secondaryText}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-      </svg>
-    </div>
-    {/* Changed title from "AI Tutor" to "AI Padhai" */}
-    <h1
-      className="text-2xl sm:text-3xl font-bold"
-      style={{ color: theme.primaryText }}
-    >
-      Learn with AI Padhai
-    </h1>
-  </div>
-);
+const ChatHeader: React.FC = () => {
+  const theme = useThemeColors();
 
-const SuggestionChip: React.FC<{ text: string }> = ({ text }) => (
-  <button className="bg-gray-700/80 hover:bg-gray-600 transition-colors duration-200 text-sm md:text-base text-gray-200 py-2 px-4 rounded-full backdrop-blur-sm">
-    {text}
-  </button>
-);
+  return (
+    <div className="text-center p-4 md:p-6">
+      <div
+        className="inline-block p-4 rounded-full mb-4"
+        style={{ backgroundColor: theme.card }}
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="40"
+          height="40"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke={theme.secondaryText}
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      {/* Changed title from "AI Tutor" to "AI Padhai" */}
+      <h1
+        className="text-2xl sm:text-3xl font-bold"
+        style={{ color: theme.primaryText }}
+      >
+        Learn with AI Padhai
+      </h1>
+    </div>
+  );
+};
+
+const SuggestionChip: React.FC<{ text: string }> = ({ text }) => {
+  const theme = useThemeColors();
+
+  return (
+    <button
+      className="transition-colors duration-200 text-sm md:text-base py-2 px-4 rounded-full backdrop-blur-sm"
+      style={{
+        backgroundColor: `${theme.card}CC`,
+        color: theme.primaryText,
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.backgroundColor = `${theme.cardHover}CC`;
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.backgroundColor = `${theme.card}CC`;
+      }}
+    >
+      {text}
+    </button>
+  );
+};
 
 const SuggestionChips: React.FC = () => {
   const suggestions = ["Quiz", "Flashcards", "Summary"];
@@ -102,20 +112,27 @@ const SuggestionChips: React.FC = () => {
   );
 };
 
-const Message: React.FC<MessageType> = ({ text, isUser }) => (
-  <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
-    <div
-      className={`max-w-[85%] sm:max-w-[75%] md:max-w-[65%] px-4 py-3 rounded-2xl ${
-        isUser ? "bg-blue-600" : ""
-      }`}
-      style={{ backgroundColor: isUser ? theme.accent : theme.cardBackground }}
-    >
-      <p className="text-base break-words" style={{ color: theme.primaryText }}>
-        {text}
-      </p>
+const Message: React.FC<MessageType> = ({ text, isUser }) => {
+  const theme = useThemeColors();
+
+  return (
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-4`}>
+      <div
+        className={`max-w-[85%] sm:max-w-[75%] md:max-w-[65%] px-4 py-3 rounded-2xl ${
+          isUser ? "bg-blue-600" : ""
+        }`}
+        style={{ backgroundColor: isUser ? theme.accent : theme.card }}
+      >
+        <p
+          className="text-base break-words"
+          style={{ color: theme.primaryText }}
+        >
+          {text}
+        </p>
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const MessageList: React.FC<{ messages: MessageType[] }> = ({ messages }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -141,6 +158,7 @@ const PlanSelector: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = useState("Free");
   const plans = ["Free", "Paid"];
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const theme = useThemeColors();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -284,6 +302,7 @@ const ChatInput: React.FC<{
   isLoading?: boolean;
 }> = ({ onSendMessage, isLoading = false }) => {
   const [inputValue, setInputValue] = useState<string>("");
+  const theme = useThemeColors();
 
   const handleSend = () => {
     if (inputValue.trim() && !isLoading) {
@@ -303,7 +322,7 @@ const ChatInput: React.FC<{
     <div className="px-2 sm:px-4 md:px-6 py-3 sm:py-4">
       <div
         className="flex items-center p-2 sm:p-3 rounded-2xl"
-        style={{ backgroundColor: theme.cardBackground }}
+        style={{ backgroundColor: theme.card }}
       >
         {/* Plan Selector - Hidden on very small screens */}
         <div className="hidden sm:block">
@@ -363,12 +382,13 @@ const ChatInput: React.FC<{
 
 // --- Main App Component ---
 export default function Chat({
-  videoId,
   messages,
   isLoading,
   error,
   onSendMessage,
 }: ChatProps) {
+  const theme = useThemeColors();
+
   return (
     <div
       className="font-sans flex flex-col h-full"

@@ -1,4 +1,5 @@
 import { FileText, X } from "lucide-react";
+import { useThemeColors } from "../contexts/ThemeContext";
 
 // --- Type Definitions ---
 interface TestResults {
@@ -136,13 +137,18 @@ const TestResultDialog = ({
   onClose,
   navigate,
 }: TestResultDialogProps) => {
+  const theme = useThemeColors();
+
   if (!results) {
     return null; // Don't render if there are no results
   }
 
   return (
     <div className="bg-gray-900 bg-opacity-70 backdrop-blur-sm fixed inset-0 z-50 flex justify-center items-center p-4">
-      <div className="bg-[#1e2124] text-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100 animate-fadeIn">
+      <div
+        className="text-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100 animate-fadeIn"
+        style={{ backgroundColor: theme.card }}
+      >
         <ResultModalHeader onClose={onClose} />
         <ResultModalBody results={results} />
         <ResultModalFooter onClose={onClose} navigate={navigate} />

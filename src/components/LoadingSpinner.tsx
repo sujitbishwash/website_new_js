@@ -1,4 +1,5 @@
 import React from "react";
+import { useThemeColors } from "../contexts/ThemeContext";
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
@@ -8,21 +9,31 @@ interface LoadingSpinnerProps {
 
 const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   size = "md",
-  text = "Loading...",
+  text,
   className = "",
 }) => {
+  const theme = useThemeColors();
+
   const sizeClasses = {
-    sm: "h-4 w-4",
-    md: "h-8 w-8",
-    lg: "h-12 w-12",
+    sm: "w-4 h-4",
+    md: "w-8 h-8",
+    lg: "w-12 h-12",
   };
 
   return (
     <div className={`flex flex-col items-center justify-center ${className}`}>
       <div
-        className={`animate-spin rounded-full border-b-2 border-blue-400 ${sizeClasses[size]}`}
-      ></div>
-      {text && <p className="mt-2 text-sm text-gray-400">{text}</p>}
+        className={`${sizeClasses[size]} animate-spin rounded-full border-2 border-solid`}
+        style={{
+          borderColor: `${theme.border} transparent ${theme.border} transparent`,
+          borderTopColor: theme.accent,
+        }}
+      />
+      {text && (
+        <p className="mt-2 text-sm" style={{ color: theme.secondaryText }}>
+          {text}
+        </p>
+      )}
     </div>
   );
 };

@@ -70,22 +70,12 @@ declare global {
   }
 }
 
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  buttonGradientFrom: "#3B82F6",
-  buttonGradientTo: "#2563EB",
-  divider: "#4B5563",
-};
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // --- MAIN APP COMPONENT ---
 const BookPage: React.FC = () => {
+  const theme = useThemeColors();
+
   // Core State
   const [book, setBook] = useState<File | null>(null);
   const [bookText, setBookText] = useState("");
@@ -340,241 +330,253 @@ const BookPage: React.FC = () => {
     description,
     coverColor,
     onSelect,
-  }) => (
-    <div
-      className="rounded-lg shadow-md p-4 border-t-4 cursor-pointer hover:shadow-xl transition-shadow"
-      style={{
-        backgroundColor: theme.cardBackground,
-        borderTopColor: coverColor,
-      }}
-      onClick={onSelect}
-    >
-      <h3 className="font-bold" style={{ color: theme.primaryText }}>
-        {title}
-      </h3>
-      <p className="text-sm mb-2" style={{ color: theme.secondaryText }}>
-        {author}
-      </p>
-      <p className="text-sm" style={{ color: theme.secondaryText }}>
-        {description}
-      </p>
-    </div>
-  );
+  }) => {
+    const theme = useThemeColors();
 
-  const UploadView: React.FC = () => (
-    <div className="text-center p-8">
-      <Sparkles
-        className="mx-auto h-16 w-16 mb-4"
-        style={{ color: theme.accent }}
-      />
-      <h2
-        className="text-3xl font-bold mb-2"
-        style={{ color: theme.primaryText }}
-      >
-        AI Study Buddy
-      </h2>
-      <p className="mb-8" style={{ color: theme.secondaryText }}>
-        Upload a PDF to get started.
-      </p>
+    return (
       <div
-        className="relative border-2 border-dashed rounded-lg p-10 text-center hover:border-indigo-500 transition-colors max-w-lg mx-auto"
-        style={{ borderColor: theme.divider }}
+        className="rounded-lg shadow-md p-4 border-t-4 cursor-pointer hover:shadow-xl transition-shadow"
+        style={{
+          backgroundColor: theme.card,
+          borderTopColor: coverColor,
+        }}
+        onClick={onSelect}
       >
-        <UploadCloud
-          className="mx-auto h-12 w-12"
-          style={{ color: theme.mutedText }}
-        />
-        <p className="mt-4 text-sm" style={{ color: theme.secondaryText }}>
-          {isPdfJsReady
-            ? "Drag & drop a PDF here, or click to select"
-            : "Initializing PDF reader..."}
+        <h3 className="font-bold" style={{ color: theme.primaryText }}>
+          {title}
+        </h3>
+        <p className="text-sm mb-2" style={{ color: theme.secondaryText }}>
+          {author}
         </p>
-        <input
-          type="file"
-          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          onChange={handleFileChange}
-          accept=".pdf"
-          disabled={isProcessing || !isPdfJsReady}
-        />
+        <p className="text-sm" style={{ color: theme.secondaryText }}>
+          {description}
+        </p>
       </div>
-      {isProcessing && (
-        <div
-          className="mt-4 flex items-center justify-center space-x-2"
+    );
+  };
+
+  const UploadView: React.FC = () => {
+    const theme = useThemeColors();
+
+    return (
+      <div className="text-center p-8">
+        <Sparkles
+          className="mx-auto h-16 w-16 mb-4"
           style={{ color: theme.accent }}
-        >
-          <Loader className="animate-spin h-5 w-5" />
-          <span>Reading your book...</span>
-        </div>
-      )}
-      {error && <div className="mt-4 text-red-500">{error}</div>}
-
-      <button
-        onClick={() => setCurrentView("chat")}
-        className="mt-6 text-sm hover:underline"
-        style={{ color: theme.accent }}
-      >
-        Continue to demo without uploading
-      </button>
-
-      <div className="mt-12 max-w-4xl mx-auto">
-        <h3
-          className="text-xl font-semibold mb-4"
+        />
+        <h2
+          className="text-3xl font-bold mb-2"
           style={{ color: theme.primaryText }}
         >
-          Or start with a classic
-        </h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <BookSuggestionCard
-            title="Pride and Prejudice"
-            author="Jane Austen"
-            description="A classic romance novel exploring themes of love, class, and social expectations in 19th-century England."
-            coverColor="#e53e3e"
-            onSelect={() => setCurrentView("chat")}
+          AI Study Buddy
+        </h2>
+        <p className="mb-8" style={{ color: theme.secondaryText }}>
+          Upload a PDF to get started.
+        </p>
+        <div
+          className="relative border-2 border-dashed rounded-lg p-10 text-center hover:border-indigo-500 transition-colors max-w-lg mx-auto"
+          style={{ borderColor: theme.divider }}
+        >
+          <UploadCloud
+            className="mx-auto h-12 w-12"
+            style={{ color: theme.mutedText }}
           />
-          <BookSuggestionCard
-            title="1984"
-            author="George Orwell"
-            description="A dystopian novel about a totalitarian society where Big Brother is always watching."
-            coverColor="#3b82f6"
-            onSelect={() => setCurrentView("chat")}
-          />
-          <BookSuggestionCard
-            title="The Great Gatsby"
-            author="F. Scott Fitzgerald"
-            description="A story of wealth, love, and the American Dream set in the Roaring Twenties."
-            coverColor="#10b981"
-            onSelect={() => setCurrentView("chat")}
+          <p className="mt-4 text-sm" style={{ color: theme.secondaryText }}>
+            {isPdfJsReady
+              ? "Drag & drop a PDF here, or click to select"
+              : "Initializing PDF reader..."}
+          </p>
+          <input
+            type="file"
+            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            onChange={handleFileChange}
+            accept=".pdf"
+            disabled={isProcessing || !isPdfJsReady}
           />
         </div>
-      </div>
-    </div>
-  );
-
-  const ChatView: React.FC = () => (
-    <div
-      className="w-full h-full flex flex-col rounded-lg shadow-lg"
-      style={{ backgroundColor: theme.cardBackground }}
-    >
-      {/* Chat History */}
-      <div
-        ref={chatContainerRef}
-        className="flex-1 p-6 space-y-6 overflow-y-auto"
-      >
-        {!bookText && (
+        {isProcessing && (
           <div
-            className="text-center p-8 h-full flex flex-col justify-center items-center"
-            style={{ color: theme.secondaryText }}
+            className="mt-4 flex items-center justify-center space-x-2"
+            style={{ color: theme.accent }}
           >
-            <BookOpen size={48} className="mx-auto mb-4" />
-            <h3
-              className="font-semibold text-lg"
-              style={{ color: theme.primaryText }}
+            <Loader className="animate-spin h-5 w-5" />
+            <span>Reading your book...</span>
+          </div>
+        )}
+        {error && <div className="mt-4 text-red-500">{error}</div>}
+
+        <button
+          onClick={() => setCurrentView("chat")}
+          className="mt-6 text-sm hover:underline"
+          style={{ color: theme.accent }}
+        >
+          Continue to demo without uploading
+        </button>
+
+        <div className="mt-12 max-w-4xl mx-auto">
+          <h3
+            className="text-xl font-semibold mb-4"
+            style={{ color: theme.primaryText }}
+          >
+            Or start with a classic
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <BookSuggestionCard
+              title="Pride and Prejudice"
+              author="Jane Austen"
+              description="A classic romance novel exploring themes of love, class, and social expectations in 19th-century England."
+              coverColor="#e53e3e"
+              onSelect={() => setCurrentView("chat")}
+            />
+            <BookSuggestionCard
+              title="1984"
+              author="George Orwell"
+              description="A dystopian novel about a totalitarian society where Big Brother is always watching."
+              coverColor="#3b82f6"
+              onSelect={() => setCurrentView("chat")}
+            />
+            <BookSuggestionCard
+              title="The Great Gatsby"
+              author="F. Scott Fitzgerald"
+              description="A story of wealth, love, and the American Dream set in the Roaring Twenties."
+              coverColor="#10b981"
+              onSelect={() => setCurrentView("chat")}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ChatView: React.FC = () => {
+    const theme = useThemeColors();
+
+    return (
+      <div
+        className="w-full h-full flex flex-col rounded-lg shadow-lg"
+        style={{ backgroundColor: theme.card }}
+      >
+        {/* Chat History */}
+        <div
+          ref={chatContainerRef}
+          className="flex-1 p-6 space-y-6 overflow-y-auto"
+        >
+          {!bookText && (
+            <div
+              className="text-center p-8 h-full flex flex-col justify-center items-center"
+              style={{ color: theme.secondaryText }}
             >
-              Welcome to the Demo!
-            </h3>
-            <p>Upload a book to activate the AI tools.</p>
-            <button
-              onClick={() => setCurrentView("upload")}
-              className="mt-4 px-4 py-2 rounded-lg shadow"
+              <BookOpen size={48} className="mx-auto mb-4" />
+              <h3
+                className="font-semibold text-lg"
+                style={{ color: theme.primaryText }}
+              >
+                Welcome to the Demo!
+              </h3>
+              <p>Upload a book to activate the AI tools.</p>
+              <button
+                onClick={() => setCurrentView("upload")}
+                className="mt-4 px-4 py-2 rounded-lg shadow"
+                style={{
+                  background: `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`,
+                  color: theme.primaryText,
+                }}
+              >
+                Upload a Book
+              </button>
+            </div>
+          )}
+          {chatHistory.map((message, index) => (
+            <ChatMessage key={index} message={message} />
+          ))}
+          {isLoading && (
+            <div className="flex items-start gap-3">
+              <BotIcon />
+              <div
+                className="p-3 rounded-lg"
+                style={{ backgroundColor: theme.input }}
+              >
+                <Loader
+                  className="animate-spin h-5 w-5"
+                  style={{ color: theme.accent }}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Tools & Input */}
+        <div
+          className="p-4 border-t"
+          style={{
+            backgroundColor: theme.background,
+            borderColor: theme.divider,
+          }}
+        >
+          <div className="flex justify-center gap-2 mb-3">
+            <ToolButton
+              onClick={() => handleToolClick("summary")}
+              icon={FileText}
+              label="Summarize"
+              disabled={!bookText || isLoading}
+            />
+            <ToolButton
+              onClick={() => handleToolClick("flashcards")}
+              icon={Lightbulb}
+              label="Flashcards"
+              disabled={!bookText || isLoading}
+            />
+            <ToolButton
+              onClick={() => handleToolClick("suggestions")}
+              icon={Sparkles}
+              label="Suggestions"
+              disabled={!bookText || isLoading}
+            />
+            <ToolButton
+              onClick={() => handleToolClick("quiz")}
+              icon={BrainCircuit}
+              label="Quiz"
+              disabled={!bookText || isLoading}
+            />
+            <ToolButton
+              onClick={() => setIsBookModalOpen(true)}
+              icon={BookOpen}
+              label="Read Book"
+              disabled={!bookText || isLoading}
+            />
+          </div>
+          <div className="relative">
+            <input
+              type="text"
+              className="w-full pl-4 pr-12 py-3 rounded-full border focus:outline-none focus:ring-2"
               style={{
-                background: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
+                backgroundColor: theme.input,
+                borderColor: theme.divider,
                 color: theme.primaryText,
               }}
+              placeholder={
+                bookText ? "Ask a question..." : "Upload a book to chat"
+              }
+              value={userInput}
+              onChange={(e) => setUserInput(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+              disabled={isLoading || !bookText}
+            />
+            <button
+              onClick={handleSendMessage}
+              disabled={isLoading || !userInput.trim() || !bookText}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full text-white disabled:opacity-50"
+              style={{
+                background: `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`,
+              }}
             >
-              Upload a Book
+              <Send size={20} />
             </button>
           </div>
-        )}
-        {chatHistory.map((message, index) => (
-          <ChatMessage key={index} message={message} />
-        ))}
-        {isLoading && (
-          <div className="flex items-start gap-3">
-            <BotIcon />
-            <div
-              className="p-3 rounded-lg"
-              style={{ backgroundColor: theme.inputBackground }}
-            >
-              <Loader
-                className="animate-spin h-5 w-5"
-                style={{ color: theme.accent }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Tools & Input */}
-      <div
-        className="p-4 border-t"
-        style={{
-          backgroundColor: theme.background,
-          borderColor: theme.divider,
-        }}
-      >
-        <div className="flex justify-center gap-2 mb-3">
-          <ToolButton
-            onClick={() => handleToolClick("summary")}
-            icon={FileText}
-            label="Summarize"
-            disabled={!bookText || isLoading}
-          />
-          <ToolButton
-            onClick={() => handleToolClick("flashcards")}
-            icon={Lightbulb}
-            label="Flashcards"
-            disabled={!bookText || isLoading}
-          />
-          <ToolButton
-            onClick={() => handleToolClick("suggestions")}
-            icon={Sparkles}
-            label="Suggestions"
-            disabled={!bookText || isLoading}
-          />
-          <ToolButton
-            onClick={() => handleToolClick("quiz")}
-            icon={BrainCircuit}
-            label="Quiz"
-            disabled={!bookText || isLoading}
-          />
-          <ToolButton
-            onClick={() => setIsBookModalOpen(true)}
-            icon={BookOpen}
-            label="Read Book"
-            disabled={!bookText || isLoading}
-          />
-        </div>
-        <div className="relative">
-          <input
-            type="text"
-            className="w-full pl-4 pr-12 py-3 rounded-full border focus:outline-none focus:ring-2"
-            style={{
-              backgroundColor: theme.inputBackground,
-              borderColor: theme.divider,
-              color: theme.primaryText,
-            }}
-            placeholder={
-              bookText ? "Ask a question..." : "Upload a book to chat"
-            }
-            value={userInput}
-            onChange={(e) => setUserInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-            disabled={isLoading || !bookText}
-          />
-          <button
-            onClick={handleSendMessage}
-            disabled={isLoading || !userInput.trim() || !bookText}
-            className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full text-white disabled:opacity-50"
-            style={{
-              background: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
-            }}
-          >
-            <Send size={20} />
-          </button>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <div
@@ -605,6 +607,7 @@ const BookPage: React.FC = () => {
 // --- SUB-COMPONENTS ---
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  const theme = useThemeColors();
   const { role, text, type, content } = message;
   const isUser = role === "user";
 
@@ -615,7 +618,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           <div
             className="p-4 rounded-lg whitespace-pre-wrap"
             style={{
-              backgroundColor: theme.inputBackground,
+              backgroundColor: theme.input,
               color: theme.secondaryText,
             }}
           >
@@ -649,7 +652,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       <div
         className={`max-w-lg p-3 rounded-lg`}
         style={{
-          backgroundColor: isUser ? theme.accent : theme.inputBackground,
+          backgroundColor: isUser ? theme.accent : theme.input,
           color: theme.primaryText,
           borderBottomRightRadius: isUser ? "0px" : "0.5rem",
           borderBottomLeftRadius: isUser ? "0.5rem" : "0px",
@@ -663,6 +666,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 };
 
 const FlashcardGroup: React.FC<FlashcardGroupProps> = ({ cards }) => {
+  const theme = useThemeColors();
   const [flipped, setFlipped] = useState<Record<number, boolean>>({});
   return (
     <div className="space-y-3">
@@ -701,6 +705,7 @@ const FlashcardGroup: React.FC<FlashcardGroupProps> = ({ cards }) => {
 };
 
 const SuggestionsGroup: React.FC<SuggestionsGroupProps> = ({ suggestions }) => {
+  const theme = useThemeColors();
   return (
     <div className="space-y-3">
       <h4 className="font-bold" style={{ color: theme.primaryText }}>
@@ -734,106 +739,120 @@ const ToolButton: React.FC<ToolButtonProps> = ({
   icon: Icon,
   label,
   disabled,
-}) => (
-  <button
-    onClick={onClick}
-    disabled={disabled}
-    className="px-4 py-2 flex items-center gap-2 text-sm font-semibold border rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-    style={{
-      backgroundColor: theme.inputBackground,
-      color: theme.secondaryText,
-      borderColor: theme.divider,
-    }}
-  >
-    <Icon size={16} />
-    {label}
-  </button>
-);
-
-const BotIcon: React.FC = () => (
-  <div
-    className="w-8 h-8 rounded-full flex items-center justify-center text-white flex-shrink-0"
-    style={{ backgroundColor: theme.accent }}
-  >
-    <Bot size={20} />
-  </div>
-);
-const UserIcon: React.FC = () => (
-  <div
-    className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-    style={{
-      backgroundColor: theme.inputBackground,
-      color: theme.secondaryText,
-    }}
-  >
-    <User size={20} />
-  </div>
-);
-
-const BookModal: React.FC<BookModalProps> = ({ text, bookName, onClose }) => (
-  <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-    <div
-      className="rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col"
-      style={{ backgroundColor: theme.cardBackground }}
+}) => {
+  const theme = useThemeColors();
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="px-4 py-2 flex items-center gap-2 text-sm font-semibold border rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+      style={{
+        backgroundColor: theme.input,
+        color: theme.secondaryText,
+        borderColor: theme.divider,
+      }}
     >
+      <Icon size={16} />
+      {label}
+    </button>
+  );
+};
+
+const BotIcon: React.FC = () => {
+  const theme = useThemeColors();
+  return (
+    <div
+      className="w-8 h-8 rounded-full flex items-center justify-center text-white flex-shrink-0"
+      style={{ backgroundColor: theme.accent }}
+    >
+      <Bot size={20} />
+    </div>
+  );
+};
+const UserIcon: React.FC = () => {
+  const theme = useThemeColors();
+  return (
+    <div
+      className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+      style={{
+        backgroundColor: theme.input,
+        color: theme.secondaryText,
+      }}
+    >
+      <User size={20} />
+    </div>
+  );
+};
+
+const BookModal: React.FC<BookModalProps> = ({ text, bookName, onClose }) => {
+  const theme = useThemeColors();
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
       <div
-        className="p-4 border-b flex justify-between items-center"
-        style={{ borderColor: theme.divider }}
+        className="rounded-xl shadow-2xl w-full max-w-4xl h-[90vh] flex flex-col"
+        style={{ backgroundColor: theme.card }}
       >
-        <h2
-          className="text-xl font-bold truncate pr-4"
-          style={{ color: theme.primaryText }}
+        <div
+          className="p-4 border-b flex justify-between items-center"
+          style={{ borderColor: theme.divider }}
         >
-          {bookName || "Book Content"}
-        </h2>
-        <button onClick={onClose} style={{ color: theme.secondaryText }}>
-          <X size={24} />
-        </button>
-      </div>
-      <div className="flex-1 p-6 overflow-y-auto">
-        <pre
-          className="whitespace-pre-wrap font-sans"
-          style={{ color: theme.secondaryText }}
-        >
-          {text}
-        </pre>
+          <h2
+            className="text-xl font-bold truncate pr-4"
+            style={{ color: theme.primaryText }}
+          >
+            {bookName || "Book Content"}
+          </h2>
+          <button onClick={onClose} style={{ color: theme.secondaryText }}>
+            <X size={24} />
+          </button>
+        </div>
+        <div className="flex-1 p-6 overflow-y-auto">
+          <pre
+            className="whitespace-pre-wrap font-sans"
+            style={{ color: theme.secondaryText }}
+          >
+            {text}
+          </pre>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
+};
 
 const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
+  const theme = useThemeColors();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<
     Record<number, string>
   >({});
+  const [score, setScore] = useState(0);
   const [showResults, setShowResults] = useState(false);
 
   const handleAnswer = (option: string) => {
-    setSelectedAnswers({ ...selectedAnswers, [currentQuestionIndex]: option });
+    setSelectedAnswers((prev) => ({ ...prev, [currentQuestionIndex]: option }));
   };
 
   const handleNext = () => {
+    const currentAnswer = selectedAnswers[currentQuestionIndex];
+    const currentQuestion = questions[currentQuestionIndex];
+
+    if (currentAnswer === currentQuestion.answer) {
+      setScore((prev) => prev + 1);
+    }
+
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(currentQuestionIndex + 1);
+      setCurrentQuestionIndex((prev) => prev + 1);
     } else {
       setShowResults(true);
     }
   };
 
-  const score = Object.keys(selectedAnswers).reduce((acc, index) => {
-    return selectedAnswers[parseInt(index)] ===
-      questions[parseInt(index)].answer
-      ? acc + 1
-      : acc;
-  }, 0);
-
   if (showResults) {
     return (
       <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
         <div
-          className="rounded-xl shadow-2xl p-8 max-w-lg w-full text-center"
-          style={{ backgroundColor: theme.cardBackground }}
+          className="rounded-xl shadow-2xl p-8 max-w-md w-full text-center"
+          style={{ backgroundColor: theme.card }}
         >
           <h2
             className="text-3xl font-bold mb-4"
@@ -854,7 +873,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
             onClick={onClose}
             className="px-6 py-3 font-semibold rounded-lg shadow-md"
             style={{
-              background: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
+              background: `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`,
               color: theme.primaryText,
             }}
           >
@@ -871,7 +890,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
       <div
         className="rounded-xl shadow-2xl p-8 max-w-2xl w-full relative"
-        style={{ backgroundColor: theme.cardBackground }}
+        style={{ backgroundColor: theme.card }}
       >
         <button
           onClick={onClose}
@@ -902,7 +921,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
                 borderColor:
                   selectedAnswers[currentQuestionIndex] === option
                     ? theme.accent
-                    : theme.divider,
+                    : theme.border,
                 backgroundColor:
                   selectedAnswers[currentQuestionIndex] === option
                     ? "rgba(96, 165, 250, 0.1)"
@@ -918,7 +937,7 @@ const QuizModal: React.FC<QuizModalProps> = ({ questions, onClose }) => {
           disabled={!selectedAnswers[currentQuestionIndex]}
           className="w-full px-6 py-3 font-semibold rounded-lg shadow-md disabled:opacity-50"
           style={{
-            background: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
+            background: `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`,
             color: theme.primaryText,
           }}
         >

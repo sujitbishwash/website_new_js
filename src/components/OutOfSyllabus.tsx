@@ -1,22 +1,13 @@
 import React, { useEffect, useState } from "react";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  accent: "#60A5FA",
-  divider: "#4B5563",
-};
+import { useThemeColors } from "../contexts/ThemeContext";
 
 // CSS-in-JS using a template literal for styles
-const GlobalStyles = `
+const GlobalStyles = (theme: any) => `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
   body {
     /* Updated background for animation */
-    background: linear-gradient(45deg, #111827, #1e293b, #111827);
+    background: linear-gradient(45deg, ${theme.background}, ${theme.card}, ${theme.background});
     background-size: 400% 400%;
     color: ${theme.primaryText};
     font-family: 'Inter', sans-serif;
@@ -79,27 +70,31 @@ const GlobalStyles = `
 `;
 
 // --- Icon Component ---
-const LightbulbIcon: React.FC = () => (
-  <div
-    style={{ animation: "iconWobble 1s ease-out 0.5s", marginBottom: "1rem" }}
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="48"
-      height="48"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={theme.accent}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+const LightbulbIcon: React.FC = () => {
+  const theme = useThemeColors();
+
+  return (
+    <div
+      style={{ animation: "iconWobble 1s ease-out 0.5s", marginBottom: "1rem" }}
     >
-      <path d="M9 18h6" />
-      <path d="M10 22h4" />
-      <path d="M12 2a7 7 0 0 0-5.657 11.343A5 5 0 0 1 12 22a5 5 0 0 1 5.657-8.657A7 7 0 0 0 12 2z" />
-    </svg>
-  </div>
-);
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke={theme.accent}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M9 18h6" />
+        <path d="M10 22h4" />
+        <path d="M12 2a7 7 0 0 0-5.657 11.343A5 5 0 0 1 12 22a5 5 0 0 1 5.657-8.657A7 7 0 0 0 12 2z" />
+      </svg>
+    </div>
+  );
+};
 
 // --- Main App Component ---
 
@@ -110,16 +105,17 @@ interface OutOfSyllabusProps {
 const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack }) => {
   const [isVisible, setIsVisible] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
+  const theme = useThemeColors();
 
   // Effect to inject global styles into the document's head
   useEffect(() => {
     const styleTag = document.createElement("style");
-    styleTag.innerHTML = GlobalStyles;
+    styleTag.innerHTML = GlobalStyles(theme);
     document.head.appendChild(styleTag);
     return () => {
       document.head.removeChild(styleTag);
     };
-  }, []);
+  }, [theme]);
 
   // Function to handle closing the message box
   const handleClose = () => {
@@ -142,7 +138,7 @@ const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack }) => {
 
   // Style for the message box
   const messageBoxStyle: React.CSSProperties = {
-    background: theme.cardBackground,
+    background: theme.card,
     padding: "2rem",
     borderRadius: "1rem",
     boxShadow: "0 10px 25px rgba(0, 0, 0, 0.2)",

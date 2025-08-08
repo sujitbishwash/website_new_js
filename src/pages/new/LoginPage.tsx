@@ -2,27 +2,13 @@ import { authApi } from "@/lib/api-client";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useThemeColors } from "../../contexts/ThemeContext";
 import { ROUTES } from "../../routes/constants";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  buttonGradientFrom: "#3B82F6",
-  buttonGradientTo: "#2563EB",
-  divider: "#4B5563",
-};
 
 // --- Style Objects ---
 // This approach uses 100% inline styles to avoid dependency on any CSS framework.
 const styles = {
   appContainer: {
-    backgroundColor: theme.background,
     minHeight: "100vh",
     display: "flex",
     alignItems: "center",
@@ -31,8 +17,6 @@ const styles = {
     padding: "1rem",
   },
   loginCard: {
-    backgroundColor: theme.cardBackground,
-    color: theme.primaryText,
     borderRadius: "1rem",
     boxShadow:
       "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
@@ -45,21 +29,17 @@ const styles = {
     textAlign: "center" as const,
   },
   headerTitle: {
-    color: theme.accent,
     fontSize: "2.25rem",
     lineHeight: "2.5rem",
     fontWeight: "bold",
   },
   headerSubtitle: {
-    color: theme.secondaryText,
     marginTop: "0.5rem",
   },
   formContainer: {
     marginTop: "2rem",
   },
   googleButton: {
-    backgroundColor: theme.inputBackground,
-    color: theme.primaryText,
     width: "100%",
     display: "flex",
     alignItems: "center",
@@ -79,15 +59,11 @@ const styles = {
   hr: {
     width: "100%",
     border: "none",
-    borderTop: `1px solid ${theme.divider}`,
   },
   dividerText: {
-    color: theme.mutedText,
     padding: "0 1rem",
   },
   inputField: {
-    backgroundColor: theme.inputBackground,
-    color: theme.primaryText,
     width: "100%",
     padding: "0.75rem 1rem",
     borderRadius: "0.5rem",
@@ -100,113 +76,59 @@ const styles = {
     marginBottom: "1rem",
   },
   otpInfoText: {
-    color: theme.secondaryText,
-    fontSize: "0.875rem",
+    marginBottom: "0.5rem",
+  },
+  otpInfoEmail: {
+    fontWeight: "600",
+  },
+  otpContainer: {
+    display: "flex",
+    justifyContent: "center",
+    gap: "0.5rem",
+    marginBottom: "1.5rem",
+  },
+  otpInput: {
+    width: "3rem",
+    height: "3rem",
+    textAlign: "center" as const,
+    fontSize: "1.25rem",
+    fontWeight: "600",
+    borderRadius: "0.5rem",
+    border: "none",
+  },
+  actionButton: {
+    width: "100%",
+    padding: "0.75rem 1rem",
+    borderRadius: "0.5rem",
+    border: "none",
+    fontWeight: "600",
+    cursor: "pointer",
+    transition: "all 0.3s",
+    position: "relative" as const,
   },
   changeEmailButton: {
-    color: theme.accent,
     background: "none",
     border: "none",
     cursor: "pointer",
     textDecoration: "underline",
-    marginLeft: "0.5rem",
-    fontSize: "0.875rem",
+    marginTop: "1rem",
   },
-  otpInputContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "0.5rem",
-    marginBottom: "1.5rem",
-  },
-  otpInputBox: {
-    backgroundColor: theme.inputBackground,
-    color: theme.primaryText,
-    width: "3rem",
-    height: "3.5rem",
-    borderRadius: "0.5rem",
-    border: "1px solid transparent",
+  privacyPolicyContainer: {
     textAlign: "center" as const,
-    fontSize: "1.5rem",
-    fontWeight: "bold",
-    transition: "border-color 0.3s, box-shadow 0.3s",
+    marginTop: "1.5rem",
   },
-  actionButton: {
-    width: "100%",
-    background: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
-    color: theme.primaryText,
-    fontWeight: "bold",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: "none",
+  privacyPolicyLink: {
+    textDecoration: "underline",
     cursor: "pointer",
-    boxShadow:
-      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-    transition: "all 0.3s",
-  },
-  privacyPolicy: {
-    color: theme.mutedText,
-    textAlign: "center" as const,
-    fontSize: "0.875rem",
-    lineHeight: "1.25rem",
-    marginTop: "2rem",
-  },
-  privacyLink: {
-    color: theme.accent,
-    textDecoration: "none",
-  },
-  errorMessage: {
-    color: "#EF4444", // red-500
-    fontSize: "0.875rem",
-    marginTop: "0.5rem",
-    textAlign: "center" as const,
-  },
-  successMessage: {
-    color: "#10B981", // green-500
-    fontSize: "0.875rem",
-    marginTop: "0.5rem",
-    textAlign: "center" as const,
-  },
-  inputFieldError: {
-    backgroundColor: theme.inputBackground,
-    color: theme.primaryText,
-    width: "100%",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: "1px solid #EF4444", // red border for error
-    boxSizing: "border-box" as const,
-    marginBottom: "0.5rem", // reduced margin to make room for error
-  },
-  actionButtonDisabled: {
-    width: "100%",
-    background: "#6B7280", // gray-500
-    color: "#9CA3AF", // gray-400
-    fontWeight: "bold",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: "none",
-    cursor: "not-allowed",
-    opacity: 0.6,
-    transition: "all 0.3s",
-  },
-  actionButtonLoading: {
-    width: "100%",
-    background: "#6B7280", // gray-500
-    color: "#9CA3AF", // gray-400
-    fontWeight: "bold",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: "none",
-    cursor: "not-allowed",
-    opacity: 0.8,
-    transition: "all 0.3s",
   },
 };
 
 // --- Main App Component ---
 
 const LoginPage: React.FC = () => {
-  const { isAuthenticated, isLoading, hasExamGoal, checkExamGoal } = useAuth();
+  const { isAuthenticated, isLoading, checkExamGoal } = useAuth();
   const navigate = useNavigate();
+  const theme = useThemeColors();
 
   // Redirect to appropriate page if already authenticated
   React.useEffect(() => {
@@ -228,7 +150,9 @@ const LoginPage: React.FC = () => {
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
-      <div style={styles.appContainer}>
+      <div
+        style={{ ...styles.appContainer, backgroundColor: theme.background }}
+      >
         <div style={{ ...styles.loginCard, textAlign: "center" }}>
           <div style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>
             Loading...
@@ -260,7 +184,12 @@ const LoginPage: React.FC = () => {
           }
         `}
       </style>
-      <div style={styles.appContainer}>
+      <div
+        style={{
+          ...styles.appContainer,
+          backgroundColor: theme.background,
+        }}
+      >
         <LoginCard />
       </div>
     </>
@@ -279,15 +208,23 @@ const EmailInput: React.FC<EmailInputProps> = ({
   email,
   setEmail,
   hasError = false,
-}) => (
-  <input
-    type="email"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    placeholder="Enter your email"
-    style={hasError ? styles.inputFieldError : styles.inputField}
-  />
-);
+}) => {
+  const theme = useThemeColors();
+  return (
+    <input
+      type="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      placeholder="Enter your email"
+      style={{
+        ...styles.inputField,
+        backgroundColor: hasError ? theme.input : theme.input,
+        color: theme.primaryText,
+        border: hasError ? `1px solid ${theme.error}` : "none",
+      }}
+    />
+  );
+};
 
 interface OtpInputProps {
   otp: string[];
@@ -295,6 +232,7 @@ interface OtpInputProps {
 }
 
 const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp }) => {
+  const theme = useThemeColors();
   const handleChange = (element: HTMLInputElement, index: number) => {
     if (isNaN(Number(element.value))) return false;
     const newOtp = [...otp];
@@ -331,7 +269,7 @@ const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp }) => {
   };
 
   return (
-    <div style={styles.otpInputContainer}>
+    <div style={styles.otpContainer}>
       {otp.map((data, index) => (
         <input
           key={index}
@@ -344,7 +282,7 @@ const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp }) => {
           onFocus={(e) => e.currentTarget.select()}
           onPaste={index === 0 ? handlePaste : () => {}}
           style={{
-            ...styles.otpInputBox,
+            ...styles.otpInput,
             ...(data ? { borderColor: theme.accent } : {}),
           }}
         />
@@ -367,26 +305,35 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   onClick,
   disabled = false,
   loading = false,
-}) => (
-  <button
-    onClick={onClick}
-    style={
-      loading
-        ? styles.actionButtonLoading
-        : disabled
-        ? styles.actionButtonDisabled
-        : styles.actionButton
-    }
-    disabled={disabled || loading}
-  >
-    {loading ? loadingText : text}
-  </button>
-);
+}) => {
+  const theme = useThemeColors();
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        ...styles.actionButton,
+        background: loading
+          ? `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`
+          : disabled
+          ? `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`
+          : `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`,
+        color: theme.primaryText,
+        fontWeight: "bold",
+        opacity: loading ? 0.8 : 1,
+        cursor: loading ? "not-allowed" : disabled ? "not-allowed" : "pointer",
+      }}
+      disabled={disabled || loading}
+    >
+      {loading ? loadingText : text}
+    </button>
+  );
+};
 
 const LoginCard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, checkExamGoal } = useAuth();
+  const theme = useThemeColors();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [otpSent, setOtpSent] = useState(false);
@@ -405,7 +352,7 @@ const LoginCard: React.FC = () => {
     return re.test(String(email).toLowerCase());
   };
 
-  const isEmailValid = validateEmail(email);
+  const isValidEmail = validateEmail(email);
   const isOtpComplete = otp.join("").length === 6;
 
   const handleSendOtp = async () => {
@@ -419,7 +366,7 @@ const LoginCard: React.FC = () => {
         return;
       }
 
-      if (!isEmailValid) {
+      if (!isValidEmail) {
         setError("Please enter a valid email address.");
         return;
       }
@@ -517,7 +464,13 @@ const LoginCard: React.FC = () => {
   };
 
   return (
-    <div style={styles.loginCard}>
+    <div
+      style={{
+        ...styles.loginCard,
+        backgroundColor: theme.card,
+        color: theme.primaryText,
+      }}
+    >
       <Header />
       <div style={styles.formContainer}>
         <GoogleSignInButton />
@@ -529,13 +482,17 @@ const LoginCard: React.FC = () => {
             <EmailInput
               email={email}
               setEmail={handleEmailChange}
-              hasError={Boolean(error && !isEmailValid)}
+              hasError={Boolean(error && !isValidEmail)}
             />
-            {error && <div style={styles.errorMessage}>{error}</div>}
+            {error && (
+              <div style={{ color: theme.error, marginTop: "0.5rem" }}>
+                {error}
+              </div>
+            )}
             <ActionButton
               text="Send OTP"
               onClick={handleSendOtp}
-              disabled={!isEmailValid}
+              disabled={!isValidEmail}
               loading={isLoading}
               loadingText="Sending OTP..."
             />
@@ -545,7 +502,8 @@ const LoginCard: React.FC = () => {
           <>
             <div style={styles.otpInfoContainer}>
               <span style={styles.otpInfoText}>
-                Enter the OTP sent to <strong>{email}</strong>
+                Enter the OTP sent to{" "}
+                <span style={styles.otpInfoEmail}>{email}</span>
               </span>
               <button
                 onClick={handleChangeEmail}
@@ -555,8 +513,16 @@ const LoginCard: React.FC = () => {
               </button>
             </div>
             <OtpInput otp={otp} setOtp={setOtp} />
-            {error && <div style={styles.errorMessage}>{error}</div>}
-            {success && <div style={styles.successMessage}>{success}</div>}
+            {error && (
+              <div style={{ color: theme.error, marginTop: "0.5rem" }}>
+                {error}
+              </div>
+            )}
+            {success && (
+              <div style={{ color: theme.success, marginTop: "0.5rem" }}>
+                {success}
+              </div>
+            )}
             <ActionButton
               text="Verify OTP"
               onClick={handleVerifyOtp}
@@ -572,57 +538,126 @@ const LoginCard: React.FC = () => {
   );
 };
 
-const Header: React.FC = () => (
-  <div style={styles.headerContainer}>
-    <h1 style={styles.headerTitle}>Welcome Back</h1>
-    <p style={styles.headerSubtitle}>
-      Sign in to continue your AI Padhai journey
-    </p>
-  </div>
-);
+const Header: React.FC = () => {
+  const theme = useThemeColors();
+  return (
+    <div style={styles.headerContainer}>
+      <h1
+        style={{
+          ...styles.headerTitle,
+          color: theme.accent,
+        }}
+      >
+        AI Padhai
+      </h1>
+      <p
+        style={{
+          ...styles.headerSubtitle,
+          color: theme.secondaryText,
+        }}
+      >
+        Your AI-powered learning companion
+      </p>
+    </div>
+  );
+};
 
-const GoogleSignInButton: React.FC = () => (
-  <button style={styles.googleButton}>
-    <svg
-      style={{ width: "1.5rem", height: "1.5rem", marginRight: "0.75rem" }}
-      viewBox="0 0 48 48"
+const GoogleSignInButton: React.FC = () => {
+  const theme = useThemeColors();
+  return (
+    <button
+      style={{
+        ...styles.googleButton,
+        backgroundColor: theme.input,
+        color: theme.primaryText,
+      }}
+      onClick={() => {
+        // Google sign-in logic would go here
+        console.log("Google sign-in clicked");
+      }}
     >
-      <path
-        fill="#FFC107"
-        d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039L38.802 8.841C34.553 4.806 29.602 2.5 24 2.5C11.983 2.5 2.5 11.983 2.5 24s9.483 21.5 21.5 21.5c11.147 0 20.25-8.673 20.25-19.75c0-1.343-.138-2.65-.389-3.917z"
-      ></path>
-      <path
-        fill="#FF3D00"
-        d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12.5 24 12.5c3.059 0 5.842 1.154 7.961 3.039l5.841-5.841C34.553 4.806 29.602 2.5 24 2.5C16.318 2.5 9.642 6.735 6.306 14.691z"
-      ></path>
-      <path
-        fill="#4CAF50"
-        d="M24 45.5c5.842 0 11.017-1.939 14.686-5.22l-6.571-4.819c-1.926 1.386-4.32 2.22-6.815 2.22c-5.22 0-9.651-3.657-11.303-8.841l-6.571 4.82C9.642 38.265 16.318 45.5 24 45.5z"
-      ></path>
-      <path
-        fill="#1976D2"
-        d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.16-4.082 5.581l6.571 4.82c3.584-3.264 6.282-8.132 6.282-14.318c0-1.343-.138-2.65-.389-3.917z"
-      ></path>
-    </svg>
-    Sign in with Google
-  </button>
-);
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        style={{ marginRight: "0.75rem" }}
+      >
+        <path
+          fill="#4285F4"
+          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+        />
+        <path
+          fill="#34A853"
+          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+        />
+        <path
+          fill="#FBBC05"
+          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+        />
+        <path
+          fill="#EA4335"
+          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+        />
+      </svg>
+      Continue with Google
+    </button>
+  );
+};
 
-const OrDivider: React.FC = () => (
-  <div style={styles.dividerContainer}>
-    <hr style={styles.hr} />
-    <span style={styles.dividerText}>OR</span>
-    <hr style={styles.hr} />
-  </div>
-);
+const OrDivider: React.FC = () => {
+  const theme = useThemeColors();
+  return (
+    <div style={styles.dividerContainer}>
+      <hr
+        style={{
+          ...styles.hr,
+          borderTop: `1px solid ${theme.border}`,
+        }}
+      />
+      <span
+        style={{
+          ...styles.dividerText,
+          color: theme.mutedText,
+        }}
+      >
+        or
+      </span>
+      <hr
+        style={{
+          ...styles.hr,
+          borderTop: `1px solid ${theme.border}`,
+        }}
+      />
+    </div>
+  );
+};
 
-const PrivacyPolicyLink: React.FC = () => (
-  <p style={styles.privacyPolicy}>
-    By continuing, you agree to our{" "}
-    <a href="#" style={styles.privacyLink}>
-      Privacy Policy
-    </a>
-  </p>
-);
+const PrivacyPolicyLink: React.FC = () => {
+  const theme = useThemeColors();
+  return (
+    <div style={styles.privacyPolicyContainer}>
+      <p
+        style={{
+          color: theme.secondaryText,
+          fontSize: "0.875rem",
+        }}
+      >
+        By continuing, you agree to our{" "}
+        <span
+          style={{
+            ...styles.privacyPolicyLink,
+            color: theme.accent,
+          }}
+          onClick={() => {
+            // Privacy policy link logic
+            console.log("Privacy policy clicked");
+          }}
+        >
+          Privacy Policy
+        </span>
+      </p>
+    </div>
+  );
+};
 
 export default LoginPage;

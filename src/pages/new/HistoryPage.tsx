@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // --- Type Definitions ---
 interface CourseMetadata {
@@ -24,109 +25,127 @@ interface LearningHistoryItem {
 
 // --- CSS Styles Component ---
 // The CSS is now included directly in the component to avoid file resolution errors.
-const HistoryStyles = () => (
-  <style>{`
-    /* --- Main Page Styles --- */
-    .history-page {
-      background-color: #0d1117; /* Dark navy background */
-      min-height: 100vh;
-      padding: 40px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      color: #c9d1d9;
-    }
+const HistoryStyles = () => {
+  const theme = useThemeColors();
 
-    .main-title {
-      text-align: center;
-      color: #58a6ff; /* Prominent blue color */
-      font-size: 2.5rem;
-      margin-bottom: 40px;
-    }
+  return (
+    <style>{`
+      /* --- Main Page Styles --- */
+      .history-page {
+        background-color: ${theme.background};
+        min-height: 100vh;
+        padding: 40px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+          Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        color: ${theme.primaryText};
+      }
 
-    /* --- Grid Layout for Cards --- */
-    .history-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
+      .main-title {
+        text-align: center;
+        color: ${theme.accent};
+        font-size: 2.5rem;
+        margin-bottom: 40px;
+      }
 
-    /* --- Reusable CourseCard Styles --- */
-    .course-card {
-      background-color: #161b22; /* Darker card background */
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      overflow: hidden;
-      position: relative; /* Required for the overlay */
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: pointer;
-    }
+      /* --- Grid Layout for Cards --- */
+      .history-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
 
-    .course-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(88, 166, 255, 0.2);
-    }
+      /* --- Reusable CourseCard Styles --- */
+      .course-card {
+        background-color: ${theme.card};
+        border: 1px solid ${theme.border};
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative; /* Required for the overlay */
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+      }
 
-    .card-image {
-      height: 150px;
-      background-size: cover;
-      background-position: center;
-      border-bottom: 1px solid #30363d;
-    }
+      .course-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(88, 166, 255, 0.2);
+      }
 
-    .card-content {
-      padding: 20px;
-    }
+      .card-image {
+        height: 150px;
+        background-size: cover;
+        background-position: center;
+        border-bottom: 1px solid ${theme.border};
+      }
 
-    .card-content h3 {
-      margin-top: 0;
-      font-size: 1.2rem;
-      color: #f0f6fc;
-    }
+      .card-content {
+        padding: 20px;
+      }
 
-    .card-content p {
-      font-size: 0.9rem;
-      color: #8b949e;
-      line-height: 1.5;
-    }
+      .card-content h3 {
+        margin-top: 0;
+        font-size: 1.2rem;
+        color: ${theme.primaryText};
+      }
 
-    /* --- Metadata Overlay Styles --- */
-    .metadata-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(22, 27, 34, 0.95); /* Semi-transparent overlay */
-      color: #f0f6fc;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-      padding: 20px;
-    }
+      .card-content p {
+        font-size: 0.9rem;
+        color: ${theme.secondaryText};
+        line-height: 1.5;
+      }
 
-    .metadata-overlay.visible {
-      opacity: 1;
-      visibility: visible;
-    }
+      /* --- Metadata Overlay Styles --- */
+      .metadata-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        color: ${theme.primaryText};
+        text-align: center;
+        padding: 20px;
+      }
 
-    .metadata-item {
-      font-size: 1.1rem;
-      margin: 5px 0;
-    }
+      .course-card:hover .metadata-overlay {
+        opacity: 1;
+      }
 
-    .metadata-item span {
-      font-weight: 600;
-      color: #58a6ff;
-    }
-  `}</style>
-);
+      .metadata-overlay h4 {
+        margin: 0 0 10px;
+        color: ${theme.accent};
+      }
+
+      .metadata-overlay p {
+        margin: 5px 0;
+        color: ${theme.secondaryText};
+      }
+
+      /* --- Responsive Design --- */
+      @media (max-width: 768px) {
+        .history-page {
+          padding: 20px;
+        }
+        
+        .main-title {
+          font-size: 2rem;
+        }
+        
+        .history-grid {
+          grid-template-columns: 1fr;
+          gap: 1rem;
+        }
+      }
+    `}</style>
+  );
+};
 
 // --- Reusable CourseCard Component ---
 // This component displays a single course card.

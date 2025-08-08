@@ -1,192 +1,210 @@
 import { useState } from "react";
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // --- CSS Styles Component ---
 // The CSS is included directly in the component to avoid file resolution errors.
-const SubscriptionStyles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+const SubscriptionStyles = () => {
+  const theme = useThemeColors();
 
-    /* --- Main Page Styles --- */
-    .subscription-page {
-      background-color: #0d1117;
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      color: #c9d1d9;
-    }
+  return (
+    <style>{`
+      @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    .subscription-container {
-      background-color: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 16px;
-      padding: 32px;
-      max-width: 600px;
-      width: 100%;
-      text-align: center;
-    }
+      /* --- Main Page Styles --- */
+      .subscription-page {
+        background-color: ${theme.background};
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+          Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        color: ${theme.primaryText};
+      }
 
-    /* --- Offer Banner --- */
-    .offer-banner {
-      background: linear-gradient(90deg, rgba(56, 139, 253, 0.1), rgba(4, 88, 207, 0.2));
-      border: 1px solid rgba(88, 166, 255, 0.3);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 32px;
-    }
-    
-    .offer-banner .limited-time {
-      background-color: #1f6feb;
-      color: #ffffff;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 0.8rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
+      .subscription-container {
+        background-color: ${theme.card};
+        border: 1px solid ${theme.border};
+        border-radius: 16px;
+        padding: 32px;
+        max-width: 600px;
+        width: 100%;
+        text-align: center;
+      }
 
-    .offer-banner p {
-      margin: 8px 0 0;
-      font-size: 1rem;
-      color: #f0f6fc;
-    }
-
-    .offer-banner .promo-code {
-      font-weight: 700;
-      background-color: rgba(88, 166, 255, 0.15);
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid rgba(88, 166, 255, 0.3);
-    }
-
-    .offer-banner .valid-until {
-      font-size: 0.8rem;
-      color: #8b949e;
-      margin-top: 4px;
-    }
-
-    /* --- Main Content --- */
-    .main-title {
-      color: #f0f6fc;
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 0 0 24px;
-    }
-
-    .feature-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 32px;
-      text-align: left;
-      display: inline-block;
-    }
-
-    .feature-list li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      font-size: 1rem;
-      color: #c9d1d9;
-    }
-    
-    .feature-list .sub-text {
-        color: #8b949e;
-        font-size: 0.9rem;
-        margin-left: 4px;
-    }
-
-    /* --- Plan Selection --- */
-    .plan-selection {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-
-    .plan-card {
-      background-color: #0d1117;
-      border: 2px solid #30363d;
-      border-radius: 12px;
-      padding: 24px;
-      cursor: pointer;
-      transition: border-color 0.3s ease, background-color 0.3s ease;
-      position: relative;
-    }
-
-    .plan-card.active {
-      border-color: #58a6ff;
-      background-color: rgba(88, 166, 255, 0.1);
-    }
-    
-    .plan-card h3 {
-        margin: 0 0 8px;
-        font-size: 1.25rem;
-        color: #f0f6fc;
-    }
-    
-    .plan-card .price {
-        font-size: 2.25rem;
-        font-weight: 700;
-        color: #f0f6fc;
-    }
-
-    .plan-card .price-per {
-        font-size: 1rem;
-        color: #8b949e;
-    }
-
-    .plan-card .billing-info {
-        font-size: 0.8rem;
-        color: #8b949e;
-        margin-top: 4px;
-    }
-
-    .save-badge {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        background-color: #238636;
-        color: #ffffff;
-        padding: 4px 8px;
+      /* --- Offer Banner --- */
+      .offer-banner {
+        background: linear-gradient(90deg, rgba(56, 139, 253, 0.1), rgba(4, 88, 207, 0.2));
+        border: 1px solid rgba(88, 166, 255, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 32px;
+      }
+      
+      .offer-banner .limited-time {
+        background-color: ${theme.accent};
+        color: ${theme.primaryText};
+        padding: 4px 12px;
         border-radius: 20px;
-        font-size: 0.75rem;
         font-weight: 600;
-    }
+        font-size: 0.8rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
 
-    /* --- Button and Footer --- */
-    .select-plan-button {
-      background: linear-gradient(90deg, #388bfd, #1f6feb);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 600;
-      width: 100%;
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-    }
+      .offer-banner p {
+        margin: 8px 0 0;
+        font-size: 1rem;
+        color: ${theme.primaryText};
+      }
 
-    .select-plan-button:hover {
-      opacity: 0.9;
-    }
+      .offer-banner .promo-code {
+        font-weight: 700;
+        background-color: rgba(88, 166, 255, 0.15);
+        padding: 2px 6px;
+        border-radius: 4px;
+        border: 1px solid rgba(88, 166, 255, 0.3);
+      }
 
-    .footer-text {
-      margin-top: 16px;
-      font-size: 0.9rem;
-      color: #8b949e;
-    }
-  `}</style>
-);
+      .offer-banner .valid-until {
+        font-size: 0.8rem;
+        color: ${theme.secondaryText};
+        margin-top: 4px;
+      }
+
+      /* --- Main Content --- */
+      .main-title {
+        color: ${theme.primaryText};
+        font-size: 2rem;
+        font-weight: 700;
+        margin: 0 0 24px;
+      }
+
+      .feature-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 32px;
+        text-align: left;
+        display: inline-block;
+      }
+
+      .feature-list li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        font-size: 1rem;
+        color: ${theme.primaryText};
+      }
+      
+      .feature-list .sub-text {
+          color: ${theme.secondaryText};
+          font-size: 0.9rem;
+          margin-left: 28px;
+      }
+
+      /* --- Pricing Section --- */
+      .pricing-section {
+        background-color: ${theme.background};
+        border: 2px solid ${theme.border};
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 32px;
+        position: relative;
+      }
+
+      .pricing-section:hover {
+        border-color: ${theme.accent};
+      }
+
+      .pricing-section .price {
+        font-size: 3rem;
+        font-weight: 700;
+        color: ${theme.primaryText};
+        margin: 0;
+      }
+
+      .pricing-section .price .currency {
+        font-size: 1.5rem;
+        vertical-align: top;
+      }
+
+      .pricing-section .price .period {
+        font-size: 1rem;
+        color: ${theme.secondaryText};
+        font-weight: 400;
+      }
+
+      .pricing-section .original-price {
+        color: ${theme.secondaryText};
+        text-decoration: line-through;
+        font-size: 1.2rem;
+        margin: 0 0 8px;
+      }
+
+      .pricing-section .discount {
+        color: ${theme.secondaryText};
+        font-size: 0.9rem;
+        margin: 0;
+      }
+
+      /* --- CTA Button --- */
+      .cta-button {
+        background: linear-gradient(90deg, ${theme.gradientFrom}, ${theme.gradientTo});
+        color: ${theme.primaryText};
+        border: none;
+        padding: 16px 32px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        width: 100%;
+        margin-bottom: 16px;
+      }
+
+      .cta-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(88, 166, 255, 0.3);
+      }
+
+      .cta-button:active {
+        transform: translateY(0);
+      }
+
+      .money-back {
+        color: ${theme.secondaryText};
+        font-size: 0.9rem;
+        margin: 0;
+      }
+
+      /* --- Responsive Design --- */
+      @media (max-width: 768px) {
+        .subscription-page {
+          padding: 20px;
+        }
+        
+        .subscription-container {
+          padding: 24px;
+        }
+        
+        .main-title {
+          font-size: 1.5rem;
+        }
+        
+        .pricing-section .price {
+          font-size: 2.5rem;
+        }
+      }
+    `}</style>
+  );
+};
 
 // --- Main Subscription Page Component ---
 const SubscriptionPage = () => {
+  const theme = useThemeColors();
   const [selectedPlan, setSelectedPlan] = useState("annual"); // 'annual' or 'monthly'
 
   const features = [
@@ -237,7 +255,7 @@ const SubscriptionPage = () => {
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
                   height="20"
-                  fill="#238636"
+                  fill={theme.success}
                   viewBox="0 0 16 16"
                 >
                   <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />

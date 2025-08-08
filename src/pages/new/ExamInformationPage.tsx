@@ -2,77 +2,93 @@
 // You can use this component by importing it and rendering it in your main App file.
 
 import { useLocation, useNavigate } from "react-router-dom";
+import { useThemeColors } from "../../contexts/ThemeContext";
 import { ROUTES } from "../../routes/constants";
 
 // Icon components for the legend - using inline SVG for simplicity
-const NotVisitedIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 14 14"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect width="14" height="14" rx="2" fill="#6B7280" />
-  </svg>
-);
-
-const NotAnsweredIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 14 14"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect width="14" height="14" rx="7" fill="#EF4444" />
-  </svg>
-);
-
-const AnsweredIcon = () => (
-  <svg
-    width="14"
-    height="14"
-    viewBox="0 0 14 14"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <rect width="14" height="14" rx="7" fill="#22C55E" />
-  </svg>
-);
-
-const MarkedForReviewIcon = () => (
-  <svg
-    width="16"
-    height="16"
-    viewBox="0 0 16 16"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      d="M8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8C16 12.4183 12.4183 16 8 16ZM7.25 11.5L12 8L7.25 4.5V11.5Z"
-      fill="#6366F1"
-    />
-    <path d="M4 12V4H5V12H4Z" fill="white" />
-  </svg>
-);
-
-const AnsweredAndMarkedIcon = () => (
-  <div className="relative">
-    <AnsweredIcon />
+const NotVisitedIcon = () => {
+  const theme = useThemeColors();
+  return (
     <svg
-      className="absolute -bottom-1 -right-1"
-      width="8"
-      height="8"
-      viewBox="0 0 12 12"
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <circle cx="6" cy="6" r="6" fill="#6366F1" />
-      <path d="M4.5 8.5L7.5 6L4.5 3.5V8.5Z" fill="white" />
+      <rect width="14" height="14" rx="2" fill={theme.mutedText} />
     </svg>
-  </div>
-);
+  );
+};
+
+const NotAnsweredIcon = () => {
+  const theme = useThemeColors();
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect width="14" height="14" rx="7" fill={theme.error} />
+    </svg>
+  );
+};
+
+const AnsweredIcon = () => {
+  const theme = useThemeColors();
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 14 14"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <rect width="14" height="14" rx="7" fill={theme.success} />
+    </svg>
+  );
+};
+
+const MarkedForReviewIcon = () => {
+  const theme = useThemeColors();
+  return (
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 16 16"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path
+        d="M8 16C3.58172 16 0 12.4183 0 8C0 3.58172 3.58172 0 8 0C12.4183 0 16 3.58172 16 8C16 12.4183 12.4183 16 8 16ZM7.25 11.5L12 8L7.25 4.5V11.5Z"
+        fill={theme.accent}
+      />
+      <path d="M4 12V4H5V12H4Z" fill="white" />
+    </svg>
+  );
+};
+
+const AnsweredAndMarkedIcon = () => {
+  const theme = useThemeColors();
+  return (
+    <div className="relative">
+      <AnsweredIcon />
+      <svg
+        className="absolute -bottom-1 -right-1"
+        width="8"
+        height="8"
+        viewBox="0 0 12 12"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <circle cx="6" cy="6" r="6" fill={theme.accent} />
+        <path d="M4.5 8.5L7.5 6L4.5 3.5V8.5Z" fill="white" />
+      </svg>
+    </div>
+  );
+};
 
 // Main component for the instructions page
 export default function ExamInformationPage() {

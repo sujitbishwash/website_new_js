@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useThemeColors } from "../contexts/ThemeContext";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import OutOfSyllabus from "./OutOfSyllabus";
@@ -7,6 +8,7 @@ import OutOfSyllabus from "./OutOfSyllabus";
 // --- Type Definitions ---
 interface IconProps {
   className?: string;
+  style?: React.CSSProperties;
 }
 
 interface AddSourceModalProps {
@@ -77,13 +79,14 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 }) => {
   const modalRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+  const theme = useThemeColors();
   const [url, setUrl] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [, setError] = useState("");
   const [suggestedVideos, setSuggestedVideos] = useState<SuggestedVideo[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState("");
-  const [usingFallbackData, setUsingFallbackData] = useState(false);
+  const [, setUsingFallbackData] = useState(false);
   const [showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
 
   // Effect to handle clicks outside the modal
@@ -146,14 +149,15 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     }
   };
 
-  const validateUrlFormat = (url: string): boolean => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+  // kept for future use
+  // const validateUrlFormat = (url: string): boolean => {
+  //   try {
+  //     new URL(url);
+  //     return true;
+  //   } catch {
+  //     return false;
+  //   }
+  // };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
@@ -204,10 +208,11 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     }
   };
 
-  const navigateToHome = () => {
-    onClose();
-    navigate(ROUTES.DASHBOARD);
-  };
+  // kept for future use
+  // const navigateToHome = () => {
+  //   onClose();
+  //   navigate(ROUTES.DASHBOARD);
+  // };
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
     try {
@@ -254,146 +259,236 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   ); // Debug log
 
   return (
-    // Backdrop
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-sm p-4 font-sans">
-      {/* Modal Panel */}
-      <div
-        ref={modalRef}
-        className="w-full max-w-lg transform rounded-xl bg-[#202123] text-gray-200 shadow-2xl transition-all"
-      >
-        <div className="p-6 sm:p-8">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center text-lg font-semibold text-white">
-              <LinkIcon className="mr-3 h-5 w-5 text-gray-400" />
-              YouTube, Website, Etc.
-            </h2>
-            <button
-              onClick={onClose}
-              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
+    <>
+      {isOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ backgroundColor: `${theme.overlay}CC` }}
+        >
+          <div
+            ref={modalRef}
+            className="w-full max-w-lg transform rounded-xl shadow-2xl transition-all"
+            style={{ backgroundColor: theme.card }}
+          >
+            {/* Header */}
+            <div
+              className="flex items-center justify-between p-6"
+              style={{ borderBottom: `1px solid ${theme.border}` }}
             >
-              <XIcon className="h-6 w-6" />
-            </button>
-          </div>
-          {/* Body */}
-
-          <div className="mt-6">
-            <label htmlFor="url-input" className="text-sm text-gray-400">
-              Enter a YouTube Link, Website URL, Doc, ArXiv, Etc.
-            </label>
-            <input
-              id="url-input"
-              type="text"
-              value={url}
-              onChange={handleUrlChange}
-              placeholder="https://youtu.be/example"
-              className="mt-2 w-full rounded-lg border border-gray-600 bg-[#2f3032] px-4 py-2.5 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              disabled={isLoading}
-            />
-
-            {/* Error Message */}
-            {error && <div className="mt-2 text-sm text-red-400">{error}</div>}
-
-            {/* Separator */}
-            <div className="my-6 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-gray-700" />
-              <div className="px-3 text-sm font-medium text-gray-500">or</div>
-              <div className="w-full border-t border-gray-700" />
+              <div className="flex items-center">
+                <LinkIcon
+                  className="mr-3 h-5 w-5"
+                  style={{ color: theme.accent }}
+                />
+                <h2
+                  className="text-xl font-semibold"
+                  style={{ color: theme.primaryText }}
+                >
+                  Add Video Source
+                </h2>
+              </div>
+              <button
+                onClick={onClose}
+                className="rounded-full p-1 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+                style={{
+                  color: theme.secondaryText,
+                  backgroundColor: "transparent",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = theme.cardHover;
+                  e.currentTarget.style.color = theme.primaryText;
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = theme.secondaryText;
+                }}
+              >
+                <XIcon className="h-5 w-5" />
+              </button>
             </div>
 
-            {/* Video Suggestions */}
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-gray-400">
+            {/* Content */}
+            <div className="p-6">
+              {/* URL Input */}
+              <div className="mb-6">
+                <label
+                  htmlFor="url-input"
+                  className="text-sm"
+                  style={{ color: theme.secondaryText }}
+                >
+                  YouTube URL
+                </label>
+                <div className="mt-2 relative">
+                  <input
+                    id="url-input"
+                    type="text"
+                    value={url}
+                    onChange={handleUrlChange}
+                    placeholder="https://www.youtube.com/watch?v=..."
+                    className="mt-2 w-full rounded-lg border px-4 py-2.5 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    style={{
+                      backgroundColor: theme.input,
+                      borderColor: theme.border,
+                      color: theme.primaryText,
+                    }}
+                  />
+                </div>
+              </div>
+
+              {/* Divider */}
+              <div className="flex items-center my-6">
+                <div
+                  className="flex-1"
+                  style={{ borderTop: `1px solid ${theme.border}` }}
+                ></div>
+                <div
+                  className="px-3 text-sm font-medium"
+                  style={{ color: theme.mutedText }}
+                >
+                  or
+                </div>
+                <div
+                  className="flex-1"
+                  style={{ borderTop: `1px solid ${theme.border}` }}
+                ></div>
+              </div>
+
+              {/* Suggested Videos */}
+              <div className="mb-6">
+                <h3
+                  className="text-sm font-medium mb-4"
+                  style={{ color: theme.secondaryText }}
+                >
                   Suggested Videos
                 </h3>
-                {usingFallbackData && (
-                  <span className="text-xs text-yellow-400 bg-yellow-900/20 px-2 py-1 rounded">
-                    Sample Data
-                  </span>
+                {isLoadingSuggestions ? (
+                  <div className="flex items-center justify-center py-8">
+                    <LoadingIcon
+                      className="h-6 w-6 animate-spin"
+                      style={{ color: theme.secondaryText }}
+                    />
+                    <span
+                      className="ml-2 text-sm"
+                      style={{ color: theme.secondaryText }}
+                    >
+                      Loading suggestions...
+                    </span>
+                  </div>
+                ) : suggestionsError ? (
+                  <p className="text-sm" style={{ color: theme.error }}>
+                    {suggestionsError}
+                  </p>
+                ) : suggestedVideos.length > 0 ? (
+                  <div className="space-y-3">
+                    {suggestedVideos.map((video, index) => (
+                      <button
+                        key={index}
+                        onClick={() => handleSuggestedVideoClick(video)}
+                        className="w-full text-left p-3 rounded-lg border transition-colors hover:bg-gray-700/50 focus:outline-none focus:ring-2 focus:ring-gray-500"
+                        style={{
+                          backgroundColor: theme.cardSecondary,
+                          borderColor: theme.border,
+                          color: theme.primaryText,
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor =
+                            theme.cardHover;
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor =
+                            theme.cardSecondary;
+                        }}
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div
+                            className="flex-shrink-0 w-16 h-12 rounded bg-gray-600 flex items-center justify-center"
+                            style={{ backgroundColor: theme.input }}
+                          >
+                            <span
+                              className="text-xs"
+                              style={{ color: theme.secondaryText }}
+                            >
+                              {video.topic.charAt(0).toUpperCase()}
+                            </span>
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p
+                              className="text-sm font-medium truncate"
+                              style={{ color: theme.primaryText }}
+                            >
+                              {video.title}
+                            </p>
+                            <p
+                              className="text-xs"
+                              style={{ color: theme.secondaryText }}
+                            >
+                              {video.topic}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm" style={{ color: theme.secondaryText }}>
+                    No suggestions available at the moment.
+                  </p>
                 )}
               </div>
 
-              {isLoadingSuggestions ? (
-                <div className="mt-4 flex items-center justify-center py-8">
-                  <LoadingIcon className="h-6 w-6 animate-spin text-gray-400" />
-                  <span className="ml-2 text-sm text-gray-400">
-                    Loading suggestions...
-                  </span>
-                </div>
-              ) : suggestionsError && !usingFallbackData ? (
-                <div className="mt-4 text-center py-8">
-                  <p className="text-sm text-red-400">{suggestionsError}</p>
-                  <button
-                    onClick={fetchSuggestedVideos}
-                    className="mt-2 text-sm text-blue-400 hover:text-blue-300"
-                  >
-                    Try again
-                  </button>
-                </div>
-              ) : suggestedVideos.length === 0 ? (
-                <div className="mt-4 text-center py-8">
-                  <p className="text-sm text-gray-400">
-                    No suggested videos available
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  {suggestedVideos.map((video) => (
-                    <div
-                      key={video.id}
-                      onClick={() => handleSuggestedVideoClick(video)}
-                      className="group cursor-pointer overflow-hidden rounded-lg bg-gray-700/50 transition-all hover:bg-gray-700 hover:shadow-lg"
-                    >
-                      <img
-                        src={video.thumbnailUrl}
-                        alt={`Thumbnail for ${video.title}`}
-                        className="h-24 w-full object-cover transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.onerror = null;
-                          target.src =
-                            "https://placehold.co/400x225/333/FFF?text=Error";
-                        }}
-                      />
-                      <div className="p-3">
-                        <p className="truncate font-semibold text-white">
-                          {video.title}
-                        </p>
-                        <p className="text-xs text-gray-400">{video.topic}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {/* Action Buttons */}
+              <div className="flex space-x-3">
+                <button
+                  onClick={onClose}
+                  className="flex-1 px-4 py-2 text-sm font-medium rounded-lg border transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+                  style={{
+                    backgroundColor: "transparent",
+                    borderColor: theme.border,
+                    color: theme.secondaryText,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = theme.cardHover;
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                  }}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleAdd}
+                  disabled={!url.trim() || isLoading}
+                  className="flex-1 px-4 py-2 text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:cursor-not-allowed"
+                  style={{
+                    backgroundColor:
+                      url.trim() && !isLoading ? theme.accent : theme.input,
+                    color: theme.primaryText,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (url.trim() && !isLoading) {
+                      e.currentTarget.style.backgroundColor = theme.accentHover;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (url.trim() && !isLoading) {
+                      e.currentTarget.style.backgroundColor = theme.accent;
+                    }
+                  }}
+                >
+                  {isLoading ? "Adding..." : "Add Video"}
+                </button>
+              </div>
             </div>
           </div>
-
-          {/* Footer */}
-          <div className="mt-8 flex justify-end space-x-4">
-            <button
-              onClick={navigateToHome}
-              className="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400"
-            >
-              Go to Home
-            </button>
-            <button
-              onClick={handleAdd}
-              disabled={!url.trim() || isLoading}
-              className="rounded-lg bg-[#343541] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:bg-gray-600 disabled:cursor-not-allowed"
-            >
-              {isLoading ? "Adding..." : "Add"}
-            </button>
-          </div>
         </div>
-      </div>
+      )}
 
-      {/* OutOfSyllabus Modal Overlay */}
+      {/* OutOfSyllabus Modal */}
       {showOutOfSyllabus && (
         <div
-          className="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50"
+          className="fixed inset-0 z-60 flex items-center justify-center"
+          style={{ backgroundColor: `${theme.overlay}CC` }}
           onClick={(e) => {
-            // Only close if clicking on the backdrop, not on the modal content
             if (e.target === e.currentTarget) {
               setShowOutOfSyllabus(false);
             }
@@ -401,13 +496,13 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         >
           <OutOfSyllabus
             onGoBack={() => {
-              console.log("Closing OutOfSyllabus modal"); // Debug log
+              console.log("Closing OutOfSyllabus modal");
               setShowOutOfSyllabus(false);
             }}
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 

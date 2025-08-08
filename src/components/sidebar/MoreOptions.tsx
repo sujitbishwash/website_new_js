@@ -1,16 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-
-// Centralized theme colors for easy customization, as requested.
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  divider: "#4B5563",
-};
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // --- TYPE DEFINITIONS ---
 // Updated to support nested children for submenus.
@@ -31,9 +20,11 @@ type MenuItem = {
 const Icon = ({
   path,
   className = "w-5 h-5",
+  style,
 }: {
   path: string;
   className?: string;
+  style?: React.CSSProperties;
 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -42,6 +33,7 @@ const Icon = ({
     strokeWidth={1.5}
     stroke="currentColor"
     className={className}
+    style={style}
   >
     <path strokeLinecap="round" strokeLinejoin="round" d={path} />
   </svg>
@@ -60,6 +52,8 @@ const LogoutModal = ({
   onClose: () => void;
   onConfirm: () => void;
 }) => {
+  const theme = useThemeColors();
+
   if (!isOpen) return null;
 
   return (
@@ -67,25 +61,74 @@ const LogoutModal = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 animate-fade-in">
       {/* Modal content */}
       <div
-        className={`bg-[${theme.cardBackground}] rounded-2xl shadow-xl w-full max-w-sm p-8 text-center`}
+        style={{
+          backgroundColor: theme.card,
+          borderRadius: "1rem",
+          boxShadow:
+            "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
+          width: "100%",
+          maxWidth: "24rem",
+          padding: "2rem",
+          textAlign: "center",
+        }}
       >
-        <h2 className={`text-2xl font-bold text-[${theme.primaryText}] mb-2`}>
+        <h2
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: "700",
+            color: theme.primaryText,
+            marginBottom: "0.5rem",
+          }}
+        >
           Are you sure you want to log out?
         </h2>
-        <p className={`text-[${theme.secondaryText}] mb-6`}>
+        <p
+          style={{
+            color: theme.secondaryText,
+            marginBottom: "1.5rem",
+          }}
+        >
           Log out of ChatGPT as{" "}
           <span className="font-semibold">sagentiriya33@gmail.com</span>?
         </p>
         <div className="flex flex-col space-y-3">
           <button
             onClick={onConfirm}
-            className={`w-full px-4 py-3 font-semibold text-[${theme.cardBackground}] bg-[${theme.primaryText}] rounded-lg transition-opacity hover:opacity-90`}
+            style={{
+              width: "100%",
+              padding: "0.75rem 1rem",
+              fontWeight: "600",
+              color: theme.card,
+              backgroundColor: theme.primaryText,
+              borderRadius: "0.5rem",
+              transition: "opacity 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.opacity = "0.9";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.opacity = "1";
+            }}
           >
             Log out
           </button>
           <button
             onClick={onClose}
-            className={`w-full px-4 py-3 font-semibold text-[${theme.primaryText}] bg-transparent rounded-lg transition-colors hover:bg-[${theme.inputBackground}]`}
+            style={{
+              width: "100%",
+              padding: "0.75rem 1rem",
+              fontWeight: "600",
+              color: theme.primaryText,
+              backgroundColor: "transparent",
+              borderRadius: "0.5rem",
+              transition: "background-color 0.2s",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = theme.input;
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "transparent";
+            }}
           >
             Cancel
           </button>
@@ -98,6 +141,8 @@ const LogoutModal = ({
 // --- MAIN COMPONENT ---
 
 const ProfileMenu = () => {
+  const theme = useThemeColors();
+
   // State to manage the visibility of the main dropdown menu.
   const [isMenuOpen, setMenuOpen] = useState(false);
   // State to track which submenu is currently hovered over.
@@ -183,44 +228,111 @@ const ProfileMenu = () => {
       <div ref={menuRef} className="relative font-sans">
         <button
           onClick={toggleMenu}
-          className={`flex items-center justify-between w-full space-x-4 p-2 rounded-lg transition-colors duration-200
-                    bg-[${theme.inputBackground}] hover:bg-[${theme.divider}] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[${theme.background}] focus:ring-[${theme.accent}]`}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            width: "100%",
+            gap: "1rem",
+            padding: "0.5rem",
+            borderRadius: "0.5rem",
+            transition: "all 0.2s",
+            backgroundColor: theme.input,
+            border: "none",
+            outline: "none",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = theme.border;
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = theme.input;
+          }}
+          onFocus={(e) => {
+            e.currentTarget.style.boxShadow = `0 0 0 2px ${theme.accent}`;
+          }}
+          onBlur={(e) => {
+            e.currentTarget.style.boxShadow = "none";
+          }}
         >
-          <div className="flex items-center space-x-3">
+          <div
+            style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}
+          >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center bg-[${theme.mutedText}]`}
+              style={{
+                width: "2rem",
+                height: "2rem",
+                borderRadius: "50%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: theme.mutedText,
+              }}
             >
               <Icon
                 path="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                className={`w-5 h-5 text-[${theme.cardBackground}]`}
+                style={{
+                  width: "1.25rem",
+                  height: "1.25rem",
+                  color: theme.card,
+                }}
               />
             </div>
-            <span className={`text-sm font-medium text-[${theme.primaryText}]`}>
+            <span
+              style={{
+                fontSize: "0.875rem",
+                fontWeight: "500",
+                color: theme.primaryText,
+              }}
+            >
               nikk07081...
             </span>
           </div>
           <Icon
             path="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-            className={`w-5 h-5 text-[${theme.secondaryText}]`}
+            style={{
+              width: "1.25rem",
+              height: "1.25rem",
+              color: theme.secondaryText,
+            }}
           />
         </button>
 
         {isMenuOpen && (
           <div
-            className={`absolute bottom-full left-0 mb-2 w-64 p-2 rounded-lg shadow-2xl z-20
-                        bg-[${theme.cardBackground}] border border-[${theme.divider}] animate-fade-in-up`}
+            style={{
+              position: "absolute",
+              bottom: "100%",
+              left: "0",
+              marginBottom: "0.5rem",
+              width: "16rem",
+              padding: "0.5rem",
+              borderRadius: "0.5rem",
+              boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+              zIndex: 20,
+              backgroundColor: theme.card,
+              border: `1px solid ${theme.border}`,
+            }}
           >
-            <div className="space-y-1">
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "0.25rem",
+              }}
+            >
               {menuOptions.map((item) =>
                 item.isDivider ? (
                   <hr
                     key={`divider-${item.label}`}
-                    className={`border-t border-[${theme.divider}] my-1`}
+                    style={{
+                      borderTop: `1px solid ${theme.border}`,
+                      margin: "0.25rem 0",
+                    }}
                   />
                 ) : (
                   <div
                     key={item.label}
-                    className="relative"
+                    style={{ position: "relative" }}
                     onMouseEnter={() =>
                       setActiveSubMenu(item.children ? item.label : null)
                     }
@@ -233,27 +345,72 @@ const ProfileMenu = () => {
                           if (item.label !== "Log Out") setMenuOpen(false);
                         }
                       }}
-                      className={`w-full flex items-center justify-between space-x-3 p-2 text-left text-sm rounded-md transition-colors duration-200
-                                text-[${theme.secondaryText}] hover:bg-[${theme.inputBackground}] hover:text-[${theme.primaryText}]`}
+                      style={{
+                        width: "100%",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: "0.75rem",
+                        padding: "0.5rem",
+                        textAlign: "left",
+                        fontSize: "0.875rem",
+                        borderRadius: "0.375rem",
+                        transition: "all 0.2s",
+                        color: theme.secondaryText,
+                        backgroundColor: "transparent",
+                        border: "none",
+                        cursor: "pointer",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = theme.input;
+                        e.currentTarget.style.color = theme.primaryText;
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "transparent";
+                        e.currentTarget.style.color = theme.secondaryText;
+                      }}
                     >
-                      <div className="flex items-center space-x-3">
+                      <div
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.75rem",
+                        }}
+                      >
                         {item.icon}
                         <span>{item.label}</span>
                       </div>
                       {item.children && (
                         <Icon
                           path="M8.25 4.5l7.5 7.5-7.5 7.5"
-                          className="w-4 h-4"
+                          style={{ width: "1rem", height: "1rem" }}
                         />
                       )}
                     </button>
 
                     {item.children && activeSubMenu === item.label && (
                       <div
-                        className={`absolute left-full top-[-0.5rem] ml-2 w-56 p-2 rounded-lg shadow-2xl z-30
-                                    bg-[${theme.cardBackground}] border border-[${theme.divider}] animate-fade-in-up`}
+                        style={{
+                          position: "absolute",
+                          left: "100%",
+                          top: "-0.125rem",
+                          marginLeft: "0.5rem",
+                          width: "14rem",
+                          padding: "0.5rem",
+                          borderRadius: "0.5rem",
+                          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+                          zIndex: 30,
+                          backgroundColor: theme.card,
+                          border: `1px solid ${theme.border}`,
+                        }}
                       >
-                        <div className="space-y-1">
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "0.25rem",
+                          }}
+                        >
                           {item.children.map((child) => (
                             <button
                               key={child.label}
@@ -261,8 +418,32 @@ const ProfileMenu = () => {
                                 child.action?.();
                                 setMenuOpen(false);
                               }}
-                              className={`w-full flex items-center space-x-3 p-2 text-left text-sm rounded-md transition-colors duration-200
-                                        text-[${theme.secondaryText}] hover:bg-[${theme.inputBackground}] hover:text-[${theme.primaryText}]`}
+                              style={{
+                                width: "100%",
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "0.75rem",
+                                padding: "0.5rem",
+                                textAlign: "left",
+                                fontSize: "0.875rem",
+                                borderRadius: "0.375rem",
+                                transition: "all 0.2s",
+                                color: theme.secondaryText,
+                                backgroundColor: "transparent",
+                                border: "none",
+                                cursor: "pointer",
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor =
+                                  theme.input;
+                                e.currentTarget.style.color = theme.primaryText;
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor =
+                                  "transparent";
+                                e.currentTarget.style.color =
+                                  theme.secondaryText;
+                              }}
                             >
                               {child.icon}
                               <span>{child.label}</span>
@@ -288,9 +469,18 @@ const ProfileMenu = () => {
 };
 
 const Moreoptions = () => {
+  const theme = useThemeColors();
   return (
     <div
-      className={`w-screen h-screen flex flex-col justify-end p-8 bg-[${theme.background}]`}
+      style={{
+        width: "100vw",
+        height: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        padding: "2rem",
+        backgroundColor: theme.background,
+      }}
     >
       <style>{`
           @keyframes fade-in {

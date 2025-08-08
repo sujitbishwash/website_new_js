@@ -1,18 +1,5 @@
 import React from "react";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827", // bg-gray-900
-  cardBackground: "#1F2937", // bg-gray-800
-  inputBackground: "#374151", // bg-gray-700
-  primaryText: "#FFFFFF", // text-white
-  secondaryText: "#9CA3AF", // text-gray-400
-  mutedText: "#6B7280", // text-gray-500
-  accent: "#60A5FA", // text-blue-400
-  buttonGradientFrom: "#3B82F6", // from-blue-500
-  buttonGradientTo: "#2563EB", // to-blue-600
-  divider: "#4B5563", // border-gray-600
-};
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // CSS keyframe animations are defined here for more dynamic movement.
 const animationStyles = `
@@ -39,6 +26,8 @@ const animationStyles = `
  * It uses CSS animations for a continuous, dynamic effect.
  */
 const NotFoundIcon: React.FC = () => {
+  const theme = useThemeColors();
+
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -106,6 +95,8 @@ interface NotFoundPageProps {
 }
 
 const ContentDesign: React.FC<NotFoundPageProps> = ({ homePath = "/" }) => {
+  const theme = useThemeColors();
+
   // Handler to navigate to the home page.
   // In a real app, you would use a router's navigation function here.
   const handleGoHome = () => {
@@ -121,7 +112,7 @@ const ContentDesign: React.FC<NotFoundPageProps> = ({ homePath = "/" }) => {
       >
         <div
           className="p-8 sm:p-12 rounded-2xl shadow-2xl flex flex-col items-center text-center max-w-md w-full"
-          style={{ backgroundColor: theme.cardBackground }}
+          style={{ backgroundColor: theme.card }}
         >
           <NotFoundIcon />
           <h1
@@ -140,7 +131,7 @@ const ContentDesign: React.FC<NotFoundPageProps> = ({ homePath = "/" }) => {
             onClick={handleGoHome}
             className="px-8 py-3 rounded-lg font-semibold text-white transition-all duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-blue-300"
             style={{
-              backgroundImage: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
+              backgroundImage: `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`,
             }}
           >
             Back to Home

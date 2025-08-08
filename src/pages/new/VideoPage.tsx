@@ -2,8 +2,9 @@ import Chat from "@/components/learning/Chat";
 import Flashcards from "@/components/learning/Flashcards";
 import Quiz from "@/components/learning/Quiz";
 import Summary from "@/components/learning/Summary";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
+import { useThemeColors } from "../../contexts/ThemeContext";
 import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
 
 // Type definitions
@@ -301,6 +302,7 @@ const AITutorPanel: React.FC<{
 const VideoPage: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const location = useLocation();
+  const theme = useThemeColors();
 
   // State for video data
   const [videoDetail, setVideoDetail] = useState<VideoDetail | null>(null);
@@ -520,10 +522,10 @@ const VideoPage: React.FC = () => {
                 /* Simple toggle switch styles */
                 .toggle-checkbox:checked {
                     right: 0;
-                    border-color: #3b82f6; /* blue-500 */
+                    border-color: ${theme.accent};
                 }
                 .toggle-checkbox:checked + .toggle-label {
-                    background-color: #3b82f6; /* blue-500 */
+                    background-color: ${theme.accent};
                 }
                 /* Custom scrollbar for webkit browsers */
                 ::-webkit-scrollbar {
@@ -534,11 +536,11 @@ const VideoPage: React.FC = () => {
                     background: transparent;
                 }
                 ::-webkit-scrollbar-thumb {
-                    background: #cbd5e1; /* gray-300 */
+                    background: ${theme.border};
                     border-radius: 10px;
                 }
                 ::-webkit-scrollbar-thumb:hover {
-                    background: #94a3b8; /* gray-400 */
+                    background: ${theme.mutedText};
                 }
                 /* For aspect ratio plugin fallback */
                 .aspect-w-16 { position: relative; padding-bottom: 56.25%; }

@@ -2,22 +2,9 @@ import { AddSourceModal } from "@/components/YouTubeSourceDialog";
 import { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useThemeColors } from "../../contexts/ThemeContext";
 import { examGoalApi, ExamType } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827", // bg-gray-900
-  cardBackground: "#1F2937", // bg-gray-800
-  inputBackground: "#374151", // bg-gray-700
-  primaryText: "#FFFFFF", // text-white
-  secondaryText: "#9CA3AF", // text-gray-400
-  mutedText: "#6B7280", // text-gray-500
-  accent: "#60A5FA", // border-blue-400
-  buttonGradientFrom: "#3B82F6", // from-blue-600
-  buttonGradientTo: "#2563EB", // to-blue-700
-  divider: "#4B5563", // border-gray-600
-};
 
 // --- Type Definitions ---
 interface ExamData {
@@ -47,6 +34,8 @@ const Dropdown: FC<DropdownProps> = ({
   disabled = false,
   id,
 }) => {
+  const theme = useThemeColors();
+
   return (
     <div className="w-full">
       <label
@@ -64,8 +53,8 @@ const Dropdown: FC<DropdownProps> = ({
           disabled={disabled}
           className="w-full appearance-none rounded-lg border px-4 py-3 pr-10 focus:outline-none focus:ring-2"
           style={{
-            backgroundColor: disabled ? theme.inputBackground : theme.mutedText,
-            borderColor: theme.divider,
+            backgroundColor: disabled ? theme.input : theme.input,
+            borderColor: theme.border,
             color: theme.primaryText,
             cursor: disabled ? "not-allowed" : "pointer",
             outlineColor: theme.accent,
@@ -103,6 +92,7 @@ const Dropdown: FC<DropdownProps> = ({
 
 // Main Card Component
 const ExamGoalSelector: FC = () => {
+  const theme = useThemeColors();
   const navigate = useNavigate();
   const { checkExamGoal } = useAuth();
   const [examType, setExamType] = useState<string>("");
@@ -186,7 +176,7 @@ const ExamGoalSelector: FC = () => {
   return (
     <div
       className="w-full max-w-2xl rounded-2xl p-6 sm:p-8 md:p-12 shadow-2xl"
-      style={{ backgroundColor: theme.cardBackground }}
+      style={{ backgroundColor: theme.card }}
     >
       <div className="text-center">
         <h1
@@ -246,20 +236,16 @@ const ExamGoalSelector: FC = () => {
           <button
             onClick={handleSubmit}
             disabled={isButtonDisabled}
-            className={`w-full text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-opacity-50 ${
-              isButtonDisabled ? "cursor-not-allowed" : "hover:shadow-lg"
-            }`}
+            className="w-full mt-8 py-3 px-6 rounded-lg font-semibold text-white transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               backgroundImage: isButtonDisabled
                 ? "none"
-                : `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
+                : `linear-gradient(to right, ${theme.gradientFrom}, ${theme.gradientTo})`,
               backgroundColor: isButtonDisabled ? theme.mutedText : "",
               outlineColor: theme.accent,
             }}
           >
-            {isSubmitting
-              ? "Navigating to dashboard..."
-              : "Continue to Dashboard"}
+            {isSubmitting ? "Setting Goal..." : "Set Exam Goal"}
           </button>
         </div>
       )}
@@ -277,15 +263,16 @@ const ExamGoalSelector: FC = () => {
 
 // Main App Component
 const ExamGoalPage: FC = () => {
-  const { isAuthenticated, isLoading, hasExamGoal } = useAuth();
   const navigate = useNavigate();
+  const { isAuthenticated, hasExamGoal } = useAuth();
+  const theme = useThemeColors();
 
   // Redirect to dashboard if user is authenticated and has exam goal
   useEffect(() => {
-    if (!isLoading && isAuthenticated && hasExamGoal) {
+    if (!isAuthenticated && hasExamGoal) {
       navigate(ROUTES.DASHBOARD, { replace: true });
     }
-  }, [isAuthenticated, isLoading, hasExamGoal, navigate]);
+  }, [isAuthenticated, hasExamGoal, navigate]);
 
   // This hook runs once when the component mounts to load Tailwind CSS.
   useEffect(() => {
@@ -300,45 +287,36 @@ const ExamGoalPage: FC = () => {
   }, []); // The empty dependency array ensures this effect runs only once.
 
   // Show loading spinner while checking authentication
-  if (isLoading) {
-    return (
-      <main
-        className="flex min-h-screen w-full items-center justify-center p-4"
-        style={{
-          backgroundColor: theme.background,
-          fontFamily: "'Inter', sans-serif",
-        }}
-      >
-        <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
-          <p className="mt-2 text-sm" style={{ color: theme.secondaryText }}>
-            Loading...
-          </p>
-        </div>
-      </main>
-    );
-  }
-
-  // Don't render exam goal form if user is authenticated and has exam goal
   if (isAuthenticated && hasExamGoal) {
     return null;
   }
 
   return (
-    <main
-      className="flex min-h-screen w-full items-center justify-center p-4"
-      style={{
-        backgroundColor: theme.background,
-        fontFamily: "'Inter', sans-serif",
-      }}
+    <div
+      className="min-h-screen font-sans p-4 sm:p-6 lg:p-8"
+      style={{ backgroundColor: theme.background }}
     >
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
-        `}
-      </style>
-      <ExamGoalSelector />
-    </main>
+      <div className="max-w-4xl mx-auto">
+        <div
+          className="rounded-xl p-6 sm:p-8"
+          style={{ backgroundColor: theme.card }}
+        >
+          <h1
+            className="text-2xl sm:text-3xl font-bold mb-6 text-center"
+            style={{ color: theme.primaryText }}
+          >
+            Choose Your Exam Goal
+          </h1>
+          <p
+            className="text-center mb-8 text-sm sm:text-base"
+            style={{ color: theme.secondaryText }}
+          >
+            Select your target exam to personalize your learning experience
+          </p>
+          <ExamGoalSelector />
+        </div>
+      </div>
+    </div>
   );
 };
 

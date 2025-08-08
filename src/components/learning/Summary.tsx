@@ -1,16 +1,5 @@
-import React, { useEffect, useState } from "react";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  divider: "#4B5563",
-};
+import { useEffect, useState } from "react";
+import { useThemeColors } from "../../contexts/ThemeContext";
 
 // --- TYPE DEFINITIONS (TypeScript) ---
 type SummaryLength = "small" | "medium" | "long";
@@ -107,144 +96,25 @@ const smallSummaryData: SummarySectionData[] = [
 ];
 
 // --- SVG ICON ---
-const SourceIcon = () => (
-  <span
-    style={{
-      color: theme.mutedText,
-      backgroundColor: "#2d3748",
-      borderRadius: "50%",
-      width: "18px",
-      height: "18px",
-      display: "inline-flex",
-      justifyContent: "center",
-      alignItems: "center",
-      fontSize: "12px",
-      marginLeft: "8px",
-      cursor: "pointer",
-    }}
-  >
-    S
-  </span>
-);
-
-// --- MODULAR COMPONENTS ---
-
-const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
-  <li className="mb-2">
-    <div className="flex items-start">
-      <span
-        className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
-        style={{ backgroundColor: theme.accent }}
-      ></span>
-      <p style={{ color: theme.secondaryText }}>
-        {point.text}
-        <SourceIcon />
-      </p>
-    </div>
-    {point.subPoints && (
-      <ul
-        className="ml-6 mt-2 list-none pl-4 border-l"
-        style={{ borderColor: theme.divider }}
-      >
-        {point.subPoints.map((subPoint) => (
-          <li key={subPoint.id} className="mb-2">
-            <div className="flex items-start">
-              <span
-                className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
-                style={{ backgroundColor: theme.mutedText }}
-              ></span>
-              <p style={{ color: theme.secondaryText }}>
-                {subPoint.text}
-                <SourceIcon />
-              </p>
-            </div>
-          </li>
-        ))}
-      </ul>
-    )}
-  </li>
-);
-
-const SummarySection: React.FC<{ section: SummarySectionData }> = ({
-  section,
-}) => (
-  <div className="mb-8">
-    <h2
-      className="text-2xl font-bold mb-4"
-      style={{ color: theme.primaryText }}
-    >
-      {section.title}
-    </h2>
-    <ul className="list-none p-0">
-      {section.points.map((point) => (
-        <SummaryPointItem key={point.id} point={point} />
-      ))}
-    </ul>
-  </div>
-);
-
-// Updated header with a dropdown selector
-const SummaryHeader: React.FC<{
-  activeLength: SummaryLength;
-  onLengthChange: (length: SummaryLength) => void;
-}> = ({ activeLength, onLengthChange }) => {
-  const lengths: SummaryLength[] = ["small", "medium", "long"];
+const SourceIcon = () => {
+  const theme = useThemeColors();
 
   return (
-    <div className="flex justify-center items-center mb-8">
-      <div className="relative">
-        <select
-          value={activeLength}
-          onChange={(e) => onLengthChange(e.target.value as SummaryLength)}
-          className="appearance-none px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 capitalize w-48 text-center"
-          style={{
-            backgroundColor: theme.inputBackground,
-            color: theme.primaryText,
-            border: `1px solid ${theme.divider}`,
-            cursor: "pointer",
-          }}
-        >
-          {lengths.map((length) => (
-            <option
-              key={length}
-              value={length}
-              style={{
-                backgroundColor: theme.inputBackground,
-                color: theme.primaryText,
-              }}
-            >
-              {length.charAt(0).toUpperCase() + length.slice(1)} Summary
-            </option>
-          ))}
-        </select>
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3"
-          style={{ color: theme.secondaryText }}
-        >
-          <svg
-            className="fill-current h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-          >
-            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-          </svg>
-        </div>
-      </div>
-    </div>
+    <svg
+      width="16"
+      height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={theme.accent}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72" />
+      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72" />
+    </svg>
   );
 };
-
-const LoadingSpinner = () => (
-  <div className="flex justify-center items-center p-10">
-    <div
-      className="w-16 h-16 border-4 border-dashed rounded-full animate-spin"
-      style={{ borderColor: `${theme.accent} transparent` }}
-    ></div>
-    <p className="ml-4 text-lg" style={{ color: theme.primaryText }}>
-      Loading Summary...
-    </p>
-  </div>
-);
 
 // --- MAIN APP COMPONENT ---
 
@@ -255,6 +125,7 @@ export default function Summary() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [summaryLength, setSummaryLength] = useState<SummaryLength>("long");
+  const theme = useThemeColors();
 
   useEffect(() => {
     const fetchSummaryData = () => {
@@ -291,19 +162,146 @@ export default function Summary() {
   }, [summaryLength]); // Re-run the effect when summaryLength changes
 
   const renderContent = () => {
-    if (isLoading) return <LoadingSpinner />;
-    if (error)
+    if (isLoading) {
       return (
-        <p className="text-center" style={{ color: theme.accent }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            padding: "3rem",
+            color: theme.accent,
+          }}
+        >
+          <div
+            style={{
+              width: "2rem",
+              height: "2rem",
+              border: `3px solid ${theme.border}`,
+              borderTop: `3px solid ${theme.accent}`,
+              borderRadius: "50%",
+              animation: "spin 1s linear infinite",
+            }}
+          />
+          <style>{`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}</style>
+        </div>
+      );
+    }
+    if (error) {
+      return (
+        <p
+          style={{
+            textAlign: "center",
+            color: theme.accent,
+          }}
+        >
           {error}
         </p>
       );
-    if (summaryData)
+    }
+    if (summaryData) {
       return summaryData.map((section) => (
-        <SummarySection key={section.id} section={section} />
+        <div
+          key={section.id}
+          style={{
+            marginBottom: "2rem",
+            padding: "1.5rem",
+            backgroundColor: theme.card,
+            borderRadius: "0.75rem",
+            border: `1px solid ${theme.border}`,
+          }}
+        >
+          <h3
+            style={{
+              color: theme.primaryText,
+              fontSize: "1.25rem",
+              fontWeight: "600",
+              marginBottom: "1rem",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.5rem",
+            }}
+          >
+            <SourceIcon />
+            {section.title}
+          </h3>
+          {section.points.map((point) => (
+            <div
+              key={point.id}
+              style={{
+                marginBottom: "1rem",
+                padding: "1rem",
+                backgroundColor: theme.card,
+                borderRadius: "0.5rem",
+                border: `1px solid ${theme.border}`,
+              }}
+            >
+              <p
+                style={{
+                  color: theme.primaryText,
+                  fontSize: "1rem",
+                  lineHeight: "1.6",
+                  marginBottom: point.subPoints ? "0.5rem" : "0",
+                }}
+              >
+                {point.text}
+              </p>
+              {point.subPoints && (
+                <div style={{ marginLeft: "1.5rem" }}>
+                  {point.subPoints.map((subPoint) => (
+                    <div
+                      key={subPoint.id}
+                      style={{
+                        marginTop: "0.5rem",
+                        padding: "0.5rem",
+                        backgroundColor: theme.cardSecondary,
+                        borderRadius: "0.25rem",
+                        border: `1px solid ${theme.borderSecondary}`,
+                      }}
+                    >
+                      <p
+                        style={{
+                          color: theme.secondaryText,
+                          fontSize: "0.9rem",
+                          lineHeight: "1.5",
+                        }}
+                      >
+                        {subPoint.text}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       ));
+    }
     return null;
   };
+
+  const lengths = [
+    {
+      key: "small" as SummaryLength,
+      label: "Short",
+      description: "Key points only",
+    },
+    {
+      key: "medium" as SummaryLength,
+      label: "Medium",
+      description: "Balanced overview",
+    },
+    {
+      key: "long" as SummaryLength,
+      label: "Detailed",
+      description: "Comprehensive analysis",
+    },
+  ];
 
   return (
     <div
@@ -319,15 +317,93 @@ export default function Summary() {
       <div className="max-w-4xl mx-auto">
         <main
           className="rounded-xl p-6 sm:p-8"
-          style={{ backgroundColor: theme.cardBackground }}
+          style={{ backgroundColor: theme.card }}
         >
-          <SummaryHeader
-            activeLength={summaryLength}
-            onLengthChange={setSummaryLength}
-          />
+          <div
+            style={{
+              marginBottom: "2rem",
+              padding: "1.5rem",
+              backgroundColor: theme.card,
+              borderRadius: "0.75rem",
+              border: `1px solid ${theme.border}`,
+            }}
+          >
+            <h2
+              style={{
+                color: theme.primaryText,
+                fontSize: "1.5rem",
+                fontWeight: "600",
+                marginBottom: "1rem",
+              }}
+            >
+              Summary Length
+            </h2>
+            <div
+              style={{
+                display: "flex",
+                gap: "1rem",
+                flexWrap: "wrap",
+              }}
+            >
+              {lengths.map((length) => (
+                <button
+                  key={length.key}
+                  onClick={() => setSummaryLength(length.key)}
+                  style={{
+                    padding: "0.75rem 1rem",
+                    borderRadius: "0.5rem",
+                    border: `2px solid ${
+                      summaryLength === length.key ? theme.accent : theme.border
+                    }`,
+                    backgroundColor:
+                      summaryLength === length.key
+                        ? theme.accent
+                        : "transparent",
+                    color:
+                      summaryLength === length.key
+                        ? theme.primaryText
+                        : theme.secondaryText,
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    minWidth: "120px",
+                  }}
+                  onMouseEnter={(e) => {
+                    if (summaryLength !== length.key) {
+                      e.currentTarget.style.backgroundColor = theme.cardHover;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (summaryLength !== length.key) {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }
+                  }}
+                >
+                  <span
+                    style={{
+                      fontWeight: "600",
+                      fontSize: "0.9rem",
+                    }}
+                  >
+                    {length.label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: "0.8rem",
+                      opacity: 0.8,
+                    }}
+                  >
+                    {length.description}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
           <div
             className="border-t my-6"
-            style={{ borderColor: theme.divider }}
+            style={{ borderColor: theme.border }}
           ></div>
           {renderContent()}
         </main>
