@@ -1,30 +1,116 @@
+
 import React, { useState, useRef, useEffect, useCallback } from "react";
+
+//import { useNavigate } from "react-router-dom";
 
 // --- SVG ICON COMPONENTS ---
 // Using simple inline SVGs for icons to keep it self-contained.
 const GeneralIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"></path></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
+    <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"></path>
+  </svg>
 );
 const AccountIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+    <circle cx="12" cy="7" r="4"></circle>
+  </svg>
 );
 const NotificationsIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+  </svg>
 );
 const PersonalizationIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 14 4-4"></path><path d="M3.34 19a10 10 0 1 1 17.32 0"></path></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="m12 14 4-4"></path>
+    <path d="M3.34 19a10 10 0 1 1 17.32 0"></path>
+  </svg>
 );
 const SecurityIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+  </svg>
 );
 const BillingIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+  </svg>
 );
 const PlayIcon = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="16"
+    height="16"
+    viewBox="0 0 24 24"
+    fill="currentColor"
+  >
+    <path d="M8 5v14l11-7z"></path>
+  </svg>
 );
-
-
 
 // --- TYPESCRIPT INTERFACES ---
 interface UserProfile {
@@ -60,21 +146,22 @@ interface SelectFieldProps {
 interface ProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onUpgradeClick: () => void;
 }
 
 interface SettingRowProps {
-    title: string;
-    description?: string;
-    children: React.ReactNode;
+  title: string;
+  description?: string;
+  children: React.ReactNode;
 }
 
 interface NotificationSettingRowProps {
-    title: string;
-    description: string;
-    value: string;
-    onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-    options: string[];
-    manageLink?: boolean;
+  title: string;
+  description: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  options: string[];
+  manageLink?: boolean;
 }
 
 // --- MOCK DATA & CONSTANTS ---
@@ -108,6 +195,15 @@ const navItems = [
   { name: "Personalization", icon: PersonalizationIcon },
   { name: "Plan and Billing", icon: BillingIcon },
   { name: "Privacy and Security", icon: SecurityIcon },
+];
+
+const features = [
+  "Unlimited uploads, pastes, and records",
+  "Unlimited AI chats",
+  "Unlimited quiz generation",
+  "Unlimited practice exams",
+  "Extended voice mode usage",
+  "Upload files up to 100 pages / 15 MB",
 ];
 
 // --- HELPER COMPONENTS ---
@@ -192,43 +288,72 @@ const DateField: React.FC<{
   </div>
 );
 
-
 // Generic setting row for the "General" tab
-const SettingRow: React.FC<SettingRowProps> = ({ title, description, children }) => (
-    <div className="py-4 flex justify-between items-center border-b border-gray-700">
-        <div>
-            <h3 className="text-base font-semibold text-white">{title}</h3>
-            {description && <p className="text-sm text-gray-400 max-w-md mt-1">{description}</p>}
-        </div>
-        <div className="flex items-center gap-4">
-            {children}
-        </div>
+const SettingRow: React.FC<SettingRowProps> = ({
+  title,
+  description,
+  children,
+}) => (
+  <div className="py-4 flex justify-between items-center border-b border-gray-700">
+    <div>
+      <h3 className="text-base font-semibold text-white">{title}</h3>
+      {description && (
+        <p className="text-sm text-gray-400 max-w-md mt-1">{description}</p>
+      )}
     </div>
+    <div className="flex items-center gap-4">{children}</div>
+  </div>
 );
 
 // New component for notification settings, as seen in the image
-const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({ title, description, value, onChange, options, manageLink }) => (
-    <div className="py-4 flex justify-between items-center border-b border-gray-700">
-        <div>
-            <h3 className="text-base font-semibold text-white">{title}</h3>
-            <p className="text-sm text-gray-400 max-w-md">{description}</p>
-            {manageLink && <a href="#" className="text-sm text-blue-500 hover:underline mt-1 inline-block">Manage tasks</a>}
-        </div>
-        <select value={value} onChange={onChange} className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-            {options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
-        </select>
+const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
+  title,
+  description,
+  value,
+  onChange,
+  options,
+  manageLink,
+}) => (
+  <div className="py-4 flex justify-between items-center border-b border-gray-700">
+    <div>
+      <h3 className="text-base font-semibold text-white">{title}</h3>
+      <p className="text-sm text-gray-400 max-w-md">{description}</p>
+      {manageLink && (
+        <a
+          href="#"
+          className="text-sm text-blue-500 hover:underline mt-1 inline-block"
+        >
+          Manage tasks
+        </a>
+      )}
     </div>
+    <select
+      value={value}
+      onChange={onChange}
+      className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+    >
+      {options.map((opt) => (
+        <option key={opt} value={opt}>
+          {opt}
+        </option>
+      ))}
+    </select>
+  </div>
 );
 
 // --- MAIN MODAL COMPONENT ---
-const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
+const ProfileModal: React.FC<ProfileModalProps> = ({
+  isOpen,
+  onClose,
+  onUpgradeClick,
+}) => {
   const [userProfile, setUserProfile] =
     useState<UserProfile>(initialUserProfile);
   const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState("Your Account");
+  const [activeTab, setActiveTab] = useState("General");
   const modalRef = useRef<HTMLDivElement>(null); // Create a ref for the modal content
 
-    // State for new "General" settings
+  // State for new "General" settings
   const [theme, setTheme] = useState("Dark");
   const [accentColor, setAccentColor] = useState("#3b82f6");
   const [language, setLanguage] = useState("Auto-detect");
@@ -236,14 +361,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
   const [voice, setVoice] = useState("Breeze");
   const [showSuggestions, setShowSuggestions] = useState(true);
 
-    // State for new notification settings
+  // State for new notification settings
   const [responseNotifications, setResponseNotifications] = useState("Push");
   const [taskNotifications, setTaskNotifications] = useState("Push, Email");
 
-   
   // State for "Privacy and Security" settings
   const [mfaEnabled, setMfaEnabled] = useState(false);
-  
+
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -299,151 +423,180 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'General':
-              return (
-                  <div>
-                      <h1 className="text-3xl font-bold text-white mb-6">General</h1>
-                      <SettingRow title="Theme">
-                          <select value={theme} onChange={(e) => setTheme(e.target.value)} className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <option>Dark</option>
-                              <option>Light</option>
-                              <option>System</option>
-                          </select>
-                      </SettingRow>
-                      <SettingRow title="Accent color">
-                          <div className="flex items-center gap-2">
-                              <span className="text-gray-400">Default</span>
-                              <input type="color" value={accentColor} onChange={e => setAccentColor(e.target.value)} className="w-8 h-8 p-1 bg-gray-700 border border-gray-600 rounded-full cursor-pointer" />
-                          </div>
-                      </SettingRow>
-                      <SettingRow title="Language">
-                          <select value={language} onChange={(e) => setLanguage(e.target.value)} className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <option>Auto-detect</option>
-                              <option>English</option>
-                              <option>Spanish</option>
-                          </select>
-                      </SettingRow>
-                      <SettingRow title="Spoken language" description="For best results, select the language you mainly speak. If it's not listed, it may still be supported via auto-detection.">
-                          <select value={spokenLanguage} onChange={(e) => setSpokenLanguage(e.target.value)} className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <option>Auto-detect</option>
-                              <option>English (US)</option>
-                              <option>English (UK)</option>
-                          </select>
-                      </SettingRow>
-                      <SettingRow title="Voice">
-                          <button className="flex items-center gap-2 text-white hover:bg-gray-700 px-3 py-1.5 rounded-md transition-colors"><PlayIcon /> Play</button>
-                          <select value={voice} onChange={(e) => setVoice(e.target.value)} className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                              <option>Breeze</option>
-                              <option>Cove</option>
-                              <option>Juniper</option>
-                          </select>
-                      </SettingRow>
-                      <SettingRow title="Show follow up suggestions in chats">
-                          <label className="relative inline-flex items-center cursor-pointer">
-                              <input type="checkbox" checked={showSuggestions} onChange={() => setShowSuggestions(!showSuggestions)} className="sr-only peer" />
-                              <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                          </label>
-                      </SettingRow>
-                  </div>
-              );
+      case "General":
+        return (
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-6">General</h1>
+            <SettingRow title="Theme">
+              <select
+                value={theme}
+                onChange={(e) => setTheme(e.target.value)}
+                className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Dark</option>
+                <option>Light</option>
+                <option>System</option>
+              </select>
+            </SettingRow>
+            <SettingRow title="Accent color">
+              <div className="flex items-center gap-2">
+                <span className="text-gray-400">Default</span>
+                <input
+                  type="color"
+                  value={accentColor}
+                  onChange={(e) => setAccentColor(e.target.value)}
+                  className="w-8 h-8 p-1 bg-gray-700 border border-gray-600 rounded-full cursor-pointer"
+                />
+              </div>
+            </SettingRow>
+            <SettingRow title="Language">
+              <select
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+                className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Auto-detect</option>
+                <option>English</option>
+                <option>Spanish</option>
+              </select>
+            </SettingRow>
+            <SettingRow
+              title="Spoken language"
+              description="For best results, select the language you mainly speak. If it's not listed, it may still be supported via auto-detection."
+            >
+              <select
+                value={spokenLanguage}
+                onChange={(e) => setSpokenLanguage(e.target.value)}
+                className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Auto-detect</option>
+                <option>English (US)</option>
+                <option>English (UK)</option>
+              </select>
+            </SettingRow>
+            <SettingRow title="Voice">
+              <button className="flex items-center gap-2 text-white hover:bg-gray-700 px-3 py-1.5 rounded-md transition-colors">
+                <PlayIcon /> Play
+              </button>
+              <select
+                value={voice}
+                onChange={(e) => setVoice(e.target.value)}
+                className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option>Breeze</option>
+                <option>Cove</option>
+                <option>Juniper</option>
+              </select>
+            </SettingRow>
+            <SettingRow title="Show follow up suggestions in chats">
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={showSuggestions}
+                  onChange={() => setShowSuggestions(!showSuggestions)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </SettingRow>
+          </div>
+        );
       case "Account":
         return (
           <div>
-                <div className="flex justify-between items-center mb-6">
-                  <div>
-                    <h1 className="text-3xl font-bold text-white">
-                      Your Account
-                    </h1>
-                    <p className="mt-1 text-gray-400">
-                      View and edit your personal information.
-                    </p>
-                  </div>
-                  <button
-                    onClick={toggleEditMode}
-                    className="px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg focus:shadow-blue-500/50 bg-gradient-to-r from-blue-600 to-blue-700"
-                  >
-                    {isEditing ? "Save Changes" : "Edit Profile"}
-                  </button>
-                </div>
-
-                <hr className="border-t border-gray-700" />
-
-                <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-                  <ProfileField
-                    label="Full Name"
-                    name="name"
-                    value={userProfile.name}
-                    isEditing={isEditing}
-                    onChange={handleInputChange}
-                  />
-                  <ProfileField
-                    label="Email Address"
-                    name="email"
-                    value={userProfile.email}
-                    type="email"
-                    isEditing={isEditing}
-                    onChange={handleInputChange}
-                  />
-                  <ProfileField
-                    label="Mobile Number"
-                    name="mobile"
-                    value={userProfile.mobile}
-                    type="tel"
-                    isEditing={isEditing}
-                    onChange={handleInputChange}
-                  />
-                  <div>
-                    <label className="block text-sm font-medium text-gray-400">
-                      Password
-                    </label>
-                    <p className="mt-1 text-base text-white">********</p>
-                  </div>
-                  <DateField
-                    label="Date of Birth"
-                    name="dob"
-                    value={userProfile.dob}
-                    isEditing={isEditing}
-                    onChange={handleInputChange}
-                  />
-                  <SelectField
-                    label="Gender"
-                    name="gender"
-                    value={userProfile.gender}
-                    isEditing={isEditing}
-                    onChange={handleInputChange}
-                    options={genders}
-                  />
-                  <ProfileField
-                    label="Address"
-                    name="address"
-                    value={userProfile.address}
-                    isEditing={isEditing}
-                    onChange={handleInputChange}
-                  />
-                  <ProfileField
-                    label="City"
-                    name="city"
-                    value={userProfile.city}
-                    isEditing={isEditing}
-                    onChange={handleInputChange}
-                  />
-                  <ProfileField
-                    label="State / Province"
-                    name="state"
-                    value={userProfile.state}
-                    isEditing={isEditing}
-                    onChange={handleInputChange}
-                  />
-                  <SelectField
-                    label="Country"
-                    name="country"
-                    value={userProfile.country}
-                    isEditing={isEditing}
-                    onChange={handleInputChange}
-                    options={countries}
-                  />
-                </div>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h1 className="text-3xl font-bold text-white">Your Account</h1>
+                <p className="mt-1 text-gray-400">
+                  View and edit your personal information.
+                </p>
               </div>
+              <button
+                onClick={toggleEditMode}
+                className="px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg focus:shadow-blue-500/50 bg-gradient-to-r from-blue-600 to-blue-700"
+              >
+                {isEditing ? "Save Changes" : "Edit Profile"}
+              </button>
+            </div>
+
+            <hr className="border-t border-gray-700" />
+
+            <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              <ProfileField
+                label="Full Name"
+                name="name"
+                value={userProfile.name}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+              />
+              <ProfileField
+                label="Email Address"
+                name="email"
+                value={userProfile.email}
+                type="email"
+                isEditing={isEditing}
+                onChange={handleInputChange}
+              />
+              <ProfileField
+                label="Mobile Number"
+                name="mobile"
+                value={userProfile.mobile}
+                type="tel"
+                isEditing={isEditing}
+                onChange={handleInputChange}
+              />
+              <div>
+                <label className="block text-sm font-medium text-gray-400">
+                  Password
+                </label>
+                <p className="mt-1 text-base text-white">********</p>
+              </div>
+              <DateField
+                label="Date of Birth"
+                name="dob"
+                value={userProfile.dob}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+              />
+              <SelectField
+                label="Gender"
+                name="gender"
+                value={userProfile.gender}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+                options={genders}
+              />
+              <ProfileField
+                label="Address"
+                name="address"
+                value={userProfile.address}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+              />
+              <ProfileField
+                label="City"
+                name="city"
+                value={userProfile.city}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+              />
+              <ProfileField
+                label="State / Province"
+                name="state"
+                value={userProfile.state}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+              />
+              <SelectField
+                label="Country"
+                name="country"
+                value={userProfile.country}
+                isEditing={isEditing}
+                onChange={handleInputChange}
+                options={countries}
+              />
+            </div>
+          </div>
         );
       case "Notifications":
         return (
@@ -468,24 +621,77 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
             />
           </div>
         );
-          case 'Privacy and Security':
-                return (
-                    <div>
-                        <h1 className="text-3xl font-bold text-white mb-6">Security</h1>
-                        <SettingRow title="Multi-factor authentication" description="Require an extra security challenge when logging in. If you are unable to pass this challenge, you will have the option to recover your account via email.">
-                            <label className="relative inline-flex items-center cursor-pointer">
-                                <input type="checkbox" checked={mfaEnabled} onChange={() => setMfaEnabled(!mfaEnabled)} className="sr-only peer" />
-                                <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-                            </label>
-                        </SettingRow>
-                        <SettingRow title="Log out of this device">
-                            <button className="px-4 py-1.5 text-sm font-semibold text-white bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors">Log out</button>
-                        </SettingRow>
-                        <SettingRow title="Log out of all devices" description="Log out of all active sessions across all devices, including your current session. It may take up to 30 minutes for other devices to be logged out.">
-                             <button className="px-4 py-1.5 text-sm font-semibold text-white bg-red-600/20 hover:bg-red-500/30 border border-red-500 rounded-lg transition-colors">Log out all</button>
-                        </SettingRow>
-                    </div>
-                );
+
+      case "Plan and Billing":
+        return (
+          <div>
+            <SettingRow
+              title="Upgrade"
+              description="You are currently on the free plan"
+            >
+              <button
+                onClick={onUpgradeClick}
+                className="px-5 py-2 text-sm font-semibold bg-white text-gray-900 rounded-lg shadow-md hover:bg-gray-200 transition-colors"
+              >
+                Upgrade Plan
+              </button>
+            </SettingRow>
+            <div className="mt-8 p-6 bg-gray-700/50 rounded-lg">
+              <h2 className="text-xl font-bold text-white">
+                Get everything in Free, and more.
+              </h2>
+              <ul className="mt-4 space-y-3">
+                {features.map((feature, index) => (
+                  <li key={index} className="flex items-start gap-3">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      fill="#238636"
+                      viewBox="0 0 16 16"
+                    >
+                      <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                    </svg>
+                    <span className="text-gray-300">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        );
+      case "Privacy and Security":
+        return (
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-6">Security</h1>
+            <SettingRow
+              title="Multi-factor authentication"
+              description="Require an extra security challenge when logging in. If you are unable to pass this challenge, you will have the option to recover your account via email."
+            >
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={mfaEnabled}
+                  onChange={() => setMfaEnabled(!mfaEnabled)}
+                  className="sr-only peer"
+                />
+                <div className="w-11 h-6 bg-gray-600 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-800 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              </label>
+            </SettingRow>
+            <SettingRow title="Log out of this device">
+              <button className="px-4 py-1.5 text-sm font-semibold text-white bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors">
+                Log out
+              </button>
+            </SettingRow>
+            <SettingRow
+              title="Log out of all devices"
+              description="Log out of all active sessions across all devices, including your current session. It may take up to 30 minutes for other devices to be logged out."
+            >
+              <button className="px-4 py-1.5 text-sm font-semibold text-white bg-red-600/20 hover:bg-red-500/30 border border-red-500 rounded-lg transition-colors">
+                Log out all
+              </button>
+            </SettingRow>
+          </div>
+        );
       default:
         return (
           <div className="text-white flex flex-col items-center justify-center h-full">
@@ -564,7 +770,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ isOpen, onClose }) => {
           </nav>
 
           {/* Right Side Content */}
-           <main className="w-3/4 p-8 overflow-y-auto">{renderContent()}</main>
+          <main className="w-3/4 p-8 overflow-y-auto">{renderContent()}</main>
         </div>
       </div>
     </>

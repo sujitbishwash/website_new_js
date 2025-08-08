@@ -9,6 +9,7 @@ import Sidebar from "./sidebar/Sidebar";
 
 const Layout: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isContracted, setIsContracted] = useState(false); // Sidebar is expanded by default on desktop
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
   const { logout } = useAuth();
@@ -25,6 +26,7 @@ const Layout: React.FC = () => {
     const handleUpgradeClick = () => {
       
     navigate(ROUTES.PREMIUM);
+    setIsContracted(true);
     setProfileModalOpen(false);
   };
 
@@ -48,7 +50,10 @@ const Layout: React.FC = () => {
       <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
         <Sidebar
           isOpen={isOpen}
+          isContracted={isContracted}
           onToggle={() => setIsOpen(!isOpen)}
+          
+          onContractToggle={() => setIsContracted(!isContracted)}
           onLogoutClick={handleLogoutClick}
           onProfileClick={handleProfileClick}
           onUpgradeClick={handleUpgradeClick}
@@ -77,7 +82,8 @@ const Layout: React.FC = () => {
       />
 
       {/* Profile Modal - positioned at root level for proper full-screen coverage */}
-      <ProfileModal isOpen={isProfileModalOpen} onClose={handleProfileClose} />
+      <ProfileModal isOpen={isProfileModalOpen} onClose={handleProfileClose} 
+          onUpgradeClick={handleUpgradeClick}/>
     </>
   );
 };

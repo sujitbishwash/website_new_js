@@ -1,4 +1,5 @@
 import {
+  ChevronsLeft,
   Award,
   Book,
   Clock,
@@ -9,27 +10,36 @@ import {
   Home,
   X,
 } from "lucide-react";
-import React from "react";
+import React, { useState } from 'react';
 import { Link, useLocation } from "react-router-dom";
 import { ROUTES } from "../../routes/constants";
 import MoreOptions from "./MoreOptions";
+import AiPadhaiLogo from '../../assets/ai_padhai_logo.svg'; // Adjust path as needed
 
 interface SidebarProps {
   isOpen: boolean;
+  isContracted: boolean;
   onToggle: () => void;
+
+  onContractToggle: () => void;
   onLogoutClick: () => void;
   onProfileClick: () => void;
-  onUpgradeClick: ()=> void;
+  onUpgradeClick: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
+  isContracted,
   onToggle,
+  onContractToggle,
   onLogoutClick,
   onProfileClick,
-  onUpgradeClick
+  onUpgradeClick,
 }) => {
   const location = useLocation();
+
+  
+  const [isHovering, setIsHovering] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -62,17 +72,64 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-gray-800 border-r border-gray-700 flex flex-col z-40 transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-screen bg-gray-800 text-white border-r border-gray-700 flex flex-col z-40 transition-all duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static lg:z-auto`}
-        style={{ width: "256px" }}
+        } lg:translate-x-0 lg:static lg:z-auto ${
+          isContracted ? "lg:w-20" : "lg:w-64"
+        }`}
       >
-        {/* Header with close button for mobile */}
+        {/*Header with close button for mobile
         <div className="p-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
           <h1 className="text-xl font-bold">AI Padhai</h1>
           <button
             onClick={onToggle}
             className="lg:hidden text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-1"
+          >
+            <X size={20} />
+          </button>
+        </div>*/}
+
+        {/* Header with contract/close buttons */}
+        <div className="p-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0 h-[65px]">
+          {/* Title hides when contracted on large screens */}
+           <div
+            className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ${
+              isContracted ? "lg:w-0" : "lg:w-auto"
+            }`}
+          >
+          <img src={AiPadhaiLogo} alt="Logo" width={30} height={30}/>
+          <h1
+            className={`text-xl font-bold whitespace-nowrap overflow-hidden transition-all duration-300 ${
+              isContracted ? "lg:w-0" : "lg:w-auto"
+            }`}
+          >
+            AI Padhai
+          </h1>
+          </div>
+
+          {/* Desktop contract/expand button */}
+          <button
+            onClick={onContractToggle}
+            
+            onMouseEnter={() => setIsHovering(true)}
+            onMouseLeave={() => setIsHovering(false)}
+            className="hidden lg:block text-gray-400 hover:text-white focus:outline-none rounded-lg p-1 cursor-pointer"
+          >
+            {isContracted ? (
+              isHovering ? (
+                <ChevronsLeft size={30} className="rotate-180" />
+              ) : (
+          <img src={AiPadhaiLogo} alt="Logo" width={30} height={30}/>
+              )
+            ) : (
+              <ChevronsLeft size={30} />
+            )}
+          </button>
+
+          {/* Mobile close button */}
+          <button
+            onClick={onToggle}
+            className="lg:hidden text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-1"
           >
             <X size={20} />
           </button>
@@ -87,20 +144,30 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <li key={item.path}>
                   <Link
                     to={item.path}
+                    title={isContracted ? item.label : ""}
                     onClick={() => {
-                      // Close sidebar on mobile when clicking a link
                       if (window.innerWidth < 1024) {
                         onToggle();
                       }
                     }}
-                    className={`flex items-center space-x-3 p-3 rounded-lg transition-colors ${
+                    className={`flex items-center ${
+                      isContracted ? "" : "space-x-3"
+                    } p-3 rounded-lg transition-colors ${
+                      isContracted ? "lg:justify-center" : ""
+                    } ${
                       isActive(item.path)
                         ? "bg-blue-600 text-white"
                         : "text-gray-300 hover:bg-gray-700 hover:text-white"
                     }`}
                   >
-                    <Icon size={20} />
-                    <span>{item.label}</span>
+                    <Icon size={20} className="flex-shrink-0" />
+                    <span
+                      className={`whitespace-nowrap transition-opacity ${
+                        isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
+                      }`}
+                    >
+                      {item.label}
+                    </span>
                   </Link>
                 </li>
               );
@@ -108,92 +175,11 @@ const Sidebar: React.FC<SidebarProps> = ({
           </ul>
         </nav>
         <MoreOptions
+          isContracted={isContracted}
           onLogoutClick={onLogoutClick}
           onProfileClick={onProfileClick}
           onUpgradeClick={onUpgradeClick}
         />
-        {/* User Profile Section */}
-        {/*
-        <div
-          onClick={() => {
-            navigate("/profile");
-            // Close sidebar on mobile when clicking profile
-            if (window.innerWidth < 1024) {
-              onToggle();
-            }
-          }}
-          className="p-4 border-t border-gray-700 text-gray-300 hover:bg-gray-700 hover:text-white cursor-pointer"
-        >
-          <div className="flex items-center space-x-3">
-        <div className="p-4 border-t border-gray-700 flex-shrink-0">
-          <div className="flex items-center space-x-3 mb-3">
-            <div className="bg-gray-600 rounded-full p-2">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="10"></circle>
-                <circle cx="12" cy="10" r="3"></circle>
-                <path d="M7 20.662V19a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v1.662"></path>
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="font-medium text-gray-300">Free Plan</p>
-              <p className="text-sm text-gray-400">{user?.email || 'learner@aipadhai.com'}</p>
-            </div>
-          </div>
-          
-          {/* Profile and Logout Buttons */}
-        {/*<div className="space-y-2">
-            <button
-              onClick={() => {
-                navigate(ROUTES.PROFILE);
-                // Close sidebar on mobile when clicking profile
-                if (window.innerWidth < 1024) {
-                  onToggle();
-                }
-              }}
-              className="w-full flex items-center space-x-3 p-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                <circle cx="12" cy="7" r="4"></circle>
-              </svg>
-              <span className="text-sm">Profile</span>
-            </button>
-            
-            <button
-              onClick={() => {
-                logout();
-                navigate(ROUTES.LOGIN);
-                // Close sidebar on mobile when logging out
-                if (window.innerWidth < 1024) {
-                  onToggle();
-                }
-              }}
-              className="w-full flex items-center space-x-3 p-2 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
-            >
-              <LogOut size={20} />
-              <span className="text-sm">Logout</span>
-            </button>
-          </div>*/}
       </aside>
     </>
   );
