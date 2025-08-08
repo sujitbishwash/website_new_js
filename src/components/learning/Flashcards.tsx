@@ -78,29 +78,14 @@ const GlobalStyles = () => (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-    body {
-      background-color: ${theme.background};
-      color: ${theme.primaryText};
-      font-family: 'Inter', sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      overflow: hidden;
-    }
-
     .flashcard-app-container {
       width: 100%;
-      max-width: 1600px; /* Further increased width for a wider layout */
-      padding: 1.5rem;
+      max-width: 100%;
+      padding: 1rem; /* add some padding for navigation and progress bar */
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
-      gap: 1.5rem; /* Adjusted gap */
+      gap: 1rem;
     }
 
     /* --- Flashcard Animation --- */
