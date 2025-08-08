@@ -205,7 +205,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             backgroundColor: theme.cardBackground,
             borderColor: theme.divider,
           }}
-          className="absolute bottom-full left-0 mb-2 w-64 p-2 rounded-lg shadow-2xl z-20 border animate-fade-in-up"
+          className="absolute bottom-full left-0 mb-1 w-64 p-2 rounded-lg shadow-2xl z-20 border animate-fade-in-up"
         >
           <div className="space-y-1">
             {menuOptions.map((item) =>
