@@ -306,16 +306,7 @@ export default function Summary() {
   };
 
   return (
-    <div
-      className="min-h-screen w-full font-sans p-4 sm:p-6 lg:p-8"
-      style={{ backgroundColor: theme.background }}
-    >
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; }
-        .animate-spin { animation: spin 1s linear infinite; }
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
+    <div className="w-full h-full font-sans">
       <div className="max-w-4xl mx-auto">
         <main
           className="rounded-xl p-6 sm:p-8"
