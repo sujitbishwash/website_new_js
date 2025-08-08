@@ -80,12 +80,11 @@ const GlobalStyles = () => {
         min-height: 100vh;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        overflow: hidden;
       }
 
       .flashcard-app-container {
         width: 100%;
-        max-width: 1600px; /* Further increased width for a wider layout */
+        max-width: 1600px;
         padding: 1.5rem;
         box-sizing: border-box;
       }
@@ -99,61 +98,112 @@ const GlobalStyles = () => {
         margin: 0 auto;
       }
 
+      /* --- Flashcard Animation --- */
+      @keyframes slideInFromRight {
+        from { transform: translateX(100%) rotate(5deg); opacity: 0; }
+        to { transform: translateX(0) rotate(0deg); opacity: 1; }
+      }
+      @keyframes slideInFromLeft {
+        from { transform: translateX(-100%) rotate(-5deg); opacity: 0; }
+        to { transform: translateX(0) rotate(0deg); opacity: 1; }
+      }
+
+      .slide-in-right {
+        animation: slideInFromRight 0.5s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+      .slide-in-left {
+        animation: slideInFromLeft 0.5s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      }
+
+      /* --- Flashcard Component --- */
+      .flashcard-scene {
+        width: 100%;
+        height: 420px;
+        perspective: 1200px;
+      }
+
       .flashcard {
         width: 100%;
-        max-width: 800px;
-        height: 400px;
-        perspective: 1000px;
-        cursor: pointer;
-        position: relative;
-      }
-
-      .flashcard-inner {
-        position: relative;
-        width: 100%;
         height: 100%;
-        text-align: center;
-        transition: transform 0.6s;
+        position: relative;
         transform-style: preserve-3d;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        border-radius: 1.5rem;
+        box-shadow: 0 0 0 1px ${theme.border}, 0 25px 50px -12px rgba(0,0,0,0.25);
       }
-
-      .flashcard.flipped .flashcard-inner {
+      
+      .flashcard.is-flipped {
         transform: rotateY(180deg);
       }
 
-      .flashcard-front,
-      .flashcard-back {
+      .flashcard-face {
         position: absolute;
         width: 100%;
         height: 100%;
         backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
         display: flex;
-        align-items: center;
+        flex-direction: column;
         justify-content: center;
-        padding: 2rem;
-        border-radius: 20px;
-        font-size: 1.5rem;
-        font-weight: 500;
-        line-height: 1.6;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
+        align-items: center;
+        padding: 2.5rem;
+        box-sizing: border-box;
+        background: linear-gradient(145deg, ${theme.card}, ${theme.cardSecondary});
+        border-radius: 1.5rem;
       }
 
-      .flashcard-front {
-        background: linear-gradient(135deg, ${theme.card} 0%, ${theme.cardSecondary} 100%);
-        color: ${theme.primaryText};
-        border: 2px solid ${theme.border};
-      }
-
-      .flashcard-back {
-        background: linear-gradient(135deg, ${theme.accent} 0%, ${theme.accentHover} 100%);
-        color: ${theme.primaryText};
+      .flashcard-face--back {
         transform: rotateY(180deg);
-        border: 2px solid ${theme.accent};
+        background: linear-gradient(145deg, ${theme.accent}, ${theme.accentHover});
+      }
+      
+      .card-label {
+        position: absolute;
+        top: 1.5rem;
+        left: 2rem;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: ${theme.accent};
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
       }
 
+      .card-content {
+        font-size: clamp(1.25rem, 3vw, 2.5rem);
+        font-weight: 700;
+        text-align: center;
+        color: ${theme.primaryText};
+        line-height: 1.3;
+      }
+      
+      .card-hint {
+        position: absolute;
+        bottom: 1.5rem;
+        font-size: 0.875rem;
+        color: ${theme.secondaryText};
+        font-weight: 500;
+      }
+
+      /* --- Progress Bar --- */
+      .progress-bar {
+        width: 100%;
+        max-width: 800px;
+        height: 8px;
+        background: ${theme.input};
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 1rem;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, ${theme.accent} 0%, ${theme.accentHover} 100%);
+        border-radius: 4px;
+        transition: width 0.3s ease;
+      }
+
+      /* --- Navigation --- */
       .navigation {
         display: flex;
         align-items: center;
@@ -217,23 +267,6 @@ const GlobalStyles = () => {
         box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
       }
 
-      .progress-bar {
-        width: 100%;
-        max-width: 800px;
-        height: 8px;
-        background: ${theme.input};
-        border-radius: 4px;
-        overflow: hidden;
-        margin-bottom: 1rem;
-      }
-
-      .progress-fill {
-        height: 100%;
-        background: linear-gradient(90deg, ${theme.accent} 0%, ${theme.accentHover} 100%);
-        border-radius: 4px;
-        transition: width 0.3s ease;
-      }
-
       .progress-text {
         text-align: center;
         font-size: 1rem;
@@ -292,6 +325,8 @@ const GlobalStyles = () => {
           min-width: auto;
         }
       }
+    `}</style>
+  );
     `}</style>
   );
 };
