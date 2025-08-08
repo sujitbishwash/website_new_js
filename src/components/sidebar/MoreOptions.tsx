@@ -143,7 +143,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
           "--tw-ring-offset-color": theme.background,
           "--tw-ring-color": theme.accent,
         }}
-        className="flex items-center justify-between w-full space-x-4 p-4 transition-colors duration-200 hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-offset-1 cursor-pointer"
+        className="flex items-center justify-between w-full space-x-2 p-4 transition-colors duration-200 hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-offset-1 cursor-pointer"
         onMouseOver={(e) =>
           (e.currentTarget.style.backgroundColor = theme.divider)
         }
@@ -172,8 +172,10 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
               isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
             }`}
           >
-            <p className="font-medium text-gray-300">nikk070@yoyo</p>
-            <p className="font-medium text-gray-300 text-sm">Free Plan</p>
+            <p className="font-medium text-gray-300 text-sm">nikk070@yoyo</p>{" "}
+            {/* reduced */}
+            <p className="font-medium text-gray-300 text-xs">Free Plan</p>{" "}
+            {/* further reduced */}
           </div>
         </div>
         <Icon
