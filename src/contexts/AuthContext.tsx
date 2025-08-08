@@ -123,7 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("userData");
     setUser(null);
-    setHasExamGoal(false);
+    //setHasExamGoal(false);
   };
 
   const signInWithGoogle = async () => {
