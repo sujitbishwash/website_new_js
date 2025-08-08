@@ -112,18 +112,20 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async () => {
+    // Clear state immediately
+    setUser(null);
+    setHasExamGoal(false);
+
+    // Clear localStorage
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("userData");
+
     try {
       // Sign out from Supabase
       await authHelpers.signOut();
     } catch (error) {
       console.error("Error signing out from Supabase:", error);
     }
-
-    // Clear localStorage
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("userData");
-    setUser(null);
-    //setHasExamGoal(false);
   };
 
   const signInWithGoogle = async () => {

@@ -23,17 +23,16 @@ const Layout: React.FC = () => {
     setProfileModalOpen(true);
   };
 
-    const handleUpgradeClick = () => {
-      
+  const handleUpgradeClick = () => {
     navigate(ROUTES.PREMIUM);
     setIsContracted(true);
     setProfileModalOpen(false);
   };
 
-  const handleLogoutConfirm = () => {
-    logout();
-    // Navigate to login page
-    navigate(ROUTES.LOGIN);
+  const handleLogoutConfirm = async () => {
+    await logout();
+    // Navigate to login page after logout is complete
+    navigate(ROUTES.LOGIN, { replace: true });
     setLogoutModalOpen(false);
   };
 
@@ -52,7 +51,6 @@ const Layout: React.FC = () => {
           isOpen={isOpen}
           isContracted={isContracted}
           onToggle={() => setIsOpen(!isOpen)}
-          
           onContractToggle={() => setIsContracted(!isContracted)}
           onLogoutClick={handleLogoutClick}
           onProfileClick={handleProfileClick}
@@ -82,8 +80,11 @@ const Layout: React.FC = () => {
       />
 
       {/* Profile Modal - positioned at root level for proper full-screen coverage */}
-      <ProfileModal isOpen={isProfileModalOpen} onClose={handleProfileClose} 
-          onUpgradeClick={handleUpgradeClick}/>
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={handleProfileClose}
+        onUpgradeClick={handleUpgradeClick}
+      />
     </>
   );
 };
