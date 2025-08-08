@@ -152,7 +152,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
         }
       >
         <div
-          className={`flex items-center space-x-2 ${
+          className={`flex items-center space-x-4 ${
             isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
           }`}
         >
