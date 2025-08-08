@@ -22,6 +22,12 @@ const Layout: React.FC = () => {
     setProfileModalOpen(true);
   };
 
+    const handleUpgradeClick = () => {
+      
+    navigate(ROUTES.PREMIUM);
+    setProfileModalOpen(false);
+  };
+
   const handleLogoutConfirm = () => {
     logout();
     // Navigate to login page
@@ -45,6 +51,7 @@ const Layout: React.FC = () => {
           onToggle={() => setIsOpen(!isOpen)}
           onLogoutClick={handleLogoutClick}
           onProfileClick={handleProfileClick}
+          onUpgradeClick={handleUpgradeClick}
         />
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header with hamburger menu */}

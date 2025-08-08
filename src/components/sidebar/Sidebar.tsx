@@ -7,7 +7,6 @@ import {
   FileText,
   Gift,
   Home,
-  Star,
   X,
 } from "lucide-react";
 import React from "react";
@@ -20,6 +19,7 @@ interface SidebarProps {
   onToggle: () => void;
   onLogoutClick: () => void;
   onProfileClick: () => void;
+  onUpgradeClick: ()=> void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -27,6 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onToggle,
   onLogoutClick,
   onProfileClick,
+  onUpgradeClick
 }) => {
   const location = useLocation();
 
@@ -45,7 +46,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: "Previous Year Papers",
     },
     { path: ROUTES.ATTEMPTED_TESTS, icon: FileText, label: "Attempted Tests" },
-    { path: ROUTES.PREMIUM, icon: Star, label: "Premium" },
     { path: ROUTES.EXAMS, icon: Award, label: "Exams" },
     { path: ROUTES.REFER_AND_EARN, icon: Gift, label: "Refer and Earn" },
   ];
@@ -110,6 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         <MoreOptions
           onLogoutClick={onLogoutClick}
           onProfileClick={onProfileClick}
+          onUpgradeClick={onUpgradeClick}
         />
         {/* User Profile Section */}
         {/*

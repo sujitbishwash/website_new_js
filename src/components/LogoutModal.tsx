@@ -1,16 +1,6 @@
 import React from "react";
 
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  divider: "#4B5563",
-};
+// --- Component Starts Here ---
 
 interface LogoutModalProps {
   isOpen: boolean;
@@ -19,16 +9,33 @@ interface LogoutModalProps {
   userEmail?: string;
 }
 
+/**
+ * A responsive, dark-themed logout confirmation modal.
+ * The main fix was to replace dynamic theme variables in classNames
+ * with static hex codes, which is required for Tailwind's JIT compiler to work.
+ * For example, `bg-[${theme.cardBackground}]` was changed to `bg-[#1F2937]`.
+ */
 const LogoutModal: React.FC<LogoutModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
   userEmail = "sagentiriya33@gmail.com",
 }) => {
+  // If the modal is not open, render nothing.
   if (!isOpen) return null;
+
+  // This function handles clicks on the backdrop.
+  // It checks if the click was on the backdrop itself (e.target)
+  // and not on a child element (like the modal content).
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
 
   return (
     <>
+      {/* This style tag adds a simple fade-in animation for the modal */}
       <style>{`
         @keyframes fade-in {
           0% { opacity: 0; }
@@ -37,29 +44,36 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
         .animate-fade-in { animation: fade-in 0.2s ease-out; }
       `}</style>
 
-      {/* Backdrop - positioned at the root level for proper full-screen coverage */}
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-60 animate-fade-in">
-        {/* Modal content */}
+      {/* Backdrop: Added onClick to close the modal when the user clicks outside the content area. */}
+      <div
+        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
+        onClick={handleBackdropClick}
+      >
+        
+        {/* Modal content container. */}
         <div
-          className={`bg-[${theme.cardBackground}] rounded-2xl shadow-xl w-full max-w-sm p-8 text-center`}
+          className="bg-[#1F2937] rounded-2xl shadow-xl w-full max-w-sm p-8 text-center"
         >
-          <h2 className={`text-2xl font-bold text-[${theme.primaryText}] mb-2`}>
+          <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">
             Are you sure you want to log out?
           </h2>
-          <p className={`text-[${theme.secondaryText}] mb-6`}>
-            Log out of ChatGPT as{" "}
-            <span className="font-semibold">{userEmail}</span>?
+
+          <p className="text-[#9CA3AF] mb-6">
+            Log out of AIPadhai as{" "}
+            <span className="font-semibold text-white">{userEmail}</span>?
           </p>
+
+          {/* Action buttons container */}
           <div className="flex flex-col space-y-3">
             <button
               onClick={onConfirm}
-              className={`w-full px-4 py-3 font-semibold text-[${theme.cardBackground}] bg-[${theme.primaryText}] rounded-lg transition-opacity hover:opacity-90`}
+              className="w-full px-4 py-3 font-semibold text-[#1F2937] bg-[#FFFFFF] rounded-lg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1F2937] focus:ring-white"
             >
               Log out
             </button>
             <button
               onClick={onClose}
-              className={`w-full px-4 py-3 font-semibold text-[${theme.primaryText}] bg-transparent rounded-lg transition-colors hover:bg-[${theme.inputBackground}]`}
+              className="w-full px-4 py-3 font-semibold text-[#FFFFFF] bg-transparent rounded-lg transition-colors hover:bg-[#374151] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1F2937] focus:ring-white"
             >
               Cancel
             </button>
