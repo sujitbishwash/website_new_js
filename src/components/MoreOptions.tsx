@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 
 import { useNavigate } from "react-router-dom"; 
+import LogoutDialog from './LogoutDialog';
 
 // Centralized theme colors for easy customization, as requested.
 const theme = {
@@ -90,6 +91,8 @@ const ProfileMenu = () => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
+  
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [isButtonHovered, setButtonHovered] = useState(false);
 
@@ -110,7 +113,13 @@ const ProfileMenu = () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
+  const handleShowLogoutDialog = () => {
+    setShowLogoutDialog(true);
+  };
 
+  const handleCloseLogoutDialog = () => {
+    setShowLogoutDialog(false);
+  };
   const handleLogout = () => {
     console.log("User confirmed logout.");
     setLogoutModalOpen(false);
@@ -219,6 +228,10 @@ const ProfileMenu = () => {
         )}
       </div>
       <LogoutModal isOpen={isLogoutModalOpen} onClose={() => setLogoutModalOpen(false)} onConfirm={handleLogout} />
+        {showLogoutDialog && <LogoutDialog
+          onClose={handleCloseLogoutDialog}
+          onConfirm={handleShowLogoutDialog}
+        />}
     </>
   );
 };
