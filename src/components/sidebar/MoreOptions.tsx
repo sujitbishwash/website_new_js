@@ -186,7 +186,7 @@ const ProfileMenu = () => {
           className={`flex items-center justify-between w-full space-x-4 p-4 transition-colors duration-200
                     bg-[${theme.inputBackground}] hover:bg-[${theme.divider}] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[${theme.background}] focus:ring-[${theme.accent}]`}
         >
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2">
             <div
               className={`w-8 h-8 rounded-full flex items-center justify-center bg-[${theme.mutedText}]`}
             >
@@ -195,9 +195,10 @@ const ProfileMenu = () => {
                 className={`w-5 h-5 text-[${theme.cardBackground}]`}
               />
             </div>
-            <span className={`text-sm font-medium text-[${theme.primaryText}]`}>
-              nikk07081...
-            </span>
+            <div className="flex-1 text-left">
+              <p className="font-medium text-gray-300">nikk070@yoyo</p>
+              <p className="font-medium text-gray-300">Free Plan</p>
+            </div>
           </div>
           <Icon
             path="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
@@ -289,9 +290,7 @@ const ProfileMenu = () => {
 
 const Moreoptions = () => {
   return (
-    <div
-      className={`flex flex-col justify-end bg-[${theme.background}]`}
-    >
+    <div className={`flex flex-col justify-end bg-[${theme.background}]`}>
       <style>{`
           @keyframes fade-in {
             0% { opacity: 0; }
