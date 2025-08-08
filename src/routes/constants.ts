@@ -17,7 +17,6 @@ export const ROUTES = {
     VIDEO_LEARNING: "/video-learning",
 
     // User routes
-    PROFILE: "/profile",
     REFER_AND_EARN: "/refer-and-earn",
     PREMIUM: "/premium",
 
@@ -47,7 +46,6 @@ export const ROUTE_NAMES = {
     [ROUTES.HISTORY]: "History",
     [ROUTES.BOOKS]: "Books",
     [ROUTES.VIDEO_LEARNING]: "Video Learning",
-    [ROUTES.PROFILE]: "Profile",
     [ROUTES.REFER_AND_EARN]: "Refer and Earn",
     [ROUTES.PREMIUM]: "Premium",
     [ROUTES.CHAT]: "Chat",

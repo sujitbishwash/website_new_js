@@ -7,25 +7,28 @@ import {
   FileText,
   Gift,
   Home,
-  LogOut,
   Star,
   X,
 } from "lucide-react";
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import MoreOptions from "./MoreOptions";
+import { Link, useLocation } from "react-router-dom";
 import { ROUTES } from "../../routes/constants";
-import { useAuth } from "../../contexts/AuthContext";
+import MoreOptions from "./MoreOptions";
 
 interface SidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+  onLogoutClick: () => void;
+  onProfileClick: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  isOpen,
+  onToggle,
+  onLogoutClick,
+  onProfileClick,
+}) => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { logout } = useAuth();
 
   const isActive = (path: string) => {
     return location.pathname === path;
@@ -104,7 +107,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
             })}
           </ul>
         </nav>
-        {<MoreOptions></MoreOptions>}
+        <MoreOptions
+          onLogoutClick={onLogoutClick}
+          onProfileClick={onProfileClick}
+        />
         {/* User Profile Section */}
         {/*
         <div
@@ -144,7 +150,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
           </div>
           
           {/* Profile and Logout Buttons */}
-          {/*<div className="space-y-2">
+        {/*<div className="space-y-2">
             <button
               onClick={() => {
                 navigate(ROUTES.PROFILE);

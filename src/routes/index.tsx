@@ -2,7 +2,6 @@ import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
 import ExamGoalPage from "@/pages/new/ExamGoalPage";
 import LoginPage from "@/pages/new/LoginPage";
-import ProfilePage from "@/pages/new/ProfilePage";
 import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -102,12 +101,6 @@ export const routes = [
         element: <Flashcards />,
         name: "Flashcards",
         description: "Flashcard learning interface",
-      },
-      {
-        path: "profile",
-        element: <ProfilePage />,
-        name: "UserProfile",
-        description: "UserProfile Page",
       },
       {
         path: "books",
