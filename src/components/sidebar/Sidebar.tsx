@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <aside
         className={`fixed top-0 left-0 h-screen bg-gray-800 text-white border-r border-gray-700 flex flex-col z-40 transition-all duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static lg:z-auto ${
+        } lg:translate-x-0 lg:static ${
           isContracted ? "lg:w-20" : "lg:w-64"
         }`}
       >
@@ -136,7 +136,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-4 overflow-y-auto min-h-0">
+        <nav className="flex-1 p-3 overflow-y-auto min-h-0">
           <ul className="space-y-2">
             {navItems.map((item) => {
               const Icon = item.icon;

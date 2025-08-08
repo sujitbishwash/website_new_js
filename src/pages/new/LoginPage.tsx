@@ -200,6 +200,19 @@ const styles = {
     opacity: 0.8,
     transition: "all 0.3s",
   },
+  // New style for the button that reveals the email input
+  emailLoginButton: {
+    background: "none",
+    border: "none",
+    color: theme.accent,
+    cursor: "pointer",
+    display: "block",
+    width: "100%",
+    textAlign: "center" as const,
+    padding: "0.5rem",
+    fontSize: "0.875rem",
+    fontWeight: "600",
+  },
 };
 
 // --- Main App Component ---
@@ -393,6 +406,8 @@ const LoginCard: React.FC = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  // New state to control the visibility of the email login form
+  const [showEmailLogin, setShowEmailLogin] = useState(false);
 
   // Get the return URL from location state, or default to dashboard
   const from =
@@ -524,22 +539,32 @@ const LoginCard: React.FC = () => {
         <OrDivider />
 
         {!otpSent ? (
-          // Email Input for OTP
-          <>
-            <EmailInput
-              email={email}
-              setEmail={handleEmailChange}
-              hasError={Boolean(error && !isEmailValid)}
-            />
-            {error && <div style={styles.errorMessage}>{error}</div>}
-            <ActionButton
-              text="Send OTP"
-              onClick={handleSendOtp}
-              disabled={!isEmailValid}
-              loading={isLoading}
-              loadingText="Sending OTP..."
-            />
-          </>
+          // Stage 1: Choose login method or enter email
+          showEmailLogin ? (
+            <>
+              {" "}
+              <EmailInput
+                email={email}
+                setEmail={handleEmailChange}
+                hasError={Boolean(error)}
+              />{" "}
+              {error && <div style={styles.errorMessage}>{error}</div>}{" "}
+              <ActionButton
+                text="Send OTP"
+                onClick={handleSendOtp}
+                disabled={!isEmailValid}
+                loading={isLoading}
+                loadingText="Sending OTP..."
+              />{" "}
+            </>
+          ) : (
+            <button
+              style={styles.emailLoginButton}
+              onClick={() => setShowEmailLogin(true)}
+            >
+              Login with Email{" "}
+            </button>
+          )
         ) : (
           // OTP Input
           <>
