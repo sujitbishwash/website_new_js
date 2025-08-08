@@ -134,6 +134,12 @@ export const routes = [
         name: "Exams Page",
         description: "Exams Page",
       },
+      {
+        path: "exam-goal",
+        element: <ExamGoalPage />,
+        name: "Exam Goal",
+        description: "Select Exam Goal",
+      },
     ],
   },
   {
@@ -148,12 +154,7 @@ export const routes = [
     name: "Auth Callback",
     description: "OAuth callback handler",
   },
-  {
-    path: "exam-goal",
-    element: <ExamGoalPage />,
-    name: "Exam Goal",
-    description: "Select Exam Goal",
-  },
+
   // Catch-all route for 404 - must be last
   {
     path: "*",
