@@ -1,7 +1,10 @@
+import AttemptedTests from "@/pages/new/AttemptedTests";
 import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
 import ExamGoalPage from "@/pages/new/ExamGoalPage";
 import LoginPage from "@/pages/new/LoginPage";
+import PrivacyPolicy from "@/pages/new/PrivacyPolicy";
+import TermsAndConditions from "@/pages/new/TermsAndConditions";
 import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -123,7 +126,7 @@ export const routes = [
       },
       {
         path: "attempted-tests",
-        element: <ComingSoonPage />,
+        element: <AttemptedTests />,
         name: "Attempted Tests",
         description: "Attempted Tests",
       },
@@ -134,6 +137,19 @@ export const routes = [
         description: "Exams Page",
       },
     ],
+  },
+  // Public informational pages
+  {
+    path: "privacy-policy",
+    element: <PrivacyPolicy />,
+    name: "Privacy Policy",
+    description: "Privacy Policy",
+  },
+  {
+    path: "terms-and-conditions",
+    element: <TermsAndConditions />,
+    name: "Terms and Conditions",
+    description: "Terms and Conditions",
   },
   {
     path: "login",

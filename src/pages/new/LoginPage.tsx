@@ -1,6 +1,6 @@
 import { authApi } from "@/lib/api-client";
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROUTES } from "../../routes/constants";
 
@@ -619,9 +619,9 @@ const OrDivider: React.FC = () => (
 const PrivacyPolicyLink: React.FC = () => (
   <p style={styles.privacyPolicy}>
     By continuing, you agree to our{" "}
-    <a href="#" style={styles.privacyLink}>
+    <Link to="/privacy-policy" style={styles.privacyLink}>
       Privacy Policy
-    </a>
+    </Link>
   </p>
 );
 
