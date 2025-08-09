@@ -1,5 +1,4 @@
-
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 //import { useNavigate } from "react-router-dom";
 
@@ -401,13 +400,21 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   // Add an effect to listen for clicks outside the modal
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // If the click is outside the modal content, call handleClose
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node)
-      ) {
-        handleClose();
-      }
+      const target = event.target as HTMLElement | null;
+      if (!target) return;
+
+      // If click is inside modal, ignore
+      if (modalRef.current && modalRef.current.contains(target)) return;
+
+      // Ignore clicks inside Radix DropdownMenu portals or triggers
+      const isInsideDropdown = Boolean(
+        target.closest("[data-slot^='dropdown-menu-']") ||
+          target.closest("[data-slot='button']")
+      );
+      if (isInsideDropdown) return;
+
+      // Otherwise, close modal
+      handleClose();
     };
 
     // Add the event listener when the modal is open
@@ -722,7 +729,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         >
           {/* Left Side Navigation */}
           <nav className="w-1/4 bg-gray-900 p-3 flex flex-col">
-            <div className="flex justify-between items-center mb-8">
+            <div
+              className="flex justify-between items-center mb-8"
+              onMouseDown={(e) => e.stopPropagation()}
+            >
               <button
                 onClick={handleClose}
                 className="text-gray-400 hover:text-white transition-colors"

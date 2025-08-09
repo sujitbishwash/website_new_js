@@ -1,16 +1,7 @@
+import { ROUTES } from "@/routes/constants";
+import { theme } from "@/styles/theme";
 import React, { useEffect, useRef, useState } from "react";
-
-// Centralized theme colors for easy customization.
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  divider: "#4B5563",
-};
+import { useNavigate } from "react-router-dom";
 
 // --- TYPE DEFINITIONS ---
 type MenuItem = {
@@ -25,9 +16,11 @@ type MenuItem = {
 const Icon = ({
   path,
   className = "w-5 h-5",
+  style,
 }: {
   path: string;
   className?: string;
+  style?: React.CSSProperties;
 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -36,6 +29,7 @@ const Icon = ({
     strokeWidth={1.5}
     stroke="currentColor"
     className={className}
+    style={style}
   >
     <path strokeLinecap="round" strokeLinejoin="round" d={path} />
   </svg>
@@ -58,6 +52,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -85,6 +80,13 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
     setMenuOpen(false);
   };
 
+  const handlePrivacyPolicyClick = () => {
+    navigate(ROUTES.PRIVACY_POLICY);
+  };
+
+  const handleTermsOfUseClick = () => {
+    navigate(ROUTES.TERMS_AND_CONDITIONS);
+  };
   const menuOptions: MenuItem[] = [
     {
       icon: (
@@ -111,12 +113,14 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             <Icon path="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
           ),
           label: "Privacy Policy",
+          action: handlePrivacyPolicyClick,
         },
         {
           icon: (
             <Icon path="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
           ),
           label: "Terms of Use",
+          action: handleTermsOfUseClick,
         },
       ],
     },
@@ -139,9 +143,6 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
         onClick={toggleMenu}
         style={{
           backgroundColor: theme.inputBackground,
-          // Correctly applying focus ring colors
-          "--tw-ring-offset-color": theme.background,
-          "--tw-ring-color": theme.accent,
         }}
         className="flex items-center justify-between w-full space-x-4 p-4 transition-colors duration-200 hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-offset-1 cursor-pointer"
         onMouseOver={(e) =>

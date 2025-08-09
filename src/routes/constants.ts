@@ -32,6 +32,10 @@ export const ROUTES = {
     // Auth routes
     LOGIN: "/login",
     EXAM_GOAL: "/exam-goal",
+
+    // policy routes
+    PRIVACY_POLICY: "/privacy-policy",
+    TERMS_AND_CONDITIONS: "/terms-and-conditions",
 } as const;
 
 // Route names for navigation
@@ -55,6 +59,8 @@ export const ROUTE_NAMES = {
     [ROUTES.EXAMS]: "Exams",
     [ROUTES.LOGIN]: "Login",
     [ROUTES.EXAM_GOAL]: "Exam Goal",
+    [ROUTES.PRIVACY_POLICY]: "Privacy Policy",
+    [ROUTES.TERMS_AND_CONDITIONS]: "Terms and Conditions",
 } as const;
 
 // Helper function to build video learning route with ID

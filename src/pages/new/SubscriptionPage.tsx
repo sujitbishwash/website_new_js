@@ -1,3 +1,4 @@
+import { theme } from "@/styles/theme";
 import { useState } from "react";
 
 // --- CSS Styles Component ---
@@ -8,7 +9,7 @@ const SubscriptionStyles = () => (
 
     /* --- Main Page Styles --- */
     .subscription-page {
-      background-color: #0d1117;
+      background-color: ${theme.background};
       min-height: 100vh;
       display: flex;
       align-items: center;
@@ -16,12 +17,12 @@ const SubscriptionStyles = () => (
       padding: 40px 20px;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
         Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      color: #c9d1d9;
+      color: ${theme.secondaryText};
     }
 
     .subscription-container {
-      background-color: #161b22;
-      border: 1px solid #30363d;
+      background-color: ${theme.cardBackground};
+      border: 1px solid ${theme.divider};
       border-radius: 16px;
       padding: 32px;
       max-width: 600px;
@@ -39,8 +40,8 @@ const SubscriptionStyles = () => (
     }
     
     .offer-banner .limited-time {
-      background-color: #1f6feb;
-      color: #ffffff;
+      background-color: ${theme.buttonGradientTo};
+      color: ${theme.primaryText};
       padding: 4px 12px;
       border-radius: 20px;
       font-weight: 600;
@@ -53,7 +54,7 @@ const SubscriptionStyles = () => (
     .offer-banner p {
       margin: 8px 0 0;
       font-size: 1rem;
-      color: #f0f6fc;
+      color: ${theme.primaryText};
     }
 
     .offer-banner .promo-code {
@@ -72,7 +73,7 @@ const SubscriptionStyles = () => (
 
     /* --- Main Content --- */
     .main-title {
-      color: #f0f6fc;
+      color: ${theme.primaryText};
       font-size: 2rem;
       font-weight: 700;
       margin: 0 0 24px;
@@ -92,11 +93,11 @@ const SubscriptionStyles = () => (
       gap: 12px;
       margin-bottom: 12px;
       font-size: 1rem;
-      color: #c9d1d9;
+      color: ${theme.secondaryText};
     }
     
     .feature-list .sub-text {
-        color: #8b949e;
+        color: ${theme.mutedText};
         font-size: 0.9rem;
         margin-left: 4px;
     }
@@ -110,8 +111,8 @@ const SubscriptionStyles = () => (
     }
 
     .plan-card {
-      background-color: #0d1117;
-      border: 2px solid #30363d;
+      background-color: ${theme.background};
+      border: 2px solid ${theme.divider};
       border-radius: 12px;
       padding: 24px;
       cursor: pointer;
@@ -120,30 +121,30 @@ const SubscriptionStyles = () => (
     }
 
     .plan-card.active {
-      border-color: #58a6ff;
-      background-color: rgba(88, 166, 255, 0.1);
+      border-color: ${theme.accent};
+      background-color: ${theme.accentLight};
     }
     
     .plan-card h3 {
         margin: 0 0 8px;
         font-size: 1.25rem;
-        color: #f0f6fc;
+        color: ${theme.primaryText};
     }
     
     .plan-card .price {
         font-size: 2.25rem;
         font-weight: 700;
-        color: #f0f6fc;
+        color: ${theme.primaryText};
     }
 
     .plan-card .price-per {
         font-size: 1rem;
-        color: #8b949e;
+        color: ${theme.mutedText};
     }
 
     .plan-card .billing-info {
         font-size: 0.8rem;
-        color: #8b949e;
+        color: ${theme.mutedText};
         margin-top: 4px;
     }
 
@@ -151,8 +152,8 @@ const SubscriptionStyles = () => (
         position: absolute;
         top: 16px;
         right: 16px;
-        background-color: #238636;
-        color: #ffffff;
+        background-color: ${theme.green};
+        color: ${theme.primaryText};
         padding: 4px 8px;
         border-radius: 20px;
         font-size: 0.75rem;
@@ -161,7 +162,7 @@ const SubscriptionStyles = () => (
 
     /* --- Button and Footer --- */
     .select-plan-button {
-      background: linear-gradient(90deg, #388bfd, #1f6feb);
+      background: linear-gradient(90deg, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo});
       color: white;
       border: none;
       border-radius: 8px;
@@ -180,7 +181,7 @@ const SubscriptionStyles = () => (
     .footer-text {
       margin-top: 16px;
       font-size: 0.9rem;
-      color: #8b949e;
+      color: ${theme.mutedText};
     }
   `}</style>
 );

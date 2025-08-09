@@ -1,3 +1,4 @@
+import { theme } from "@/styles/theme";
 import { useState } from "react";
 
 // --- CSS Styles Component ---
@@ -8,13 +9,13 @@ const ReferralStyles = () => (
 
     .referral-page {
       /* New: Added a subtle radial gradient for depth */
-      background-color: #0d1117;
-      background-image: radial-gradient(circle at top, rgba(56, 139, 253, 0.1), transparent 40%);
+      background-color: ${theme.background};
+      background-image: radial-gradient(circle at top, ${theme.accentLight}, transparent 40%);
       min-height: 100vh;
       padding: 40px;
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
         Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      color: #c9d1d9;
+      color: ${theme.secondaryText};
     }
 
     .referral-container {
@@ -26,8 +27,8 @@ const ReferralStyles = () => (
     }
 
     .referral-card {
-      background-color: #161b22;
-      border: 1px solid #30363d;
+      background-color: ${theme.cardBackground};
+      border: 1px solid ${theme.divider};
       border-radius: 12px;
       padding: 24px;
       /* New: Added transition for hover effects */
@@ -43,7 +44,7 @@ const ReferralStyles = () => (
     .card-title {
       font-size: 1.25rem;
       font-weight: 600;
-      color: #f0f6fc;
+      color: ${theme.primaryText};
       margin: 0 0 1.5rem;
     }
 
@@ -55,14 +56,14 @@ const ReferralStyles = () => (
     .referral-header h1 {
       font-size: 2.5rem;
       font-weight: 700;
-      color: #f0f6fc;
+      color: ${theme.primaryText};
       margin: 0;
       /* New: Added text shadow for emphasis */
-      text-shadow: 0 0 15px rgba(88, 166, 255, 0.3);
+      text-shadow: 0 0 15px ${theme.accentLight};
     }
     .referral-header .subtitle {
       font-size: 1.2rem;
-      color: #8b949e;
+      color: ${theme.mutedText};
       margin: 8px 0 0;
     }
     .referral-header .subtitle span {
@@ -72,8 +73,8 @@ const ReferralStyles = () => (
 
     /* --- Premium Unlock Section --- */
     .premium-unlock-section {
-        background: linear-gradient(90deg, rgba(56, 139, 253, 0.1), rgba(4, 88, 207, 0.2));
-        border: 1px solid rgba(88, 166, 255, 0.3);
+        background: linear-gradient(90deg, ${theme.accentLight}, rgba(4, 88, 207, 0.2));
+        border: 1px solid ${theme.accentLight};
         border-radius: 12px;
         padding: 24px;
         text-align: center;
@@ -100,7 +101,7 @@ const ReferralStyles = () => (
     .premium-unlock-section h2 {
         font-size: 1.5rem;
         font-weight: 600;
-        color: #f0f6fc;
+        color: ${theme.primaryText};
         margin: 0 0 1rem;
         position: relative; /* To keep it above the glow */
     }
@@ -114,18 +115,18 @@ const ReferralStyles = () => (
         position: relative; /* To keep it above the glow */
     }
     .premium-features-list li {
-        background: #161b22;
+        background: ${theme.cardBackground};
         padding: 16px;
         border-radius: 8px;
         font-weight: 500;
-        border: 1px solid #30363d;
+        border: 1px solid ${theme.divider};
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 8px;
     }
     .premium-unlock-section .footer-text {
-        color: #8b949e;
+        color: ${theme.mutedText};
         margin: 0;
         position: relative; /* To keep it above the glow */
     }
@@ -141,18 +142,18 @@ const ReferralStyles = () => (
     }
 
     .referral-code-box {
-      background-color: #0d1117;
-      border: 1px dashed #484f58;
+      background-color: ${theme.background};
+      border: 1px dashed ${theme.divider};
       padding: 12px 16px;
       border-radius: 8px;
       font-size: 1.1rem;
       font-weight: 600;
-      color: #f0f6fc;
+      color: ${theme.primaryText};
       letter-spacing: 1px;
     }
 
     .copy-button {
-      background-color: #238636;
+      background-color: ${theme.green};
       color: white;
       border: none;
       padding: 12px 20px;
@@ -167,7 +168,7 @@ const ReferralStyles = () => (
     }
 
     .copy-button:hover {
-      background-color: #2ea043;
+      background-color: ${theme.green};
     }
     
     .copy-button.copied {
@@ -183,18 +184,18 @@ const ReferralStyles = () => (
     }
 
     .step-card {
-      background-color: #0d1117;
+      background-color: ${theme.background};
       padding: 20px;
       border-radius: 8px;
       border: 1px solid transparent;
       transition: border-color 0.3s ease;
     }
     .step-card:hover {
-        border-color: #30363d;
+        border-color: ${theme.divider};
     }
     
     .step-card .icon {
-        background-color: rgba(88, 166, 255, 0.1);
+        background-color: ${theme.accentLight};
         width: 48px;
         height: 48px;
         border-radius: 50%;
@@ -202,17 +203,17 @@ const ReferralStyles = () => (
         align-items: center;
         justify-content: center;
         margin-bottom: 1rem;
-        border: 1px solid rgba(88, 166, 255, 0.2);
+        border: 1px solid ${theme.accentLight};
     }
 
     .step-card h4 {
         margin: 0 0 0.5rem;
-        color: #f0f6fc;
+        color: ${theme.primaryText};
     }
     
     .step-card p {
         font-size: 0.9rem;
-        color: #8b949e;
+        color: ${theme.mutedText};
         line-height: 1.5;
         margin: 0;
     }
@@ -227,14 +228,14 @@ const ReferralStyles = () => (
     .stat-item h4 {
         margin: 0 0 0.5rem;
         font-size: 1rem;
-        color: #8b949e;
+        color: ${theme.mutedText};
         font-weight: 500;
     }
 
     .stat-item .value {
         font-size: 2rem;
         font-weight: 700;
-        color: #f0f6fc;
+        color: ${theme.primaryText};
     }
 
     /* --- Leaderboard --- */
@@ -249,35 +250,35 @@ const ReferralStyles = () => (
     }
     
     .leaderboard-table thead {
-        border-bottom: 1px solid #30363d;
+        border-bottom: 1px solid ${theme.divider};
     }
 
     .leaderboard-table th {
         font-size: 0.9rem;
-        color: #8b949e;
+        color: ${theme.mutedText};
         font-weight: 600;
     }
     
     /* New: Zebra-striping for better readability */
     .leaderboard-table tbody tr:nth-child(odd) {
-        background-color: #0d1117;
+        background-color: ${theme.background};
     }
 
     .leaderboard-table tbody tr:hover {
-        background-color: #21262d;
+        background-color: ${theme.cardBackground};
     }
     
     .leaderboard-table td {
-        color: #c9d1d9;
+        color: ${theme.secondaryText};
     }
     
     .leaderboard-table .rank {
         font-weight: 700;
-        color: #58a6ff;
+        color: ${theme.accent};
     }
     
     .leaderboard-table .rewards {
-        color: #2ea043;
+        color: ${theme.green};
         font-weight: 600;
     }
   `}</style>

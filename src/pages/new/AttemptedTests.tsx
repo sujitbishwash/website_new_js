@@ -426,7 +426,7 @@ const styles: { [key: string]: (isMobile: boolean) => React.CSSProperties } = {
     minHeight: "100vh",
     padding: isMobile ? "1rem" : "2rem 4rem",
   }),
-  header: (isMobile) => ({ marginBottom: "2rem" }),
+  header: (_isMobile) => ({ marginBottom: "2rem" }),
   h1: (isMobile) => ({
     fontSize: isMobile ? "1.5rem" : "2rem",
     fontWeight: "bold",
@@ -470,7 +470,7 @@ const styles: { [key: string]: (isMobile: boolean) => React.CSSProperties } = {
     transition: "transform 0.2s, box-shadow 0.2s",
     boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
   }),
-  inputContainer: (isMobile) => ({
+  inputContainer: (_isMobile) => ({
     position: "relative",
     marginBottom: "2rem",
   }),
