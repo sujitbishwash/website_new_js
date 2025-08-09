@@ -23,8 +23,7 @@ const Layout: React.FC = () => {
     setProfileModalOpen(true);
   };
 
-    const handleUpgradeClick = () => {
-      
+  const handleUpgradeClick = () => {
     navigate(ROUTES.PREMIUM);
     setIsContracted(true);
     setProfileModalOpen(false);
@@ -47,12 +46,11 @@ const Layout: React.FC = () => {
 
   return (
     <>
-      <div className="flex h-screen bg-gray-900 text-white overflow-hidden">
+      <div className="flex h-screen bg-background text-foreground overflow-hidden">
         <Sidebar
           isOpen={isOpen}
           isContracted={isContracted}
           onToggle={() => setIsOpen(!isOpen)}
-          
           onContractToggle={() => setIsContracted(!isContracted)}
           onLogoutClick={handleLogoutClick}
           onProfileClick={handleProfileClick}
@@ -60,10 +58,10 @@ const Layout: React.FC = () => {
         />
         <div className="flex-1 flex flex-col min-w-0">
           {/* Header with hamburger menu */}
-          <header className="bg-gray-800 border-b border-gray-700 p-4 lg:hidden flex-shrink-0">
+          <header className="bg-card border-b border-border p-4 lg:hidden flex-shrink-0">
             <button
               onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-2"
+              className="text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-lg p-2"
             >
               <Menu size={24} />
             </button>
@@ -82,8 +80,11 @@ const Layout: React.FC = () => {
       />
 
       {/* Profile Modal - positioned at root level for proper full-screen coverage */}
-      <ProfileModal isOpen={isProfileModalOpen} onClose={handleProfileClose} 
-          onUpgradeClick={handleUpgradeClick}/>
+      <ProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={handleProfileClose}
+        onUpgradeClick={handleUpgradeClick}
+      />
     </>
   );
 };

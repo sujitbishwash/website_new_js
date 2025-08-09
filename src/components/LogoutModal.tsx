@@ -49,31 +49,28 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
         className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
         onClick={handleBackdropClick}
       >
-        
         {/* Modal content container. */}
-        <div
-          className="bg-[#1F2937] rounded-2xl shadow-xl w-full max-w-sm p-8 text-center"
-        >
-          <h2 className="text-2xl font-bold text-[#FFFFFF] mb-2">
+        <div className="bg-card text-card-foreground rounded-2xl shadow-xl w-full max-w-sm p-8 text-center border border-border">
+          <h2 className="text-2xl font-bold mb-2">
             Are you sure you want to log out?
           </h2>
 
-          <p className="text-[#9CA3AF] mb-6">
+          <p className="text-muted-foreground mb-6">
             Log out of AIPadhai as{" "}
-            <span className="font-semibold text-white">{userEmail}</span>?
+            <span className="font-semibold text-foreground">{userEmail}</span>?
           </p>
 
           {/* Action buttons container */}
           <div className="flex flex-col space-y-3">
             <button
               onClick={onConfirm}
-              className="w-full px-4 py-3 font-semibold text-[#1F2937] bg-[#FFFFFF] rounded-lg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1F2937] focus:ring-white"
+              className="w-full px-4 py-3 font-semibold bg-primary text-primary-foreground rounded-lg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring"
             >
               Log out
             </button>
             <button
               onClick={onClose}
-              className="w-full px-4 py-3 font-semibold text-[#FFFFFF] bg-transparent rounded-lg transition-colors hover:bg-[#374151] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-[#1F2937] focus:ring-white"
+              className="w-full px-4 py-3 font-semibold text-foreground bg-transparent rounded-lg transition-colors hover:bg-accent/20 focus:outline-none focus:ring-2 focus:ring-ring"
             >
               Cancel
             </button>

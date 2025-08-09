@@ -138,13 +138,13 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   ];
 
   return (
-    <div ref={menuRef} className="relative font-sans">
+    <div ref={menuRef} className="relative font-sans bg-card text-foreground">
       <button
         onClick={toggleMenu}
         style={{
           backgroundColor: theme.inputBackground,
         }}
-        className="flex items-center justify-between w-full space-x-4 p-4 transition-colors duration-200 hover:bg-gray-700 focus:outline-none focus:ring-1 focus:ring-offset-1 cursor-pointer"
+        className="flex items-center justify-between w-full space-x-4 p-4 transition-colors duration-200 hover:bg-accent/20 focus:outline-none focus:ring-1 focus:ring-offset-1 cursor-pointer"
         onMouseOver={(e) =>
           (e.currentTarget.style.backgroundColor = theme.divider)
         }
@@ -173,13 +173,15 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
               isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
             }`}
           >
-            <p className="font-medium text-gray-300">nikk070@yoyo</p>
-            <p className="font-medium text-gray-300 text-sm">Free Plan</p>
+            <p className="font-medium text-muted-foreground">nikk070@yoyo</p>
+            <p className="font-medium text-muted-foreground text-sm">
+              Free Plan
+            </p>
           </div>
         </div>
         <Icon
           path="M6.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM12.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0zM18.75 12a.75.75 0 11-1.5 0 .75.75 0 011.5 0z"
-          style={{ color: theme.secondaryText }}
+          style={{ color: theme.primaryText }}
           className={`w-5 h-5 ${
             isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
           }`}
@@ -204,7 +206,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             backgroundColor: theme.cardBackground,
             borderColor: theme.divider,
           }}
-          className="absolute bottom-full left-0 mb-2 w-64 p-2 rounded-lg shadow-2xl z-20 border animate-fade-in-up"
+          className="absolute bottom-full left-0 mb-2 w-64 p-2 rounded-lg shadow-2xl z-20 border animate-fade-in-up text-foreground"
         >
           <div className="space-y-1">
             {menuOptions.map((item) =>
@@ -230,7 +232,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                       }
                     }}
                     style={{ color: theme.secondaryText }}
-                    className="w-full flex items-center justify-between space-x-3 p-2 text-left text-sm rounded-md transition-colors duration-200 hover:bg-gray-700 hover:text-white cursor-pointer"
+                    className="w-full flex items-center justify-between space-x-3 p-2 text-left text-sm rounded-md transition-colors duration-200 hover:bg-accent hover:text-accent-foreground cursor-pointer"
                     onMouseOver={(e) => {
                       e.currentTarget.style.backgroundColor =
                         theme.inputBackground;
@@ -272,7 +274,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                               setMenuOpen(false);
                             }}
                             style={{ color: theme.secondaryText }}
-                            className="w-full flex items-center space-x-3 p-2 text-left text-sm text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors duration-200 cursor-pointer"
+                            className="w-full flex items-center space-x-3 p-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors duration-200 cursor-pointer"
                             onMouseOver={(e) => {
                               e.currentTarget.style.backgroundColor =
                                 theme.inputBackground;

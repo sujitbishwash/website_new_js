@@ -37,11 +37,9 @@ export const theme: ThemeColors = {
 
 // Available color palettes
 export type ColorThemeName =
-    | "slate" // default (current app look)
-    | "ocean" // blue/cyan
-    | "forest" // green/teal
-    | "rose" // pink/red
-    | "amber"; // warm yellow/orange
+    | "slate" // default (neutral, professional)
+    | "ocean" // blue/cyan professional
+    | "forest"; // green/teal professional
 
 const palettes: Record<ColorThemeName, ThemeColors> = {
     slate: {
@@ -92,49 +90,74 @@ const palettes: Record<ColorThemeName, ThemeColors> = {
         yellow: "#EAB308",
         red: "#DC2626",
     },
-    rose: {
-        background: "#1A0E14",
-        cardBackground: "#2A0F1F",
-        inputBackground: "#3B102A",
-        primaryText: "#F5E9F0",
-        secondaryText: "#F0A7C3",
-        mutedText: "#E879F9",
-        accent: "#FB7185",
-        accentLight: "rgba(251, 113, 133, 0.12)",
-        buttonGradientFrom: "#F43F5E",
-        buttonGradientTo: "#E11D48",
-        divider: "#6B1F3B",
-        green: "#86EFAC",
-        yellow: "#FDE047",
-        red: "#FB7185",
-    },
-    amber: {
-        background: "#16120A",
-        cardBackground: "#1F170B",
-        inputBackground: "#2A1E0E",
-        primaryText: "#FFF7ED",
-        secondaryText: "#FED7AA",
-        mutedText: "#D97706",
-        accent: "#F59E0B",
-        accentLight: "rgba(245, 158, 11, 0.12)",
-        buttonGradientFrom: "#F59E0B",
-        buttonGradientTo: "#D97706",
-        divider: "#4B2E0F",
-        green: "#84CC16",
-        yellow: "#FACC15",
-        red: "#F87171",
-    },
 };
 
 export const getAvailableColorThemes = (): ColorThemeName[] =>
     Object.keys(palettes) as ColorThemeName[];
 
 export const applyColorTheme = (name: ColorThemeName) => {
-    const p = palettes[name] || palettes.slate;
+    const palette = palettes[name] || palettes.slate;
     const root = document.documentElement;
+    const isDark = root.classList.contains("dark");
+
+    // Derive light/dark variants to ensure clear contrast differences
+    const p: ThemeColors = isDark
+        ? palette
+        : {
+            // Light mode overrides for professional contrast
+            background: "#FFFFFF",
+            cardBackground: "#FFFFFF",
+            inputBackground: "#F3F4F6",
+            primaryText: "#0F172A",
+            secondaryText: "#475569",
+            mutedText: "#64748B",
+            // keep accent family from selected palette for brand feel
+            accent: palette.accent,
+            accentLight: palette.accentLight,
+            buttonGradientFrom: palette.buttonGradientFrom,
+            buttonGradientTo: palette.buttonGradientTo,
+            divider: "#E5E7EB",
+            green: "#16A34A",
+            yellow: "#CA8A04",
+            red: "#DC2626",
+        };
+
     const set = (key: keyof ThemeColors, value: string) =>
         root.style.setProperty(`--ap-${key}`, value);
     (Object.keys(p) as (keyof ThemeColors)[]).forEach((k) => set(k, p[k]));
+
+    // Sync Tailwind CSS token variables for cohesive look across the app
+    const setUI = (varName: string, value: string) =>
+        root.style.setProperty(varName, value);
+
+    // Base surfaces and text
+    setUI("--background", p.background);
+    setUI("--foreground", p.primaryText);
+    setUI("--card", p.cardBackground);
+    setUI("--card-foreground", p.primaryText);
+    // Primary & accent
+    setUI("--primary", p.accent);
+    setUI("--primary-foreground", p.primaryText);
+    setUI("--accent", p.accentLight);
+    setUI("--accent-foreground", p.primaryText);
+    // Secondary & muted
+    setUI("--secondary", p.inputBackground);
+    setUI("--secondary-foreground", p.primaryText);
+    setUI("--muted", p.inputBackground);
+    setUI("--muted-foreground", p.secondaryText);
+    // Borders/inputs/ring
+    setUI("--border", p.divider);
+    setUI("--input", p.inputBackground);
+    setUI("--ring", p.accent);
+    // Sidebar tokens (align with card scheme)
+    setUI("--sidebar", p.cardBackground);
+    setUI("--sidebar-foreground", p.primaryText);
+    setUI("--sidebar-primary", p.accent);
+    setUI("--sidebar-primary-foreground", p.primaryText);
+    setUI("--sidebar-accent", p.accentLight);
+    setUI("--sidebar-accent-foreground", p.primaryText);
+    setUI("--sidebar-border", p.divider);
+    setUI("--sidebar-ring", p.accent);
 };
 
 

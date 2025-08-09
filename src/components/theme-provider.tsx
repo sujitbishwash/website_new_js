@@ -47,6 +47,15 @@ export function ThemeProvider({
     }
 
     root.classList.add(theme);
+
+    // Re-apply current color palette to match the new light/dark mode
+    try {
+      const saved = localStorage.getItem(
+        "ap-color-theme"
+      ) as ColorThemeName | null;
+      // Small timeout lets the classList settle before applying CSS vars
+      setTimeout(() => applyColorTheme(saved || "slate"), 0);
+    } catch {}
   }, [theme]);
 
   // Initialize color palette on mount from localStorage

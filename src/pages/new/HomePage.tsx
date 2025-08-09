@@ -475,32 +475,34 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-full bg-gradient-to-br from-[#0d121e] to-[#1a1a2e] text-gray-300 font-sans p-6">
+    <div className="min-h-full bg-background text-foreground font-sans p-6">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl">
         {/* Header Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">
+        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
             What do you want to learn today?
           </h1>
-          <p className="text-slate-400 mb-6">
+          <p className="text-muted-foreground mb-6">
             Start by uploading a file or pasting a video link.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="group flex items-center space-x-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-800/90 transition-all duration-300 cursor-pointer border border-slate-700 hover:border-blue-500">
-              <UploadIcon className="h-8 w-8 text-blue-400 transition-transform group-hover:scale-110" />
+            <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border hover:border-accent">
+              <UploadIcon className="h-8 w-8 text-accent transition-transform group-hover:scale-110" />
               <div>
-                <h2 className="font-semibold text-white">Upload File</h2>
-                <p className="text-xs text-slate-400">PDF, DOC, TXT</p>
+                <h2 className="font-semibold text-foreground">Upload File</h2>
+                <p className="text-xs text-muted-foreground">PDF, DOC, TXT</p>
               </div>
             </div>
             <div
               onClick={() => setIsYouTubeModalOpen(true)}
-              className="group flex items-center space-x-4 p-4 bg-slate-800/60 rounded-lg hover:bg-slate-800/90 transition-all duration-300 cursor-pointer border border-slate-700 hover:border-green-500"
+              className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border hover:border-accent"
             >
-              <PasteIcon className="h-8 w-8 text-green-400 transition-transform group-hover:scale-110" />
+              <PasteIcon className="h-8 w-8 text-accent transition-transform group-hover:scale-110" />
               <div>
-                <h2 className="font-semibold text-white">Paste Link</h2>
-                <p className="text-xs text-slate-400">paste youtube links</p>
+                <h2 className="font-semibold text-foreground">Paste Link</h2>
+                <p className="text-xs text-muted-foreground">
+                  paste youtube links
+                </p>
               </div>
             </div>
           </div>
@@ -509,8 +511,8 @@ export default function HomePage() {
         {/* --- SEQUENTIAL LAYOUT --- */}
 
         {/* Recommended Videos Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5">
+        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+          <h2 className="text-2xl font-bold text-foreground mb-5">
             Recommended Videos
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -518,7 +520,7 @@ export default function HomePage() {
               <div
                 key={video.id}
                 onClick={() => navigate(ROUTES.VIDEO_LEARNING)}
-                className="group relative bg-slate-800/60 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-slate-600 border border-slate-700/80 hover:-translate-y-1 cursor-pointer"
+                className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
               >
                 <div className="relative">
                   <img
@@ -527,14 +529,14 @@ export default function HomePage() {
                     className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                    <PlayCircleIcon className="h-12 w-12 text-white/70 group-hover:text-white/90 group-hover:scale-110 transition-all duration-300" />
+                    <PlayCircleIcon className="h-12 w-12 text-primary group-hover:scale-110 transition-all duration-300" />
                   </div>
                 </div>
                 <div className="p-4">
-                  <h4 className="font-semibold text-white truncate">
+                  <h4 className="font-semibold text-foreground truncate">
                     {video.title}
                   </h4>
-                  <p className="text-xs text-slate-400">{video.topic}</p>
+                  <p className="text-xs text-muted-foreground">{video.topic}</p>
                 </div>
               </div>
             ))}
@@ -542,24 +544,26 @@ export default function HomePage() {
         </div>
 
         {/* Recommended Reading Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5">
+        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+          <h2 className="text-2xl font-bold text-foreground mb-5">
             Recommended Reading
           </h2>
           <div className="space-y-4">
             {suggestedReadings.map((item) => (
               <div
                 key={item.id}
-                className="group flex items-center space-x-4 bg-slate-800/60 p-3 rounded-lg border border-slate-700/80 hover:border-slate-600 transition-all duration-300 hover:bg-slate-800/90"
+                className="group flex items-center space-x-4 bg-card/80 p-3 rounded-lg border border-border hover:border-accent transition-all duration-300 hover:bg-accent/10"
               >
-                <div className="flex-shrink-0 bg-slate-700/80 w-16 h-16 rounded-lg flex items-center justify-center">
-                  <DocumentTextIcon className="h-8 w-8 text-orange-400" />
+                <div className="flex-shrink-0 bg-muted w-16 h-16 rounded-lg flex items-center justify-center">
+                  <DocumentTextIcon className="h-8 w-8 text-accent" />
                 </div>
                 <div className="flex-grow">
-                  <h4 className="font-semibold text-white">{item.title}</h4>
-                  <p className="text-xs text-slate-400">{item.topic}</p>
+                  <h4 className="font-semibold text-foreground">
+                    {item.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">{item.topic}</p>
                 </div>
-                <button className="px-3 py-1.5 text-sm font-semibold bg-orange-600/80 text-white rounded-md hover:bg-orange-600 transition-colors">
+                <button className="px-3 py-1.5 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
                   Read
                 </button>
               </div>
@@ -568,26 +572,28 @@ export default function HomePage() {
         </div>
 
         {/* Recommended Tests Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5">
+        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+          <h2 className="text-2xl font-bold text-foreground mb-5">
             Recommended Tests
           </h2>
           <div className="space-y-4">
             {suggestedTests.map((test) => (
               <div
                 key={test.id}
-                className="group flex items-center space-x-4 bg-slate-800/60 p-3 rounded-lg border border-slate-700/80 hover:border-slate-600 transition-all duration-300 hover:bg-slate-800/90"
+                className="group flex items-center space-x-4 bg-card/80 p-3 rounded-lg border border-border hover:border-accent transition-all duration-300 hover:bg-accent/10"
               >
-                <div className="flex-shrink-0 bg-slate-700/80 w-16 h-16 rounded-lg flex items-center justify-center">
-                  <ClipboardDocumentListIcon className="h-8 w-8 text-purple-400" />
+                <div className="flex-shrink-0 bg-muted w-16 h-16 rounded-lg flex items-center justify-center">
+                  <ClipboardDocumentListIcon className="h-8 w-8 text-accent" />
                 </div>
                 <div className="flex-grow">
-                  <h4 className="font-semibold text-white">{test.title}</h4>
-                  <p className="text-xs text-slate-400">{test.topic}</p>
+                  <h4 className="font-semibold text-foreground">
+                    {test.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">{test.topic}</p>
                 </div>
                 <button
                   onClick={() => navigate(ROUTES.EXAM_INFO)}
-                  className="px-3 py-1.5 text-sm font-semibold bg-purple-600/80 text-white rounded-md hover:bg-purple-600 transition-colors"
+                  className="px-3 py-1.5 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
                 >
                   Start
                 </button>
@@ -597,12 +603,12 @@ export default function HomePage() {
         </div>
 
         {/* Continue Learning Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5 flex justify-between items-center">
+        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+          <h2 className="text-2xl font-bold text-foreground mb-5 flex justify-between items-center">
             <span>Continue Learning</span>
             <a
               href="#"
-              className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
+              className="text-sm font-medium text-accent hover:opacity-80 transition-colors"
             >
               View all
             </a>
@@ -611,7 +617,7 @@ export default function HomePage() {
             {learningItems.map((item) => (
               <div
                 key={item.id}
-                className="group relative bg-slate-800/60 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-slate-600 border border-slate-700/80 hover:-translate-y-1"
+                className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1"
               >
                 <img
                   src={item.thumbnailUrl}
@@ -625,24 +631,26 @@ export default function HomePage() {
                   }}
                 />
                 <div className="p-4">
-                  <h3 className="font-bold text-white truncate text-lg">
+                  <h3 className="font-bold text-foreground truncate text-lg">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-slate-400 mb-4">{item.subject}</p>
-                  <div className="w-full bg-slate-700 rounded-full h-2.5 mb-2">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    {item.subject}
+                  </p>
+                  <div className="w-full bg-muted rounded-full h-2.5 mb-2">
                     <div
-                      className="bg-blue-500 h-2.5 rounded-full"
+                      className="bg-primary h-2.5 rounded-full"
                       style={{ width: `${item.progress}%` }}
                     ></div>
                   </div>
-                  <div className="flex justify-between items-center text-xs text-slate-500">
+                  <div className="flex justify-between items-center text-xs text-muted-foreground">
                     <span>{item.progress}% Complete</span>
                     <span>{item.lastStudied}</span>
                   </div>
                 </div>
                 <button
                   onClick={() => handleRemoveRecord(item.id, "learning")}
-                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent hover:text-accent-foreground"
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>
@@ -652,12 +660,12 @@ export default function HomePage() {
         </div>
 
         {/* Attempted Tests Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 mb-10 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5 flex justify-between items-center">
+        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+          <h2 className="text-2xl font-bold text-foreground mb-5 flex justify-between items-center">
             <span>Attempted Tests</span>
             <a
               href="#"
-              className="text-sm font-medium text-blue-400 hover:text-blue-300 transition-colors"
+              className="text-sm font-medium text-accent hover:opacity-80 transition-colors"
             >
               View all
             </a>
@@ -666,7 +674,7 @@ export default function HomePage() {
             {attemptedTests.map((test) => (
               <div
                 key={test.id}
-                className="group relative bg-slate-800/60 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 transition-all duration-300 hover:shadow-xl hover:bg-slate-800/90 border border-slate-700/80 hover:border-slate-600"
+                className="group relative bg-card/80 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 transition-all duration-300 hover:shadow-xl hover:bg-accent/10 border border-border hover:border-accent"
               >
                 <div className="flex-shrink-0 text-center w-24">
                   <p
@@ -676,13 +684,15 @@ export default function HomePage() {
                   >
                     {test.score}%
                   </p>
-                  <p className="text-xs text-slate-500">Overall Score</p>
+                  <p className="text-xs text-muted-foreground/80">
+                    Overall Score
+                  </p>
                 </div>
                 <div className="flex-grow w-full border-t sm:border-t-0 sm:border-l border-slate-700 pt-3 sm:pt-0 sm:pl-4">
-                  <h3 className="font-semibold text-white text-lg">
+                  <h3 className="font-semibold text-foreground text-lg">
                     {test.title}
                   </h3>
-                  <p className="text-sm text-slate-400 mb-2">
+                  <p className="text-sm text-muted-foreground mb-2">
                     Attempted: {test.date}
                   </p>
                   <div className="flex items-center space-x-4 text-sm">
@@ -698,13 +708,13 @@ export default function HomePage() {
                 </div>
                 <button
                   onClick={() => navigate(ROUTES.ANALYSIS)}
-                  className="px-4 py-2 text-sm font-semibold bg-blue-600/80 text-white rounded-md hover:bg-blue-600 transition-colors w-full sm:w-auto"
+                  className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors w-full sm:w-auto"
                 >
                   Review Test
                 </button>
                 <button
                   onClick={() => handleRemoveRecord(test.id, "test")}
-                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-500 hover:text-white"
+                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent hover:text-accent-foreground"
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>
@@ -714,15 +724,17 @@ export default function HomePage() {
         </div>
 
         {/* Explore Topics Card */}
-        <div className="bg-slate-900/50 rounded-xl p-6 shadow-2xl border border-slate-700/50 backdrop-blur-sm">
-          <h2 className="text-2xl font-bold text-white mb-5">Explore Topics</h2>
+        <div className="bg-card rounded-xl p-6 shadow-2xl border border-border">
+          <h2 className="text-2xl font-bold text-foreground mb-5">
+            Explore Topics
+          </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {initialTopics.map((topic) => {
               const Icon = topic.icon;
               return (
                 <div
                   key={topic.id}
-                  className={`group flex flex-col items-center justify-center text-center p-4 rounded-lg cursor-pointer transition-all duration-300 border ${topic.color} hover:bg-opacity-25`}
+                  className={`group flex flex-col items-center justify-center text-center p-4 rounded-lg cursor-pointer transition-all duration-300 border ${topic.color} hover:bg-accent/10`}
                 >
                   <Icon className="h-8 w-8 mb-2 transition-transform duration-300 group-hover:scale-110" />
                   <div>
