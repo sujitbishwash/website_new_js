@@ -342,6 +342,8 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
 );
 
 // --- MAIN MODAL COMPONENT ---
+import { ModeToggle } from "./mode-toggle";
+
 const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
   onClose,
@@ -428,15 +430,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           <div>
             <h1 className="text-3xl font-bold text-white mb-6">General</h1>
             <SettingRow title="Theme">
-              <select
-                value={theme}
-                onChange={(e) => setTheme(e.target.value)}
-                className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option>Dark</option>
-                <option>Light</option>
-                <option>System</option>
-              </select>
+              <ModeToggle />
             </SettingRow>
             <SettingRow title="Accent color">
               <div className="flex items-center gap-2">

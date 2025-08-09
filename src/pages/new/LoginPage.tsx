@@ -1,22 +1,9 @@
 import { authApi } from "@/lib/api-client";
+import { theme } from "@/styles/theme";
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROUTES } from "../../routes/constants";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  buttonGradientFrom: "#3B82F6",
-  buttonGradientTo: "#2563EB",
-  divider: "#4B5563",
-};
 
 // --- Style Objects ---
 // This approach uses 100% inline styles to avoid dependency on any CSS framework.
@@ -155,13 +142,13 @@ const styles = {
     textDecoration: "none",
   },
   errorMessage: {
-    color: "#EF4444", // red-500
+    color: theme.red,
     fontSize: "0.875rem",
     marginTop: "0.5rem",
     textAlign: "center" as const,
   },
   successMessage: {
-    color: "#10B981", // green-500
+    color: theme.green,
     fontSize: "0.875rem",
     marginTop: "0.5rem",
     textAlign: "center" as const,
@@ -172,14 +159,14 @@ const styles = {
     width: "100%",
     padding: "0.75rem 1rem",
     borderRadius: "0.5rem",
-    border: "1px solid #EF4444", // red border for error
+    border: `1px solid ${theme.red}`,
     boxSizing: "border-box" as const,
     marginBottom: "0.5rem", // reduced margin to make room for error
   },
   actionButtonDisabled: {
     width: "100%",
-    background: "#6B7280", // gray-500
-    color: "#9CA3AF", // gray-400
+    background: theme.mutedText,
+    color: theme.secondaryText,
     fontWeight: "bold",
     padding: "0.75rem 1rem",
     borderRadius: "0.5rem",
@@ -190,8 +177,8 @@ const styles = {
   },
   actionButtonLoading: {
     width: "100%",
-    background: "#6B7280", // gray-500
-    color: "#9CA3AF", // gray-400
+    background: theme.mutedText,
+    color: theme.secondaryText,
     fontWeight: "bold",
     padding: "0.75rem 1rem",
     borderRadius: "0.5rem",

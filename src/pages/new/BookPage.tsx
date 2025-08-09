@@ -1,3 +1,4 @@
+import { theme } from "@/styles/theme";
 import {
   BookOpen,
   Bot,
@@ -70,19 +71,7 @@ declare global {
   }
 }
 
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  buttonGradientFrom: "#3B82F6",
-  buttonGradientTo: "#2563EB",
-  divider: "#4B5563",
-};
+// Centralized theme imported from shared theme module
 
 // --- MAIN APP COMPONENT ---
 const BookPage: React.FC = () => {

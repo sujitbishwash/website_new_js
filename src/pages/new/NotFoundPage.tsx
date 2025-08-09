@@ -1,18 +1,5 @@
+import { theme } from "@/styles/theme";
 import React from "react";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827", // bg-gray-900
-  cardBackground: "#1F2937", // bg-gray-800
-  inputBackground: "#374151", // bg-gray-700
-  primaryText: "#FFFFFF", // text-white
-  secondaryText: "#9CA3AF", // text-gray-400
-  mutedText: "#6B7280", // text-gray-500
-  accent: "#60A5FA", // text-blue-400
-  buttonGradientFrom: "#3B82F6", // from-blue-500
-  buttonGradientTo: "#2563EB", // to-blue-600
-  divider: "#4B5563", // border-gray-600
-};
 
 // CSS keyframe animations are defined here for more dynamic movement.
 const animationStyles = `

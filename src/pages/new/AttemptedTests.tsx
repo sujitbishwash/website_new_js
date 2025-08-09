@@ -1,3 +1,4 @@
+import { theme } from "@/styles/theme";
 import React, { useEffect, useMemo, useState } from "react";
 
 //==============================================================================
@@ -404,22 +405,6 @@ const analysisData: PageData = {
 //==============================================================================
 // 3. THEME & STYLES
 //==============================================================================
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  accentLight: "rgba(96, 165, 250, 0.1)",
-  buttonGradientFrom: "#3B82F6",
-  buttonGradientTo: "#2563EB",
-  divider: "#374151",
-  green: "#34D399",
-  yellow: "#FBBF24",
-  red: "#F87171",
-};
 
 const GlobalStyles = () => (
   <style>{`

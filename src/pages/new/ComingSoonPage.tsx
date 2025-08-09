@@ -1,18 +1,5 @@
+import { theme } from "@/styles/theme";
 import React, { useEffect, useState } from "react";
-
-// Centralized theme colors for easy customization
-const theme = {
-  background: "#111827", // A very dark blue, almost black
-  cardBackground: "#1F2937", // Dark slate gray
-  inputBackground: "#374151", // Lighter slate gray
-  primaryText: "#FFFFFF", // White
-  secondaryText: "#9CA3AF", // Light gray
-  mutedText: "#6B7280", // Medium gray
-  accent: "#60A5FA", // A bright, friendly blue
-  buttonGradientFrom: "#3B82F6", // A vibrant blue for gradients
-  buttonGradientTo: "#2563EB", // A deeper blue for gradients
-  divider: "#4B5563", // A subtle gray for dividers
-};
 
 // --- Helper Components ---
 
