@@ -36,6 +36,7 @@ export const ROUTES = {
     // policy routes
     PRIVACY_POLICY: "/privacy-policy",
     TERMS_AND_CONDITIONS: "/terms-and-conditions",
+    AUTH_CALLBACK: "/auth/callback",
 } as const;
 
 // Route names for navigation
@@ -61,6 +62,7 @@ export const ROUTE_NAMES = {
     [ROUTES.EXAM_GOAL]: "Exam Goal",
     [ROUTES.PRIVACY_POLICY]: "Privacy Policy",
     [ROUTES.TERMS_AND_CONDITIONS]: "Terms and Conditions",
+    [ROUTES.AUTH_CALLBACK]: "Auth Callback",
 } as const;
 
 // Helper function to build video learning route with ID

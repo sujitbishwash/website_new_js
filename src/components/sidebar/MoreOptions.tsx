@@ -172,7 +172,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             }`}
           >
             <p className="font-medium text-muted-foreground">nikk070@yoyo</p>
-            <p className="font-medium text-muted-foreground text-sm">
+            <p className="font-medium text-muted-foreground text-xs">
               Free Plan
             </p>
           </div>

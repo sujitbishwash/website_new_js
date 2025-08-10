@@ -29,10 +29,10 @@ const Layout: React.FC = () => {
     setProfileModalOpen(false);
   };
 
-  const handleLogoutConfirm = () => {
-    logout();
-    // Navigate to login page
-    navigate(ROUTES.LOGIN);
+  const handleLogoutConfirm = async () => {
+    await logout();
+    // Navigate to login page after logout is complete
+    navigate(ROUTES.LOGIN, { replace: true });
     setLogoutModalOpen(false);
   };
 

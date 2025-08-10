@@ -1,4 +1,5 @@
 import AttemptedTests from "@/pages/new/AttemptedTests";
+import AuthCallbackPage from "@/pages/new/AuthCallbackPage";
 import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
 import ExamGoalPage from "@/pages/new/ExamGoalPage";
@@ -136,6 +137,12 @@ export const routes = [
         name: "Exams Page",
         description: "Exams Page",
       },
+      {
+        path: "exam-goal",
+        element: <ExamGoalPage />,
+        name: "Exam Goal",
+        description: "Select Exam Goal",
+      },
     ],
   },
   // Public informational pages
@@ -158,11 +165,12 @@ export const routes = [
     description: "User authentication page",
   },
   {
-    path: "exam-goal",
-    element: <ExamGoalPage />,
-    name: "Exam Goal",
-    description: "Select Exam Goal",
+    path: "auth/callback",
+    element: <AuthCallbackPage />,
+    name: "Auth Callback",
+    description: "OAuth callback handler",
   },
+
   // Catch-all route for 404 - must be last
   {
     path: "*",
