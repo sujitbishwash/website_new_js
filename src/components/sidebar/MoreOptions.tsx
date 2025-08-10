@@ -1,7 +1,6 @@
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 // --- TYPE DEFINITIONS ---
 type MenuItem = {
@@ -52,7 +51,6 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -81,11 +79,11 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   };
 
   const handlePrivacyPolicyClick = () => {
-    navigate(ROUTES.PRIVACY_POLICY);
+    window.open(ROUTES.PRIVACY_POLICY, "_blank");
   };
 
   const handleTermsOfUseClick = () => {
-    navigate(ROUTES.TERMS_AND_CONDITIONS);
+    window.open(ROUTES.TERMS_AND_CONDITIONS, "_blank");
   };
   const menuOptions: MenuItem[] = [
     {
