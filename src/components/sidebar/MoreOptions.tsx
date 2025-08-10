@@ -151,7 +151,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
         }
       >
         <div
-          className={`flex items-center space-x-2 ${
+          className={`flex items-center space-x-4 ${
             isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
           }`}
         >
@@ -256,13 +256,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   </button>
 
                   {item.children && activeSubMenu === item.label && (
-                    <div
-                      style={{
-                        backgroundColor: theme.cardBackground,
-                        borderColor: theme.divider,
-                      }}
-                      className="absolute left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 border animate-fade-in-up"
-                    >
+                    <div className="bg-gray-700  border border-gray-500 absolute left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 border animate-fade-in-up">
                       <div className="space-y-1">
                         {item.children.map((child) => (
                           <button
@@ -285,7 +279,10 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                             }}
                           >
                             {child.icon}
-                            <span>{child.label}</span>
+
+                            <span className="text-gray-300 hover:bg-gray-700 hover:text-white">
+                              {child.label}
+                            </span>
                           </button>
                         ))}
                       </div>
