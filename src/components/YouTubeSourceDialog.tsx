@@ -134,7 +134,14 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       setUsingFallbackData(false);
 
       const videos = await videoApi.getSuggestedVideos();
-      setSuggestedVideos(videos);
+      // setSuggestedVideos(videos);
+      // Ensure videos is an array before setting state
+      if (Array.isArray(videos)) {
+        setSuggestedVideos(videos);
+      } else {
+        console.warn("API returned non-array data:", videos);
+        throw new Error("Invalid response format from API");
+      }
     } catch (err: any) {
       console.warn("API failed, using fallback data:", err.message);
       setSuggestionsError("Using sample videos (API unavailable)");
