@@ -351,7 +351,7 @@ const AITutorPanel: React.FC<{
         </div>
       </div>
       {/* Component Container */}
-      <div className="flex-1 overflow-hidden min-h-0 rounded-b-xl">
+      <div className="flex-1 overflow-y-auto min-h-0 rounded-b-xl">
         {components[currentMode]}
       </div>
     </div>
