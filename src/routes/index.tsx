@@ -178,6 +178,18 @@ export const routes = [
     name: "Not Found",
     description: "Page not found",
   },
+  {
+    path: "privacy-policy",
+    element: <PrivacyPolicy />,
+    name: "Privacy Policy",
+    description: "Privacy Policy",
+  },
+  {
+    path: "terms-and-conditions",
+    element: <TermsAndConditions />,
+    name: "Terms and Conditions",
+    description: "Terms and Conditions",
+  },
 ];
 
 // Create router instance

@@ -1,8 +1,9 @@
 import { authApi } from "@/lib/api-client";
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROUTES } from "../../routes/constants";
+import { Button } from "react-day-picker";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -672,9 +673,13 @@ const OrDivider: React.FC = () => (
 const PrivacyPolicyLink: React.FC = () => (
   <p style={styles.privacyPolicy}>
     By continuing, you agree to our{" "}
-    <Link to="/privacy-policy" style={styles.privacyLink}>
+    <button
+      onClick={() => window.open(ROUTES.PRIVACY_POLICY, "_blank")}
+      style={styles.privacyLink}
+      className="cursor-pointer border-none bg-transparent p-0"
+    >
       Privacy Policy
-    </Link>
+    </button>
   </p>
 );
 
