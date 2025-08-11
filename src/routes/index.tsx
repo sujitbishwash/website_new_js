@@ -23,6 +23,7 @@ import SubscriptionPage from "../pages/new/SubscriptionPage";
 import TestConfigurationPage from "../pages/new/TestConfigurationPage";
 import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
+import ExamsPage from "@/pages/new/ExamsPage";
 
 // Route configuration object for easy maintenance
 export const routes = [
@@ -133,7 +134,7 @@ export const routes = [
       },
       {
         path: "exams",
-        element: <ComingSoonPage />,
+        element: <ExamsPage />,
         name: "Exams Page",
         description: "Exams Page",
       },

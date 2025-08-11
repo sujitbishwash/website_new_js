@@ -441,7 +441,7 @@ export default function YouTubeSourceDialog() {
   );
 }
 
-const getRandomItems = (
+export const getRandomItems = (
   array: SuggestedVideo[],
   count: number
 ): SuggestedVideo[] => {
@@ -450,7 +450,7 @@ const getRandomItems = (
 };
 
 // Fallback dummy data for suggested videos when API fails
-const fallbackSuggestedVideos: SuggestedVideo[] = [
+export const fallbackSuggestedVideos: SuggestedVideo[] = [
   {
     id: 1,
     title: "React Hooks in 10 Minutes",

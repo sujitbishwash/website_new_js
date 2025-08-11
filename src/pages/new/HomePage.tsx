@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AddSourceModal } from "../../components/YouTubeSourceDialog";
-import { ROUTES } from "../../routes/constants";
+import { AddSourceModal, fallbackSuggestedVideos, getRandomItems } from "../../components/YouTubeSourceDialog";
+import { buildVideoLearningRoute, ROUTES } from "../../routes/constants";
+import { SuggestedVideo, videoApi } from "@/lib/api-client";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -35,12 +36,6 @@ interface AttemptedTest {
   wrong: number;
 }
 
-interface SuggestedVideo {
-  id: string;
-  title: string;
-  topic: string;
-  thumbnailUrl: string;
-}
 
 interface SuggestedReading {
   id: string;
@@ -426,26 +421,6 @@ const initialAttemptedTests: AttemptedTest[] = [
   },
 ];
 
-const suggestedVideos: SuggestedVideo[] = [
-  {
-    id: "sv1",
-    title: "The Paradox of Black Holes",
-    topic: "Astrophysics",
-    thumbnailUrl: "https://placehold.co/600x400/1E293B/FFFFFF?text=Video",
-  },
-  {
-    id: "sv2",
-    title: "Machine Learning Fundamentals",
-    topic: "AI & CS",
-    thumbnailUrl: "https://placehold.co/600x400/3B291E/FFFFFF?text=Video",
-  },
-  {
-    id: "sv3",
-    title: "A Deep Dive into Neuroscience",
-    topic: "Biology",
-    thumbnailUrl: "https://placehold.co/600x400/8A2BE2/FFFFFF?text=Video",
-  },
-];
 
 const suggestedReadings: SuggestedReading[] = [
   { id: "sr1", title: "A Brief History of Time", topic: "Cosmology" },
@@ -474,6 +449,19 @@ export default function HomePage() {
     }
   };
 
+  const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
+    try {
+      //setIsLoading(true);
+
+      // If validation passes, fetch video details
+      const details = await videoApi.getVideoDetail(video.url);
+
+      navigate(buildVideoLearningRoute(details.external_source_id));
+    } catch (err: any) {
+    } finally {
+      //setIsLoading(false);
+    }
+  };
   return (
     <div className="min-h-full bg-background text-foreground font-sans p-6">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl">
@@ -516,10 +504,10 @@ export default function HomePage() {
             Recommended Videos
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {suggestedVideos.map((video) => (
+            {getRandomItems(fallbackSuggestedVideos,3).map((video) => (
               <div
                 key={video.id}
-                onClick={() => navigate(ROUTES.VIDEO_LEARNING)}
+                onClick={() => handleSuggestedVideoClick(video)}
                 className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
               >
                 <div className="relative">
