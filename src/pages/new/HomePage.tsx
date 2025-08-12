@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AddSourceModal } from "../../components/YouTubeSourceDialog";
-import { videoApi } from "../../lib/api-client";
-import { ROUTES } from "../../routes/constants";
+import { AddSourceModal, fallbackSuggestedVideos, getRandomItems } from "../../components/YouTubeSourceDialog";
+import { buildVideoLearningRoute, ROUTES } from "../../routes/constants";
+import { SuggestedVideo, videoApi } from "@/lib/api-client";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -36,15 +36,6 @@ interface AttemptedTest {
   wrong: number;
 }
 
-interface SuggestedVideo {
-  id: number;
-  title: string;
-  topic: string;
-  thumbnailUrl: string;
-  url: string;
-  description?: string;
-  tags?: string[];
-}
 
 interface SuggestedReading {
   id: string;
@@ -280,7 +271,7 @@ const PaintBrushIcon: React.FC<IconProps> = ({ className }) => (
     <path
       strokeLinecap="round"
       strokeLinejoin="round"
-      d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.433 2.433c-.498 0-.974-.196-1.32-.546a3 3 0 010-4.243 3 3 0 014.242 0l.827.827a3 3 0 004.242 0l.827-.827a3 3 0 014.242 0l.827.827a3 3 0 004.242 0l.827-.827a3 3 0 010 4.243 3 3 0 01-4.243 0l-.827-.827a3 3 0 00-4.242 0l-.827.827a3 3 0 01-4.242 0l-.827-.827a3 3 0 00-4.242 0z"
+      d="M9.53 16.122a3 3 0 00-5.78 1.128 2.25 2.25 0 01-2.433 2.433c-.498 0-.974-.196-1.32-.546a3 3 0 010-4.243 3 3 0 014.242 0l.827.827a3 3 0 004.242 0l.827-.827a3 3 0 014.242 0l.827.827a3 3 0 004.242 0l.827-.827a3 3 0 014.242 0l.827.827a3 3 0 004.242 0l.827-.827a3 3 0 010 4.243 3 3 0 01-4.243 0l-.827-.827a3 3 0 00-4.242 0l-.827.827a3 3 0 01-4.242 0l-.827-.827a3 3 0 00-4.242 0z"
     />
   </svg>
 );
@@ -430,7 +421,6 @@ const initialAttemptedTests: AttemptedTest[] = [
   },
 ];
 
-// Removed dummy data - will be fetched from API
 
 const suggestedReadings: SuggestedReading[] = [
   { id: "sr1", title: "A Brief History of Time", topic: "Cosmology" },
@@ -448,8 +438,6 @@ const suggestedTests: SuggestedTest[] = [
 export default function HomePage() {
   const [learningItems, setLearningItems] = useState(initialLearningItems);
   const [attemptedTests, setAttemptedTests] = useState(initialAttemptedTests);
-  const [suggestedVideos, setSuggestedVideos] = useState<SuggestedVideo[]>([]);
-  const [isLoadingVideos, setIsLoadingVideos] = useState(true);
   const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -461,66 +449,19 @@ export default function HomePage() {
     }
   };
 
-  const handleVideoClick = (video: SuggestedVideo) => {
-    // Navigate to video learning page with video details
-    navigate(`${ROUTES.VIDEO_LEARNING}/${video.id}`, { state: { video } });
+  const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
+    try {
+      //setIsLoading(true);
+
+      // If validation passes, fetch video details
+      const details = await videoApi.getVideoDetail(video.url);
+
+      navigate(buildVideoLearningRoute(details.external_source_id));
+    } catch (err: any) {
+    } finally {
+      //setIsLoading(false);
+    }
   };
-
-  // Fetch suggested videos on component mount
-  useEffect(() => {
-    const fetchSuggestedVideos = async () => {
-      try {
-        setIsLoadingVideos(true);
-        const videos = await videoApi.getSuggestedVideos();
-        setSuggestedVideos(videos);
-      } catch (error) {
-        console.error("Error fetching suggested videos:", error);
-        // Set empty array on error
-        setSuggestedVideos([]);
-      } finally {
-        setIsLoadingVideos(false);
-      }
-    };
-
-    fetchSuggestedVideos();
-  }, []);
-
-  // Function to retry fetching videos (with cache)
-  const retryFetchVideos = () => {
-    const fetchSuggestedVideos = async () => {
-      try {
-        setIsLoadingVideos(true);
-        const videos = await videoApi.getSuggestedVideos();
-        setSuggestedVideos(videos);
-      } catch (error) {
-        console.error("Error fetching suggested videos:", error);
-        setSuggestedVideos([]);
-      } finally {
-        setIsLoadingVideos(false);
-      }
-    };
-
-    fetchSuggestedVideos();
-  };
-
-  // Function to force refresh (ignore cache)
-  const forceRefreshVideos = () => {
-    const fetchSuggestedVideos = async () => {
-      try {
-        setIsLoadingVideos(true);
-        const videos = await videoApi.getSuggestedVideosFresh();
-        setSuggestedVideos(videos);
-      } catch (error) {
-        console.error("Error fetching suggested videos:", error);
-        setSuggestedVideos([]);
-      } finally {
-        setIsLoadingVideos(false);
-      }
-    };
-
-    fetchSuggestedVideos();
-  };
-
   return (
     <div className="min-h-full bg-background text-foreground font-sans p-6">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl">
@@ -562,67 +503,32 @@ export default function HomePage() {
           <h2 className="text-2xl font-bold text-foreground mb-5">
             Recommended Videos
           </h2>
-          {isLoadingVideos ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="bg-muted h-36 rounded-lg mb-4"></div>
-                  <div className="bg-muted h-4 rounded mb-2"></div>
-                  <div className="bg-muted h-3 rounded w-1/2"></div>
-                </div>
-              ))}
-            </div>
-          ) : suggestedVideos.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {suggestedVideos.map((video) => (
-                <div
-                  key={video.id}
-                  onClick={() => handleVideoClick(video)}
-                  className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
-                >
-                  <div className="relative">
-                    <img
-                      src={
-                        video.thumbnailUrl ||
-                        "https://placehold.co/600x400/1E293B/FFFFFF?text=Video"
-                      }
-                      alt={video.title}
-                      className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                      <PlayCircleIcon className="h-12 w-12 text-primary group-hover:scale-110 transition-all duration-300" />
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h4 className="font-semibold text-foreground truncate">
-                      {video.title}
-                    </h4>
-                    <p className="text-xs text-muted-foreground">
-                      {video.topic}
-                    </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {getRandomItems(fallbackSuggestedVideos,3).map((video) => (
+              <div
+                key={video.id}
+                onClick={() => handleSuggestedVideoClick(video)}
+                className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
+              >
+                <div className="relative">
+                  <img
+                    src={video.thumbnailUrl}
+                    alt={video.title}
+                    className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                    <PlayCircleIcon className="h-12 w-12 text-primary group-hover:scale-110 transition-all duration-300" />
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <p>No recommended videos available at the moment.</p>
-              <div className="flex gap-3 justify-center mt-4">
-                <button
-                  onClick={retryFetchVideos}
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-                >
-                  Retry
-                </button>
-                <button
-                  onClick={forceRefreshVideos}
-                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors"
-                >
-                  Force Refresh
-                </button>
+                <div className="p-4">
+                  <h4 className="font-semibold text-foreground truncate">
+                    {video.title}
+                  </h4>
+                  <p className="text-xs text-muted-foreground">{video.topic}</p>
+                </div>
               </div>
-            </div>
-          )}
+            ))}
+          </div>
         </div>
 
         {/* Recommended Reading Card */}

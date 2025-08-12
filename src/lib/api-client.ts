@@ -63,13 +63,13 @@ export const apiRequest = async <T>(
 // Auth related API calls
 export const authApi = {
   sendOtp: async (email: string) => {
-    return apiRequest<{ data: string }>('POST', '/ums/send-otp', {
+    return apiRequest<{ success: boolean; message: string }>('POST', '/auth/send-otp', {
       email,
     });
   },
 
   verifyOtp: async (email: string, otp: string) => {
-    return apiRequest<{ access_token: string }>('POST', '/ums/verifi-otp', {
+    return apiRequest<{ access_token: string; success: boolean; message: string }>('POST', '/auth/verify-otp', {
       email,
       otp,
     });
@@ -129,6 +129,14 @@ export const examGoalApi = {
       }
     });
   },
+  getUserExamGoal: async () => {
+    const token = localStorage.getItem('authToken');
+    return apiRequest<{ success: boolean; data: { exam: string; group_type: string } | null }>('GET', '/exam-goal/user', undefined, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  }
 };
 
 export interface VideoDetail {
@@ -192,37 +200,12 @@ export const videoApi = {
     return response.json();
   },
 
-  getSuggestedVideos: async (cacheDuration: number = 30 * 60 * 1000): Promise<SuggestedVideo[]> => {
+  getSuggestedVideos: async (): Promise<SuggestedVideo[]> => {
     const token = localStorage.getItem('authToken');
     if (!token) {
       throw new Error('No authentication token found');
     }
 
-    // Check cache first
-    const cacheKey = 'suggestedVideos_cache';
-    const cachedData = localStorage.getItem(cacheKey);
-
-    if (cachedData) {
-      try {
-        const { data, timestamp } = JSON.parse(cachedData);
-        const now = Date.now();
-
-        // Check if cache is still valid
-        if (now - timestamp < cacheDuration) {
-          console.log('Using cached suggested videos');
-          return data;
-        } else {
-          console.log('Cache expired, fetching fresh data');
-          localStorage.removeItem(cacheKey);
-        }
-      } catch (error) {
-        console.warn('Failed to parse cached data, fetching fresh data');
-        localStorage.removeItem(cacheKey);
-      }
-    }
-
-    // Fetch fresh data from API
-    console.log('Fetching suggested videos from API');
     const response = await fetch(`${API_CONFIG.baseURL}/video/suggested`, {
       method: 'GET',
       headers: {
@@ -236,45 +219,7 @@ export const videoApi = {
       throw new Error(errorData.detail || 'Failed to fetch suggested videos');
     }
 
-    const result = await response.json();
-
-    // Handle the actual API response structure: { suggested: [...] }
-    if (result.suggested && Array.isArray(result.suggested)) {
-      // Transform the API response to match our interface
-      const transformedVideos = result.suggested.map((video: any) => ({
-        id: video.video_id, // Map video_id to id
-        title: video.title,
-        topic: video.channel_title || 'General', // Use channel_title as topic
-        thumbnailUrl: video.thumbnail, // Map thumbnail to thumbnailUrl
-        url: video.url,
-        description: video.channel_title, // Use channel_title as description
-        tags: [video.source_for] // Use source_for as tags
-      }));
-
-      // Cache the transformed data
-      const cacheData = {
-        data: transformedVideos,
-        timestamp: Date.now()
-      };
-      localStorage.setItem(cacheKey, JSON.stringify(cacheData));
-
-      return transformedVideos;
-    }
-
-    // Fallback to empty array if structure is unexpected
-    return [];
-  },
-
-  // Method to clear cache manually if needed
-  clearSuggestedVideosCache: () => {
-    localStorage.removeItem('suggestedVideos_cache');
-    console.log('Suggested videos cache cleared');
-  },
-
-  // Method to force refresh (ignore cache)
-  getSuggestedVideosFresh: async (): Promise<SuggestedVideo[]> => {
-    localStorage.removeItem('suggestedVideos_cache');
-    return videoApi.getSuggestedVideos();
+    return response.json();
   },
 
   getVideoChapters: async (videoId: string): Promise<VideoChaptersResponse> => {

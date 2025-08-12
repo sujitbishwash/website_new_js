@@ -141,17 +141,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkExamGoal = async (): Promise<boolean> => {
     try {
       setExamGoalLoading(true);
-      console.log("Checking exam goal...");
-      const { authApi } = await import("../lib/api-client");
-      const response = await authApi.getAuthenticatedUser();
-      console.log("Exam goal API response:", response);
+      const { examGoalApi } = await import("../lib/api-client");
+      const response = await examGoalApi.getUserExamGoal();
 
       if (response.data.success && response.data.data) {
-        console.log("User has exam goal:", response.data.data);
         setHasExamGoal(true);
         return true;
       } else {
-        console.log("User does not have exam goal");
         setHasExamGoal(false);
         return false;
       }

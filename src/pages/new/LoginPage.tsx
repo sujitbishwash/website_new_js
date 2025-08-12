@@ -401,8 +401,6 @@ const LoginCard: React.FC = () => {
     (location.state as { from?: { pathname: string } })?.from?.pathname ||
     ROUTES.DASHBOARD;
 
-  console.log("Return URL (from):", from);
-
   const validateEmail = (email: string): boolean => {
     const re =
       /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -428,27 +426,28 @@ const LoginCard: React.FC = () => {
         return;
       }
 
+      /*
       // Call the API to send OTP
-      console.log("Sending OTP to:", email);
       const response = await authApi.sendOtp(email);
-      console.log("Send OTP response:", response);
 
-      if (response.data && response.data.data) {
-        setSuccess(response.data.data);
+      if (response.data.success) {
+        setSuccess("OTP sent successfully! Please check your email.");
         setOtpSent(true);
       } else {
-        setError(response.message || "Failed to send OTP. Please try again.");
+        setError(
+          response.data.message || "Failed to send OTP. Please try again."
+        );
       }
-
+      */
       //  its a dummy code need to be removed when apui ready
-      // setTimeout(() => {
-      //   setOtpSent(true);
-      //   setIsLoading(false);
-      // }, 1000);
+      setTimeout(() => {
+        setOtpSent(true);
+        setIsLoading(false);
+      }, 1000);
     } catch (err: any) {
       setError(err.message || "Failed to send OTP. Please try again.");
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
@@ -465,50 +464,44 @@ const LoginCard: React.FC = () => {
       }
 
       // Call the API to verify OTP
-      console.log("Verifying OTP for:", email);
+      /*
       const response = await authApi.verifyOtp(email, finalOtp);
-      console.log("Verify OTP response:", response);
 
-      if (response.data && response.data.access_token) {
-        // Store the token in localStorage (store in both places for consistency)
+      if (response.data.success) {
+        // Store the token in localStorage
         localStorage.setItem("authToken", response.data.access_token);
-        localStorage.setItem("access_token", response.data.access_token);
 
         setSuccess("Login successful! Redirecting...");
 
-        // Use the auth context to login with the verified token
+        
+      } else {
+        setError(response.data.message || "Invalid OTP. Please try again.");
+      }
+        */
+
+      // Navigate to appropriate page after a short delay
+      setTimeout(async () => {
+        // dummy code need to be removed when api is ready
+        const response = await authApi.login(email, "securepassword");
+
+        // Use the auth context to login
         login(response.data.access_token, { email });
 
-        // Add a small delay to ensure the auth context is updated
-        setTimeout(async () => {
-          try {
-            // Check if user has exam goal and navigate accordingly
-            const hasGoal = await checkExamGoal();
-            console.log("Exam goal check result:", hasGoal);
-
-            if (hasGoal) {
-              // User has exam goal, navigate to return URL or dashboard
-              console.log("Navigating to dashboard:", from);
-              navigate(from);
-            } else {
-              // User doesn't have exam goal, navigate to exam goal page
-              console.log("Navigating to exam goal page");
-              navigate(ROUTES.EXAM_GOAL);
-            }
-          } catch (error) {
-            console.error("Error during navigation:", error);
-            // Fallback navigation
-            navigate(ROUTES.EXAM_GOAL);
-          }
-        }, 500);
-      } else {
-        setError(response.message || "Invalid OTP. Please try again.");
-        return;
-      }
+        // Check if user has exam goal and navigate accordingly
+        const hasGoal = await checkExamGoal();
+        if (hasGoal) {
+          // User has exam goal, navigate to return URL or dashboard
+          navigate(from);
+        } else {
+          // User doesn't have exam goal, navigate to exam goal page
+          navigate(ROUTES.EXAM_GOAL);
+        }
+        setIsLoading(false);
+      }, 1000);
     } catch (err: any) {
       setError(err.message || "Failed to verify OTP. Please try again.");
     } finally {
-      setIsLoading(false);
+      // setIsLoading(false);
     }
   };
 
