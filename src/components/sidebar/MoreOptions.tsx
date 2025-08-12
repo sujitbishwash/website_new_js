@@ -67,7 +67,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-
+  ///yo
   const handleProfileClick = () => {
     onProfileClick();
     setMenuOpen(false);
@@ -85,6 +85,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const handleTermsOfUseClick = () => {
     window.open(ROUTES.TERMS_AND_CONDITIONS, "_blank");
   };
+
   const menuOptions: MenuItem[] = [
     {
       icon: (

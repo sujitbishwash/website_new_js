@@ -3,6 +3,7 @@ import AuthCallbackPage from "@/pages/new/AuthCallbackPage";
 import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
 import ExamGoalPage from "@/pages/new/ExamGoalPage";
+import ExamsPage from "@/pages/new/ExamsPage";
 import LoginPage from "@/pages/new/LoginPage";
 import PersonalDetails from "@/pages/new/PersonalDetails";
 import PrivacyPolicy from "@/pages/new/PrivacyPolicy";
@@ -24,7 +25,6 @@ import SubscriptionPage from "../pages/new/SubscriptionPage";
 import TestConfigurationPage from "../pages/new/TestConfigurationPage";
 import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
-import ExamsPage from "@/pages/new/ExamsPage";
 
 // Route configuration object for easy maintenance
 export const routes = [
@@ -186,6 +186,18 @@ export const routes = [
     element: <NotFoundPage />,
     name: "Not Found",
     description: "Page not found",
+  },
+  {
+    path: "privacy-policy",
+    element: <PrivacyPolicy />,
+    name: "Privacy Policy",
+    description: "Privacy Policy",
+  },
+  {
+    path: "terms-and-conditions",
+    element: <TermsAndConditions />,
+    name: "Terms and Conditions",
+    description: "Terms and Conditions",
   },
 ];
 
