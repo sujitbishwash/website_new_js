@@ -492,8 +492,11 @@ const LoginCard: React.FC = () => {
       // Call the API to verify OTP
       const response = await authApi.verifyOtp(email, finalOtp);
 
-      // Store the token in localStorage
+      // Store the token in localStorage and update auth context
       localStorage.setItem("authToken", response.data.access_token);
+
+      // Update the auth context to mark user as authenticated
+      login(response.data.access_token, { email });
 
       setSuccess("Login successful! Redirecting...");
 
