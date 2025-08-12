@@ -12,8 +12,7 @@ import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/Layout";
 import ProtectedRoute from "../components/ProtectedRoute";
-import Chat from "../components/to-be-deleted/Chat";
-import Flashcards from "../components/to-be-deleted/Flashcards";
+
 import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
 import ExamInformationPage from "../pages/new/ExamInformationPage";
 import ExamReconfirmationPage from "../pages/new/ExamReconfirmationPage";
@@ -98,13 +97,13 @@ export const routes = [
       },
       {
         path: "chat",
-        element: <Chat />,
+        element: <ComingSoonPage />,
         name: "Chat",
         description: "Chat interface",
       },
       {
         path: "flashcards",
-        element: <Flashcards />,
+        element: <ComingSoonPage />,
         name: "Flashcards",
         description: "Flashcard learning interface",
       },
@@ -186,18 +185,6 @@ export const routes = [
     element: <NotFoundPage />,
     name: "Not Found",
     description: "Page not found",
-  },
-  {
-    path: "privacy-policy",
-    element: <PrivacyPolicy />,
-    name: "Privacy Policy",
-    description: "Privacy Policy",
-  },
-  {
-    path: "terms-and-conditions",
-    element: <TermsAndConditions />,
-    name: "Terms and Conditions",
-    description: "Terms and Conditions",
   },
 ];
 

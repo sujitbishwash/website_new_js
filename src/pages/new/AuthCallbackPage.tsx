@@ -31,45 +31,51 @@ const AuthCallbackPage: React.FC = () => {
           localStorage.setItem("authToken", data.session.access_token);
 
           try {
-            // Check if user has name and exam goal
-            const [userDetailsResponse, examGoalResponse] = await Promise.all([
-              authApi.getUserDetails(),
-              authApi.getAuthenticatedUser(),
-            ]);
-
-            console.log("User details response:", userDetailsResponse);
+            // Check if user has name and exam goal using the /ums/me endpoint
+            const examGoalResponse = await authApi.getAuthenticatedUser();
             console.log("Exam goal response:", examGoalResponse);
-
-            // Check if name is missing
-            const hasName =
-              userDetailsResponse.data?.data?.name &&
-              userDetailsResponse.data.data.name.trim() !== "";
 
             // Check if user has exam goal
             const hasExamGoal =
               examGoalResponse.data?.success &&
               examGoalResponse.data.data !== null;
-
-            console.log("Has name:", hasName);
             console.log("Has exam goal:", hasExamGoal);
 
             // Determine redirect based on user state
-            if (!hasName) {
-              // User needs to complete personal details
-              console.log("Redirecting to personal details page");
-              navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
-            } else if (!hasExamGoal) {
-              // User has name but no exam goal
-              console.log("Redirecting to exam goal page");
-              navigate(ROUTES.EXAM_GOAL, { replace: true });
-            } else {
-              // User has both name and exam goal
-              console.log("Redirecting to dashboard");
+            if (hasExamGoal) {
+              // User has both name and exam goal, go directly to dashboard
+              console.log("User has exam goal, redirecting to dashboard");
               navigate(ROUTES.DASHBOARD, { replace: true });
+            } else {
+              // User doesn't have exam goal, check if they have a name
+              try {
+                const userDetailsResponse = await authApi.getUserDetails();
+                console.log("User details response:", userDetailsResponse);
+
+                // Check if name is missing
+                const hasName =
+                  userDetailsResponse.data?.data?.name &&
+                  userDetailsResponse.data.data.name.trim() !== "";
+                console.log("Has name:", hasName);
+
+                if (!hasName) {
+                  // User needs to complete personal details
+                  console.log("Redirecting to personal details page");
+                  navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+                } else {
+                  // User has name but no exam goal
+                  console.log("Redirecting to exam goal page");
+                  navigate(ROUTES.EXAM_GOAL, { replace: true });
+                }
+              } catch (userDetailsError) {
+                console.error("Error checking user details:", userDetailsError);
+                // Fallback to personal details page if user details API fails
+                navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+              }
             }
           } catch (error) {
-            console.error("Error checking user details:", error);
-            // Fallback to personal details page if API calls fail
+            console.error("Error checking exam goal:", error);
+            // Fallback to personal details page if exam goal API fails
             navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
           }
         } else {
