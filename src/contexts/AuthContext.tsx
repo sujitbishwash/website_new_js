@@ -14,10 +14,13 @@ interface AuthContextType {
   isLoading: boolean;
   hasExamGoal: boolean;
   examGoalLoading: boolean;
+  hasName: boolean;
+  nameLoading: boolean;
   login: (token: string, userData?: Partial<User>) => void;
   logout: () => void;
   checkAuth: () => Promise<boolean>;
   checkExamGoal: () => Promise<boolean>;
+  checkUserDetails: () => Promise<boolean>;
   signInWithGoogle: () => Promise<{ data: any; error: any }>;
 }
 
@@ -40,6 +43,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [hasExamGoal, setHasExamGoal] = useState(false);
   const [examGoalLoading, setExamGoalLoading] = useState(false);
+  const [hasName, setHasName] = useState(false);
+  const [nameLoading, setNameLoading] = useState(false);
 
   // Convert Supabase user to our User interface
   const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
@@ -115,6 +120,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // Clear state immediately
     setUser(null);
     setHasExamGoal(false);
+    setHasName(false);
 
     // Clear localStorage
     localStorage.removeItem("authToken");
@@ -158,6 +164,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  const checkUserDetails = async (): Promise<boolean> => {
+    try {
+      setNameLoading(true);
+      console.log("Checking user details...");
+      const { authApi } = await import("../lib/api-client");
+      const response = await authApi.getUserDetails();
+      console.log("User details API response:", response);
+
+      if (response.data?.data?.name && response.data.data.name.trim() !== "") {
+        console.log("User has name:", response.data.data.name);
+        setHasName(true);
+        return true;
+      } else {
+        console.log("User does not have name");
+        setHasName(false);
+        return false;
+      }
+    } catch (error) {
+      console.error("Error checking user details:", error);
+      setHasName(false);
+      return false;
+    } finally {
+      setNameLoading(false);
+    }
+  };
+
   useEffect(() => {
     const initializeAuth = async () => {
       await checkAuth();
@@ -173,10 +205,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     isLoading,
     hasExamGoal,
     examGoalLoading,
+    hasName,
+    nameLoading,
     login,
     logout,
     checkAuth,
     checkExamGoal,
+    checkUserDetails,
     signInWithGoogle,
   };
 

@@ -31,6 +31,7 @@ export const ROUTES = {
 
     // Auth routes
     LOGIN: "/login",
+    PERSONAL_DETAILS: "/personal-details",
     EXAM_GOAL: "/exam-goal",
 
     // policy routes
@@ -59,6 +60,7 @@ export const ROUTE_NAMES = {
     [ROUTES.ATTEMPTED_TESTS]: "Attempted Tests",
     [ROUTES.EXAMS]: "Exams",
     [ROUTES.LOGIN]: "Login",
+    [ROUTES.PERSONAL_DETAILS]: "Personal Details",
     [ROUTES.EXAM_GOAL]: "Exam Goal",
     [ROUTES.PRIVACY_POLICY]: "Privacy Policy",
     [ROUTES.TERMS_AND_CONDITIONS]: "Terms and Conditions",

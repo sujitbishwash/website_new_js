@@ -90,6 +90,15 @@ export const authApi = {
         Authorization: `Bearer ${token}`
       }
     });
+  },
+
+  getUserDetails: async () => {
+    const token = localStorage.getItem('authToken');
+    return apiRequest<{ success: boolean; data: { name?: string; email: string; id: string } | null }>('GET', '/ums/user-details', undefined, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
   }
 };
 

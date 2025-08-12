@@ -4,6 +4,7 @@ import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
 import ExamGoalPage from "@/pages/new/ExamGoalPage";
 import LoginPage from "@/pages/new/LoginPage";
+import PersonalDetails from "@/pages/new/PersonalDetails";
 import PrivacyPolicy from "@/pages/new/PrivacyPolicy";
 import TermsAndConditions from "@/pages/new/TermsAndConditions";
 import VideoPage from "@/pages/new/VideoPage";
@@ -138,6 +139,12 @@ export const routes = [
         description: "Exams Page",
       },
       {
+        path: "personal-details",
+        element: <PersonalDetails />,
+        name: "Personal Details",
+        description: "User personal details page",
+      },
+      {
         path: "exam-goal",
         element: <ExamGoalPage />,
         name: "Exam Goal",
@@ -164,6 +171,7 @@ export const routes = [
     name: "Login",
     description: "User authentication page",
   },
+
   {
     path: "auth/callback",
     element: <AuthCallbackPage />,

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { authApi } from "../../lib/api-client";
 import { supabase } from "../../lib/supabase";
 import { ROUTES } from "../../routes/constants";
 
@@ -26,9 +27,51 @@ const AuthCallbackPage: React.FC = () => {
           // Successfully authenticated
           console.log("User authenticated:", data.session.user);
 
-          // Redirect to dashboard or exam goal page
-          // You can add logic here to check if user has exam goal
-          navigate(ROUTES.DASHBOARD, { replace: true });
+          // Store the token for API calls
+          localStorage.setItem("authToken", data.session.access_token);
+
+          try {
+            // Check if user has name and exam goal
+            const [userDetailsResponse, examGoalResponse] = await Promise.all([
+              authApi.getUserDetails(),
+              authApi.getAuthenticatedUser(),
+            ]);
+
+            console.log("User details response:", userDetailsResponse);
+            console.log("Exam goal response:", examGoalResponse);
+
+            // Check if name is missing
+            const hasName =
+              userDetailsResponse.data?.data?.name &&
+              userDetailsResponse.data.data.name.trim() !== "";
+
+            // Check if user has exam goal
+            const hasExamGoal =
+              examGoalResponse.data?.success &&
+              examGoalResponse.data.data !== null;
+
+            console.log("Has name:", hasName);
+            console.log("Has exam goal:", hasExamGoal);
+
+            // Determine redirect based on user state
+            if (!hasName) {
+              // User needs to complete personal details
+              console.log("Redirecting to personal details page");
+              navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+            } else if (!hasExamGoal) {
+              // User has name but no exam goal
+              console.log("Redirecting to exam goal page");
+              navigate(ROUTES.EXAM_GOAL, { replace: true });
+            } else {
+              // User has both name and exam goal
+              console.log("Redirecting to dashboard");
+              navigate(ROUTES.DASHBOARD, { replace: true });
+            }
+          } catch (error) {
+            console.error("Error checking user details:", error);
+            // Fallback to personal details page if API calls fail
+            navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+          }
         } else {
           // No session found
           setError("No authentication session found.");
