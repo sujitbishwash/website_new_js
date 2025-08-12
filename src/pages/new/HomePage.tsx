@@ -485,12 +485,30 @@ export default function HomePage() {
     fetchSuggestedVideos();
   }, []);
 
-  // Function to retry fetching videos
+  // Function to retry fetching videos (with cache)
   const retryFetchVideos = () => {
     const fetchSuggestedVideos = async () => {
       try {
         setIsLoadingVideos(true);
         const videos = await videoApi.getSuggestedVideos();
+        setSuggestedVideos(videos);
+      } catch (error) {
+        console.error("Error fetching suggested videos:", error);
+        setSuggestedVideos([]);
+      } finally {
+        setIsLoadingVideos(false);
+      }
+    };
+
+    fetchSuggestedVideos();
+  };
+
+  // Function to force refresh (ignore cache)
+  const forceRefreshVideos = () => {
+    const fetchSuggestedVideos = async () => {
+      try {
+        setIsLoadingVideos(true);
+        const videos = await videoApi.getSuggestedVideosFresh();
         setSuggestedVideos(videos);
       } catch (error) {
         console.error("Error fetching suggested videos:", error);
@@ -589,12 +607,20 @@ export default function HomePage() {
           ) : (
             <div className="text-center py-8 text-muted-foreground">
               <p>No recommended videos available at the moment.</p>
-              <button
-                onClick={retryFetchVideos}
-                className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
-              >
-                Retry
-              </button>
+              <div className="flex gap-3 justify-center mt-4">
+                <button
+                  onClick={retryFetchVideos}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                >
+                  Retry
+                </button>
+                <button
+                  onClick={forceRefreshVideos}
+                  className="px-4 py-2 bg-secondary text-secondary-foreground rounded-md hover:bg-secondary/90 transition-colors"
+                >
+                  Force Refresh
+                </button>
+              </div>
             </div>
           )}
         </div>
