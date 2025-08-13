@@ -1,5 +1,6 @@
 import { theme } from "@/styles/theme";
 import React, { useEffect, useMemo, useState } from "react";
+import { useUser } from "../../contexts/UserContext";
 
 //==============================================================================
 // 1. TYPE DEFINITIONS (TypeScript)
@@ -76,8 +77,8 @@ interface PageData {
 //==============================================================================
 // 2. MOCK DATA
 //==============================================================================
-const analysisData: PageData = {
-  user: { name: "Alex" },
+const createAnalysisData = (userName: string): PageData => ({
+  user: { name: userName },
   tests: [
     {
       id: "test1",
@@ -400,7 +401,7 @@ const analysisData: PageData = {
       description: "Sharpen your skills in manipulating expressions.",
     },
   ],
-};
+});
 
 //==============================================================================
 // 3. THEME & STYLES
@@ -1319,6 +1320,7 @@ const TestHistoryList: React.FC<{
 const AttemptedTests = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [selectedTest, setSelectedTest] = useState<TestData | null>(null);
+  const { profile } = useUser();
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -1326,6 +1328,7 @@ const AttemptedTests = () => {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  const analysisData = createAnalysisData(profile?.name || "User");
   const { user, tests, availableTests } = analysisData;
 
   return (

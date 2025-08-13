@@ -1,6 +1,7 @@
-import { ROUTES } from "@/routes/constants";
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useUser } from "../../contexts/UserContext";
+import { ROUTES } from "../../routes/constants";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -215,14 +216,16 @@ const CongratulationsCard: React.FC<CongratulationsCardProps> = ({
 
 const PaymentSuccessPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { profile } = useUser();
   const paymentData = location.state as {
     amount?: number;
     planType?: string;
     recipient?: string;
   } | null;
 
-  // Use data from navigation state or fallback to defaults
-  const [userName] = useState<string>(paymentData?.recipient || "Learner");
+  // Use real user data from context, fallback to navigation state, then defaults
+  const userName = profile?.name || paymentData?.recipient || "Learner";
   const [planType, setPlanType] = useState<string | null>(
     paymentData?.planType || null
   );

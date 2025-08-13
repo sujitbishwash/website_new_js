@@ -1,5 +1,4 @@
 import {
-  Award,
   Book,
   ChevronsLeft,
   Clock,
@@ -25,6 +24,7 @@ interface SidebarProps {
   onLogoutClick: () => void;
   onProfileClick: () => void;
   onUpgradeClick: () => void;
+  onExamConfigurationClick: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -35,6 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onLogoutClick,
   onProfileClick,
   onUpgradeClick,
+  onExamConfigurationClick,
 }) => {
   const location = useLocation();
 
@@ -182,6 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           onLogoutClick={onLogoutClick}
           onProfileClick={onProfileClick}
           onUpgradeClick={onUpgradeClick}
+          onExamConfigurationClick={onExamConfigurationClick}
         />
       </aside>
     </>

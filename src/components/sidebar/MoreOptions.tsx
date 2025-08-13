@@ -1,6 +1,7 @@
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import React, { useEffect, useRef, useState } from "react";
+import { useUser } from "@/contexts/UserContext";
 
 // --- TYPE DEFINITIONS ---
 type MenuItem = {
@@ -40,6 +41,7 @@ interface ProfileMenuProps {
   onLogoutClick: () => void;
   onProfileClick: () => void;
   onUpgradeClick: () => void;
+  onExamConfigurationClick: () => void;
 }
 
 const ProfileMenu: React.FC<ProfileMenuProps> = ({
@@ -47,10 +49,22 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onLogoutClick,
   onProfileClick,
   onUpgradeClick,
+  onExamConfigurationClick,
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { profile, isLoading, error } = useUser();
+
+  // Debug logging
+  console.log('MoreOptions - Profile:', profile);
+  console.log('MoreOptions - Loading:', isLoading);
+  console.log('MoreOptions - Error:', error);
+
+  const handleExamConfigurationClick = () => {
+    onExamConfigurationClick();
+    setMenuOpen(false);
+  };
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -93,6 +107,13 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
       ),
       label: "Settings",
       action: handleProfileClick,
+    },
+    {
+      icon: (
+        <Icon path="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      ),
+      label: "Exam Configuration",
+      action: handleExamConfigurationClick,
     },
     {
       icon: (
@@ -172,9 +193,11 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
               isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
             }`}
           >
-            <p className="font-medium text-muted-foreground">nikk070@yoyo</p>
+            <p className="font-medium text-muted-foreground">
+              {isLoading ? "Loading..." : profile?.email || "user@example.com"}
+            </p>
             <p className="font-medium text-muted-foreground text-xs">
-              Free Plan
+              {error ? "Error loading profile" : "Free Plan"}
             </p>
           </div>
         </div>
@@ -294,21 +317,23 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             )}
           </div>
         </div>
-      )}
-    </div>
-  );
-};
+             )}
+     </div>
+   );
+ };
 
 const Moreoptions = ({
   isContracted,
   onLogoutClick,
   onProfileClick,
   onUpgradeClick,
+  onExamConfigurationClick,
 }: {
   isContracted: boolean;
   onLogoutClick: () => void;
   onProfileClick: () => void;
   onUpgradeClick: () => void;
+  onExamConfigurationClick: () => void;
 }) => {
   return (
     // Set the background on the main container
@@ -329,12 +354,13 @@ const Moreoptions = ({
           .animate-fade-in-up { animation: fade-in-up 0.2s ease-out; }
         `}</style>
       <div>
-        <ProfileMenu
-          isContracted={isContracted}
-          onLogoutClick={onLogoutClick}
-          onProfileClick={onProfileClick}
-          onUpgradeClick={onUpgradeClick}
-        />
+                 <ProfileMenu
+           isContracted={isContracted}
+           onLogoutClick={onLogoutClick}
+           onProfileClick={onProfileClick}
+           onUpgradeClick={onUpgradeClick}
+           onExamConfigurationClick={onExamConfigurationClick}
+         />
       </div>
     </div>
   );

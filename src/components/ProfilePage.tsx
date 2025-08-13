@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useUser } from "../contexts/UserContext";
 
 //import { useNavigate } from "react-router-dom";
 
@@ -164,17 +165,17 @@ interface NotificationSettingRowProps {
 }
 
 // --- MOCK DATA & CONSTANTS ---
-const initialUserProfile: UserProfile = {
-  name: "Alex Doe",
-  email: "alex.doe@example.com",
-  mobile: "+1 (555) 123-4567",
+const createInitialUserProfile = (profile: any): UserProfile => ({
+  name: profile?.name || "User",
+  email: profile?.email || "user@example.com",
+  mobile: profile?.phone || "+1 (555) 123-4567",
   address: "123 Learning Lane, Apt 4B",
   city: "Eduville",
   state: "Knowledge",
   country: "United States",
   gender: "Prefer not to say",
   dob: "1995-08-15",
-};
+});
 
 const countries = [
   "United States",
@@ -348,14 +349,15 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   onUpgradeClick,
 }) => {
-  const [userProfile, setUserProfile] =
-    useState<UserProfile>(initialUserProfile);
+  const { profile } = useUser();
+  const [userProfile, setUserProfile] = useState<UserProfile>(() =>
+    createInitialUserProfile(profile)
+  );
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("General");
   const modalRef = useRef<HTMLDivElement>(null); // Create a ref for the modal content
 
   // State for new "General" settings
-  const [theme, setTheme] = useState("Dark");
   const [accentColor, setAccentColor] = useState("#3b82f6");
   const [language, setLanguage] = useState("Auto-detect");
   const [spokenLanguage, setSpokenLanguage] = useState("Auto-detect");
@@ -392,7 +394,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   const handleClose = useCallback(() => {
     if (isEditing) {
       setIsEditing(false);
-      setUserProfile(initialUserProfile); // Reset to initial state on close if editing
+      setUserProfile(createInitialUserProfile(profile)); // Reset to initial state on close if editing
     }
     onClose();
   }, [isEditing, onClose]);
