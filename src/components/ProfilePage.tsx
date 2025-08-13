@@ -5,52 +5,13 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 // --- SVG ICON COMPONENTS ---
 // Using simple inline SVGs for icons to keep it self-contained.
 const GeneralIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path>
-    <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12z"></path>
-  </svg>
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10.323 1.627c.828 0 1.595.439 2.014 1.154l.822 1.4.053.07c.062.06.145.096.233.096l1.615.013.154.007c.768.057 1.463.49 1.85 1.164l.329.571.073.136c.315.642.318 1.395.008 2.04l-.071.136-.803 1.422a.34.34 0 0 0 0 .329l.803 1.42.071.137c.31.645.308 1.398-.008 2.04l-.073.136-.328.571a2.34 2.34 0 0 1-1.85 1.165l-.155.005-1.615.014a.34.34 0 0 0-.233.097l-.053.068-.822 1.401a2.34 2.34 0 0 1-2.014 1.155h-.647a2.33 2.33 0 0 1-1.931-1.024l-.082-.13-.822-1.402a.34.34 0 0 0-.2-.153l-.086-.012-1.615-.014A2.34 2.34 0 0 1 3.016 14.6l-.081-.13-.328-.572a2.34 2.34 0 0 1-.01-2.312l.802-1.421.033-.08a.34.34 0 0 0 0-.17l-.033-.08-.802-1.421a2.33 2.33 0 0 1 .01-2.312l.328-.571.081-.13A2.34 2.34 0 0 1 4.94 4.36l1.615-.013.086-.011a.34.34 0 0 0 .2-.155l.822-1.4.082-.13a2.34 2.34 0 0 1 1.931-1.024zm-.647 1.33c-.312 0-.603.144-.792.386l-.074.11-.821 1.401c-.26.443-.706.737-1.206.807l-.217.016-1.615.013c-.312.003-.603.15-.79.394l-.074.11-.328.571a1 1 0 0 0-.004.995l.802 1.421.095.196c.161.399.16.846 0 1.246l-.095.196-.802 1.42c-.174.31-.173.688.004.996l.328.57.075.11a1 1 0 0 0 .789.394l1.615.014.217.015c.5.07.946.366 1.206.808l.821 1.4.074.11c.189.242.48.388.792.388h.647c.356 0 .686-.19.867-.497l.821-1.4.122-.181c.31-.4.788-.639 1.301-.643l1.615-.014.132-.01c.304-.042.576-.223.732-.494l.328-.57.057-.118c.1-.243.102-.515.004-.758l-.057-.12-.803-1.42a1.67 1.67 0 0 1 0-1.638l.803-1.42.057-.12a1 1 0 0 0-.004-.758l-.057-.118-.328-.571a1 1 0 0 0-.732-.494l-.132-.01-1.615-.013a1.67 1.67 0 0 1-1.3-.642l-.123-.18-.821-1.401a1 1 0 0 0-.867-.497zM11.586 10a1.586 1.586 0 1 0-3.173 0 1.586 1.586 0 0 0 3.172 0m1.329 0a2.915 2.915 0 1 1-5.83 0 2.915 2.915 0 0 1 5.83 0" /></svg>
 );
 const AccountIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-    <circle cx="12" cy="7" r="4"></circle>
-  </svg>
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16.585 10a6.585 6.585 0 1 0-10.969 4.912A5.65 5.65 0 0 1 10 12.835c1.767 0 3.345.81 4.383 2.077A6.57 6.57 0 0 0 16.585 10M10 14.165a4.32 4.32 0 0 0-3.305 1.53c.972.565 2.1.89 3.305.89a6.55 6.55 0 0 0 3.303-.89A4.32 4.32 0 0 0 10 14.165M11.835 8.5a1.835 1.835 0 1 0-3.67 0 1.835 1.835 0 0 0 3.67 0m6.08 1.5a7.915 7.915 0 1 1-15.83 0 7.915 7.915 0 0 1 15.83 0m-4.75-1.5a3.165 3.165 0 1 1-6.33 0 3.165 3.165 0 0 1 6.33 0" /></svg>
 );
 const NotificationsIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-  </svg>
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 2.043a6.705 6.705 0 0 1 6.666 5.978l.561 5.15.009.164c0 .816-.662 1.496-1.498 1.496h-1.836a3.999 3.999 0 0 1-7.804 0H4.262a1.5 1.5 0 0 1-1.49-1.66l.562-5.15.043-.317A6.705 6.705 0 0 1 10 2.044M7.48 14.831a2.666 2.666 0 0 0 5.038 0zM10 3.373a5.375 5.375 0 0 0-5.31 4.538l-.033.254-.562 5.15c-.01.1.067.186.167.186h11.476a.17.17 0 0 0 .167-.15v-.036l-.562-5.15A5.375 5.375 0 0 0 10 3.373" /></svg>
 );
 const PersonalizationIcon = () => (
   <svg
@@ -69,35 +30,10 @@ const PersonalizationIcon = () => (
   </svg>
 );
 const SecurityIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-  </svg>
+  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 7.5h0.008M12.5 12.5a5 5 0 1 0 -4.955 -4.327c0.048 0.362 0.072 0.543 0.057 0.658a0.708 0.708 0 0 1 -0.098 0.288c-0.057 0.101 -0.156 0.2 -0.355 0.399l-4.258 4.258c-0.144 0.144 -0.217 0.217 -0.268 0.3a0.833 0.833 0 0 0 -0.1 0.242C2.5 14.413 2.5 14.515 2.5 14.719V16.167c0 0.467 0 0.7 0.091 0.878a0.833 0.833 0 0 0 0.364 0.364C3.133 17.5 3.367 17.5 3.833 17.5h1.448c0.204 0 0.306 0 0.402 -0.023a0.833 0.833 0 0 0 0.242 -0.1c0.083 -0.051 0.156 -0.123 0.3 -0.267l4.258 -4.259c0.199 -0.199 0.298 -0.298 0.4 -0.355a0.708 0.708 0 0 1 0.287 -0.098c0.115 -0.017 0.296 0.008 0.658 0.057Q12.158 12.5 12.5 12.5" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg>
 );
 const BillingIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-    <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-  </svg>
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>
 );
 const PlayIcon = () => (
   <svg
@@ -409,7 +345,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       // Ignore clicks inside Radix DropdownMenu portals or triggers
       const isInsideDropdown = Boolean(
         target.closest("[data-slot^='dropdown-menu-']") ||
-          target.closest("[data-slot='button']")
+        target.closest("[data-slot='button']")
       );
       if (isInsideDropdown) return;
 
@@ -759,11 +695,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                   <a
                     href="#"
                     onClick={() => setActiveTab(item.name)}
-                    className={`flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      activeTab === item.name
-                        ? "bg-blue-600 text-white"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white"
-                    }`}
+                    className={`flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === item.name
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      }`}
                   >
                     <item.icon />
                     {item.name}

@@ -18,6 +18,33 @@ const SubscriptionStyles = () => (
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
         Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
       color: ${theme.secondaryText};
+      position: relative; /* Added for positioning the close button */
+    }
+
+    /* --- Close Button --- */
+    .close-button {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 10px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background-color 0.2s ease-in-out;
+    }
+
+    .close-button:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .close-button svg {
+      width: 24px;
+      height: 24px;
+      color: ${theme.mutedText};
     }
 
     .subscription-container {
@@ -28,6 +55,7 @@ const SubscriptionStyles = () => (
       max-width: 600px;
       width: 100%;
       text-align: center;
+      position: relative;
     }
 
     /* --- Offer Banner --- */
@@ -204,10 +232,22 @@ const SubscriptionPage = () => {
     alert(`You have selected the ${selectedPlan} plan.`);
   };
 
+  // Function to go back to the previous page using standard browser history
+  const handleClose = () => {
+    window.history.back();
+  };
+
   return (
     <>
       <SubscriptionStyles />
       <div className="subscription-page">
+        <button className="close-button" onClick={handleClose} aria-label="Close">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
         <div className="subscription-container">
           <div className="offer-banner">
             <div className="limited-time">
