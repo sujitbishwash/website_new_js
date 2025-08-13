@@ -1,4 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -89,7 +92,7 @@ const CanvasIcon = () => (
   />
 );
 const SendIcon = () => (
-  <Icon path="M22 2L11 13 2 9l-1.5 9L22 2z" className="w-5 h-5" />
+  <Icon path="M10.3009 13.6949L20.102 3.89742M10.5795 14.1355L12.8019 18.5804C13.339 19.6545 13.6075 20.1916 13.9458 20.3356C14.2394 20.4606 14.575 20.4379 14.8492 20.2747C15.1651 20.0866 15.3591 19.5183 15.7472 18.3818L19.9463 6.08434C20.2845 5.09409 20.4535 4.59896 20.3378 4.27142C20.2371 3.98648 20.013 3.76234 19.7281 3.66167C19.4005 3.54595 18.9054 3.71502 17.9151 4.05315L5.61763 8.2523C4.48114 8.64037 3.91289 8.83441 3.72478 9.15032C3.56153 9.42447 3.53891 9.76007 3.66389 10.0536C3.80791 10.3919 4.34498 10.6605 5.41912 11.1975L9.86397 13.42C10.041 13.5085 10.1295 13.5527 10.2061 13.6118C10.2742 13.6643 10.3352 13.7253 10.3876 13.7933C10.4468 13.87 10.491 13.9585 10.5795 14.1355Z" className="w-5 h-5" />
 );
 
 // --- Components ---
@@ -138,20 +141,22 @@ const SuggestionChips: React.FC = () => {
   );
 };
 
-const Message: React.FC<MessageType> = ({ text, isUser }) => (
-  <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
-    <div
-      style={{ backgroundColor: isUser ? theme.accent : theme.cardBackground }}
-      className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
-        isUser
+const Message: React.FC<MessageType> = ({ text, isUser }) => {
+  const markdownText = text.replace(/\\n/g, '\n');
+  return (
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+      <div
+        style={{ backgroundColor: isUser ? theme.accent : theme.cardBackground }}
+        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${isUser
           ? "bg-blue-600 text-white rounded-br-none"
           : "bg-gray-700 text-gray-200 rounded-bl-none"
-      }`}
-    >
-      {text}
+          }`}
+      >
+        <MarkdownRenderer content={markdownText} />
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 const MessageList: React.FC<{ messages: MessageType[] }> = ({ messages }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -205,9 +210,8 @@ const PlanSelector: React.FC = () => {
           {selectedPlan}
         </span>
         <svg
-          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -275,9 +279,8 @@ const ModeSelector: React.FC = () => {
           {selectedMode}
         </span>
         <svg
-          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -309,6 +312,22 @@ const ModeSelector: React.FC = () => {
           ))}
         </div>
       )}
+    </div>
+  );
+};
+
+// --- Markdown Renderer ---
+const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
+  const cleanText = content.replace(/\\n/g, '\n'); // actual line breaks
+  const beautified = content
+    .replace(/\\n/g, '\n')
+    .replace(/\*   /g, '- ')
+    .replace(/(\*{1,2})(?!.*\1)/g, '$1 ');
+  return (
+    <div className="prose prose-invert prose-sm max-w-none">
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{cleanText}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{"                      "}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{beautified}</ReactMarkdown>
     </div>
   );
 };
@@ -346,19 +365,19 @@ const ChatInput: React.FC<{
           className="w-full bg-gray text-white placeholder-gray-400 focus:outline-none p-2 sm:pl-4 sm:pr-4 text-sm sm:text-base min-w-0"
         />
         <div className="flex items-center justify-between gap-1">
-        <div className="flex items-center justify-between mt-2">
-          {/* Plan Selector - Hidden on very small screens */}
-          <div className="hidden sm:block">
-            <PlanSelector />
+          <div className="flex items-center justify-between mt-2">
+            {/* Plan Selector - Hidden on very small screens */}
+            <div className="hidden sm:block">
+              <PlanSelector />
+            </div>
+
+            {/* Mode Selector - More compact on small screens */}
+            <div className="sm:ml-2">
+              <ModeSelector />
+            </div>
           </div>
 
-          {/* Mode Selector - More compact on small screens */}
-          <div className="sm:ml-2">
-            <ModeSelector />
-          </div>
-          </div>
-
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1">{/*
             <button
               type="button"
               className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full"
@@ -376,15 +395,15 @@ const ChatInput: React.FC<{
               className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full"
             >
               <CanvasIcon />
+            </button>*/}
+            <button
+              onClick={handleSend}
+              type="submit"
+              className="p-2 text-white bg-gray-700 rounded-full hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 cursor-pointer"
+              disabled={isLoading}
+            >
+              <SendIcon />
             </button>
-          <button
-          onClick={handleSend}
-            type="submit"
-            className="p-2 text-white bg-gray-700 rounded-full hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 cursor-pointer"
-            disabled={isLoading}
-          >
-            <SendIcon />
-          </button>
           </div>
         </div>
       </div>
