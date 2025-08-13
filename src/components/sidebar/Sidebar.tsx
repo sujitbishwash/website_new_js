@@ -56,7 +56,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: "Previous Year Papers",
     },
     { path: ROUTES.ATTEMPTED_TESTS, icon: FileText, label: "Attempted Tests" },
-    { path: ROUTES.EXAMS, icon: Award, label: "Exams" },
     { path: ROUTES.REFER_AND_EARN, icon: Gift, label: "Refer and Earn" },
   ];
 
