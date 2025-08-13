@@ -5,6 +5,10 @@ import {
   markAsReturningUser,
   markSplashAsSeen,
   resetFirstTimeUser,
+  hasValidAuthToken,
+  clearAuthData,
+  getAuthToken,
+  getUserData,
 } from "../lib/utils";
 import { ROUTES } from "../routes/constants";
 
@@ -770,44 +774,99 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 </div>
               </SettingRow>
 
-              <SettingRow
-                title="Local Storage Status"
-                description="Current state of splash screen related localStorage values."
-              >
-                <div className="bg-gray-700 p-4 rounded-lg">
-                  <div className="text-sm space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">First Time User:</span>
-                      <span className="text-white">
-                        {localStorage.getItem("aipadhai_first_time_user") ===
-                        null
-                          ? "Yes (null)"
-                          : "No (false)"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Has Seen Splash:</span>
-                      <span className="text-white">
-                        {localStorage.getItem("aipadhai_has_seen_splash") ===
-                        "true"
-                          ? "Yes"
-                          : "No"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Should Show Splash:</span>
-                      <span className="text-white">
-                        {localStorage.getItem("aipadhai_first_time_user") ===
-                          null &&
-                        localStorage.getItem("aipadhai_has_seen_splash") !==
-                          "true"
-                          ? "Yes"
-                          : "No"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </SettingRow>
+                             <SettingRow
+                 title="Local Storage Status"
+                 description="Current state of splash screen related localStorage values."
+               >
+                 <div className="bg-gray-700 p-4 rounded-lg">
+                   <div className="text-sm space-y-2">
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">First Time User:</span>
+                       <span className="text-white">
+                         {localStorage.getItem("aipadhai_first_time_user") ===
+                         null
+                           ? "Yes (null)"
+                           : "No (false)"}
+                       </span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">Has Seen Splash:</span>
+                       <span className="text-white">
+                         {localStorage.getItem("aipadhai_has_seen_splash") ===
+                         "true"
+                           ? "Yes"
+                           : "No"}
+                       </span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">Should Show Splash:</span>
+                       <span className="text-white">
+                         {localStorage.getItem("aipadhai_first_time_user") ===
+                           null &&
+                         localStorage.getItem("aipadhai_has_seen_splash") !==
+                           "true"
+                           ? "Yes"
+                           : "No"}
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+               </SettingRow>
+
+               <SettingRow
+                 title="Authentication Management"
+                 description="Manage authentication state and tokens for testing."
+               >
+                 <div className="flex flex-col gap-3">
+                   <button
+                     onClick={() => {
+                       clearAuthData();
+                       alert('Authentication data has been cleared. You will need to login again.');
+                     }}
+                     className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                   >
+                     Clear Auth Data
+                   </button>
+                   <button
+                     onClick={() => {
+                       const token = getAuthToken();
+                       const userData = getUserData();
+                       alert(`Auth Token: ${token ? 'Present' : 'Not found'}\nUser Data: ${userData ? 'Present' : 'Not found'}`);
+                     }}
+                     className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
+                   >
+                     Check Auth Status
+                   </button>
+                 </div>
+               </SettingRow>
+
+               <SettingRow
+                 title="Authentication Status"
+                 description="Current authentication state."
+               >
+                 <div className="bg-gray-700 p-4 rounded-lg">
+                   <div className="text-sm space-y-2">
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">Has Valid Token:</span>
+                       <span className="text-white">
+                         {hasValidAuthToken() ? "Yes" : "No"}
+                       </span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">Auth Token:</span>
+                       <span className="text-white">
+                         {getAuthToken() ? "Present" : "Not found"}
+                       </span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">User Data:</span>
+                       <span className="text-white">
+                         {getUserData() ? "Present" : "Not found"}
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+               </SettingRow>
             </div>
           </div>
         );
