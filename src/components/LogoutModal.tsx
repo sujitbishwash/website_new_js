@@ -1,4 +1,5 @@
 import React from "react";
+import { useUser } from "../contexts/UserContext";
 
 // --- Component Starts Here ---
 
@@ -19,8 +20,10 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  userEmail = "sagentiriya33@gmail.com",
+  userEmail,
 }) => {
+  const { profile } = useUser();
+  const displayEmail = userEmail || profile?.email || "user@example.com";
   // If the modal is not open, render nothing.
   if (!isOpen) return null;
 
@@ -57,7 +60,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
 
           <p className="text-muted-foreground mb-6">
             Log out of AIPadhai as{" "}
-            <span className="font-semibold text-foreground">{userEmail}</span>?
+            <span className="font-semibold text-foreground">{displayEmail}</span>?
           </p>
 
           {/* Action buttons container */}

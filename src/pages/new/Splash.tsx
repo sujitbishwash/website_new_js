@@ -1,4 +1,7 @@
+import { markAsReturningUser, markSplashAsSeen } from "@/lib/utils";
+import { ROUTES } from "@/routes/constants";
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -290,6 +293,16 @@ export default function Splash() {
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const slideDuration = 7000; // 7 seconds
+  const navigate = useNavigate();
+
+  const handleGetStarted = () => {
+    // Mark splash as seen and user as returning
+    markSplashAsSeen();
+    markAsReturningUser();
+
+    // Navigate to login page
+    navigate(ROUTES.LOGIN);
+  };
 
   const goToNext = () =>
     setCurrentFeatureIndex((prev) => (prev + 1) % features.length);
@@ -360,7 +373,10 @@ export default function Splash() {
         <h1 className="text-2xl font-bold" style={{ color: theme.primaryText }}>
           AIPadhai
         </h1>
-        <button className="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300">
+        <button
+          onClick={handleGetStarted}
+          className="px-4 py-2 text-sm font-semibold rounded-lg text-white bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300"
+        >
           Skip Intro
         </button>
       </header>
@@ -388,6 +404,7 @@ export default function Splash() {
       <div className="absolute bottom-0 w-full p-8 flex flex-col items-center z-20">
         {currentFeatureIndex === features.length - 1 ? (
           <button
+            onClick={handleGetStarted}
             className={`px-8 py-3 font-bold rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:scale-105 shadow-xl transition-all duration-500 ease-out ${
               currentFeatureIndex === features.length - 1
                 ? "opacity-100 translate-y-0"

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import { useUser } from "@/contexts/UserContext";
+import React, { useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 // --- TYPE DEFINITIONS (TypeScript) ---
 interface Theme {
@@ -148,19 +150,34 @@ const Footer: React.FC<FooterProps> = ({ text }) => {
  * The main application component that assembles the payment page.
  */
 const PaymentPage: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { profile } = useUser();
+  const amount = (location.state as { amount?: number })?.amount || 999;
   // --- STATE MANAGEMENT ---
   // The QR code URL can be changed here to update the image dynamically.
   // Using a placeholder from placehold.co for demonstration.
   // Replace this with your actual QR code image URL.
-  const [qrCodeUrl, setQrCodeUrl] = useState<string>(
-    "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=upi://pay?pa=example@upi&pn=Example%20Name&am=150.00&cu=INR"
-  );
+  const qrCodeUrl =
+    "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=upi://pay?pa=example@upi&pn=Example%20Name&am=150.00&cu=INR";
 
-  const [paymentInfo, setPaymentInfo] = useState({
-    amount: 150.0,
+  const paymentInfo = {
+    amount: amount,
     currency: "INR",
-    recipient: "John Doe",
-  });
+    recipient: profile?.name || "User",
+  };
+
+  useEffect(() => {
+    setTimeout(() => {
+      navigate("/payment-success", {
+        state: {
+          amount: paymentInfo.amount,
+          planType: paymentInfo.amount >= 2000 ? "Annual" : "Monthly",
+          recipient: paymentInfo.recipient,
+        },
+      });
+    }, 5000);
+  }, [navigate, amount, profile?.name]);
 
   return (
     <div

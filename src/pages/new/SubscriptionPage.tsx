@@ -1,5 +1,6 @@
 import { theme } from "@/styles/theme";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // --- CSS Styles Component ---
 // The CSS is included directly in the component to avoid file resolution errors.
@@ -217,6 +218,7 @@ const SubscriptionStyles = () => (
 // --- Main Subscription Page Component ---
 const SubscriptionPage = () => {
   const [selectedPlan, setSelectedPlan] = useState("annual"); // 'annual' or 'monthly'
+  const navigate = useNavigate();
 
   const features = [
     "Unlimited uploads, pastes, and records",
@@ -228,8 +230,10 @@ const SubscriptionPage = () => {
   ];
 
   const handleSelectPlan = () => {
+    // Calculate the amount based on selected plan
+    const amount = selectedPlan === "annual" ? 199 * 12 : 399; // Annual: 199/month * 12, Monthly: 399
     // In a real app, you would handle the checkout process here
-    alert(`You have selected the ${selectedPlan} plan.`);
+    navigate("/payment", { state: { amount } });
   };
 
   // Function to go back to the previous page using standard browser history

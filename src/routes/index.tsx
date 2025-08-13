@@ -3,7 +3,6 @@ import AuthCallbackPage from "@/pages/new/AuthCallbackPage";
 import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
 import ExamGoalPage from "@/pages/new/ExamGoalPage";
-import ExamsPage from "@/pages/new/ExamsPage";
 import LoginPage from "@/pages/new/LoginPage";
 import PaymentPage from "@/pages/new/PaymentPage";
 import PaymentSuccessPage from "@/pages/new/PaymentSuccessPage";
@@ -15,6 +14,7 @@ import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/Layout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import RootLayout from "../components/RootLayout";
 
 import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
 import ExamInformationPage from "../pages/new/ExamInformationPage";
@@ -30,183 +30,183 @@ import { ROUTES } from "./constants";
 
 // Route configuration object for easy maintenance
 export const routes = [
-  // Public splash page - accessible without authentication
   {
-    path: ROUTES.SPLASH,
-    element: <Splash />,
-    name: "Welcome",
-    description: "Welcome and onboarding page",
-  },
-  {
-    path: ROUTES.HOME,
-    element: (
-      <ProtectedRoute>
-        <Layout />
-      </ProtectedRoute>
-    ),
+    path: "/",
+    element: <RootLayout />,
     children: [
+      // Public splash page - accessible without authentication
       {
-        index: true,
-        element: <HomePage />,
-        name: "Home",
-        description: "Main dashboard page",
+        path: ROUTES.SPLASH,
+        element: <Splash />,
+        name: "Welcome",
+        description: "Welcome and onboarding page",
       },
       {
-        path: "home",
-        element: <HomePage />,
-        name: "Home",
-        description: "Main dashboard page",
+        path: ROUTES.HOME,
+        element: (
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        ),
+        children: [
+          {
+            index: true,
+            element: <HomePage />,
+            name: "Home",
+            description: "Main dashboard page",
+          },
+          {
+            path: "home",
+            element: <HomePage />,
+            name: "Home",
+            description: "Main dashboard page",
+          },
+          {
+            path: "test-series",
+            element: <TestConfigurationPage />,
+            name: "Test Configuration",
+            description: "Configure test settings",
+          },
+          {
+            path: "exam-info",
+            element: <ExamInformationPage />,
+            name: "Exam Information",
+            description: "View exam details and instructions",
+          },
+          {
+            path: "exam-reconfirm",
+            element: <ExamReconfirmationPage />,
+            name: "Exam Reconfirmation",
+            description: "Confirm exam details before starting",
+          },
+          {
+            path: "test-main-page",
+            element: <TestMainPage />,
+            name: "Test Main Page",
+            description: "Main test taking interface",
+          },
+          {
+            path: "analysis",
+            element: <DetailedAnalysisPage />,
+            name: "Detailed Analysis",
+            description: "View detailed test analysis and results",
+          },
+          {
+            path: "history",
+            element: <HistoryPage />,
+            name: "Learning History",
+            description: "View learning history and progress",
+          },
+          {
+            path: "refer-and-earn",
+            element: <ReferralPage />,
+            name: "Referral",
+            description: "Referral program page",
+          },
+          {
+            path: "premium",
+            element: <SubscriptionPage />,
+            name: "Subscription",
+            description: "Subscription management page",
+          },
+          {
+            path: "chat",
+            element: <ComingSoonPage />,
+            name: "Chat",
+            description: "Chat interface",
+          },
+          {
+            path: "flashcards",
+            element: <ComingSoonPage />,
+            name: "Flashcards",
+            description: "Flashcard learning interface",
+          },
+          {
+            path: "books",
+            element: <BookPage />,
+            name: "Books",
+            description: "Book Page",
+          },
+          {
+            path: "video-learning/:videoId",
+            element: <VideoPage />,
+            name: "Video Learning",
+            description: "Video Learning Page",
+          },
+          // Coming Soon Routes - Pages not yet implemented
+          {
+            path: "previous-year-papers",
+            element: <ComingSoonPage />,
+            name: "Previous Year Papers",
+            description: "Previous year question papers",
+          },
+          {
+            path: "attempted-tests",
+            element: <AttemptedTests />,
+            name: "Attempted Tests",
+            description: "Attempted Tests",
+          },
+
+          {
+            path: "personal-details",
+            element: <PersonalDetails />,
+            name: "Personal Details",
+            description: "User personal details page",
+          },
+          {
+            path: "exam-goal",
+            element: <ExamGoalPage />,
+            name: "Exam Goal",
+            description: "Select Exam Goal",
+          },
+        ],
+      },
+      // Public informational pages
+      {
+        path: "privacy-policy",
+        element: <PrivacyPolicy />,
+        name: "Privacy Policy",
+        description: "Privacy Policy",
       },
       {
-        path: "test-series",
-        element: <TestConfigurationPage />,
-        name: "Test Configuration",
-        description: "Configure test settings",
+        path: "terms-and-conditions",
+        element: <TermsAndConditions />,
+        name: "Terms and Conditions",
+        description: "Terms and Conditions",
       },
       {
-        path: "exam-info",
-        element: <ExamInformationPage />,
-        name: "Exam Information",
-        description: "View exam details and instructions",
+        path: "login",
+        element: <LoginPage />,
+        name: "Login",
+        description: "User authentication page",
       },
       {
-        path: "exam-reconfirm",
-        element: <ExamReconfirmationPage />,
-        name: "Exam Reconfirmation",
-        description: "Confirm exam details before starting",
+        path: "auth/callback",
+        element: <AuthCallbackPage />,
+        name: "Auth Callback",
+        description: "OAuth callback handler",
+      },
+      // Payment pages - accessible without authentication
+      {
+        path: "payment",
+        element: <PaymentPage />,
+        name: "Payment",
+        description: "Payment processing page",
       },
       {
-        path: "test-main-page",
-        element: <TestMainPage />,
-        name: "Test Main Page",
-        description: "Main test taking interface",
+        path: "payment-success",
+        element: <PaymentSuccessPage />,
+        name: "Payment Success",
+        description: "Payment success confirmation page",
       },
+      // Catch-all route for 404 - must be last
       {
-        path: "analysis",
-        element: <DetailedAnalysisPage />,
-        name: "Detailed Analysis",
-        description: "View detailed test analysis and results",
-      },
-      {
-        path: "history",
-        element: <HistoryPage />,
-        name: "Learning History",
-        description: "View learning history and progress",
-      },
-      {
-        path: "refer-and-earn",
-        element: <ReferralPage />,
-        name: "Referral",
-        description: "Referral program page",
-      },
-      {
-        path: "premium",
-        element: <SubscriptionPage />,
-        name: "Subscription",
-        description: "Subscription management page",
-      },
-      {
-        path: "chat",
-        element: <ComingSoonPage />,
-        name: "Chat",
-        description: "Chat interface",
-      },
-      {
-        path: "flashcards",
-        element: <ComingSoonPage />,
-        name: "Flashcards",
-        description: "Flashcard learning interface",
-      },
-      {
-        path: "books",
-        element: <BookPage />,
-        name: "Books",
-        description: "Book Page",
-      },
-      {
-        path: "video-learning/:videoId",
-        element: <VideoPage />,
-        name: "Video Learning",
-        description: "Video Learning Page",
-      },
-      // Coming Soon Routes - Pages not yet implemented
-      {
-        path: "previous-year-papers",
-        element: <ComingSoonPage />,
-        name: "Previous Year Papers",
-        description: "Previous year question papers",
-      },
-      {
-        path: "attempted-tests",
-        element: <AttemptedTests />,
-        name: "Attempted Tests",
-        description: "Attempted Tests",
-      },
-      {
-        path: "exams",
-        element: <ExamsPage />,
-        name: "Exams Page",
-        description: "Exams Page",
-      },
-      {
-        path: "personal-details",
-        element: <PersonalDetails />,
-        name: "Personal Details",
-        description: "User personal details page",
-      },
-      {
-        path: "exam-goal",
-        element: <ExamGoalPage />,
-        name: "Exam Goal",
-        description: "Select Exam Goal",
+        path: "*",
+        element: <NotFoundPage />,
+        name: "Not Found",
+        description: "Page not found",
       },
     ],
-  },
-  // Public informational pages
-  {
-    path: "privacy-policy",
-    element: <PrivacyPolicy />,
-    name: "Privacy Policy",
-    description: "Privacy Policy",
-  },
-  {
-    path: "terms-and-conditions",
-    element: <TermsAndConditions />,
-    name: "Terms and Conditions",
-    description: "Terms and Conditions",
-  },
-  {
-    path: "login",
-    element: <LoginPage />,
-    name: "Login",
-    description: "User authentication page",
-  },
-  {
-    path: "auth/callback",
-    element: <AuthCallbackPage />,
-    name: "Auth Callback",
-    description: "OAuth callback handler",
-  },
-  // Payment pages - accessible without authentication
-  {
-    path: "payment",
-    element: <PaymentPage />,
-    name: "Payment",
-    description: "Payment processing page",
-  },
-  {
-    path: "payment-success",
-    element: <PaymentSuccessPage />,
-    name: "Payment Success",
-    description: "Payment success confirmation page",
-  },
-
-  // Catch-all route for 404 - must be last
-  {
-    path: "*",
-    element: <NotFoundPage />,
-    name: "Not Found",
-    description: "Page not found",
   },
 ];
 
@@ -216,7 +216,10 @@ export const router = createBrowserRouter(routes);
 // Helper function to get route by path
 export const getRouteByPath = (path: string) => {
   const mainRoute = routes[0]; // Get the main route with children
-  return mainRoute.children?.find(
+  const homeRoute = mainRoute.children?.find(
+    (route) => route.path === ROUTES.HOME
+  );
+  return homeRoute?.children?.find(
     (route) => route.path === path || (route.index && path === "/")
   );
 };
@@ -224,8 +227,11 @@ export const getRouteByPath = (path: string) => {
 // Helper function to get all route names for navigation
 export const getRouteNames = () => {
   const mainRoute = routes[0]; // Get the main route with children
+  const homeRoute = mainRoute.children?.find(
+    (route) => route.path === ROUTES.HOME
+  );
   return (
-    mainRoute.children?.map((route) => ({
+    homeRoute?.children?.map((route) => ({
       path: route.index ? "/" : `/${route.path}`,
       name: route.name,
     })) || []
@@ -235,8 +241,11 @@ export const getRouteNames = () => {
 // Helper function to check if route exists
 export const routeExists = (path: string) => {
   const mainRoute = routes[0]; // Get the main route with children
+  const homeRoute = mainRoute.children?.find(
+    (route) => route.path === ROUTES.HOME
+  );
   return (
-    mainRoute.children?.some(
+    homeRoute?.children?.some(
       (route) => route.path === path || (route.index && path === "/")
     ) || false
   );

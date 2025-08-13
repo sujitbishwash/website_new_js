@@ -83,6 +83,7 @@ export const authApi = {
     });
   },
 
+  // need to check if this is needed
   getAuthenticatedUser: async () => {
     const token = localStorage.getItem('authToken');
     return apiRequest<{ data: { exam: string; group_type: string } | null }>('GET', '/ums/me', undefined, {
@@ -92,9 +93,10 @@ export const authApi = {
     });
   },
 
+  // need to check if this is needed
   getUserDetails: async () => {
     const token = localStorage.getItem('authToken');
-    return apiRequest<{ success: boolean; data: { name?: string; email: string; id: string } | null }>('GET', '/ums/user-details', undefined, {
+    return apiRequest<{ success: boolean; data: { name?: string; email: string; id: string } | null }>('GET', '/ums/me', undefined, {
       headers: {
         Authorization: `Bearer ${token}`
       }

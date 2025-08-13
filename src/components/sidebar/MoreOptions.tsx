@@ -1,6 +1,7 @@
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import React, { useEffect, useRef, useState } from "react";
+import { useUser } from "@/contexts/UserContext";
 
 // --- TYPE DEFINITIONS ---
 type MenuItem = {
@@ -40,6 +41,7 @@ interface ProfileMenuProps {
   onLogoutClick: () => void;
   onProfileClick: () => void;
   onUpgradeClick: () => void;
+  onExamConfigurationClick: () => void;
 }
 
 const ProfileMenu: React.FC<ProfileMenuProps> = ({
@@ -47,10 +49,22 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onLogoutClick,
   onProfileClick,
   onUpgradeClick,
+  onExamConfigurationClick,
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const { profile, isLoading, error } = useUser();
+
+  // Debug logging
+  console.log('MoreOptions - Profile:', profile);
+  console.log('MoreOptions - Loading:', isLoading);
+  console.log('MoreOptions - Error:', error);
+
+  const handleExamConfigurationClick = () => {
+    onExamConfigurationClick();
+    setMenuOpen(false);
+  };
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -96,7 +110,18 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
     },
     {
       icon: (
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>),label: "Settings",
+      action: handleProfileClick,},
+    {
+      icon: (
+        <Icon path="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+      ),
+      label: "Exam Configuration",
+      action: handleExamConfigurationClick,
+    },
+    {
+      icon: (
+        <Icon path="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
       ),
       label: "Upgrade plan",
       action: handleUpgradeClick,
@@ -170,9 +195,11 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             className={`flex-1 text-left whitespace-nowrap transition-opacity ${isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
               }`}
           >
-            <p className="font-medium text-muted-foreground">nikk070@yoyo</p>
+            <p className="font-medium text-muted-foreground">
+              {isLoading ? "Loading..." : profile?.email || "user@example.com"}
+            </p>
             <p className="font-medium text-muted-foreground text-xs">
-              Free Plan
+              {error ? "Error loading profile" : "Free Plan"}
             </p>
           </div>
         </div>
@@ -290,21 +317,23 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             )}
           </div>
         </div>
-      )}
-    </div>
-  );
-};
+             )}
+     </div>
+   );
+ };
 
 const Moreoptions = ({
   isContracted,
   onLogoutClick,
   onProfileClick,
   onUpgradeClick,
+  onExamConfigurationClick,
 }: {
   isContracted: boolean;
   onLogoutClick: () => void;
   onProfileClick: () => void;
   onUpgradeClick: () => void;
+  onExamConfigurationClick: () => void;
 }) => {
   return (
     // Set the background on the main container
@@ -325,12 +354,13 @@ const Moreoptions = ({
           .animate-fade-in-up { animation: fade-in-up 0.2s ease-out; }
         `}</style>
       <div>
-        <ProfileMenu
-          isContracted={isContracted}
-          onLogoutClick={onLogoutClick}
-          onProfileClick={onProfileClick}
-          onUpgradeClick={onUpgradeClick}
-        />
+                 <ProfileMenu
+           isContracted={isContracted}
+           onLogoutClick={onLogoutClick}
+           onProfileClick={onProfileClick}
+           onUpgradeClick={onUpgradeClick}
+           onExamConfigurationClick={onExamConfigurationClick}
+         />
       </div>
     </div>
   );

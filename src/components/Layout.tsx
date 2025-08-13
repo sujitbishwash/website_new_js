@@ -4,6 +4,7 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { ROUTES } from "../routes/constants";
 import LogoutModal from "./LogoutModal";
+import ExamConfigurationModal from "./modals/ExamConfigurationModal";
 import ProfileModal from "./ProfilePage";
 import Sidebar from "./sidebar/Sidebar";
 
@@ -12,6 +13,7 @@ const Layout: React.FC = () => {
   const [isContracted, setIsContracted] = useState(false); // Sidebar is expanded by default on desktop
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
+  const [isExamModalOpen, setIsExamModalOpen] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -31,6 +33,10 @@ const Layout: React.FC = () => {
     navigate(ROUTES.PREMIUM);
     setIsContracted(true);
     setProfileModalOpen(false);
+  };
+
+  const handleExamConfigurationClick = () => {
+    setIsExamModalOpen(true);
   };
 
   const handleLogoutConfirm = async () => {
@@ -60,6 +66,7 @@ const Layout: React.FC = () => {
             onLogoutClick={handleLogoutClick}
             onProfileClick={handleProfileClick}
             onUpgradeClick={handleUpgradeClick}
+            onExamConfigurationClick={handleExamConfigurationClick}
           />
         )}
         <div className="flex-1 flex flex-col min-w-0">
@@ -92,6 +99,12 @@ const Layout: React.FC = () => {
         isOpen={isProfileModalOpen}
         onClose={handleProfileClose}
         onUpgradeClick={handleUpgradeClick}
+      />
+
+      {/* Exam Configuration Modal - positioned at root level for proper full-screen coverage */}
+      <ExamConfigurationModal
+        isOpen={isExamModalOpen}
+        onClose={() => setIsExamModalOpen(false)}
       />
     </>
   );

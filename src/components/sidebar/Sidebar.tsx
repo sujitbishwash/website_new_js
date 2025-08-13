@@ -1,5 +1,4 @@
 import {
-  Award,
   Book,
   ChevronsLeft,
   Clock,
@@ -25,6 +24,7 @@ interface SidebarProps {
   onLogoutClick: () => void;
   onProfileClick: () => void;
   onUpgradeClick: () => void;
+  onExamConfigurationClick: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -35,6 +35,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onLogoutClick,
   onProfileClick,
   onUpgradeClick,
+  onExamConfigurationClick,
 }) => {
   const location = useLocation();
 
@@ -55,7 +56,6 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: "Previous Year Papers",
     },
     { path: ROUTES.ATTEMPTED_TESTS, icon: FileText, label: "Attempted Tests" },
-    { path: ROUTES.EXAMS, icon: Award, label: "Exams" },
     { path: ROUTES.REFER_AND_EARN, icon: Gift, label: "Refer and Earn" },
   ];
 
@@ -182,6 +182,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           onLogoutClick={onLogoutClick}
           onProfileClick={onProfileClick}
           onUpgradeClick={onUpgradeClick}
+          onExamConfigurationClick={onExamConfigurationClick}
         />
       </aside>
     </>

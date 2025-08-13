@@ -54,6 +54,8 @@ const Icon: React.FC<IconProps> = ({ path, className = "w-6 h-6" }) => (
   </svg>
 );
 
+// commented until usage is confirmed
+/*
 const BrainIcon: React.FC = () => (
   // Changed icon color from green to blue to match the new theme
   <svg
@@ -78,6 +80,8 @@ const BrainIcon: React.FC = () => (
     <path d="m9.5 9.5-1-1" />
   </svg>
 );
+*/
+
 const PlusIcon = () => <Icon path="M12 5v14 M5 12h14" className="w-5 h-5" />;
 const SettingsIcon = () => (
   <Icon
@@ -204,11 +208,7 @@ const PlanSelector: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center space-x-1 sm:space-x-2 sm:p-2 rounded-lg hover:bg-gray-700 transition-colors"
       >
-        <span
-          className="text-xs sm:text-sm font-medium"
-        >
-          {selectedPlan}
-        </span>
+        <span className="text-xs sm:text-sm font-medium">{selectedPlan}</span>
         <svg
           className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
             }`}

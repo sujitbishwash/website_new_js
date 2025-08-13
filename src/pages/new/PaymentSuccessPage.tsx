@@ -1,4 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useUser } from "../../contexts/UserContext";
+import { ROUTES } from "../../routes/constants";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -151,6 +154,7 @@ const CongratulationsCard: React.FC<CongratulationsCardProps> = ({
   userName,
   planType,
 }) => {
+  const navigate = useNavigate();
   return (
     <div
       className="rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-lg mx-auto text-center overflow-hidden"
@@ -198,6 +202,9 @@ const CongratulationsCard: React.FC<CongratulationsCardProps> = ({
           color: theme.primaryText,
           boxShadow: `0 4px 15px ${theme.buttonGradientFrom}50`,
         }}
+        onClick={() => {
+          navigate(ROUTES.HOME);
+        }}
       >
         Start Learning
       </button>
@@ -208,28 +215,39 @@ const CongratulationsCard: React.FC<CongratulationsCardProps> = ({
 // --- Main App Component ---
 
 const PaymentSuccessPage: React.FC = () => {
-  // Static user name for demonstration
-  const [userName] = useState<string>("Learner");
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { profile } = useUser();
+  const paymentData = location.state as {
+    amount?: number;
+    planType?: string;
+    recipient?: string;
+  } | null;
 
-  // State to hold plan details from the "backend"
-  const [planType, setPlanType] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  // Use real user data from context, fallback to navigation state, then defaults
+  const userName = profile?.name || paymentData?.recipient || "Learner";
+  const [planType, setPlanType] = useState<string | null>(
+    paymentData?.planType || null
+  );
+  const [isLoading, setIsLoading] = useState<boolean>(!paymentData?.planType);
 
   useEffect(() => {
     document.body.style.backgroundColor = theme.background;
 
-    // Simulate fetching data from a backend
-    const fetchSubscriptionData = () => {
-      setTimeout(() => {
-        // In a real application, this would be an API call.
-        // We'll randomly choose between Monthly and Yearly for this demo.
-        const fetchedPlan = Math.random() > 0.5 ? "Yearly" : "Monthly";
-        setPlanType(fetchedPlan);
-        setIsLoading(false);
-      }, 1500); // Simulate a 1.5-second network delay
-    };
+    // If we don't have plan data from navigation, simulate fetching it
+    if (!paymentData?.planType) {
+      const fetchSubscriptionData = () => {
+        setTimeout(() => {
+          // In a real application, this would be an API call.
+          // We'll randomly choose between Monthly and Yearly for this demo.
+          const fetchedPlan = Math.random() > 0.5 ? "Yearly" : "Monthly";
+          setPlanType(fetchedPlan);
+          setIsLoading(false);
+        }, 1500); // Simulate a 1.5-second network delay
+      };
 
-    fetchSubscriptionData();
+      fetchSubscriptionData();
+    }
 
     // Cleanup function to reset body background color when component unmounts
     return () => {
