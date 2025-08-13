@@ -33,3 +33,33 @@ export const resetFirstTimeUser = (): void => {
   localStorage.removeItem(FIRST_TIME_USER_KEY);
   localStorage.removeItem(HAS_SEEN_SPLASH_KEY);
 };
+
+// Authentication utilities
+export const hasValidAuthToken = (): boolean => {
+  const token = localStorage.getItem('authToken');
+  const userData = localStorage.getItem('userData');
+  
+  return !!(token && userData);
+};
+
+export const clearAuthData = (): void => {
+  localStorage.removeItem('authToken');
+  localStorage.removeItem('userData');
+};
+
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem('authToken');
+};
+
+export const getUserData = (): any => {
+  const userData = localStorage.getItem('userData');
+  if (userData) {
+    try {
+      return JSON.parse(userData);
+    } catch (error) {
+      console.error('Error parsing user data:', error);
+      return null;
+    }
+  }
+  return null;
+};

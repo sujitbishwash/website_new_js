@@ -1,5 +1,16 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
+import {
+  markAsReturningUser,
+  markSplashAsSeen,
+  resetFirstTimeUser,
+  hasValidAuthToken,
+  clearAuthData,
+  getAuthToken,
+  getUserData,
+} from "../lib/utils";
+import { ROUTES } from "../routes/constants";
 
 //import { useNavigate } from "react-router-dom";
 
@@ -32,6 +43,22 @@ const PersonalizationIcon = () => (
 );
 const SecurityIcon = () => (
   <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><g stroke-width="0" /><g stroke-linecap="round" stroke-linejoin="round" /><path d="M12.5 7.5h0.008M12.5 12.5a5 5 0 1 0 -4.955 -4.327c0.048 0.362 0.072 0.543 0.057 0.658a0.708 0.708 0 0 1 -0.098 0.288c-0.057 0.101 -0.156 0.2 -0.355 0.399l-4.258 4.258c-0.144 0.144 -0.217 0.217 -0.268 0.3a0.833 0.833 0 0 0 -0.1 0.242C2.5 14.413 2.5 14.515 2.5 14.719V16.167c0 0.467 0 0.7 0.091 0.878a0.833 0.833 0 0 0 0.364 0.364C3.133 17.5 3.367 17.5 3.833 17.5h1.448c0.204 0 0.306 0 0.402 -0.023a0.833 0.833 0 0 0 0.242 -0.1c0.083 -0.051 0.156 -0.123 0.3 -0.267l4.258 -4.259c0.199 -0.199 0.298 -0.298 0.4 -0.355a0.708 0.708 0 0 1 0.287 -0.098c0.115 -0.017 0.296 0.008 0.658 0.057Q12.158 12.5 12.5 12.5" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" /></svg>
+);
+
+const DevelopmentIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+  </svg>
 );
 const BillingIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>
@@ -131,6 +158,7 @@ const navItems = [
   { name: "Personalization", icon: PersonalizationIcon },
   { name: "Plan and Billing", icon: BillingIcon },
   { name: "Privacy and Security", icon: SecurityIcon },
+  { name: "Development", icon: DevelopmentIcon },
 ];
 
 const features = [
@@ -286,6 +314,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   onUpgradeClick,
 }) => {
+  const navigate = useNavigate();
   const { profile } = useUser();
   const [userProfile, setUserProfile] = useState<UserProfile>(() =>
     createInitialUserProfile(profile)
@@ -622,6 +651,152 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 Log out all
               </button>
             </SettingRow>
+          </div>
+        );
+      case "Development":
+        return (
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-6">
+              Development Tools
+            </h1>
+            <p className="text-gray-400 mb-6">
+              Development and testing utilities for debugging purposes.
+            </p>
+
+            <div className="space-y-6">
+              <SettingRow
+                title="Splash Screen Management"
+                description="Reset splash screen state to test the onboarding flow again."
+              >
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      resetFirstTimeUser();
+                      alert(
+                        "Splash screen state has been reset. Refresh the page to see the splash screen again."
+                      );
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                  >
+                    Reset Splash State
+                  </button>
+                  <button
+                    onClick={() => {
+                      markSplashAsSeen();
+                      markAsReturningUser();
+                      alert(
+                        'Splash screen state has been set to "completed". User will not see splash again.'
+                      );
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                  >
+                    Mark Splash as Completed
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate(ROUTES.SPLASH);
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                  >
+                    View Splash Screen
+                  </button>
+                </div>
+              </SettingRow>
+
+                             <SettingRow
+                 title="Local Storage Status"
+                 description="Current state of splash screen related localStorage values."
+               >
+                 <div className="bg-gray-700 p-4 rounded-lg">
+                   <div className="text-sm space-y-2">
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">First Time User:</span>
+                       <span className="text-white">
+                         {localStorage.getItem("aipadhai_first_time_user") ===
+                         null
+                           ? "Yes (null)"
+                           : "No (false)"}
+                       </span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">Has Seen Splash:</span>
+                       <span className="text-white">
+                         {localStorage.getItem("aipadhai_has_seen_splash") ===
+                         "true"
+                           ? "Yes"
+                           : "No"}
+                       </span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">Should Show Splash:</span>
+                       <span className="text-white">
+                         {localStorage.getItem("aipadhai_first_time_user") ===
+                           null &&
+                         localStorage.getItem("aipadhai_has_seen_splash") !==
+                           "true"
+                           ? "Yes"
+                           : "No"}
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+               </SettingRow>
+
+               <SettingRow
+                 title="Authentication Management"
+                 description="Manage authentication state and tokens for testing."
+               >
+                 <div className="flex flex-col gap-3">
+                   <button
+                     onClick={() => {
+                       clearAuthData();
+                       alert('Authentication data has been cleared. You will need to login again.');
+                     }}
+                     className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                   >
+                     Clear Auth Data
+                   </button>
+                   <button
+                     onClick={() => {
+                       const token = getAuthToken();
+                       const userData = getUserData();
+                       alert(`Auth Token: ${token ? 'Present' : 'Not found'}\nUser Data: ${userData ? 'Present' : 'Not found'}`);
+                     }}
+                     className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
+                   >
+                     Check Auth Status
+                   </button>
+                 </div>
+               </SettingRow>
+
+               <SettingRow
+                 title="Authentication Status"
+                 description="Current authentication state."
+               >
+                 <div className="bg-gray-700 p-4 rounded-lg">
+                   <div className="text-sm space-y-2">
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">Has Valid Token:</span>
+                       <span className="text-white">
+                         {hasValidAuthToken() ? "Yes" : "No"}
+                       </span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">Auth Token:</span>
+                       <span className="text-white">
+                         {getAuthToken() ? "Present" : "Not found"}
+                       </span>
+                     </div>
+                     <div className="flex justify-between">
+                       <span className="text-gray-300">User Data:</span>
+                       <span className="text-white">
+                         {getUserData() ? "Present" : "Not found"}
+                       </span>
+                     </div>
+                   </div>
+                 </div>
+               </SettingRow>
+            </div>
           </div>
         );
       default:

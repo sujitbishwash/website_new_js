@@ -91,10 +91,24 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token && userData) {
         try {
           const parsedUser = JSON.parse(userData);
-          setUser(parsedUser);
-          return true;
+          
+          // Validate token by making an API call
+          const { authApi } = await import("../lib/api-client");
+          const response = await authApi.getAuthenticatedUser();
+          
+          if (response.data && response.data.data) {
+            // Token is valid, set user
+            setUser(parsedUser);
+            return true;
+          } else {
+            // Token is invalid, clear storage
+            console.log("Invalid token found, clearing storage");
+            logout();
+            return false;
+          }
         } catch (error) {
-          console.error("Error parsing user data:", error);
+          console.error("Error validating token:", error);
+          // Token validation failed, clear storage
           logout();
           return false;
         }
