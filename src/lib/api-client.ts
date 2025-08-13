@@ -83,24 +83,14 @@ export const authApi = {
     });
   },
 
-  // need to check if this is needed
+  // Get authenticated user data (for exam goal check)
   getAuthenticatedUser: async () => {
-    const token = localStorage.getItem('authToken');
-    return apiRequest<{ data: { exam: string; group_type: string } | null }>('GET', '/ums/me', undefined, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    return apiRequest<{ data: { exam: string; group_type: string } | null }>('GET', '/ums/me');
   },
 
-  // need to check if this is needed
+  // Get user details (for profile information)
   getUserDetails: async () => {
-    const token = localStorage.getItem('authToken');
-    return apiRequest<{ success: boolean; data: { name?: string; email: string; id: string } | null }>('GET', '/ums/me', undefined, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    return apiRequest<{ success: boolean; data: { name?: string; email: string; id: string } | null }>('GET', '/ums/user-details');
   }
 };
 
@@ -113,31 +103,16 @@ export interface ExamType {
 
 export const examGoalApi = {
   getExamTypes: async () => {
-    const token = localStorage.getItem('access_token');
-    return apiRequest<{ success: boolean; data: ExamType[] }>('GET', '/exam-goal/exam-type', undefined, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    return apiRequest<{ success: boolean; data: ExamType[] }>('GET', '/exam-goal/exam-type');
   },
   addExamGoal: async (exam: string, groupType: string) => {
-    const token = localStorage.getItem('access_token');
     return apiRequest<{ success: boolean; message: string }>('POST', '/exam-goal/add', {
       exam,
       group_type: groupType
-    }, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
     });
   },
   getUserExamGoal: async () => {
-    const token = localStorage.getItem('authToken');
-    return apiRequest<{ success: boolean; data: { exam: string; group_type: string } | null }>('GET', '/exam-goal/user', undefined, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
+    return apiRequest<{ success: boolean; data: { exam: string; group_type: string } | null }>('GET', '/exam-goal/user');
   }
 };
 
@@ -181,47 +156,13 @@ export interface VideoTranscriptResponse {
 
 export const videoApi = {
   getVideoDetail: async (url: string): Promise<VideoDetail> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/video/detail?url=${encodeURIComponent(url)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to fetch video details');
-    }
-
-    return response.json();
+    const response = await apiRequest<VideoDetail>('GET', `/video/detail?url=${encodeURIComponent(url)}`);
+    return response.data;
   },
 
   getSuggestedVideos: async (): Promise<SuggestedVideo[]> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/video/suggested`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to fetch suggested videos');
-    }
-
-    const result = await response.json();
+    const response = await apiRequest<{ suggested: any[] }>('GET', '/video/suggested');
+    const result = response.data;
 
     // Handle the API response structure: { suggested: [...] }
     if (result.suggested && Array.isArray(result.suggested)) {
@@ -242,47 +183,13 @@ export const videoApi = {
   },
 
   getVideoChapters: async (videoId: string): Promise<VideoChaptersResponse> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/video/chapter?video_id=${encodeURIComponent(videoId)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to fetch video chapters');
-    }
-
-    return response.json();
+    const response = await apiRequest<VideoChaptersResponse>('GET', `/video/chapter?video_id=${encodeURIComponent(videoId)}`);
+    return response.data;
   },
 
   getVideoTranscript: async (videoId: string): Promise<VideoTranscriptResponse> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/video/transcript?video_id=${encodeURIComponent(videoId)}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to fetch video transcript');
-    }
-
-    return response.json();
+    const response = await apiRequest<VideoTranscriptResponse>('GET', `/video/transcript?video_id=${encodeURIComponent(videoId)}`);
+    return response.data;
   },
 };
 
@@ -307,69 +214,21 @@ interface ChatSendResponse {
 
 export const chatApi = {
   getChatHistory: async (videoId: string): Promise<ChatHistoryResponse> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/ai_agent/history?vedio_id=${encodeURIComponent(videoId)}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch chat history');
-    }
-
-    return response.json();
+    const response = await apiRequest<ChatHistoryResponse>('GET', `/ai_agent/history?vedio_id=${encodeURIComponent(videoId)}`);
+    return response.data;
   },
 
   startChat: async (videoId: string): Promise<ChatStartResponse> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/ai_agent/start`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({ vedio_id: videoId })
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to start chat');
-    }
-
-    return response.json();
+    const response = await apiRequest<ChatStartResponse>('POST', '/ai_agent/start', { vedio_id: videoId });
+    return response.data;
   },
 
   sendMessage: async (videoId: string, message: string): Promise<ChatSendResponse> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/ai_agent/send`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        vedio_id: videoId,
-        message: message
-      })
+    const response = await apiRequest<ChatSendResponse>('POST', '/ai_agent/send', {
+      vedio_id: videoId,
+      message: message
     });
-
-    if (!response.ok) {
-      throw new Error('Failed to send message');
-    }
-
-    return response.json();
+    return response.data;
   }
 };
 
@@ -385,25 +244,8 @@ interface TestSeriesFormData {
 }
 
 export const fetchTestSeriesFormData = async (): Promise<TestSeriesFormData> => {
-  const token = localStorage.getItem('authToken');
-  if (!token) {
-    throw new Error('No authentication token found');
-  }
-
-  const response = await fetch(`${API_CONFIG.baseURL}/test-series/form-data`, {
-    method: 'GET',
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
-    },
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json();
-    throw new Error(errorData.detail || 'Failed to fetch test series form data');
-  }
-
-  return response.json();
+  const response = await apiRequest<TestSeriesFormData>('GET', '/test-series/form-data');
+  return response.data;
 };
 
 interface TestSeriesResponse {
@@ -418,25 +260,8 @@ export const testSeriesApi = {
     level: string;
     language: string;
   }): Promise<TestSeriesResponse> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/test-series/form`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(data)
-    });
-
-    if (!response.ok) {
-      throw new Error('Failed to create test');
-    }
-
-    return response.json();
+    const response = await apiRequest<TestSeriesResponse>('POST', '/test-series/form', data);
+    return response.data;
   }
 };
 
@@ -523,49 +348,12 @@ export const validateUrl = async (url: string): Promise<UrlValidationResponse> =
 
 export const quizApi = {
   getQuestions: async (sessionId: number): Promise<QuestionResponse> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/test-series/question/${sessionId}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-
-    console.log(response);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to fetch questions');
-    }
-
-    return response.json();
+    const response = await apiRequest<QuestionResponse>('GET', `/test-series/question/${sessionId}`);
+    return response.data;
   },
 
   submitTest: async (data: SubmitTestRequest): Promise<SubmitTestResponse> => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      throw new Error('No authentication token found');
-    }
-
-    const response = await fetch(`${API_CONFIG.baseURL}/test-series/submit-test-session/`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to submit test');
-    }
-
-    return response.json();
+    const response = await apiRequest<SubmitTestResponse>('POST', '/test-series/submit-test-session/', data);
+    return response.data;
   },
 };

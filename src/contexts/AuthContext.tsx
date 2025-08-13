@@ -65,21 +65,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuth = async (): Promise<boolean> => {
     try {
+      console.log("🔍 Checking authentication...");
+
       // First try to get session from Supabase
       const { session, error } = await authHelpers.getSession();
 
       if (error) {
-        console.error("Error getting session:", error);
+        console.error("❌ Error getting Supabase session:", error);
         return false;
       }
 
       if (session?.user) {
+        console.log("✅ Supabase session found, user:", session.user.email);
         const convertedUser = convertSupabaseUser(session.user);
         setUser(convertedUser);
 
         // Store token for backward compatibility with existing API
         localStorage.setItem("authToken", session.access_token);
         localStorage.setItem("userData", JSON.stringify(convertedUser));
+        console.log("💾 Stored auth token and user data in localStorage");
 
         return true;
       }
@@ -88,35 +92,66 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const token = localStorage.getItem("authToken");
       const userData = localStorage.getItem("userData");
 
+      console.log(
+        "🔍 Checking localStorage - Token:",
+        !!token,
+        "UserData:",
+        !!userData
+      );
+
       if (token && userData) {
         try {
           const parsedUser = JSON.parse(userData);
-          
+          console.log("👤 Parsed user data:", parsedUser.email);
+
           // Validate token by making an API call
+          console.log("🔍 Validating token with API...");
           const { authApi } = await import("../lib/api-client");
           const response = await authApi.getAuthenticatedUser();
-          
-          if (response.data && response.data.data) {
+
+          console.log("📡 API response:", response);
+
+          // More flexible validation - check if the request was successful (status 200-299)
+          // and if we got any response data, even if it's null
+          if (response && response.status >= 200 && response.status < 300) {
             // Token is valid, set user
+            console.log("✅ Token is valid, setting user");
             setUser(parsedUser);
             return true;
           } else {
             // Token is invalid, clear storage
-            console.log("Invalid token found, clearing storage");
+            console.log("❌ Invalid token found, clearing storage");
             logout();
             return false;
           }
-        } catch (error) {
-          console.error("Error validating token:", error);
-          // Token validation failed, clear storage
-          logout();
-          return false;
+        } catch (error: any) {
+          console.error("❌ Error validating token:", error);
+          // Don't clear storage on network errors, only on authentication errors
+          if (error.status === 401 || error.status === 403) {
+            console.log("🔒 Authentication error, clearing storage");
+            logout();
+            return false;
+          } else {
+            console.log("🌐 Network error, keeping authentication data");
+            // For network errors, assume token is still valid
+            // Parse user data again for network error case
+            try {
+              const parsedUser = JSON.parse(userData);
+              setUser(parsedUser);
+              return true;
+            } catch (parseError) {
+              console.error("❌ Error parsing user data:", parseError);
+              logout();
+              return false;
+            }
+          }
         }
       }
 
+      console.log("❌ No valid authentication found");
       return false;
     } catch (error) {
-      console.error("Error checking auth:", error);
+      console.error("❌ Error checking auth:", error);
       return false;
     }
   };
@@ -163,7 +198,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const { authApi } = await import("../lib/api-client");
       const response = await authApi.getAuthenticatedUser();
 
-      if (response.data && response.data.data) {
+      const hasExamGoal =
+        response &&
+        response.status >= 200 &&
+        response.status < 300 &&
+        response.data &&
+        response.data.data !== null;
+
+      if (hasExamGoal) {
         setHasExamGoal(true);
         return true;
       } else {
@@ -189,8 +231,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // First check if user has exam goal
       const { authApi } = await import("../lib/api-client");
       const examGoalResponse = await authApi.getAuthenticatedUser();
+
+      // Check if the API call was successful and if user has exam goal data
       const hasExamGoal =
-        examGoalResponse.data && examGoalResponse.data.data !== null;
+        examGoalResponse &&
+        examGoalResponse.status >= 200 &&
+        examGoalResponse.status < 300 &&
+        examGoalResponse.data &&
+        examGoalResponse.data.data !== null;
 
       if (hasExamGoal) {
         // User has both name and exam goal
@@ -204,6 +252,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // User doesn't have exam goal, check if they have a name
       const userDetailsResponse = await authApi.getUserDetails();
       const hasName =
+        userDetailsResponse &&
+        userDetailsResponse.status >= 200 &&
+        userDetailsResponse.status < 300 &&
         userDetailsResponse.data?.data?.name &&
         userDetailsResponse.data.data.name.trim() !== "";
 
@@ -241,8 +292,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const response = await authApi.getUserDetails();
       console.log("User details API response:", response);
 
-      if (response.data?.data?.name && response.data.data.name.trim() !== "") {
-        console.log("User has name:", response.data.data.name);
+      const hasName =
+        response &&
+        response.status >= 200 &&
+        response.status < 300 &&
+        response.data?.data?.name &&
+        response.data.data.name.trim() !== "";
+
+      if (hasName) {
+        console.log("User has name:", response.data?.data?.name);
         setHasName(true);
         return true;
       } else {
