@@ -113,6 +113,9 @@ const CopyIcon = () => (
   />
 );
 const XIcon = () => <Icon path="M18 6L6 18 M6 6l12 12" className="w-5 h-5" />;
+
+const MaximizeIcon = () => <Icon path="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" className="w-5 h-5" />;
+const MinimizeIcon = () => <Icon path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" className="w-5 h-5" />;
 // --- Sub-Components for Modularity ---
 
 interface HeaderProps {
@@ -121,15 +124,11 @@ interface HeaderProps {
   onToggleVideo: () => void;
   isVideoVisible: boolean;
   onShare: () => void;
+  onToggleFullScreen: () => void;
+  isLeftColumnVisible: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({
-  videoDetail,
-  isLoading,
-  onToggleVideo,
-  isVideoVisible,
-  onShare,
-}) => (
+const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading, onToggleVideo, isVideoVisible, onShare, onToggleFullScreen, isLeftColumnVisible }) => (
   <header className="flex justify-between items-center mb-4 sm:mb-6 gap-4">
     <div className="flex-1 min-w-0">
       <h1 className="text-md text-gray-500 truncate">
@@ -141,19 +140,14 @@ const Header: React.FC<HeaderProps> = ({
       </h1>
     </div>
     <div className="flex items-center space-x-2 flex-shrink-0">
-      <button
-        onClick={onToggleVideo}
-        title={isVideoVisible ? "Hide Video" : "Show Video"}
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors"
-      >
+      <button onClick={onToggleVideo} title={isVideoVisible ? 'Hide Video' : 'Show Video'} className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors">
         {isVideoVisible ? <VideoOffIcon /> : <VideoOnIcon />}
       </button>
-      <button
-        onClick={onShare}
-        title="Share"
-        className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors"
-      >
+      <button onClick={onShare} title="Share" className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors">
         <ShareIcon />
+      </button>
+      <button onClick={onToggleFullScreen} title={isLeftColumnVisible ? 'Full Screen Chat' : 'Exit Full Screen'} className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors">
+        {isLeftColumnVisible ? <MaximizeIcon /> : <MinimizeIcon />}
       </button>
     </div>
   </header>
@@ -187,21 +181,19 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
         <div className="flex items-center border border-gray-700 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("chapters")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
-              activeTab === "chapters"
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${activeTab === "chapters"
                 ? "bg-gray-900 shadow-sm text-gray-100"
                 : "text-gray-400 hover:bg-gray-700"
-            }`}
+              }`}
           >
             <ChaptersIcon /> Chapters
           </button>
           <button
             onClick={() => setActiveTab("transcripts")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
-              activeTab === "transcripts"
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${activeTab === "transcripts"
                 ? "bg-gray-900 shadow-sm text-gray-100"
                 : "text-gray-400 hover:bg-gray-700"
-            }`}
+              }`}
           >
             <TranscriptIcon /> Transcripts
           </button>
@@ -301,6 +293,9 @@ const AITutorPanel: React.FC<{
   isChatLoading: boolean;
   chatError: string | null;
   onSendMessage: (message: string) => void;
+  
+  onToggleFullScreen: () => void;
+  isLeftColumnVisible: boolean;
 }> = ({
   currentMode,
   onModeChange,
@@ -309,55 +304,61 @@ const AITutorPanel: React.FC<{
   isChatLoading,
   chatError,
   onSendMessage,
+  onToggleFullScreen,
+  isLeftColumnVisible,
 }) => {
-  const modes: { key: LearningMode; label: string; icon: any }[] = [
-    { key: "chat", label: "Chat", icon: <ChatIcon /> },
-    { key: "flashcards", label: "Flashcards", icon: <FlashcardsIcon /> },
-    { key: "quiz", label: "Quiz", icon: <QuizIcon /> },
-    { key: "summary", label: "Summary", icon: <SummaryIcon /> },
-  ];
+    const modes: { key: LearningMode; label: string; icon: any }[] = [
+      { key: "chat", label: "Chat", icon: <ChatIcon /> },
+      { key: "flashcards", label: "Flashcards", icon: <FlashcardsIcon /> },
+      { key: "quiz", label: "Quiz", icon: <QuizIcon /> },
+      { key: "summary", label: "Summary", icon: <SummaryIcon /> },
+    ];
 
-  const components = {
-    chat: (
-      <Chat
-        videoId={videoId}
-        messages={chatMessages}
-        isLoading={isChatLoading}
-        error={chatError}
-        onSendMessage={onSendMessage}
-      />
-    ),
-    flashcards: <Flashcards />,
-    quiz: <Quiz />,
-    summary: <Summary />,
-  };
+    const components = {
+      chat: (
+        <Chat
+          videoId={videoId}
+          messages={chatMessages}
+          isLoading={isChatLoading}
+          error={chatError}
+          onSendMessage={onSendMessage}
+        />
+      ),
+      flashcards: <Flashcards />,
+      quiz: <Quiz />,
+      summary: <Summary />,
+    };
 
-  return (
-    <div className="rounded-xl border border-gray-700 bg-gray-800 flex flex-col h-[calc(100vh-50px)]">
-      <div className="p-2 bg-gray-800 border-b border-gray-700 rounded-t-xl">
-        <div className="flex items-center border border-gray-700 rounded-lg w-full">
-          {modes.map(({ key, label, icon }) => (
-            <button
-              key={key}
-              onClick={() => onModeChange(key)}
-              className={`flex items-center justify-center gap-2 w-full px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
-                currentMode === key
-                  ? "bg-gray-900 shadow-sm text-gray-100"
-                  : "text-gray-400 hover:bg-gray-700"
-              }`}
-            >
-              {icon} {label}
-            </button>
-          ))}
+    return (
+    <div className="rounded-xl border border-gray-700 bg-gray-800 flex flex-col h-full max-h-[90vh]">
+        <div className="relative p-3 bg-gray-800 border-b border-gray-700 rounded-t-xl">
+             <div className="flex items-center border border-gray-700 rounded-lg p-1 w-full overflow-x-auto pb-2 custom-scrollbar pr-12">
+                 {modes.map(({ key, label, icon }) => (
+                   <button
+                     key={key}
+                     onClick={() => onModeChange(key)}
+                     className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+                       currentMode === key
+                         ? "bg-gray-900 shadow-sm text-gray-100"
+                         : "text-gray-400 hover:bg-gray-700"
+                     }`}
+                   >
+                     {icon} {label}
+                   </button>
+                 ))}
+             </div>
+             <div className="absolute top-3 right-3">
+                <button onClick={onToggleFullScreen} title={isLeftColumnVisible ? 'Full Screen Chat' : 'Exit Full Screen'} className="p-2 text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors">
+                    {isLeftColumnVisible ? <MaximizeIcon /> : <MinimizeIcon />}
+                </button>
+             </div>
         </div>
-      </div>
-      {/* Component Container */}
-      <div className="flex-1 overflow-y-auto min-h-0 rounded-b-xl">
+      <div className="flex-1 overflow-hidden min-h-0">
         {components[currentMode]}
       </div>
     </div>
-  );
-};
+    );
+  };
 
 const ShareModal = ({ isOpen, onClose, url }) => {
   const [copySuccess, setCopySuccess] = useState("");
@@ -456,6 +457,7 @@ const VideoPage: React.FC = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
+  const [isLeftColumnVisible, setIsLeftColumnVisible] = useState(true);
 
   // State for learning mode
   const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
@@ -633,13 +635,16 @@ const VideoPage: React.FC = () => {
     <div className="bg-gray-900 min-h-screen font-sans text-gray-200">
       <div className="container mx-auto sm:px-4 lg:px-6 sm:py-6">
         <main className="grid grid-cols-1 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
-          <div className="xl:col-span-3 space-y-4 sm:space-y-6">
+          <div className={`xl:col-span-3 space-y-4 sm:space-y-6 ${isLeftColumnVisible ? '' : 'hidden'}`}>
             <Header
               videoDetail={videoDetail}
               isLoading={isLoadingVideo}
               onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
               isVideoVisible={isVideoVisible}
               onShare={() => setIsShareModalOpen(true)}
+
+              onToggleFullScreen={() => setIsLeftColumnVisible(!isLeftColumnVisible)}
+              isLeftColumnVisible={isLeftColumnVisible}
             />
 
             {isVideoVisible && (
@@ -656,7 +661,17 @@ const VideoPage: React.FC = () => {
               transcriptError={transcriptError}
             />
           </div>
-          <div className="xl:col-span-2">
+          <div className={`${isLeftColumnVisible ? 'xl:col-span-2' : 'xl:col-span-5'}`}>
+             {!isLeftColumnVisible && (
+                 <div className="flex justify-between items-center mb-4 sm:mb-6">
+                    <h1 className="text-xl sm:text-2xl font-bold text-gray-100 truncate">
+                        {isLoadingVideo ? <div className="h-8 bg-gray-700 rounded w-3/4 animate-pulse"></div> : videoDetail?.title || "Video Title"}
+                    </h1>
+                     <button onClick={() => setIsLeftColumnVisible(true)} title="Exit Full Screen" className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors">
+                        <MinimizeIcon />
+                     </button>
+                 </div>
+             )}
             <AITutorPanel
               currentMode={currentMode}
               onModeChange={handleModeChange}
