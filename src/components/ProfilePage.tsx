@@ -31,7 +31,7 @@ const PersonalizationIcon = () => (
   </svg>
 );
 const SecurityIcon = () => (
-  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><g stroke-width="0"/><g stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 7.5h0.008M12.5 12.5a5 5 0 1 0 -4.955 -4.327c0.048 0.362 0.072 0.543 0.057 0.658a0.708 0.708 0 0 1 -0.098 0.288c-0.057 0.101 -0.156 0.2 -0.355 0.399l-4.258 4.258c-0.144 0.144 -0.217 0.217 -0.268 0.3a0.833 0.833 0 0 0 -0.1 0.242C2.5 14.413 2.5 14.515 2.5 14.719V16.167c0 0.467 0 0.7 0.091 0.878a0.833 0.833 0 0 0 0.364 0.364C3.133 17.5 3.367 17.5 3.833 17.5h1.448c0.204 0 0.306 0 0.402 -0.023a0.833 0.833 0 0 0 0.242 -0.1c0.083 -0.051 0.156 -0.123 0.3 -0.267l4.258 -4.259c0.199 -0.199 0.298 -0.298 0.4 -0.355a0.708 0.708 0 0 1 0.287 -0.098c0.115 -0.017 0.296 0.008 0.658 0.057Q12.158 12.5 12.5 12.5" stroke="#fff" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><g stroke-width="0" /><g stroke-linecap="round" stroke-linejoin="round" /><path d="M12.5 7.5h0.008M12.5 12.5a5 5 0 1 0 -4.955 -4.327c0.048 0.362 0.072 0.543 0.057 0.658a0.708 0.708 0 0 1 -0.098 0.288c-0.057 0.101 -0.156 0.2 -0.355 0.399l-4.258 4.258c-0.144 0.144 -0.217 0.217 -0.268 0.3a0.833 0.833 0 0 0 -0.1 0.242C2.5 14.413 2.5 14.515 2.5 14.719V16.167c0 0.467 0 0.7 0.091 0.878a0.833 0.833 0 0 0 0.364 0.364C3.133 17.5 3.367 17.5 3.833 17.5h1.448c0.204 0 0.306 0 0.402 -0.023a0.833 0.833 0 0 0 0.242 -0.1c0.083 -0.051 0.156 -0.123 0.3 -0.267l4.258 -4.259c0.199 -0.199 0.298 -0.298 0.4 -0.355a0.708 0.708 0 0 1 0.287 -0.098c0.115 -0.017 0.296 0.008 0.658 0.057Q12.158 12.5 12.5 12.5" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" /></svg>
 );
 const BillingIcon = () => (
   <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>
@@ -279,6 +279,7 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
 
 // --- MAIN MODAL COMPONENT ---
 import { ModeToggle } from "./mode-toggle";
+import { AccentToggle } from "./accent-toggle";
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
@@ -378,15 +379,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               <ModeToggle />
             </SettingRow>
             <SettingRow title="Accent color">
-              <div className="flex items-center gap-2">
-                <span className="text-gray-400">Default</span>
-                <input
-                  type="color"
-                  value={accentColor}
-                  onChange={(e) => setAccentColor(e.target.value)}
-                  className="w-8 h-8 p-1 bg-gray-700 border border-gray-600 rounded-full cursor-pointer"
-                />
-              </div>
+              <AccentToggle />
             </SettingRow>
             <SettingRow title="Language">
               <select
