@@ -3,6 +3,7 @@ export const ROUTES = {
     // Main routes
     HOME: "/",
     DASHBOARD: "/home",
+    SPLASH: "/splash",
 
     // Test related routes
     TEST_SERIES: "/test-series",
@@ -19,6 +20,10 @@ export const ROUTES = {
     // User routes
     REFER_AND_EARN: "/refer-and-earn",
     PREMIUM: "/premium",
+
+    // Payment routes
+    PAYMENT: "/payment",
+    PAYMENT_SUCCESS: "/payment-success",
 
     // Tool routes
     CHAT: "/chat",
@@ -44,6 +49,7 @@ export const ROUTES = {
 export const ROUTE_NAMES = {
     [ROUTES.HOME]: "Home",
     [ROUTES.DASHBOARD]: "Home",
+    [ROUTES.SPLASH]: "Welcome",
     [ROUTES.TEST_SERIES]: "Test Series",
     [ROUTES.EXAM_INFO]: "Exam Information",
     [ROUTES.EXAM_RECONFIRM]: "Exam Reconfirmation",
@@ -54,6 +60,8 @@ export const ROUTE_NAMES = {
     [ROUTES.VIDEO_LEARNING]: "Video Learning",
     [ROUTES.REFER_AND_EARN]: "Refer and Earn",
     [ROUTES.PREMIUM]: "Premium",
+    [ROUTES.PAYMENT]: "Payment",
+    [ROUTES.PAYMENT_SUCCESS]: "Payment Success",
     [ROUTES.CHAT]: "Chat",
     [ROUTES.FLASHCARDS]: "Flashcards",
     [ROUTES.PREVIOUS_YEAR_PAPERS]: "Previous Year Papers",

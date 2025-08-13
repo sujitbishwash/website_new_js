@@ -19,10 +19,15 @@ export const navigationCategories = {
   user: [
     { path: '/referral', name: 'Referral Program' },
     { path: '/subscription', name: 'Subscription' },
+    { path: '/payment', name: 'Payment' },
+    { path: '/payment-success', name: 'Payment Success' },
   ],
   tools: [
     { path: '/chat', name: 'Chat' },
     { path: '/flashcards', name: 'Flashcards' },
+  ],
+  public: [
+    { path: '/splash', name: 'Welcome' },
   ]
 };
 

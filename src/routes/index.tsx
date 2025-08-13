@@ -5,8 +5,11 @@ import ComingSoonPage from "@/pages/new/ComingSoonPage";
 import ExamGoalPage from "@/pages/new/ExamGoalPage";
 import ExamsPage from "@/pages/new/ExamsPage";
 import LoginPage from "@/pages/new/LoginPage";
+import PaymentPage from "@/pages/new/PaymentPage";
+import PaymentSuccessPage from "@/pages/new/PaymentSuccessPage";
 import PersonalDetails from "@/pages/new/PersonalDetails";
 import PrivacyPolicy from "@/pages/new/PrivacyPolicy";
+import Splash from "@/pages/new/Splash";
 import TermsAndConditions from "@/pages/new/TermsAndConditions";
 import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
@@ -27,6 +30,13 @@ import { ROUTES } from "./constants";
 
 // Route configuration object for easy maintenance
 export const routes = [
+  // Public splash page - accessible without authentication
+  {
+    path: ROUTES.SPLASH,
+    element: <Splash />,
+    name: "Welcome",
+    description: "Welcome and onboarding page",
+  },
   {
     path: ROUTES.HOME,
     element: (
@@ -171,12 +181,24 @@ export const routes = [
     name: "Login",
     description: "User authentication page",
   },
-
   {
     path: "auth/callback",
     element: <AuthCallbackPage />,
     name: "Auth Callback",
     description: "OAuth callback handler",
+  },
+  // Payment pages - accessible without authentication
+  {
+    path: "payment",
+    element: <PaymentPage />,
+    name: "Payment",
+    description: "Payment processing page",
+  },
+  {
+    path: "payment-success",
+    element: <PaymentSuccessPage />,
+    name: "Payment Success",
+    description: "Payment success confirmation page",
   },
 
   // Catch-all route for 404 - must be last
