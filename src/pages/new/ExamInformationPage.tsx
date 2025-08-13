@@ -2,6 +2,7 @@
 // You can use this component by importing it and rendering it in your main App file.
 
 import { useLocation, useNavigate } from "react-router-dom";
+import { useUser } from "../../contexts/UserContext";
 import { ROUTES } from "../../routes/constants";
 
 // Icon components for the legend - using inline SVG for simplicity
@@ -78,6 +79,7 @@ const AnsweredAndMarkedIcon = () => (
 export default function ExamInformationPage() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { profile, examGoal } = useUser();
   const testId = location.state?.testId;
   const testConfig = location.state?.testConfig;
 
@@ -91,8 +93,17 @@ export default function ExamInformationPage() {
           </h1>
           <div className="flex items-center space-x-4">
             <div className="text-right hidden sm:block">
-              <p className="font-semibold text-white">Student Name</p>
-              <p className="text-xs text-gray-400">UID: 123456789</p>
+              <p className="font-semibold text-white">
+                {profile?.name || "Student Name"}
+              </p>
+              <p className="text-xs text-gray-400">
+                {profile?.email || "Email not available"}
+              </p>
+              {examGoal && (
+                <p className="text-xs text-blue-400">
+                  {examGoal.exam} - {examGoal.groupType}
+                </p>
+              )}
             </div>
             <img
               src="https://placehold.co/48x48/6366F1/FFFFFF?text=S"

@@ -1,5 +1,5 @@
-import type { User as SupabaseUser } from "@supabase/supabase-js";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { ApiResponse } from "../lib/api-client";
 import { authHelpers } from "../lib/supabase";
 
 interface User {
@@ -16,8 +16,8 @@ interface AuthContextType {
   examGoalLoading: boolean;
   hasName: boolean;
   nameLoading: boolean;
-  login: (token: string, userData?: Partial<User>) => void;
-  logout: () => void;
+  login: (token: string, userData?: Partial<User>) => Promise<void>;
+  logout: () => Promise<void>;
   checkAuth: () => Promise<boolean>;
   checkExamGoal: () => Promise<boolean>;
   checkUserDetails: () => Promise<boolean>;
@@ -26,7 +26,31 @@ interface AuthContextType {
     hasExamGoal: boolean;
     nextStep: "personal-details" | "exam-goal" | "dashboard";
   }>;
-  signInWithGoogle: () => Promise<{ data: any; error: any }>;
+  signInWithGoogle: () => Promise<any>;
+  // Get user data (from localStorage or API)
+  getUserData: () => Promise<ApiResponse<{
+    exam?: string;
+    group_type?: string;
+    name?: string;
+    email?: string;
+    id?: string;
+    phoneno?: string;
+    type?: string;
+    usercode?: string;
+  } | null> | null>;
+  // Force refresh user data (bypass localStorage)
+  refreshUserData: () => Promise<ApiResponse<{
+    exam?: string;
+    group_type?: string;
+    name?: string;
+    email?: string;
+    id?: string;
+    phoneno?: string;
+    type?: string;
+    usercode?: string;
+  } | null> | null>;
+  // Update user data in localStorage
+  updateLocalStorageUserData: (userData: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -39,11 +63,30 @@ export const useAuth = () => {
   return context;
 };
 
-interface AuthProviderProps {
-  children: React.ReactNode;
-}
+// Add cache for user data
+let userDataCache: {
+  data: {
+    exam?: string;
+    group_type?: string;
+    name?: string;
+    email?: string;
+    id?: string;
+    phoneno?: string;
+    type?: string;
+    usercode?: string;
+  } | null;
+  timestamp: number;
+  isFetching?: boolean;
+} | null = null;
 
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
+// Global flag to prevent multiple simultaneous API calls
+let isGlobalFetching = false;
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [hasExamGoal, setHasExamGoal] = useState(false);
@@ -51,53 +94,130 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [hasName, setHasName] = useState(false);
   const [nameLoading, setNameLoading] = useState(false);
 
-  // Convert Supabase user to our User interface
-  const convertSupabaseUser = (supabaseUser: SupabaseUser): User => {
-    return {
-      id: supabaseUser.id,
-      email: supabaseUser.email || "",
-      name:
-        supabaseUser.user_metadata?.full_name ||
-        supabaseUser.user_metadata?.name ||
-        "",
-    };
+  // Get user data with localStorage optimization
+  const getUserData = async () => {
+    console.log("🔍 getUserData called", new Date().toISOString());
+
+    // Check if cache is valid
+    if (
+      userDataCache &&
+      Date.now() - userDataCache.timestamp < CACHE_DURATION
+    ) {
+      console.log("📋 Using stored user data");
+      return {
+        data: userDataCache.data,
+        status: 200,
+      };
+    }
+
+    // Prevent multiple simultaneous API calls
+    if (isGlobalFetching) {
+      console.log("⏳ Global API call already in progress, waiting...");
+      // Wait for the current request to complete
+      while (isGlobalFetching) {
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      // Return the stored data that should now be available
+      if (
+        userDataCache &&
+        Date.now() - userDataCache.timestamp < CACHE_DURATION
+      ) {
+        console.log("📋 Using stored user data after waiting");
+        return {
+          data: userDataCache.data,
+          status: 200,
+        };
+      }
+    }
+
+    try {
+      console.log(
+        "📡 Fetching fresh user data from API",
+        new Date().toISOString()
+      );
+
+      // Mark as fetching to prevent duplicate calls
+      isGlobalFetching = true;
+
+      const { authApi } = await import("../lib/api-client");
+      const response = await authApi.getAuthenticatedUser();
+      console.log("✅ API call completed", new Date().toISOString());
+
+      // Update stored data
+      userDataCache = {
+        data: response.data || null, // API returns data directly, not wrapped in data.data
+        timestamp: Date.now(),
+      };
+
+      // Also update localStorage with the fresh data
+      updateLocalStorageUserData(response.data);
+
+      // Clear global fetching flag
+      isGlobalFetching = false;
+
+      return response;
+    } catch (error) {
+      console.error("❌ Error fetching user data:", error);
+
+      // If it's an authentication error, clear cache and auth data
+      if (error && typeof error === "object" && "status" in error) {
+        const apiError = error as any;
+        if (apiError.status === 401 || apiError.status === 403) {
+          console.log(
+            "🔒 Authentication error - clearing stored data and auth data"
+          );
+          userDataCache = null;
+          // Don't call logout here as it might cause infinite loops
+          // The calling function (checkUserState) will handle logout
+        }
+      }
+
+      // Clear global fetching flag on error
+      isGlobalFetching = false;
+      return null;
+    }
+  };
+
+  // Clear stored data when user logs out
+  const clearUserDataCache = () => {
+    console.log("🧹 Clearing stored user data");
+    userDataCache = null;
+    isGlobalFetching = false;
+  };
+
+  // Force refresh user data (bypass localStorage and fetch fresh data)
+  const refreshUserData = async () => {
+    console.log("🔄 Refreshing user data from API");
+    userDataCache = null; // Clear stored data
+    return await getUserData(); // This will fetch fresh data
+  };
+
+  // Update user data in localStorage
+  const updateLocalStorageUserData = (userData: any) => {
+    try {
+      if (userData) {
+        const userInfo = {
+          id: userData.id || "default-id",
+          email: userData.email || "",
+          name: userData.name || "",
+        };
+        localStorage.setItem("userData", JSON.stringify(userInfo));
+        console.log("✅ Updated user data in localStorage:", userInfo);
+      }
+    } catch (error) {
+      console.error("❌ Error updating user data in localStorage:", error);
+    }
   };
 
   const checkAuth = async (): Promise<boolean> => {
     try {
       console.log("🔍 Checking authentication...");
 
-      // First try to get session from Supabase
-      const { session, error } = await authHelpers.getSession();
-
-      if (error) {
-        console.error("❌ Error getting Supabase session:", error);
-        return false;
-      }
-
-      if (session?.user) {
-        console.log("✅ Supabase session found, user:", session.user.email);
-        const convertedUser = convertSupabaseUser(session.user);
-        setUser(convertedUser);
-
-        // Store token for backward compatibility with existing API
-        localStorage.setItem("authToken", session.access_token);
-        localStorage.setItem("userData", JSON.stringify(convertedUser));
-        console.log("💾 Stored auth token and user data in localStorage");
-
-        return true;
-      }
-
-      // Fallback to localStorage for backward compatibility
       const token = localStorage.getItem("authToken");
       const userData = localStorage.getItem("userData");
 
-      console.log(
-        "🔍 Checking localStorage - Token:",
-        !!token,
-        "UserData:",
-        !!userData
-      );
+      console.log("🔑 Token exists:", !!token);
+      console.log("👤 User data exists:", !!userData);
 
       if (token && userData) {
         try {
@@ -106,8 +226,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
           // Validate token by making an API call
           console.log("🔍 Validating token with API...");
-          const { authApi } = await import("../lib/api-client");
-          const response = await authApi.getAuthenticatedUser();
+          const response = await getUserData();
 
           console.log("📡 API response:", response);
 
@@ -156,7 +275,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const login = (token: string, userData?: Partial<User>) => {
+  const login = async (token: string, userData?: Partial<User>) => {
     localStorage.setItem("authToken", token);
 
     if (userData) {
@@ -168,6 +287,40 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem("userData", JSON.stringify(userInfo));
       setUser(userInfo);
     }
+
+    // After login, fetch and store the complete user profile
+    try {
+      console.log("🔄 Fetching complete user profile after login...");
+      const response = await getUserData();
+
+      if (
+        response &&
+        response.status >= 200 &&
+        response.status < 300 &&
+        response.data
+      ) {
+        const completeUserData = response.data;
+        console.log("📋 Complete user data fetched:", completeUserData);
+
+        // Update localStorage with complete user data
+        const updatedUserInfo = {
+          id: completeUserData.id || userData?.id || "default-id",
+          email: completeUserData.email || userData?.email || "",
+          name: completeUserData.name || userData?.name || "",
+        };
+
+        localStorage.setItem("userData", JSON.stringify(updatedUserInfo));
+        setUser(updatedUserInfo);
+
+        console.log("✅ Complete user profile stored in localStorage");
+      }
+    } catch (error) {
+      console.error(
+        "❌ Error fetching complete user profile after login:",
+        error
+      );
+      // Don't fail login if profile fetch fails
+    }
   };
 
   const logout = async () => {
@@ -175,6 +328,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setUser(null);
     setHasExamGoal(false);
     setHasName(false);
+    clearUserDataCache(); // Clear cache on logout
 
     // Clear localStorage
     localStorage.removeItem("authToken");
@@ -195,20 +349,28 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkExamGoal = async (): Promise<boolean> => {
     try {
       setExamGoalLoading(true);
-      const { authApi } = await import("../lib/api-client");
-      const response = await authApi.getAuthenticatedUser();
+
+      // Use dedicated getUserExamGoal API instead of checking /ums/me
+      const { examGoalApi } = await import("../lib/api-client");
+      const response = await examGoalApi.getUserExamGoal();
+
+      console.log("🎯 Exam goal API response:", response);
 
       const hasExamGoal =
         response &&
         response.status >= 200 &&
         response.status < 300 &&
-        response.data &&
-        response.data.data !== null;
+        response.data?.success &&
+        response.data?.data &&
+        response.data.data.exam &&
+        response.data.data.group_type;
 
       if (hasExamGoal) {
+        console.log("✅ User has exam goal:", response.data.data);
         setHasExamGoal(true);
         return true;
       } else {
+        console.log("❌ User does not have exam goal");
         setHasExamGoal(false);
         return false;
       }
@@ -228,53 +390,215 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     nextStep: "personal-details" | "exam-goal" | "dashboard";
   }> => {
     try {
-      // First check if user has exam goal
-      const { authApi } = await import("../lib/api-client");
-      const examGoalResponse = await authApi.getAuthenticatedUser();
+      console.log("🔍 Starting checkUserState...");
 
-      // Check if the API call was successful and if user has exam goal data
-      const hasExamGoal =
-        examGoalResponse &&
-        examGoalResponse.status >= 200 &&
-        examGoalResponse.status < 300 &&
-        examGoalResponse.data &&
-        examGoalResponse.data.data !== null;
+      // First check if user is authenticated (has valid token)
+      const token = localStorage.getItem("authToken");
+      const userData = localStorage.getItem("userData");
 
-      if (hasExamGoal) {
-        // User has both name and exam goal
-        return {
-          hasName: true,
-          hasExamGoal: true,
-          nextStep: "dashboard",
-        };
-      }
+      console.log("🔑 Token exists:", !!token);
+      console.log("👤 User data exists:", !!userData);
 
-      // User doesn't have exam goal, check if they have a name
-      const userDetailsResponse = await authApi.getUserDetails();
-      const hasName =
-        userDetailsResponse &&
-        userDetailsResponse.status >= 200 &&
-        userDetailsResponse.status < 300 &&
-        userDetailsResponse.data?.data?.name &&
-        userDetailsResponse.data.data.name.trim() !== "";
-
-      if (!hasName) {
-        // User needs to complete personal details
+      // If no token or user data, user is not authenticated
+      if (!token || !userData) {
+        console.log("❌ User not authenticated - no token or user data");
         return {
           hasName: false,
           hasExamGoal: false,
           nextStep: "personal-details",
         };
-      } else {
-        // User has name but no exam goal
+      }
+
+      // Parse user data from localStorage first
+      let parsedUserData: any;
+      try {
+        parsedUserData = JSON.parse(userData);
+        console.log("📋 Parsed user data from localStorage:", parsedUserData);
+      } catch (parseError) {
+        console.error(
+          "❌ Error parsing user data from localStorage:",
+          parseError
+        );
+        return {
+          hasName: false,
+          hasExamGoal: false,
+          nextStep: "personal-details",
+        };
+      }
+
+      // Check if user has a name from localStorage FIRST
+      const hasNameFromStorage =
+        parsedUserData?.name && parsedUserData.name.trim() !== "";
+      console.log(
+        "📝 Has name from localStorage:",
+        hasNameFromStorage,
+        "Name value:",
+        parsedUserData?.name
+      );
+
+      // If user has name in localStorage, we don't need to call the API for name check
+      if (hasNameFromStorage) {
+        console.log(
+          "✅ User has name in localStorage, skipping API call for name check"
+        );
+
+        // Only check exam goal if user has name
+        let hasExamGoal: boolean = false;
+        try {
+          const { examGoalApi } = await import("../lib/api-client");
+          const examGoalResponse = await examGoalApi.getUserExamGoal();
+
+          hasExamGoal = !!(
+            examGoalResponse &&
+            examGoalResponse.status >= 200 &&
+            examGoalResponse.status < 300 &&
+            examGoalResponse.data?.success &&
+            examGoalResponse.data?.data &&
+            examGoalResponse.data.data.exam &&
+            examGoalResponse.data.data.group_type
+          );
+
+          console.log(
+            "🎯 Exam goal check:",
+            hasExamGoal,
+            "Exam:",
+            examGoalResponse?.data?.data?.exam,
+            "Group:",
+            examGoalResponse?.data?.data?.group_type
+          );
+        } catch (examGoalError) {
+          console.error("❌ Error checking exam goal:", examGoalError);
+          hasExamGoal = false;
+        }
+
+        if (hasExamGoal) {
+          console.log(
+            "✅ User has both name (from localStorage) and exam goal, going to dashboard"
+          );
+          return {
+            hasName: true,
+            hasExamGoal: true,
+            nextStep: "dashboard",
+          };
+        } else {
+          console.log(
+            "✅ User has name (from localStorage) but no exam goal, going to exam goal"
+          );
+          return {
+            hasName: true,
+            hasExamGoal: false,
+            nextStep: "exam-goal",
+          };
+        }
+      }
+
+      // If we reach here, user doesn't have name in localStorage, so we need to call API
+      console.log(
+        "📡 User doesn't have name in localStorage, calling API to check..."
+      );
+      const response = await getUserData();
+      console.log("📊 /ums/me API response:", response);
+
+      // Check if API call failed (including 401/403 authentication errors)
+      if (!response || response.status < 200 || response.status >= 300) {
+        console.log("❌ API call failed or unauthorized");
+
+        // If it's an authentication error (401/403), user is logged out
+        if (response?.status === 401 || response?.status === 403) {
+          console.log("🔒 Authentication error - user logged out");
+          // Clear authentication data
+          logout();
+        }
+
+        return {
+          hasName: false,
+          hasExamGoal: false,
+          nextStep: "personal-details",
+        };
+      }
+
+      const userDataFromAPI = response.data;
+      console.log("📋 User data from API:", userDataFromAPI);
+
+      // Check if user has a name from API
+      const hasNameFromAPI =
+        userDataFromAPI?.name && userDataFromAPI.name.trim() !== "";
+      console.log(
+        "📝 Has name from API:",
+        hasNameFromAPI,
+        "Name value:",
+        userDataFromAPI?.name
+      );
+
+      // Check if user has exam goal using dedicated API
+      let hasExamGoal: boolean = false;
+      try {
+        const { examGoalApi } = await import("../lib/api-client");
+        const examGoalResponse = await examGoalApi.getUserExamGoal();
+
+        hasExamGoal = !!(
+          examGoalResponse &&
+          examGoalResponse.status >= 200 &&
+          examGoalResponse.status < 300 &&
+          examGoalResponse.data?.success &&
+          examGoalResponse.data?.data &&
+          examGoalResponse.data.data.exam &&
+          examGoalResponse.data.data.group_type
+        );
+
+        console.log(
+          "🎯 Exam goal check:",
+          hasExamGoal,
+          "Exam:",
+          examGoalResponse?.data?.data?.exam,
+          "Group:",
+          examGoalResponse?.data?.data?.group_type
+        );
+      } catch (examGoalError) {
+        console.error("❌ Error checking exam goal:", examGoalError);
+        hasExamGoal = false;
+      }
+
+      if (hasNameFromAPI && hasExamGoal) {
+        console.log(
+          "✅ User has both name (from API) and exam goal, going to dashboard"
+        );
+        return {
+          hasName: true,
+          hasExamGoal: true,
+          nextStep: "dashboard",
+        };
+      } else if (hasNameFromAPI && !hasExamGoal) {
+        console.log(
+          "✅ User has name (from API) but no exam goal, going to exam goal"
+        );
         return {
           hasName: true,
           hasExamGoal: false,
           nextStep: "exam-goal",
         };
+      } else {
+        console.log("❌ User needs personal details");
+        return {
+          hasName: false,
+          hasExamGoal: false,
+          nextStep: "personal-details",
+        };
       }
     } catch (error) {
-      console.error("Error checking user state:", error);
+      console.error("❌ Error checking user state:", error);
+
+      // If it's an authentication error, clear auth data
+      if (error && typeof error === "object" && "status" in error) {
+        const apiError = error as any;
+        if (apiError.status === 401 || apiError.status === 403) {
+          console.log(
+            "🔒 Authentication error in catch block - clearing auth data"
+          );
+          logout();
+        }
+      }
+
       // Fallback to personal details page
       return {
         hasName: false,
@@ -288,19 +612,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setNameLoading(true);
       console.log("Checking user details...");
-      const { authApi } = await import("../lib/api-client");
-      const response = await authApi.getUserDetails();
+      const response = await getUserData();
       console.log("User details API response:", response);
 
       const hasName =
         response &&
         response.status >= 200 &&
         response.status < 300 &&
-        response.data?.data?.name &&
-        response.data.data.name.trim() !== "";
+        response.data?.name &&
+        response.data.name.trim() !== "";
 
       if (hasName) {
-        console.log("User has name:", response.data?.data?.name);
+        console.log("User has name:", response.data?.name);
         setHasName(true);
         return true;
       } else {
@@ -341,6 +664,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkUserDetails,
     checkUserState,
     signInWithGoogle,
+    getUserData,
+    refreshUserData,
+    updateLocalStorageUserData,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

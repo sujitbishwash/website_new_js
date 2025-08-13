@@ -14,8 +14,15 @@ const apiClient = axios.create(API_CONFIG);
 // Add request interceptor to add auth token
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem('authToken');
+  console.log("🔑 Request interceptor - Token exists:", !!token);
+  console.log("🔑 Request interceptor - Token value:", token ? `${token.substring(0, 20)}...` : "null");
+  console.log("🔑 Request interceptor - URL:", config.url);
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log("🔑 Request interceptor - Authorization header set");
+  } else {
+    console.log("🔑 Request interceptor - No token found, request will be unauthorized");
   }
   return config;
 });
@@ -41,6 +48,9 @@ export const apiRequest = async <T>(
   config?: { headers?: Record<string, string> }
 ): Promise<ApiResponse<T>> => {
   try {
+    console.log(`🌐 Making ${method} request to:`, endpoint);
+    console.log(`🌐 Request data:`, data);
+
     const response = await apiClient.request({
       method,
       url: endpoint,
@@ -48,11 +58,23 @@ export const apiRequest = async <T>(
       headers: config?.headers,
     });
 
+    console.log(`✅ ${method} ${endpoint} response:`, response.data);
+    console.log(`✅ ${method} ${endpoint} status:`, response.status);
+
     return {
       data: response.data,
       status: response.status,
     };
   } catch (error: any) {
+    console.error("❌ API Request Error:", {
+      status: error.response?.status,
+      statusText: error.response?.statusText,
+      data: error.response?.data,
+      message: error.message,
+      url: error.config?.url,
+      method: error.config?.method
+    });
+
     throw {
       message: error.response?.data?.message || 'An error occurred',
       status: error.response?.status || 500,
@@ -63,13 +85,13 @@ export const apiRequest = async <T>(
 // Auth related API calls
 export const authApi = {
   sendOtp: async (email: string) => {
-    return apiRequest<{ data: string }>('POST', '/ums/send-otp', {
+    return apiRequest<{ success: boolean; message: string }>('POST', '/ums/send-otp', {
       email,
     });
   },
 
   verifyOtp: async (email: string, otp: string) => {
-    return apiRequest<{ access_token: string }>('POST', '/ums/verifi-otp', {
+    return apiRequest<{ success: boolean; access_token: string; message?: string }>('POST', '/ums/verifi-otp', {
       email,
       otp,
     });
@@ -85,12 +107,15 @@ export const authApi = {
 
   // Get authenticated user data (for exam goal check)
   getAuthenticatedUser: async () => {
-    return apiRequest<{ data: { exam: string; group_type: string } | null }>('GET', '/ums/me');
+    console.log("🚨 DIRECT API CALL to getAuthenticatedUser", new Date().toISOString());
+    return apiRequest<{ exam?: string; group_type?: string; name?: string; email?: string; id?: string; otp?: string; password?: string; phoneno?: string; type?: string; usercode?: string }>('GET', '/ums/me');
   },
 
-  // Get user details (for profile information)
-  getUserDetails: async () => {
-    return apiRequest<{ success: boolean; data: { name?: string; email: string; id: string } | null }>('GET', '/ums/user-details');
+
+
+  // Update user details
+  updateUserDetails: async (userData: { name: string; gender?: string; dateOfBirth?: string }) => {
+    return apiRequest<{ success: boolean; message: string }>('PUT', '/ums/me', userData);
   }
 };
 
@@ -112,7 +137,7 @@ export const examGoalApi = {
     });
   },
   getUserExamGoal: async () => {
-    return apiRequest<{ success: boolean; data: { exam: string; group_type: string } | null }>('GET', '/exam-goal/user');
+    return apiRequest<{ success: boolean; data: { exam: string; group_type: string } | null }>('GET', '/exam-goal');
   }
 };
 

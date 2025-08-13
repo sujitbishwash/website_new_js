@@ -1,7 +1,7 @@
+import { useUser } from "@/contexts/UserContext";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import React, { useEffect, useRef, useState } from "react";
-import { useUser } from "@/contexts/UserContext";
 
 // --- TYPE DEFINITIONS ---
 type MenuItem = {
@@ -54,12 +54,19 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { profile, isLoading, error } = useUser();
+  const { profile, isLoading, error, isDataLoaded, isBackgroundLoading } =
+    useUser();
 
   // Debug logging
-  console.log('MoreOptions - Profile:', profile);
-  console.log('MoreOptions - Loading:', isLoading);
-  console.log('MoreOptions - Error:', error);
+  console.log("MoreOptions - Profile:", profile);
+  console.log("MoreOptions - Loading:", isLoading);
+  console.log("MoreOptions - Error:", error);
+  console.log("MoreOptions - Data Loaded:", isDataLoaded);
+  console.log("MoreOptions - Background Loading:", isBackgroundLoading);
+  console.log(
+    "MoreOptions - Email being displayed:",
+    profile?.email || "user@example.com"
+  );
 
   const handleExamConfigurationClick = () => {
     onExamConfigurationClick();
@@ -197,8 +204,18 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
               {isLoading ? "Loading..." : profile?.email || "user@example.com"}
             </p>
             <p className="font-medium text-muted-foreground text-xs">
-              {error ? "Error loading profile" : "Free Plan"}
+              {error
+                ? "Error loading profile"
+                : isDataLoaded
+                ? "Free Plan"
+                : "Free Plan"}
             </p>
+            {isBackgroundLoading && (
+              <div className="flex items-center space-x-1 mt-1">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-blue-400">Syncing...</span>
+              </div>
+            )}
           </div>
         </div>
         <Icon
@@ -317,10 +334,10 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             )}
           </div>
         </div>
-             )}
-     </div>
-   );
- };
+      )}
+    </div>
+  );
+};
 
 const Moreoptions = ({
   isContracted,
@@ -354,13 +371,13 @@ const Moreoptions = ({
           .animate-fade-in-up { animation: fade-in-up 0.2s ease-out; }
         `}</style>
       <div>
-                 <ProfileMenu
-           isContracted={isContracted}
-           onLogoutClick={onLogoutClick}
-           onProfileClick={onProfileClick}
-           onUpgradeClick={onUpgradeClick}
-           onExamConfigurationClick={onExamConfigurationClick}
-         />
+        <ProfileMenu
+          isContracted={isContracted}
+          onLogoutClick={onLogoutClick}
+          onProfileClick={onProfileClick}
+          onUpgradeClick={onUpgradeClick}
+          onExamConfigurationClick={onExamConfigurationClick}
+        />
       </div>
     </div>
   );

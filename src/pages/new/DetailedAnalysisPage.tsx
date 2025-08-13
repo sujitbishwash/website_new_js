@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useUser } from "../../contexts/UserContext";
 
 // --- Type Definitions ---
 interface PerformanceMetricProps {
@@ -164,9 +165,10 @@ export default function DetailedAnalysisTestPage() {
   const [openSection, setOpenSection] = useState<string | null>(
     "general-intelligence"
   );
+  const { profile, examGoal } = useUser();
 
   const toggleSection = (section: string) => {
-    setOpenSection(openSection === section ? null : section);
+    setOpenSection(openSection === section ? null : null);
   };
 
   const reasoningTopicData = [
@@ -274,15 +276,38 @@ export default function DetailedAnalysisTestPage() {
   ];
 
   return (
-    <div className="bg-slate-50 min-h-screen p-2 sm:p-6 lg:p-8 font-sans">
-      <div className="max-w-7xl mx-auto">
-        {/* --- Header --- */}
-        <header className="mb-8 pb-4 border-b border-gray-200">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">
-            SSC CGL Tier 1 - Mock 5
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header with User Info */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Detailed Analysis Report
           </h1>
-          <p className="text-sm text-gray-500 mt-2">Taken on: 2024-07-20</p>
-        </header>
+          {profile && (
+            <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="text-gray-500 font-medium">Student:</span>
+                  <span className="ml-2 text-gray-900">
+                    {profile.name || "Not set"}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-gray-500 font-medium">Email:</span>
+                  <span className="ml-2 text-gray-900">{profile.email}</span>
+                </div>
+                {examGoal && (
+                  <div>
+                    <span className="text-gray-500 font-medium">
+                      Exam Goal:
+                    </span>
+                    <span className="ml-2 text-gray-900">{examGoal.exam}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
         {/* --- Main Content Grid (2 Columns on Large Screens) --- */}
         <div className="lg:grid lg:grid-cols-12 lg:gap-8">

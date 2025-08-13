@@ -2,13 +2,13 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import {
-  markAsReturningUser,
-  markSplashAsSeen,
-  resetFirstTimeUser,
-  hasValidAuthToken,
   clearAuthData,
   getAuthToken,
   getUserData,
+  hasValidAuthToken,
+  markAsReturningUser,
+  markSplashAsSeen,
+  resetFirstTimeUser,
 } from "../lib/utils";
 import { ROUTES } from "../routes/constants";
 
@@ -191,17 +191,17 @@ interface NotificationSettingRowProps {
   manageLink?: boolean;
 }
 
-// --- MOCK DATA & CONSTANTS ---
+// --- DYNAMIC USER PROFILE CREATION ---
 const createInitialUserProfile = (profile: any): UserProfile => ({
-  name: profile?.name || "User",
-  email: profile?.email || "user@example.com",
-  mobile: profile?.phone || "+1 (555) 123-4567",
-  address: "123 Learning Lane, Apt 4B",
-  city: "Eduville",
-  state: "Knowledge",
-  country: "United States",
-  gender: "Prefer not to say",
-  dob: "1995-08-15",
+  name: profile?.name || "Not set",
+  email: profile?.email || "Not set",
+  mobile: profile?.phone || profile?.phoneno || "Not set",
+  address: profile?.address || "Not set",
+  city: profile?.city || "Not set",
+  state: profile?.state || "Not set",
+  country: profile?.country || "Not set",
+  gender: profile?.gender || "Not set",
+  dob: profile?.dateOfBirth || profile?.dob || "Not set",
 });
 
 const countries = [
@@ -256,7 +256,31 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
         autoComplete="off"
       />
     ) : (
-      <p className="mt-1 text-base text-white">{value}</p>
+      <div className="flex items-center gap-2">
+        <p
+          className={`mt-1 text-base ${
+            value === "Not set" ? "text-gray-500 italic" : "text-white"
+          }`}
+        >
+          {value}
+        </p>
+        {value !== "Not set" && (
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900 text-green-300">
+            <svg
+              className="w-3 h-3 mr-1"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
+              <path
+                fillRule="evenodd"
+                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Set
+          </span>
+        )}
+      </div>
     )}
   </div>
 );
@@ -385,6 +409,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("General");
   const modalRef = useRef<HTMLDivElement>(null); // Create a ref for the modal content
+
+  // Update userProfile when profile from UserContext changes
+  useEffect(() => {
+    if (profile) {
+      console.log("🔄 ProfilePage: Profile updated from UserContext:", profile);
+      setUserProfile(createInitialUserProfile(profile));
+    }
+  }, [profile]);
 
   // State for new "General" settings
   const [accentColor, setAccentColor] = useState("#3b82f6");
@@ -542,13 +574,55 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 <p className="mt-1 text-gray-400">
                   View and edit your personal information.
                 </p>
+                {profile && (
+                  <div className="mt-2 text-xs text-gray-500">
+                    <span className="inline-flex items-center gap-1">
+                      <svg
+                        className="w-3 h-3"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                      Data synced from your account
+                    </span>
+                  </div>
+                )}
               </div>
-              <button
-                onClick={toggleEditMode}
-                className="px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg focus:shadow-blue-500/50 bg-gradient-to-r from-blue-600 to-blue-700"
-              >
-                {isEditing ? "Save Changes" : "Edit Profile"}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    console.log("🔄 ProfilePage: Manual refresh requested");
+                    // This will trigger a re-render when profile changes
+                  }}
+                  className="px-3 py-2 text-sm font-semibold text-gray-300 rounded-lg border border-gray-600 hover:bg-gray-700 transition-colors"
+                  title="Refresh profile data"
+                >
+                  <svg
+                    className="w-4 h-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                    />
+                  </svg>
+                </button>
+                <button
+                  onClick={toggleEditMode}
+                  className="px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg focus:shadow-blue-500/50 bg-gradient-to-r from-blue-600 to-blue-700"
+                >
+                  {isEditing ? "Save Changes" : "Edit Profile"}
+                </button>
+              </div>
             </div>
 
             <hr className="border-t border-gray-700" />
@@ -627,6 +701,54 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 onChange={handleInputChange}
                 options={countries}
               />
+
+              {/* Exam Goal Information */}
+              {profile && (
+                <>
+                  <div className="col-span-1 md:col-span-2">
+                    <h3 className="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">
+                      Exam Goal Information
+                    </h3>
+                  </div>
+                  <ProfileField
+                    label="Exam Goal"
+                    name="examGoal"
+                    value={profile.examGoal?.exam || "Not set"}
+                    isEditing={false}
+                    onChange={() => {}}
+                  />
+                  <ProfileField
+                    label="Group Type"
+                    name="groupType"
+                    value={profile.examGoal?.groupType || "Not set"}
+                    isEditing={false}
+                    onChange={() => {}}
+                  />
+                </>
+              )}
+
+              {/* Debug Information */}
+              {process.env.NODE_ENV === "development" && profile && (
+                <div className="col-span-1 md:col-span-2 mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                  <h4 className="text-sm font-medium text-gray-400 mb-2">
+                    Debug Info (Development Only)
+                  </h4>
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <div>
+                      <strong>Profile ID:</strong> {profile.id || "N/A"}
+                    </div>
+                    <div>
+                      <strong>Last Updated:</strong>{" "}
+                      {profile.updatedAt
+                        ? new Date(profile.updatedAt).toLocaleString()
+                        : "N/A"}
+                    </div>
+                    <div>
+                      <strong>Data Source:</strong> UserContext
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -774,99 +896,105 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 </div>
               </SettingRow>
 
-                             <SettingRow
-                 title="Local Storage Status"
-                 description="Current state of splash screen related localStorage values."
-               >
-                 <div className="bg-gray-700 p-4 rounded-lg">
-                   <div className="text-sm space-y-2">
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">First Time User:</span>
-                       <span className="text-white">
-                         {localStorage.getItem("aipadhai_first_time_user") ===
-                         null
-                           ? "Yes (null)"
-                           : "No (false)"}
-                       </span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">Has Seen Splash:</span>
-                       <span className="text-white">
-                         {localStorage.getItem("aipadhai_has_seen_splash") ===
-                         "true"
-                           ? "Yes"
-                           : "No"}
-                       </span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">Should Show Splash:</span>
-                       <span className="text-white">
-                         {localStorage.getItem("aipadhai_first_time_user") ===
-                           null &&
-                         localStorage.getItem("aipadhai_has_seen_splash") !==
-                           "true"
-                           ? "Yes"
-                           : "No"}
-                       </span>
-                     </div>
-                   </div>
-                 </div>
-               </SettingRow>
+              <SettingRow
+                title="Local Storage Status"
+                description="Current state of splash screen related localStorage values."
+              >
+                <div className="bg-gray-700 p-4 rounded-lg">
+                  <div className="text-sm space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">First Time User:</span>
+                      <span className="text-white">
+                        {localStorage.getItem("aipadhai_first_time_user") ===
+                        null
+                          ? "Yes (null)"
+                          : "No (false)"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Has Seen Splash:</span>
+                      <span className="text-white">
+                        {localStorage.getItem("aipadhai_has_seen_splash") ===
+                        "true"
+                          ? "Yes"
+                          : "No"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Should Show Splash:</span>
+                      <span className="text-white">
+                        {localStorage.getItem("aipadhai_first_time_user") ===
+                          null &&
+                        localStorage.getItem("aipadhai_has_seen_splash") !==
+                          "true"
+                          ? "Yes"
+                          : "No"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </SettingRow>
 
-               <SettingRow
-                 title="Authentication Management"
-                 description="Manage authentication state and tokens for testing."
-               >
-                 <div className="flex flex-col gap-3">
-                   <button
-                     onClick={() => {
-                       clearAuthData();
-                       alert('Authentication data has been cleared. You will need to login again.');
-                     }}
-                     className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                   >
-                     Clear Auth Data
-                   </button>
-                   <button
-                     onClick={() => {
-                       const token = getAuthToken();
-                       const userData = getUserData();
-                       alert(`Auth Token: ${token ? 'Present' : 'Not found'}\nUser Data: ${userData ? 'Present' : 'Not found'}`);
-                     }}
-                     className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
-                   >
-                     Check Auth Status
-                   </button>
-                 </div>
-               </SettingRow>
+              <SettingRow
+                title="Authentication Management"
+                description="Manage authentication state and tokens for testing."
+              >
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      clearAuthData();
+                      alert(
+                        "Authentication data has been cleared. You will need to login again."
+                      );
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                  >
+                    Clear Auth Data
+                  </button>
+                  <button
+                    onClick={() => {
+                      const token = getAuthToken();
+                      const userData = getUserData();
+                      alert(
+                        `Auth Token: ${
+                          token ? "Present" : "Not found"
+                        }\nUser Data: ${userData ? "Present" : "Not found"}`
+                      );
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
+                  >
+                    Check Auth Status
+                  </button>
+                </div>
+              </SettingRow>
 
-               <SettingRow
-                 title="Authentication Status"
-                 description="Current authentication state."
-               >
-                 <div className="bg-gray-700 p-4 rounded-lg">
-                   <div className="text-sm space-y-2">
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">Has Valid Token:</span>
-                       <span className="text-white">
-                         {hasValidAuthToken() ? "Yes" : "No"}
-                       </span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">Auth Token:</span>
-                       <span className="text-white">
-                         {getAuthToken() ? "Present" : "Not found"}
-                       </span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">User Data:</span>
-                       <span className="text-white">
-                         {getUserData() ? "Present" : "Not found"}
-                       </span>
-                     </div>
-                   </div>
-                 </div>
-               </SettingRow>
+              <SettingRow
+                title="Authentication Status"
+                description="Current authentication state."
+              >
+                <div className="bg-gray-700 p-4 rounded-lg">
+                  <div className="text-sm space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Has Valid Token:</span>
+                      <span className="text-white">
+                        {hasValidAuthToken() ? "Yes" : "No"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Auth Token:</span>
+                      <span className="text-white">
+                        {getAuthToken() ? "Present" : "Not found"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">User Data:</span>
+                      <span className="text-white">
+                        {getUserData() ? "Present" : "Not found"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </SettingRow>
             </div>
           </div>
         );

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useUser } from "../../contexts/UserContext";
 import { ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
@@ -45,6 +46,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
   const navigate = useNavigate();
   const [isConfirmed, setIsConfirmed] = useState(false);
   const location = useLocation();
+  const { profile, examGoal } = useUser();
   const testId = location.state?.testId;
   const testConfig = location.state?.testConfig;
 
@@ -55,9 +57,29 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
         {/* Adjusted max-width for a more centered, single-column layout */}
         {/* Top Header */}
         <header className="flex justify-between items-center mb-6">
-          <h1 className="text-lg md:text-xl font-semibold text-gray-100">
-            {examDetails.title}
-          </h1>
+          <div>
+            <h1 className="text-lg md:text-xl font-semibold text-gray-100">
+              {examDetails.title}
+            </h1>
+            {/* User Profile Info */}
+            {profile && (
+              <div className="mt-2 text-sm text-gray-400">
+                <span className="mr-4">
+                  <span className="text-gray-500">Student:</span>{" "}
+                  {profile.name || "Not set"}
+                </span>
+                <span className="mr-4">
+                  <span className="text-gray-500">Email:</span> {profile.email}
+                </span>
+                {examGoal && (
+                  <span>
+                    <span className="text-gray-500">Exam Goal:</span>{" "}
+                    {examGoal.exam}
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
           <span className="bg-gray-700 text-sm px-3 py-1 rounded-md">
             Maximum Marks: {examDetails.maxMarks}
           </span>

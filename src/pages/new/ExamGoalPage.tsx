@@ -3,6 +3,7 @@ import { theme } from "@/styles/theme";
 import { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import { useUser } from "../../contexts/UserContext";
 import { examGoalApi, ExamType } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 
@@ -91,7 +92,8 @@ const Dropdown: FC<DropdownProps> = ({
 // Main Card Component
 const ExamGoalSelector: FC = () => {
   const navigate = useNavigate();
-  const { checkExamGoal } = useAuth();
+  const { checkExamGoal, refreshUserData } = useAuth();
+  const { clearCache } = useUser();
   const [examType, setExamType] = useState<string>("");
   const [specificExam, setSpecificExam] = useState<string>("");
   const [examData, setExamData] = useState<ExamData>({});
@@ -99,6 +101,25 @@ const ExamGoalSelector: FC = () => {
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFormCompleted, setIsFormCompleted] = useState(false);
+
+  // Navigation guard to prevent leaving without completing
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (!isFormCompleted && (examType || specificExam)) {
+        e.preventDefault();
+        e.returnValue =
+          "You have unsaved changes. Are you sure you want to leave?";
+        return e.returnValue;
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isFormCompleted, examType, specificExam]);
 
   // Fetch exam data from API
   useEffect(() => {
@@ -147,21 +168,52 @@ const ExamGoalSelector: FC = () => {
   const handleSubmit = async () => {
     if (!examType || !specificExam) return;
 
+    console.log("🚀 Starting exam goal submission...", {
+      examType,
+      specificExam,
+    });
+
     try {
       setIsSubmitting(true);
 
       // commenting until the API is ready
       const response = await examGoalApi.addExamGoal(specificExam, examType);
+      console.log("📡 API Response:", response);
+
       if (response.data.success) {
+        console.log("✅ Exam goal added successfully:", response.data.message);
+
+        // Clear all caches to ensure fresh data
+        console.log("🧹 Clearing caches...");
+        clearCache();
+
+        // Force refresh the user data to get the updated exam goal
+        console.log("🔄 Force refreshing user data...");
+        await refreshUserData();
+
         // Update exam goal state
+        console.log("🔍 Checking exam goal state...");
         await checkExamGoal();
+
+        // Mark form as completed to allow navigation
+        setIsFormCompleted(true);
+
         // Navigate to dashboard or show success message
         setIsModalOpen(true);
-        console.log("Exam goal added successfully:", response.data.message);
-        // You can add navigation logic here
+
+        // Navigate to home page immediately after successful submission
+        console.log("🏠 Navigating to home page...");
+        navigate(ROUTES.HOME);
+      } else {
+        console.log("❌ API call failed:", response.data);
       }
     } catch (err: any) {
-      console.error("Failed to add exam goal:", err.message);
+      console.error("❌ Failed to add exam goal:", err);
+      console.error("❌ Error details:", {
+        message: err.message,
+        status: err.status,
+        data: err.data,
+      });
       // You can add error handling logic here
     } finally {
       setIsSubmitting(false);
@@ -255,7 +307,7 @@ const ExamGoalSelector: FC = () => {
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
-          navigate(ROUTES.DASHBOARD);
+          navigate(ROUTES.HOME);
         }}
       />
     </div>
@@ -267,10 +319,10 @@ const ExamGoalPage: FC = () => {
   const { isAuthenticated, isLoading, hasExamGoal } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect to dashboard if user is authenticated and has exam goal
+  // Redirect to home if user is authenticated and has exam goal
   useEffect(() => {
     if (!isLoading && isAuthenticated && hasExamGoal) {
-      navigate(ROUTES.DASHBOARD, { replace: true });
+      navigate(ROUTES.HOME, { replace: true });
     }
   }, [isAuthenticated, isLoading, hasExamGoal, navigate]);
 
