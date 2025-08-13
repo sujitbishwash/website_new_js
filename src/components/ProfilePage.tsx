@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
+import {
+  markAsReturningUser,
+  markSplashAsSeen,
+  resetFirstTimeUser,
+} from "../lib/utils";
+import { ROUTES } from "../routes/constants";
 
 //import { useNavigate } from "react-router-dom";
 
@@ -82,6 +89,22 @@ const SecurityIcon = () => (
     strokeLinejoin="round"
   >
     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+  </svg>
+);
+
+const DevelopmentIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="20"
+    height="20"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
+    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
   </svg>
 );
 const BillingIcon = () => (
@@ -195,6 +218,7 @@ const navItems = [
   { name: "Personalization", icon: PersonalizationIcon },
   { name: "Plan and Billing", icon: BillingIcon },
   { name: "Privacy and Security", icon: SecurityIcon },
+  { name: "Development", icon: DevelopmentIcon },
 ];
 
 const features = [
@@ -349,6 +373,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   onClose,
   onUpgradeClick,
 }) => {
+  const navigate = useNavigate();
   const { profile } = useUser();
   const [userProfile, setUserProfile] = useState<UserProfile>(() =>
     createInitialUserProfile(profile)
@@ -693,6 +718,97 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 Log out all
               </button>
             </SettingRow>
+          </div>
+        );
+      case "Development":
+        return (
+          <div>
+            <h1 className="text-3xl font-bold text-white mb-6">
+              Development Tools
+            </h1>
+            <p className="text-gray-400 mb-6">
+              Development and testing utilities for debugging purposes.
+            </p>
+
+            <div className="space-y-6">
+              <SettingRow
+                title="Splash Screen Management"
+                description="Reset splash screen state to test the onboarding flow again."
+              >
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      resetFirstTimeUser();
+                      alert(
+                        "Splash screen state has been reset. Refresh the page to see the splash screen again."
+                      );
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                  >
+                    Reset Splash State
+                  </button>
+                  <button
+                    onClick={() => {
+                      markSplashAsSeen();
+                      markAsReturningUser();
+                      alert(
+                        'Splash screen state has been set to "completed". User will not see splash again.'
+                      );
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                  >
+                    Mark Splash as Completed
+                  </button>
+                  <button
+                    onClick={() => {
+                      navigate(ROUTES.SPLASH);
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                  >
+                    View Splash Screen
+                  </button>
+                </div>
+              </SettingRow>
+
+              <SettingRow
+                title="Local Storage Status"
+                description="Current state of splash screen related localStorage values."
+              >
+                <div className="bg-gray-700 p-4 rounded-lg">
+                  <div className="text-sm space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">First Time User:</span>
+                      <span className="text-white">
+                        {localStorage.getItem("aipadhai_first_time_user") ===
+                        null
+                          ? "Yes (null)"
+                          : "No (false)"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Has Seen Splash:</span>
+                      <span className="text-white">
+                        {localStorage.getItem("aipadhai_has_seen_splash") ===
+                        "true"
+                          ? "Yes"
+                          : "No"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Should Show Splash:</span>
+                      <span className="text-white">
+                        {localStorage.getItem("aipadhai_first_time_user") ===
+                          null &&
+                        localStorage.getItem("aipadhai_has_seen_splash") !==
+                          "true"
+                          ? "Yes"
+                          : "No"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </SettingRow>
+            </div>
           </div>
         );
       default:
