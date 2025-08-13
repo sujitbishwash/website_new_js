@@ -293,14 +293,26 @@ export default function ExamConfigurationModal({ isOpen, onClose }: ExamConfigur
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
           <h2 style={styles.title}>Exam Configuration</h2>
-          <button 
-            style={styles.closeButton}
-            onClick={onClose}
-            onMouseOver={(e) => (e.currentTarget.style.color = theme.primaryText)}
-            onMouseOut={(e) => (e.currentTarget.style.color = theme.secondaryText)}
+          <button
+          className="absolute top-3 right-3 p-1 text-gray-400 rounded-full hover:bg-gray-700 hover:text-white focus:outline-none"
+          onClick={onClose}
+          aria-label="Close modal"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="w-6 h-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
-            ×
-          </button>
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
         </div>
         
         <div style={styles.content}>
@@ -352,6 +364,19 @@ export default function ExamConfigurationModal({ isOpen, onClose }: ExamConfigur
             </div>
           )}
         </div>
+        {/* Modal Actions (Footer) */}
+            <div className="flex justify-end items-center gap-4 mt-6 pt-4 border-t border-gray-700">
+                <button
+                    className="px-6 py-2 font-medium text-gray-300 bg-transparent rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
+                >
+                    Cancel
+                </button>
+                <button
+                    className="px-6 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+                >
+                    Save
+                </button>
+            </div>
       </div>
     </div>
   );
