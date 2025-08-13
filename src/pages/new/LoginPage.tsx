@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROUTES } from "../../routes/constants";
-import { Button } from "react-day-picker";
 
 // --- Style Objects ---
 // This approach uses 100% inline styles to avoid dependency on any CSS framework.
@@ -213,18 +212,57 @@ const LoginPage: React.FC = () => {
   React.useEffect(() => {
     const handleAuthenticatedUser = async () => {
       if (!isLoading && isAuthenticated) {
-        // Check if user has exam goal
-        const hasGoal = await checkExamGoal();
-        if (hasGoal) {
-          navigate(ROUTES.DASHBOARD, { replace: true });
-        } else {
-          navigate(ROUTES.EXAM_GOAL, { replace: true });
+        try {
+          // First check if user has exam goal using the /ums/me endpoint
+          const examGoalResponse = await authApi.getAuthenticatedUser();
+          console.log("Exam goal response:", examGoalResponse);
+
+          // Check if user has exam goal
+          const hasExamGoal =
+            examGoalResponse.data && examGoalResponse.data.data !== null;
+          console.log("Has exam goal:", hasExamGoal);
+
+          if (hasExamGoal) {
+            // User has both name and exam goal, go directly to dashboard
+            console.log("User has exam goal, redirecting to dashboard");
+            navigate(ROUTES.DASHBOARD, { replace: true });
+          } else {
+            // User doesn't have exam goal, check if they have a name
+            try {
+              const userDetailsResponse = await authApi.getUserDetails();
+              console.log("User details response:", userDetailsResponse);
+
+              // Check if name is missing
+              const hasName =
+                userDetailsResponse.data?.data?.name &&
+                userDetailsResponse.data.data.name.trim() !== "";
+              console.log("Has name:", hasName);
+
+              if (!hasName) {
+                // User needs to complete personal details
+                console.log("Redirecting to personal details page");
+                navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+              } else {
+                // User has name but no exam goal
+                console.log("Redirecting to exam goal page");
+                navigate(ROUTES.EXAM_GOAL, { replace: true });
+              }
+            } catch (userDetailsError) {
+              console.error("Error checking user details:", userDetailsError);
+              // Fallback to personal details page if user details API fails
+              navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+            }
+          }
+        } catch (error) {
+          console.error("Error checking exam goal:", error);
+          // Fallback to personal details page if exam goal API fails
+          navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
       }
     };
 
     handleAuthenticatedUser();
-  }, [isAuthenticated, isLoading, navigate, checkExamGoal]);
+  }, [isAuthenticated, isLoading, navigate]);
 
   // Show loading spinner while checking authentication
   if (isLoading) {
@@ -387,7 +425,7 @@ const ActionButton: React.FC<ActionButtonProps> = ({
 const LoginCard: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, checkExamGoal } = useAuth();
+  const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [otp, setOtp] = useState<string[]>(new Array(6).fill(""));
   const [otpSent, setOtpSent] = useState(false);
@@ -427,28 +465,15 @@ const LoginCard: React.FC = () => {
         return;
       }
 
-      /*
       // Call the API to send OTP
       const response = await authApi.sendOtp(email);
 
-      if (response.data.success) {
-        setSuccess("OTP sent successfully! Please check your email.");
-        setOtpSent(true);
-      } else {
-        setError(
-          response.data.message || "Failed to send OTP. Please try again."
-        );
-      }
-      */
-      //  its a dummy code need to be removed when apui ready
-      setTimeout(() => {
-        setOtpSent(true);
-        setIsLoading(false);
-      }, 1000);
+      setSuccess(response.data.data);
+      setOtpSent(true);
     } catch (err: any) {
       setError(err.message || "Failed to send OTP. Please try again.");
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -465,44 +490,67 @@ const LoginCard: React.FC = () => {
       }
 
       // Call the API to verify OTP
-      /*
       const response = await authApi.verifyOtp(email, finalOtp);
 
-      if (response.data.success) {
-        // Store the token in localStorage
-        localStorage.setItem("authToken", response.data.access_token);
+      // Store the token in localStorage and update auth context
+      localStorage.setItem("authToken", response.data.access_token);
 
-        setSuccess("Login successful! Redirecting...");
+      // Update the auth context to mark user as authenticated
+      login(response.data.access_token, { email });
 
-        
-      } else {
-        setError(response.data.message || "Invalid OTP. Please try again.");
-      }
-        */
+      setSuccess("Login successful! Redirecting...");
 
-      // Navigate to appropriate page after a short delay
-      setTimeout(async () => {
-        // dummy code need to be removed when api is ready
-        const response = await authApi.login(email, "securepassword");
+      // Use the same logic as AuthCallbackPage to determine where to navigate
+      try {
+        // First check if user has exam goal using the /ums/me endpoint
+        const examGoalResponse = await authApi.getAuthenticatedUser();
+        console.log("Exam goal response:", examGoalResponse);
 
-        // Use the auth context to login
-        login(response.data.access_token, { email });
+        // Check if user has exam goal
+        const hasExamGoal =
+          examGoalResponse.data && examGoalResponse.data.data !== null;
+        console.log("Has exam goal:", hasExamGoal);
 
-        // Check if user has exam goal and navigate accordingly
-        const hasGoal = await checkExamGoal();
-        if (hasGoal) {
-          // User has exam goal, navigate to return URL or dashboard
-          navigate(from);
+        if (hasExamGoal) {
+          // User has both name and exam goal, go directly to dashboard
+          console.log("User has exam goal, redirecting to dashboard");
+          navigate(from, { replace: true });
         } else {
-          // User doesn't have exam goal, navigate to exam goal page
-          navigate(ROUTES.EXAM_GOAL);
+          // User doesn't have exam goal, check if they have a name
+          try {
+            const userDetailsResponse = await authApi.getUserDetails();
+            console.log("User details response:", userDetailsResponse);
+
+            // Check if name is missing
+            const hasName =
+              userDetailsResponse.data?.data?.name &&
+              userDetailsResponse.data.data.name.trim() !== "";
+            console.log("Has name:", hasName);
+
+            if (!hasName) {
+              // User needs to complete personal details
+              console.log("Redirecting to personal details page");
+              navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+            } else {
+              // User has name but no exam goal
+              console.log("Redirecting to exam goal page");
+              navigate(ROUTES.EXAM_GOAL, { replace: true });
+            }
+          } catch (userDetailsError) {
+            console.error("Error checking user details:", userDetailsError);
+            // Fallback to personal details page if user details API fails
+            navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+          }
         }
-        setIsLoading(false);
-      }, 1000);
+      } catch (error) {
+        console.error("Error checking exam goal:", error);
+        // Fallback to personal details page if exam goal API fails
+        navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+      }
     } catch (err: any) {
       setError(err.message || "Failed to verify OTP. Please try again.");
     } finally {
-      // setIsLoading(false);
+      setIsLoading(false);
     }
   };
 

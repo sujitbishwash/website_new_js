@@ -1,8 +1,8 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { AddSourceModal, fallbackSuggestedVideos, getRandomItems } from "../../components/YouTubeSourceDialog";
-import { buildVideoLearningRoute, ROUTES } from "../../routes/constants";
 import { SuggestedVideo, videoApi } from "@/lib/api-client";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { AddSourceModal } from "../../components/YouTubeSourceDialog";
+import { buildVideoLearningRoute, ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -35,7 +35,6 @@ interface AttemptedTest {
   correct: number;
   wrong: number;
 }
-
 
 interface SuggestedReading {
   id: string;
@@ -421,7 +420,6 @@ const initialAttemptedTests: AttemptedTest[] = [
   },
 ];
 
-
 const suggestedReadings: SuggestedReading[] = [
   { id: "sr1", title: "A Brief History of Time", topic: "Cosmology" },
   { id: "sr2", title: "The Double Helix", topic: "Genetics" },
@@ -439,7 +437,31 @@ export default function HomePage() {
   const [learningItems, setLearningItems] = useState(initialLearningItems);
   const [attemptedTests, setAttemptedTests] = useState(initialAttemptedTests);
   const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
+  const [suggestedVideos, setSuggestedVideos] = useState<SuggestedVideo[]>([]);
+  const [isLoadingVideos, setIsLoadingVideos] = useState(false);
+  const [videosError, setVideosError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Fetch suggested videos when component mounts
+  useEffect(() => {
+    const fetchSuggestedVideos = async () => {
+      try {
+        setIsLoadingVideos(true);
+        setVideosError(null);
+        const videos = await videoApi.getSuggestedVideos();
+        setSuggestedVideos(videos);
+      } catch (error: any) {
+        console.error("Failed to fetch suggested videos:", error);
+        setVideosError(error.message || "Failed to load suggested videos");
+        // Fallback to empty array if API fails
+        setSuggestedVideos([]);
+      } finally {
+        setIsLoadingVideos(false);
+      }
+    };
+
+    fetchSuggestedVideos();
+  }, []);
 
   const handleRemoveRecord = (id: string, type: "learning" | "test") => {
     if (type === "learning") {
@@ -500,35 +522,100 @@ export default function HomePage() {
 
         {/* Recommended Videos Card */}
         <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
-          <h2 className="text-2xl font-bold text-foreground mb-5">
-            Recommended Videos
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {getRandomItems(fallbackSuggestedVideos,3).map((video) => (
-              <div
-                key={video.id}
-                onClick={() => handleSuggestedVideoClick(video)}
-                className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-2xl font-bold text-foreground">
+              Recommended Videos
+            </h2>
+            <button
+              onClick={() => {
+                setVideosError(null);
+                const fetchSuggestedVideos = async () => {
+                  try {
+                    setIsLoadingVideos(true);
+                    const videos = await videoApi.getSuggestedVideos();
+                    setSuggestedVideos(videos);
+                  } catch (error: any) {
+                    console.error("Failed to fetch suggested videos:", error);
+                    setVideosError(
+                      error.message || "Failed to load suggested videos"
+                    );
+                  } finally {
+                    setIsLoadingVideos(false);
+                  }
+                };
+                fetchSuggestedVideos();
+              }}
+              disabled={isLoadingVideos}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
               >
-                <div className="relative">
-                  <img
-                    src={video.thumbnailUrl}
-                    alt={video.title}
-                    className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                    <PlayCircleIcon className="h-12 w-12 text-primary group-hover:scale-110 transition-all duration-300" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                />
+              </svg>
+              Refresh
+            </button>
+          </div>
+
+          {isLoadingVideos ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span className="ml-2 text-muted-foreground">
+                Loading videos...
+              </span>
+            </div>
+          ) : videosError ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>{videosError}</p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-2 text-primary hover:underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : suggestedVideos.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {suggestedVideos.slice(0, 3).map((video) => (
+                <div
+                  key={video.id}
+                  onClick={() => handleSuggestedVideoClick(video)}
+                  className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
+                >
+                  <div className="relative">
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={video.title}
+                      className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                      <PlayCircleIcon className="h-12 w-12 text-primary group-hover:scale-110 transition-all duration-300" />
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <h4 className="font-semibold text-foreground truncate">
+                      {video.title}
+                    </h4>
+                    <p className="text-xs text-muted-foreground">
+                      {video.topic}
+                    </p>
                   </div>
                 </div>
-                <div className="p-4">
-                  <h4 className="font-semibold text-foreground truncate">
-                    {video.title}
-                  </h4>
-                  <p className="text-xs text-muted-foreground">{video.topic}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>No recommended videos available at the moment.</p>
+            </div>
+          )}
         </div>
 
         {/* Recommended Reading Card */}

@@ -21,6 +21,11 @@ interface AuthContextType {
   checkAuth: () => Promise<boolean>;
   checkExamGoal: () => Promise<boolean>;
   checkUserDetails: () => Promise<boolean>;
+  checkUserState: () => Promise<{
+    hasName: boolean;
+    hasExamGoal: boolean;
+    nextStep: "personal-details" | "exam-goal" | "dashboard";
+  }>;
   signInWithGoogle: () => Promise<{ data: any; error: any }>;
 }
 
@@ -141,10 +146,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const checkExamGoal = async (): Promise<boolean> => {
     try {
       setExamGoalLoading(true);
-      const { examGoalApi } = await import("../lib/api-client");
-      const response = await examGoalApi.getUserExamGoal();
+      const { authApi } = await import("../lib/api-client");
+      const response = await authApi.getAuthenticatedUser();
 
-      if (response.data.success && response.data.data) {
+      if (response.data && response.data.data) {
         setHasExamGoal(true);
         return true;
       } else {
@@ -157,6 +162,60 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       return false;
     } finally {
       setExamGoalLoading(false);
+    }
+  };
+
+  // Method to check user's complete state and determine next step
+  const checkUserState = async (): Promise<{
+    hasName: boolean;
+    hasExamGoal: boolean;
+    nextStep: "personal-details" | "exam-goal" | "dashboard";
+  }> => {
+    try {
+      // First check if user has exam goal
+      const { authApi } = await import("../lib/api-client");
+      const examGoalResponse = await authApi.getAuthenticatedUser();
+      const hasExamGoal =
+        examGoalResponse.data && examGoalResponse.data.data !== null;
+
+      if (hasExamGoal) {
+        // User has both name and exam goal
+        return {
+          hasName: true,
+          hasExamGoal: true,
+          nextStep: "dashboard",
+        };
+      }
+
+      // User doesn't have exam goal, check if they have a name
+      const userDetailsResponse = await authApi.getUserDetails();
+      const hasName =
+        userDetailsResponse.data?.data?.name &&
+        userDetailsResponse.data.data.name.trim() !== "";
+
+      if (!hasName) {
+        // User needs to complete personal details
+        return {
+          hasName: false,
+          hasExamGoal: false,
+          nextStep: "personal-details",
+        };
+      } else {
+        // User has name but no exam goal
+        return {
+          hasName: true,
+          hasExamGoal: false,
+          nextStep: "exam-goal",
+        };
+      }
+    } catch (error) {
+      console.error("Error checking user state:", error);
+      // Fallback to personal details page
+      return {
+        hasName: false,
+        hasExamGoal: false,
+        nextStep: "personal-details",
+      };
     }
   };
 
@@ -208,6 +267,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     checkAuth,
     checkExamGoal,
     checkUserDetails,
+    checkUserState,
     signInWithGoogle,
   };
 

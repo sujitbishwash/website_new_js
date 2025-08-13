@@ -63,13 +63,13 @@ export const apiRequest = async <T>(
 // Auth related API calls
 export const authApi = {
   sendOtp: async (email: string) => {
-    return apiRequest<{ success: boolean; message: string }>('POST', '/auth/send-otp', {
+    return apiRequest<{ data: string }>('POST', '/ums/send-otp', {
       email,
     });
   },
 
   verifyOtp: async (email: string, otp: string) => {
-    return apiRequest<{ access_token: string; success: boolean; message: string }>('POST', '/auth/verify-otp', {
+    return apiRequest<{ access_token: string }>('POST', '/ums/verifi-otp', {
       email,
       otp,
     });
@@ -85,7 +85,7 @@ export const authApi = {
 
   getAuthenticatedUser: async () => {
     const token = localStorage.getItem('authToken');
-    return apiRequest<{ success: boolean; data: { exam: string; group_type: string } | null }>('GET', '/ums/me', undefined, {
+    return apiRequest<{ data: { exam: string; group_type: string } | null }>('GET', '/ums/me', undefined, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -219,7 +219,24 @@ export const videoApi = {
       throw new Error(errorData.detail || 'Failed to fetch suggested videos');
     }
 
-    return response.json();
+    const result = await response.json();
+
+    // Handle the API response structure: { suggested: [...] }
+    if (result.suggested && Array.isArray(result.suggested)) {
+      // Transform the API response to match our interface
+      return result.suggested.map((video: any) => ({
+        id: video.video_id, // Map video_id to id
+        title: video.title,
+        topic: video.channel_title || 'General', // Use channel_title as topic
+        thumbnailUrl: video.thumbnail, // Map thumbnail to thumbnailUrl
+        url: video.url,
+        description: video.channel_title, // Use channel_title as description
+        tags: [video.source_for] // Use source_for as tags
+      }));
+    }
+
+    // Fallback to empty array if structure is unexpected
+    return [];
   },
 
   getVideoChapters: async (videoId: string): Promise<VideoChaptersResponse> => {

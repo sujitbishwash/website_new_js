@@ -83,7 +83,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   const [suggestedVideos, setSuggestedVideos] = useState<SuggestedVideo[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState("");
-  const [usingFallbackData, setUsingFallbackData] = useState(false);
   const [showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
 
   // Effect to handle clicks outside the modal
@@ -131,10 +130,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     try {
       setIsLoadingSuggestions(true);
       setSuggestionsError("");
-      setUsingFallbackData(false);
 
       const videos = await videoApi.getSuggestedVideos();
-      //setSuggestedVideos(videos);
       // Ensure videos is an array before setting state
       if (Array.isArray(videos)) {
         setSuggestedVideos(videos);
@@ -143,11 +140,9 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         throw new Error("Invalid response format from API");
       }
     } catch (err: any) {
-      console.warn("API failed, using fallback data:", err.message);
-      setSuggestionsError("Using sample videos (API unavailable)");
-      // Fallback to dummy data if API fails
-      setSuggestedVideos(getRandomItems(fallbackSuggestedVideos, 3));
-      setUsingFallbackData(true);
+      console.error("Failed to fetch suggested videos:", err.message);
+      setSuggestionsError("Failed to load suggested videos");
+      setSuggestedVideos([]);
     } finally {
       setIsLoadingSuggestions(false);
     }
@@ -314,11 +309,13 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                 <h3 className="text-sm font-medium text-gray-400">
                   Suggested Videos
                 </h3>
-                {usingFallbackData && (
-                  <span className="text-xs text-yellow-400 bg-yellow-900/20 px-2 py-1 rounded">
-                    Sample Data
-                  </span>
-                )}
+                <button
+                  onClick={fetchSuggestedVideos}
+                  disabled={isLoadingSuggestions}
+                  className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                >
+                  Refresh
+                </button>
               </div>
 
               {isLoadingSuggestions ? (
@@ -328,7 +325,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                     Loading suggestions...
                   </span>
                 </div>
-              ) : suggestionsError && !usingFallbackData ? (
+              ) : suggestionsError ? (
                 <div className="mt-4 text-center py-8">
                   <p className="text-sm text-red-400">{suggestionsError}</p>
                   <button
@@ -440,69 +437,3 @@ export default function YouTubeSourceDialog() {
     </div>
   );
 }
-
-export const getRandomItems = (
-  array: SuggestedVideo[],
-  count: number
-): SuggestedVideo[] => {
-  const shuffled = [...array].sort(() => 0.5 - Math.random());
-  return shuffled.slice(0, count);
-};
-
-// Fallback dummy data for suggested videos when API fails
-export const fallbackSuggestedVideos: SuggestedVideo[] = [
-  {
-    id: 1,
-    title: "React Hooks in 10 Minutes",
-    topic: "Web Development",
-    thumbnailUrl: "https://placehold.co/400x225/E84343/FFFFFF?text=React",
-    url: "https://www.youtube.com/watch?v=TNhaISOUy6Q",
-    description: "Learn React Hooks quickly with practical examples",
-    tags: ["react", "javascript", "web-development"],
-  },
-  {
-    id: 2,
-    title: "A Brief History of the Cosmos",
-    topic: "Science",
-    thumbnailUrl: "https://placehold.co/400x225/4361E8/FFFFFF?text=Cosmos",
-    url: "https://www.youtube.com/watch?v=OUnYkixy3ug",
-    description: "Explore the fascinating history of our universe",
-    tags: ["science", "cosmos", "astronomy"],
-  },
-  {
-    id: 3,
-    title: "Perfect Sourdough for Beginners",
-    topic: "Cooking",
-    thumbnailUrl: "https://placehold.co/400x225/E8A243/FFFFFF?text=Cooking",
-    url: "https://www.youtube.com/watch?v=-9Osn7JsP1Y",
-    description: "Master the art of sourdough bread making",
-    tags: ["cooking", "baking", "sourdough"],
-  },
-  {
-    id: 4,
-    title: "Machine Learning Fundamentals",
-    topic: "Technology",
-    thumbnailUrl: "https://placehold.co/400x225/10B981/FFFFFF?text=ML",
-    url: "https://www.youtube.com/watch?v=bLHqHRWUUWg&list=PLwdnzlV3ogoVDlDwuB9SLJzhaZT0tTil3",
-    description: "Essential concepts in machine learning",
-    tags: ["machine-learning", "ai", "technology"],
-  },
-  {
-    id: 5,
-    title: "Photography Composition Tips",
-    topic: "Art",
-    thumbnailUrl: "https://placehold.co/400x225/8B5CF6/FFFFFF?text=Photo",
-    url: "https://www.youtube.com/watch?v=8XBYt-_U4WE",
-    description: "Improve your photography with composition techniques",
-    tags: ["photography", "art", "composition"],
-  },
-  {
-    id: 6,
-    title: "Financial Planning Basics",
-    topic: "Finance",
-    thumbnailUrl: "https://placehold.co/400x225/F59E0B/FFFFFF?text=Finance",
-    url: "https://www.youtube.com/watch?v=MabD5R8kRak",
-    description: "Essential financial planning for beginners",
-    tags: ["finance", "planning", "money"],
-  },
-];

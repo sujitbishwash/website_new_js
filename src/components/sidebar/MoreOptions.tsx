@@ -257,7 +257,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   </button>
 
                   {item.children && activeSubMenu === item.label && (
-                    <div className="bg-gray-700  border border-gray-500 absolute left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 border animate-fade-in-up">
+                    <div className="bg-gray-700  border border-gray-500 absolute left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 animate-fade-in-up">
                       <div className="space-y-1">
                         {item.children.map((child) => (
                           <button
