@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
 import TestResultDialog from "../../components/TestResultDialog";
+import { useUser } from "../../contexts/UserContext";
 import { ROUTES } from "../../routes/constants";
 
 // --- Type Definitions ---
@@ -93,6 +94,7 @@ const TestMainPage = () => {
   const navigate = useNavigate();
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { profile, examGoal } = useUser();
 
   const [questions, setQuestions] = useState<Question[]>([]);
 
@@ -443,6 +445,18 @@ const TestMainPage = () => {
           General Knowledge Test
         </h1>
         <div className="flex items-center">
+          {/* User Info - Mobile */}
+          <div className="md:hidden mr-2">
+            {profile && (
+              <div className="text-xs text-gray-300">
+                <div className="font-medium">{profile.name || "Student"}</div>
+                {examGoal && (
+                  <div className="text-blue-400">{examGoal.exam}</div>
+                )}
+              </div>
+            )}
+          </div>
+
           <div className="flex items-center mr-2 sm:mr-4">
             <span className="text-sm mr-2 hidden sm:inline">Time Left:</span>
             <span
@@ -586,9 +600,23 @@ const TestMainPage = () => {
               />
             </svg>
           </button>
+
+          {/* User Profile Section */}
           <div className="bg-gray-700 p-4 rounded-lg flex items-center mb-6">
             <UserIcon />
-            <span className="font-semibold">Student Name</span>
+            <div className="flex-1">
+              <div className="font-semibold text-white">
+                {profile?.name || "Student Name"}
+              </div>
+              {profile?.email && (
+                <div className="text-xs text-gray-300">{profile.email}</div>
+              )}
+              {examGoal && (
+                <div className="text-xs text-blue-400">
+                  {examGoal.exam} - {examGoal.groupType}
+                </div>
+              )}
+            </div>
           </div>
 
           {/* --- RESPONSIVE LEGEND SECTION --- */}

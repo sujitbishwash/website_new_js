@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../../contexts/UserContext";
 import { fetchTestSeriesFormData, testSeriesApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 
@@ -75,6 +76,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
 // --- Main Page Component ---
 const TestConfigurationPageComponent = () => {
   const navigate = useNavigate();
+  const { profile, examGoal, isLoading: userLoading } = useUser();
 
   // State to hold user selections
   const [selectedSubject, setSelectedSubject] = useState("");
@@ -207,6 +209,45 @@ const TestConfigurationPageComponent = () => {
             Select your preferences to start a practice test.
           </p>
         </div>
+
+        {/* --- User Profile Section --- */}
+        {profile && (
+          <div className="p-6 bg-blue-900/20 border border-blue-700/50 rounded-xl">
+            <h2 className="text-lg font-semibold text-blue-200 mb-3">
+              Student Information
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <span className="text-gray-400">Name:</span>
+                <span className="ml-2 text-white font-medium">
+                  {profile.name || "Not set"}
+                </span>
+              </div>
+              <div>
+                <span className="text-gray-400">Email:</span>
+                <span className="ml-2 text-white font-medium">
+                  {profile.email}
+                </span>
+              </div>
+              {examGoal && (
+                <>
+                  <div>
+                    <span className="text-gray-400">Exam Goal:</span>
+                    <span className="ml-2 text-white font-medium">
+                      {examGoal.exam}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-gray-400">Group Type:</span>
+                    <span className="ml-2 text-white font-medium">
+                      {examGoal.groupType}
+                    </span>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* --- Error Display --- */}
         {error && (

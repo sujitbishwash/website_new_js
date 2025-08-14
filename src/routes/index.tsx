@@ -146,20 +146,20 @@ export const routes = [
             name: "Attempted Tests",
             description: "Attempted Tests",
           },
-
-          {
-            path: "personal-details",
-            element: <PersonalDetails />,
-            name: "Personal Details",
-            description: "User personal details page",
-          },
-          {
-            path: "exam-goal",
-            element: <ExamGoalPage />,
-            name: "Exam Goal",
-            description: "Select Exam Goal",
-          },
         ],
+      },
+      // Public onboarding pages (accessible without full authentication)
+      {
+        path: "personal-details",
+        element: <PersonalDetails />,
+        name: "Personal Details",
+        description: "User personal details page",
+      },
+      {
+        path: "exam-goal",
+        element: <ExamGoalPage />,
+        name: "Exam Goal",
+        description: "Select Exam Goal",
       },
       // Public informational pages
       {

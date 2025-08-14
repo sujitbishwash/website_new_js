@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { authApi } from "../../lib/api-client";
+import { useAuth } from "../../contexts/AuthContext";
 import { supabase } from "../../lib/supabase";
 import { ROUTES } from "../../routes/constants";
 
 const AuthCallbackPage: React.FC = () => {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
+  const { checkUserState, checkAuth, refreshUserData } = useAuth();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -29,53 +30,53 @@ const AuthCallbackPage: React.FC = () => {
 
           // Store the token for API calls
           localStorage.setItem("authToken", data.session.access_token);
+          console.log(
+            "🔑 Token stored:",
+            data.session.access_token
+              ? `${data.session.access_token.substring(0, 20)}...`
+              : "null"
+          );
+
+          // Also store user data in localStorage for AuthContext
+          const userInfo = {
+            id: data.session.user.id,
+            email: data.session.user.email || "",
+            name: data.session.user.user_metadata?.name || "",
+          };
+          localStorage.setItem("userData", JSON.stringify(userInfo));
+          console.log("👤 User data stored:", userInfo);
+
+          // Update AuthContext state
+          console.log("🔄 Updating AuthContext state...");
+          await checkAuth();
+
+          // Small delay to ensure token is properly stored
+          await new Promise((resolve) => setTimeout(resolve, 100));
 
           try {
-            // Check if user has name and exam goal using the /ums/me endpoint
-            const examGoalResponse = await authApi.getAuthenticatedUser();
-            console.log("Exam goal response:", examGoalResponse);
+            // Force refresh user data to ensure we have the latest data
+            console.log("🔄 Force refreshing user data...");
+            await refreshUserData();
 
-            // Check if user has exam goal
-            const hasExamGoal =
-              examGoalResponse.data?.success &&
-              examGoalResponse.data.data !== null;
-            console.log("Has exam goal:", hasExamGoal);
+            // Use the stored user data from AuthContext to determine where to navigate
+            console.log("🔍 About to call checkUserState...");
+            const userState = await checkUserState();
+            console.log("User state:", userState);
 
-            // Determine redirect based on user state
-            if (hasExamGoal) {
-              // User has both name and exam goal, go directly to dashboard
+            // Navigate based on user state
+            if (userState.nextStep === "dashboard") {
               console.log("User has exam goal, redirecting to dashboard");
               navigate(ROUTES.DASHBOARD, { replace: true });
+            } else if (userState.nextStep === "exam-goal") {
+              console.log("Redirecting to exam goal page");
+              navigate(ROUTES.EXAM_GOAL, { replace: true });
             } else {
-              // User doesn't have exam goal, check if they have a name
-              try {
-                const userDetailsResponse = await authApi.getUserDetails();
-                console.log("User details response:", userDetailsResponse);
-
-                // Check if name is missing
-                const hasName =
-                  userDetailsResponse.data?.data?.name &&
-                  userDetailsResponse.data.data.name.trim() !== "";
-                console.log("Has name:", hasName);
-
-                if (!hasName) {
-                  // User needs to complete personal details
-                  console.log("Redirecting to personal details page");
-                  navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
-                } else {
-                  // User has name but no exam goal
-                  console.log("Redirecting to exam goal page");
-                  navigate(ROUTES.EXAM_GOAL, { replace: true });
-                }
-              } catch (userDetailsError) {
-                console.error("Error checking user details:", userDetailsError);
-                // Fallback to personal details page if user details API fails
-                navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
-              }
+              console.log("Redirecting to personal details page");
+              navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
             }
           } catch (error) {
-            console.error("Error checking exam goal:", error);
-            // Fallback to personal details page if exam goal API fails
+            console.error("Error checking user state:", error);
+            // Fallback to personal details page if API fails
             navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
           }
         } else {
