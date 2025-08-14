@@ -36,12 +36,7 @@ export const theme: ThemeColors = {
 };
 
 // Available color palettes
-export type ColorThemeName =
-    | "slate" // default (neutral, professional)
-    | "ocean" // blue/cyan professional
-    | "forest"; // green/teal professional
-
-const palettes: Record<ColorThemeName, ThemeColors> = {
+export const palettes: Record<string, ThemeColors> = {
     slate: {
         background: "#111827",
         cardBackground: "#1F2937",
@@ -91,6 +86,8 @@ const palettes: Record<ColorThemeName, ThemeColors> = {
         red: "#DC2626",
     },
 };
+
+export type ColorThemeName = keyof typeof palettes;
 
 export const getAvailableColorThemes = (): ColorThemeName[] =>
     Object.keys(palettes) as ColorThemeName[];
