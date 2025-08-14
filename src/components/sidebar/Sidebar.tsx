@@ -2,12 +2,12 @@ import {
   LibraryBig,
   ChevronsLeft,
   Clock,
-  FileCheck,
-  FileQuestion,
-  FileText,
+  FilePen,
+  FileClock,
   Gift,
   Home,
   X,
+  FileCheck2,
 } from "lucide-react";
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -49,13 +49,13 @@ const Sidebar: React.FC<SidebarProps> = ({
     { path: ROUTES.HOME, icon: Home, label: "Home" },
     { path: ROUTES.HISTORY, icon: Clock, label: "History" },
     { path: ROUTES.BOOKS, icon: LibraryBig, label: "Books" },
-    { path: ROUTES.TEST_SERIES, icon: FileCheck, label: "Test Series" },
+    { path: ROUTES.TEST_SERIES, icon: FilePen, label: "Test Series" },
     {
       path: ROUTES.PREVIOUS_YEAR_PAPERS,
-      icon: FileQuestion,
+      icon: FileClock,
       label: "Previous Year Papers",
     },
-    { path: ROUTES.ATTEMPTED_TESTS, icon: FileText, label: "Attempted Tests" },
+    { path: ROUTES.ATTEMPTED_TESTS, icon: FileCheck2, label: "Attempted Tests" },
     { path: ROUTES.REFER_AND_EARN, icon: Gift, label: "Refer and Earn" },
   ];
 

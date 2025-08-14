@@ -3,6 +3,11 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSourceModal } from "../../components/YouTubeSourceDialog";
 import { buildVideoLearningRoute, ROUTES } from "../../routes/constants";
+import {
+  BookOpen,
+  CirclePlay,
+  ClipboardList
+} from "lucide-react";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -136,61 +141,7 @@ const XCircleIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-const PlayCircleIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M21 12a7.5 7.5 0 11-15 0 7.5 7.5 0 0115 0z"
-    />
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z"
-    />
-  </svg>
-);
 
-const ClipboardDocumentListIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75c0-.231-.035-.454-.1-.664M6.75 7.5h.75v.75h-.75V7.5zM6.75 10.5h.75v.75h-.75V10.5zM6.75 13.5h.75v.75h-.75V13.5zM6.75 16.5h.75v.75h-.75V16.5zm-5.25-9a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v10.5a2.25 2.25 0 01-2.25 2.25H5.25a2.25 2.25 0 01-2.25-2.25V7.5z"
-    />
-  </svg>
-);
-
-const DocumentTextIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    strokeWidth={1.5}
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"
-    />
-  </svg>
-);
 
 const CodeBracketIcon: React.FC<IconProps> = ({ className }) => (
   <svg
@@ -497,7 +448,7 @@ export default function HomePage() {
               0 0 20px rgba(168, 85, 247, 0.6), 
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
-      <button onClick={() => { navigate(ROUTES.PREMIUM); }} className="fixed top-4 right-8 z-50 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-[#F1F1FB] text-[#5D5BD0] hover:bg-[#E4E4F6] dark:bg-[#373669] dark:text-[#DCDBF6] dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none">
+      <button onClick={() => { navigate(ROUTES.PREMIUM); }} className="fixed top-4 right-8 z-50 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none">
         <SparklesIcon className="h-5 w-5" />
         <span>Upgrade plan</span>
       </button>
@@ -512,7 +463,7 @@ export default function HomePage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border hover:border-accent">
-              <UploadIcon className="h-8 w-8 text-accent transition-transform group-hover:scale-110" />
+              <UploadIcon className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
               <div>
                 <h2 className="font-semibold text-foreground">Upload File</h2>
                 <p className="text-xs text-muted-foreground">PDF, DOC, TXT</p>
@@ -522,7 +473,7 @@ export default function HomePage() {
               onClick={() => setIsYouTubeModalOpen(true)}
               className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border hover:border-accent"
             >
-              <PasteIcon className="h-8 w-8 text-accent transition-transform group-hover:scale-110" />
+              <PasteIcon className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
               <div>
                 <h2 className="font-semibold text-foreground">Paste Link</h2>
                 <p className="text-xs text-muted-foreground">
@@ -612,7 +563,7 @@ export default function HomePage() {
                       className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                      <PlayCircleIcon className="h-12 w-12 text-primary group-hover:scale-110 transition-all duration-300" />
+                      <CirclePlay className="h-12 w-12 text-white group-hover:scale-110 transition-all duration-300" />
                     </div>
                   </div>
                   <div className="p-4">
@@ -645,7 +596,7 @@ export default function HomePage() {
                 className="group flex items-center space-x-4 bg-card/80 p-3 rounded-lg border border-border hover:border-accent transition-all duration-300 hover:bg-accent/10"
               >
                 <div className="flex-shrink-0 bg-muted w-16 h-16 rounded-lg flex items-center justify-center">
-                  <DocumentTextIcon className="h-8 w-8 text-accent" />
+                  <BookOpen className="h-8 w-8 text-gray" />
                 </div>
                 <div className="flex-grow">
                   <h4 className="font-semibold text-foreground">
@@ -673,7 +624,7 @@ export default function HomePage() {
                 className="group flex items-center space-x-4 bg-card/80 p-3 rounded-lg border border-border hover:border-accent transition-all duration-300 hover:bg-accent/10"
               >
                 <div className="flex-shrink-0 bg-muted w-16 h-16 rounded-lg flex items-center justify-center">
-                  <ClipboardDocumentListIcon className="h-8 w-8 text-accent" />
+                  <ClipboardList className="h-8 w-8 text-gray" />
                 </div>
                 <div className="flex-grow">
                   <h4 className="font-semibold text-foreground">
