@@ -260,7 +260,7 @@ const SettingRow: React.FC<SettingRowProps> = ({
 }) => (
   <div className="py-4 flex justify-between items-center border-b border-gray-700">
     <div>
-      <h3 className="text-base font-semibold text-white">{title}</h3>
+      <h3 className="text-base text-white">{title}</h3>
       {description && (
         <p className="text-sm text-gray-400 max-w-md mt-1">{description}</p>
       )}
@@ -403,7 +403,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "General":
         return (
           <div>
-            <h1 className="text-3xl font-bold text-white mb-6">General</h1>
+            <h1 className="text-3xl text-white mb-6">General</h1>
             <SettingRow title="Theme">
               <ModeToggle />
             </SettingRow>
@@ -467,7 +467,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           <div>
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h1 className="text-3xl font-bold text-white">Your Account</h1>
+                <h1 className="text-3xl  text-white">Your Account</h1>
                 <p className="mt-1 text-gray-400">
                   View and edit your personal information.
                 </p>
@@ -562,7 +562,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Notifications":
         return (
           <div>
-            <h1 className="text-3xl font-bold text-white mb-6">
+            <h1 className="text-3xl  text-white mb-6">
               Notifications
             </h1>
             <NotificationSettingRow
@@ -598,7 +598,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               </button>
             </SettingRow>
             <div className="mt-8 p-6 bg-gray-700/50 rounded-lg">
-              <h2 className="text-xl font-bold text-white">
+              <h2 className="text-xl  text-white">
                 Get everything in Free, and more.
               </h2>
               <ul className="mt-4 space-y-3">
@@ -623,7 +623,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Privacy and Security":
         return (
           <div>
-            <h1 className="text-3xl font-bold text-white mb-6">Security</h1>
+            <h1 className="text-3xl  text-white mb-6">Security</h1>
             <SettingRow
               title="Multi-factor authentication"
               description="Require an extra security challenge when logging in. If you are unable to pass this challenge, you will have the option to recover your account via email."
@@ -656,7 +656,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Development":
         return (
           <div>
-            <h1 className="text-3xl font-bold text-white mb-6">
+            <h1 className="text-3xl  text-white mb-6">
               Development Tools
             </h1>
             <p className="text-gray-400 mb-6">
@@ -703,106 +703,106 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 </div>
               </SettingRow>
 
-                             <SettingRow
-                 title="Local Storage Status"
-                 description="Current state of splash screen related localStorage values."
-               >
-                 <div className="bg-gray-700 p-4 rounded-lg">
-                   <div className="text-sm space-y-2">
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">First Time User:</span>
-                       <span className="text-white">
-                         {localStorage.getItem("aipadhai_first_time_user") ===
-                         null
-                           ? "Yes (null)"
-                           : "No (false)"}
-                       </span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">Has Seen Splash:</span>
-                       <span className="text-white">
-                         {localStorage.getItem("aipadhai_has_seen_splash") ===
-                         "true"
-                           ? "Yes"
-                           : "No"}
-                       </span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">Should Show Splash:</span>
-                       <span className="text-white">
-                         {localStorage.getItem("aipadhai_first_time_user") ===
-                           null &&
-                         localStorage.getItem("aipadhai_has_seen_splash") !==
-                           "true"
-                           ? "Yes"
-                           : "No"}
-                       </span>
-                     </div>
-                   </div>
-                 </div>
-               </SettingRow>
+              <SettingRow
+                title="Local Storage Status"
+                description="Current state of splash screen related localStorage values."
+              >
+                <div className="bg-gray-700 p-4 rounded-lg">
+                  <div className="text-sm space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">First Time User:</span>
+                      <span className="text-white">
+                        {localStorage.getItem("aipadhai_first_time_user") ===
+                          null
+                          ? "Yes (null)"
+                          : "No (false)"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Has Seen Splash:</span>
+                      <span className="text-white">
+                        {localStorage.getItem("aipadhai_has_seen_splash") ===
+                          "true"
+                          ? "Yes"
+                          : "No"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Should Show Splash:</span>
+                      <span className="text-white">
+                        {localStorage.getItem("aipadhai_first_time_user") ===
+                          null &&
+                          localStorage.getItem("aipadhai_has_seen_splash") !==
+                          "true"
+                          ? "Yes"
+                          : "No"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </SettingRow>
 
-               <SettingRow
-                 title="Authentication Management"
-                 description="Manage authentication state and tokens for testing."
-               >
-                 <div className="flex flex-col gap-3">
-                   <button
-                     onClick={() => {
-                       clearAuthData();
-                       alert('Authentication data has been cleared. You will need to login again.');
-                     }}
-                     className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                   >
-                     Clear Auth Data
-                   </button>
-                   <button
-                     onClick={() => {
-                       const token = getAuthToken();
-                       const userData = getUserData();
-                       alert(`Auth Token: ${token ? 'Present' : 'Not found'}\nUser Data: ${userData ? 'Present' : 'Not found'}`);
-                     }}
-                     className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
-                   >
-                     Check Auth Status
-                   </button>
-                 </div>
-               </SettingRow>
+              <SettingRow
+                title="Authentication Management"
+                description="Manage authentication state and tokens for testing."
+              >
+                <div className="flex flex-col gap-3">
+                  <button
+                    onClick={() => {
+                      clearAuthData();
+                      alert('Authentication data has been cleared. You will need to login again.');
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                  >
+                    Clear Auth Data
+                  </button>
+                  <button
+                    onClick={() => {
+                      const token = getAuthToken();
+                      const userData = getUserData();
+                      alert(`Auth Token: ${token ? 'Present' : 'Not found'}\nUser Data: ${userData ? 'Present' : 'Not found'}`);
+                    }}
+                    className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
+                  >
+                    Check Auth Status
+                  </button>
+                </div>
+              </SettingRow>
 
-               <SettingRow
-                 title="Authentication Status"
-                 description="Current authentication state."
-               >
-                 <div className="bg-gray-700 p-4 rounded-lg">
-                   <div className="text-sm space-y-2">
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">Has Valid Token:</span>
-                       <span className="text-white">
-                         {hasValidAuthToken() ? "Yes" : "No"}
-                       </span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">Auth Token:</span>
-                       <span className="text-white">
-                         {getAuthToken() ? "Present" : "Not found"}
-                       </span>
-                     </div>
-                     <div className="flex justify-between">
-                       <span className="text-gray-300">User Data:</span>
-                       <span className="text-white">
-                         {getUserData() ? "Present" : "Not found"}
-                       </span>
-                     </div>
-                   </div>
-                 </div>
-               </SettingRow>
+              <SettingRow
+                title="Authentication Status"
+                description="Current authentication state."
+              >
+                <div className="bg-gray-700 p-4 rounded-lg">
+                  <div className="text-sm space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Has Valid Token:</span>
+                      <span className="text-white">
+                        {hasValidAuthToken() ? "Yes" : "No"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">Auth Token:</span>
+                      <span className="text-white">
+                        {getAuthToken() ? "Present" : "Not found"}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-300">User Data:</span>
+                      <span className="text-white">
+                        {getUserData() ? "Present" : "Not found"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </SettingRow>
             </div>
           </div>
         );
       default:
         return (
           <div className="text-white flex flex-col items-center justify-center h-full">
-            <h1 className="text-3xl font-bold">{activeTab}</h1>
+            <h1 className="text-3xl ">{activeTab}</h1>
             <p className="mt-2 text-gray-400">
               Content for this section is not yet implemented.
             </p>
@@ -831,34 +831,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         {/* Modal content: Attach the ref here */}
         <div
           ref={modalRef}
-          className="w-full max-w-4xl h-[600px] mx-4 rounded-xl shadow-2xl bg-gray-800 flex overflow-hidden animate-slide-in"
-        >
+          className="relative w-full max-w-4xl h-[600px] mx-4 rounded-xl shadow-2xl bg-gray-800 flex overflow-hidden animate-slide-in"
+        ><button onClick={handleClose} className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-gray-700 hover:text-white transition-colors z-10 cursor-pointer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          </button>
           {/* Left Side Navigation */}
-          <nav className="w-1/4 bg-gray-900 p-3 flex flex-col">
-            <div
-              className="flex justify-between items-center mb-8"
-              onMouseDown={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={handleClose}
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
-                </svg>
-              </button>
-            </div>
+          <nav className="w-1/4 bg-gray-900 p-2 flex flex-col">
+          <h2 className="text-xl text-white ml-4 mt-6 mb-8">Settings</h2>
+            
             <ul>
               {navItems.map((item) => (
                 <li key={item.name} className="mb-2">

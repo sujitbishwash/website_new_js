@@ -49,12 +49,6 @@ export function ModeToggle() {
         <DropdownMenuItem onClick={() => setTheme("system")}>
           System
         </DropdownMenuItem>
-        <div className="h-px my-1 bg-border" />
-        {colorThemes.map((name) => (
-          <DropdownMenuItem key={name} onClick={() => handleColorTheme(name)}>
-            Color: {name}
-          </DropdownMenuItem>
-        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );

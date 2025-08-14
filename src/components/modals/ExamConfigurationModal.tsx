@@ -29,25 +29,25 @@ const examData: ExamData = {
   ssc: {
     displayName: 'SSC',
     exams: {
-      cgl: { 
+      cgl: {
         name: 'SSC CGL (Combined Graduate Level)',
         description: 'A national-level exam to recruit candidates for Group B and C posts in various ministries and departments of the Government of India.',
         eligibility: 'Bachelor\'s Degree from a recognized university.',
         pattern: ['Tier 1: Computer Based Examination', 'Tier 2: Computer Based Examination', 'Tier 3: Pen and Paper Mode (Descriptive)', 'Tier 4: Computer Proficiency Test/Skill Test'],
       },
-      chsl: { 
+      chsl: {
         name: 'SSC CHSL (Combined Higher Secondary Level)',
         description: 'Conducted to recruit candidates for various posts such as LDC, JSA, PA, SA, and DEO in different ministries and departments.',
         eligibility: 'Passed 12th Standard or equivalent examination.',
         pattern: ['Tier 1: Computer-Based Exam', 'Tier 2: Descriptive Paper', 'Tier 3: Typing Test/Skill Test'],
       },
-      je: { 
+      je: {
         name: 'SSC JE (Junior Engineer)',
         description: 'Recruits Junior Engineers for various government departments and organizations.',
         eligibility: 'Diploma or Degree in Engineering in the relevant discipline.',
         pattern: ['Paper-I: Computer Based Examination (Objective)', 'Paper-II: Descriptive Type'],
       },
-      gd: { 
+      gd: {
         name: 'SSC GD Constable',
         description: 'Recruitment of constables (General Duty) in Border Security Force (BSF), Central Industrial Security Force (CISF), etc.',
         eligibility: 'Matriculation or 10th Class pass.',
@@ -64,19 +64,19 @@ const examData: ExamData = {
         eligibility: 'Graduation in any discipline from a recognised University.',
         pattern: ['Phase-I: Preliminary Examination (Objective)', 'Phase-II: Main Examination (Objective & Descriptive)', 'Phase-III: Psychometric Test, Group Exercise & Interview'],
       },
-      ibps_po: { 
+      ibps_po: {
         name: 'IBPS PO (Probationary Officer)',
         description: 'A common written exam for the recruitment of Probationary Officers in multiple public sector banks.',
         eligibility: 'A degree (Graduation) in any discipline from a University recognised by the Govt. Of India.',
         pattern: ['Prelims: Objective Test', 'Mains: Objective & Descriptive Test', 'Interview'],
       },
-      sbi_clerk: { 
+      sbi_clerk: {
         name: 'SBI Clerk (Junior Associate)',
         description: 'Recruits candidates for the clerical cadre in the State Bank of India.',
         eligibility: 'Graduation in any discipline from a recognised University.',
         pattern: ['Preliminary Examination', 'Main Examination', 'Test of specified opted local language'],
       },
-      ibps_clerk: { 
+      ibps_clerk: {
         name: 'IBPS Clerk',
         description: 'A common recruitment process for clerical positions in various public sector banks across India.',
         eligibility: 'A degree (Graduation) in any discipline.',
@@ -87,13 +87,13 @@ const examData: ExamData = {
   class10: {
     displayName: 'Class 10',
     exams: {
-      cbse: { 
+      cbse: {
         name: 'CBSE Board Exam',
         description: 'Central Board of Secondary Education annual examination for 10th-grade students.',
         eligibility: 'Students who have passed the 9th-grade examination from a CBSE affiliated school.',
         pattern: ['Mathematics', 'Science (Physics, Chemistry, Biology)', 'Social Science', 'English', 'Second Language'],
       },
-      icse: { 
+      icse: {
         name: 'ICSE Board Exam',
         description: 'Indian Certificate of Secondary Education examination, known for its comprehensive syllabus.',
         eligibility: 'Completion of 10 years of formal education.',
@@ -104,13 +104,13 @@ const examData: ExamData = {
   railways: {
     displayName: 'Railways',
     exams: {
-      rrb_ntpc: { 
+      rrb_ntpc: {
         name: 'RRB NTPC',
         description: 'Recruitment for various non-technical posts in the Indian Railways.',
         eligibility: 'Varies from 12th pass to Graduate depending on the post.',
         pattern: ['1st Stage CBT', '2nd Stage CBT', 'Typing Skill Test/Computer Based Aptitude Test', 'Document Verification'],
       },
-      rrb_group_d: { 
+      rrb_group_d: {
         name: 'RRB Group D',
         description: 'Recruitment for Level 1 posts in the Indian Railways.',
         eligibility: '10th Pass (or ITI from institutions recognised by NCVT/SCVT).',
@@ -149,8 +149,8 @@ export default function ExamConfigurationModal({ isOpen, onClose }: ExamConfigur
       displayName: examData[key].displayName,
     }));
     const currentExams = Object.keys(examData[selectedCategoryKey].exams).map(key => ({
-        key: key,
-        name: examData[selectedCategoryKey].exams[key].name,
+      key: key,
+      name: examData[selectedCategoryKey].exams[key].name,
     }));
     const selectedExamDetails = examData[selectedCategoryKey].exams[selectedExamKey];
     return { categories, currentExams, selectedExamDetails };
@@ -231,13 +231,13 @@ export default function ExamConfigurationModal({ isOpen, onClose }: ExamConfigur
       boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
     },
     controlGroup: {
-        display: 'flex',
-        flexDirection: 'column',
+      display: 'flex',
+      flexDirection: 'column',
     },
     label: {
-        fontSize: '0.9rem',
-        color: theme.secondaryText,
-        marginBottom: '0.5rem',
+      fontSize: '0.9rem',
+      color: theme.secondaryText,
+      marginBottom: '0.5rem',
     },
     select: {
       padding: '0.75rem',
@@ -264,60 +264,63 @@ export default function ExamConfigurationModal({ isOpen, onClose }: ExamConfigur
       paddingBottom: '1rem',
     },
     detailSection: {
-        marginBottom: '1.5rem',
+      marginBottom: '1.5rem',
     },
     detailHeading: {
-        fontSize: '1.1rem',
-        fontWeight: 'bold',
-        color: theme.secondaryText,
-        marginBottom: '0.5rem',
+      fontSize: '1.1rem',
+      fontWeight: 'bold',
+      color: theme.secondaryText,
+      marginBottom: '0.5rem',
     },
     detailText: {
-        fontSize: '1rem',
-        color: theme.primaryText,
-        lineHeight: '1.6',
+      fontSize: '1rem',
+      color: theme.primaryText,
+      lineHeight: '1.6',
     },
     detailList: {
-        listStylePosition: 'inside',
-        paddingLeft: '0.5rem',
+      listStylePosition: 'inside',
+      paddingLeft: '0.5rem',
     },
     detailListItem: {
-        marginBottom: '0.5rem',
+      marginBottom: '0.5rem',
     }
   };
 
   if (!isOpen) return null;
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.header}>
-          <h2 style={styles.title}>Exam Configuration</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
+      onClick={onClose}>
+      <div className="relative w-full max-w-2xl mx-4 bg-gray-900 rounded-xl shadow-2xl border border-gray-700 flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}>
+
+        <div className="p-5 border-b border-gray-700">
+          <h3 className="text-2xl font-semibold">Exam Configuration</h3>
           <button
-          className="absolute top-3 right-3 p-1 text-gray-400 rounded-full hover:bg-gray-700 hover:text-white focus:outline-none"
+          className="absolute top-3 right-3 p-2 text-gray-400 rounded-full hover:bg-gray-700 hover:text-white focus:outline-none z-10"
           onClick={onClose}
           aria-label="Close modal"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-6 h-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-        </button>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="w-6 h-6"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </button>
+          
         </div>
-        
         <div style={styles.content}>
-          <div style={{...styles.controlsContainer, ...{flexDirection: window.innerWidth < 600 ? 'column' : 'row'}}}>
-            <div style={{...styles.controlGroup, flex: 1}}>
+          <div style={{ ...styles.controlsContainer, ...{ flexDirection: window.innerWidth < 600 ? 'column' : 'row' } }}>
+            <div style={{ ...styles.controlGroup, flex: 1 }}>
               <label htmlFor="category-select" style={styles.label}>Exam Category</label>
               <select id="category-select" value={selectedCategoryKey} onChange={handleCategoryChange} style={styles.select}>
                 {categories.map(category => (
@@ -327,7 +330,7 @@ export default function ExamConfigurationModal({ isOpen, onClose }: ExamConfigur
                 ))}
               </select>
             </div>
-            <div style={{...styles.controlGroup, flex: 1}}>
+            <div style={{ ...styles.controlGroup, flex: 1 }}>
               <label htmlFor="exam-select" style={styles.label}>Specific Exam</label>
               <select id="exam-select" value={selectedExamKey} onChange={handleExamChange} style={styles.select}>
                 {currentExams.map(exam => (
@@ -342,41 +345,42 @@ export default function ExamConfigurationModal({ isOpen, onClose }: ExamConfigur
           {selectedExamDetails && (
             <div style={styles.detailsCard}>
               <h3 style={styles.detailTitle}>{selectedExamDetails.name}</h3>
-              
+
               <div style={styles.detailSection}>
-                  <h4 style={styles.detailHeading}>Description</h4>
-                  <p style={styles.detailText}>{selectedExamDetails.description}</p>
+                <h4 style={styles.detailHeading}>Description</h4>
+                <p style={styles.detailText}>{selectedExamDetails.description}</p>
               </div>
 
               <div style={styles.detailSection}>
-                  <h4 style={styles.detailHeading}>Eligibility</h4>
-                  <p style={styles.detailText}>{selectedExamDetails.eligibility}</p>
+                <h4 style={styles.detailHeading}>Eligibility</h4>
+                <p style={styles.detailText}>{selectedExamDetails.eligibility}</p>
               </div>
 
               <div style={styles.detailSection}>
-                  <h4 style={styles.detailHeading}>Exam Pattern</h4>
-                  <ul style={{...styles.detailText, ...styles.detailList}}>
-                      {selectedExamDetails.pattern.map((step, index) => (
-                          <li key={index} style={styles.detailListItem}>{step}</li>
-                      ))}
-                  </ul>
+                <h4 style={styles.detailHeading}>Exam Pattern</h4>
+                <ul style={{ ...styles.detailText, ...styles.detailList }}>
+                  {selectedExamDetails.pattern.map((step, index) => (
+                    <li key={index} style={styles.detailListItem}>{step}</li>
+                  ))}
+                </ul>
               </div>
             </div>
           )}
         </div>
+
         {/* Modal Actions (Footer) */}
-            <div className="flex justify-end items-center gap-4 mt-6 pt-4 border-t border-gray-700">
-                <button
-                    className="px-6 py-2 font-medium text-gray-300 bg-transparent rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
-                >
-                    Cancel
-                </button>
-                <button
-                    className="px-6 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-                >
-                    Save
-                </button>
-            </div>
+        <div className="flex justify-end items-center gap-4 p-5 border-t border-gray-700">
+          <button onClick={onClose}
+            className="px-6 py-2 font-medium text-gray-300 bg-transparent rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            className="px-6 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
+          >
+            Save
+          </button>
+        </div>
       </div>
     </div>
   );

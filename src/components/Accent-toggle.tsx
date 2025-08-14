@@ -40,10 +40,9 @@ export function AccentToggle() {
         align="end"
         onPointerDown={(e) => e.stopPropagation()}
       >
-        <div className="h-px my-1 bg-border" />
         {colorThemes.map((name) => (
           <DropdownMenuItem key={name} onClick={() => handleColorTheme(name)}>
-            Color: {name}
+           {name}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
