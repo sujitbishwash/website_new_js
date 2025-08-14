@@ -1,6 +1,7 @@
 import { useUser } from "@/contexts/UserContext";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
+import { CircleUserRound } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 
 // --- TYPE DEFINITIONS ---
@@ -198,10 +199,9 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             style={{ backgroundColor: theme.mutedText }}
             className="w-8 h-8 rounded-full flex items-center justify-center"
           >
-            <Icon
-              path="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+            <CircleUserRound
               style={{ color: theme.cardBackground }}
-              className="w-5 h-5"
+              className="w-8 h-8"
             />
           </div>
 
@@ -210,7 +210,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
               }`}
           >
             <p className="font-medium text-muted-foreground">
-              {isLoading ? "Loading..." : profile?.email || "user@example.com"}
+              {isLoading ? "Loading..." : profile?.name || "Empty"}
             </p>
             <p className="font-medium text-muted-foreground text-xs">
               {error

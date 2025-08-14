@@ -153,7 +153,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                     } ${
                       isActive(item.path)
                         ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-accent/20 hover:text-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
                     }`}
                   >
                     <Icon

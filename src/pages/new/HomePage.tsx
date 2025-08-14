@@ -6,7 +6,9 @@ import { buildVideoLearningRoute, ROUTES } from "../../routes/constants";
 import {
   BookOpen,
   CirclePlay,
-  ClipboardList
+  Clipboard,
+  ClipboardList,
+  FileUp
 } from "lucide-react";
 
 // --- Type Definitions ---
@@ -463,7 +465,7 @@ export default function HomePage() {
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border hover:border-accent">
-              <UploadIcon className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
+              <FileUp className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
               <div>
                 <h2 className="font-semibold text-foreground">Upload File</h2>
                 <p className="text-xs text-muted-foreground">PDF, DOC, TXT</p>
@@ -473,7 +475,7 @@ export default function HomePage() {
               onClick={() => setIsYouTubeModalOpen(true)}
               className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border hover:border-accent"
             >
-              <PasteIcon className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
+              <Clipboard className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
               <div>
                 <h2 className="font-semibold text-foreground">Paste Link</h2>
                 <p className="text-xs text-muted-foreground">

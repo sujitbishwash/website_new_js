@@ -542,12 +542,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                   {isEditing ? "Save Changes" : "Edit Profile"}
                 </button>
               </div>
-              <button
-                onClick={toggleEditMode}
-                className="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg bg-gradient-to-r from-blue-600 to-blue-700 cursor-pointer"
-              >
-                {isEditing ? "Save Changes" : "Edit Profile"}
-              </button>
             </div>
 
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">

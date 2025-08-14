@@ -40,8 +40,26 @@ export type ColorThemeName =
     | "slate" // default (neutral, professional)
     | "ocean" // blue/cyan professional
     | "forest"; // green/teal professional
+/**Sand – soft beige-tan
 
-const palettes: Record<ColorThemeName, ThemeColors> = {
+Moss – muted green
+
+Driftwood – weathered gray-brown
+
+Cobalt – deep blue
+
+Pine – rich evergreen
+
+Clay – earthy red-brown
+
+Charcoal – dark gray
+
+Seafoam – pale greenish-blue
+
+Auburn – warm reddish-brown
+
+Ochre – golden yellow earth tone */
+export const palettes: Record<ColorThemeName, ThemeColors> = {
     slate: {
         background: "#111827",
         cardBackground: "#1F2937",

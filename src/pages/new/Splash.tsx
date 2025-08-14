@@ -234,7 +234,7 @@ export default function Splash() {
     markAsReturningUser();
 
     // Navigate to login page
-    navigate(ROUTES.LOGIN);
+    navigate(ROUTES.HOME);
   };
 
   const goToNext = () =>
