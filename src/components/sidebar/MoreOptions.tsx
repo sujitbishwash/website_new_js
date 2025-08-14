@@ -177,10 +177,11 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   return (
     <div ref={menuRef} className="relative font-sans text-foreground">
       <button
-      
-      style={{ backgroundColor: theme.inputBackground }}
+
+        style={{ backgroundColor: theme.inputBackground }}
         onClick={toggleMenu}
-        className="flex items-center justify-between w-full p-4 transition-colors duration-200 hover:bg-accent/20 cursor-pointer"
+        className={`flex items-center w-full p-4 transition-colors duration-200 hover:bg-accent/20 cursor-pointer ${isContracted ? "justify-center" : "justify-between"
+          }`}
         onMouseOver={(e) =>
           (e.currentTarget.style.backgroundColor = theme.divider)
         }
@@ -195,7 +196,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
           <div
             className="rounded-full flex items-center justify-center cursor-pointer"
           >
-            <CircleUserRound 
+            <CircleUserRound
               className="w-8 h-8 text-muted-foreground"
             />
           </div>
@@ -226,13 +227,13 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
           className={`w-5 h-5 ${isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
             }`}
         />
-        <div 
+        <div
           className={`w-8 h-8 rounded-full flex items-center justify-center ${isContracted ? "opacity-100" : "lg:opacity-0 lg:hidden"
             }`}
         >
-          <CircleUserRound 
-              className="w-8 h-8 text-muted-foreground"
-            />
+          <CircleUserRound
+            className="w-8 h-8 text-muted-foreground"
+          />
         </div>
       </button>
 

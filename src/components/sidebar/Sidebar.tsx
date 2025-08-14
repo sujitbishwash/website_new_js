@@ -109,7 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             onClick={onContractToggle}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
-            className="hidden lg:block flex items-center text-muted-foreground hover:text-foreground focus:outline-none rounded-lg p-2 cursor-pointer"
+            className="hidden lg:block flex items-center justify-center text-muted-foreground hover:text-foreground focus:outline-none rounded-lg p-2 cursor-pointer"
           >
             {isContracted ? (
               isHovering ? (
