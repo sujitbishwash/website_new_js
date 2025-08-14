@@ -107,7 +107,7 @@ const AnimatedTitle: React.FC<{
   return (
     <h2
       className={`text-4xl md:text-6xl font-bold ${className}`}
-      
+
       style={{ color: theme.primaryText }}
     >
       {text.split("").map((char, index) => (
@@ -245,28 +245,29 @@ export default function Splash() {
       (prev) => (prev - 1 + features.length) % features.length
     );
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowRight") goToNext();
-      if (e.key === "ArrowLeft") goToPrev();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+    // Keyboard navigation
+    useEffect(() => {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "ArrowRight" && currentFeatureIndex < features.length - 1) goToNext();
+            if (e.key === "ArrowLeft" && currentFeatureIndex > 0) goToPrev();
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [currentFeatureIndex]);
 
-  // Auto-advance timer
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentFeatureIndex < features.length - 1) {
-        goToNext();
-      } else {
-        // On the last slide, timer completion triggers the final CTA
-        setIsFinalCtaVisible(true);
-      }
-    }, slideDuration);
+    // Auto-advance timer
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (currentFeatureIndex < features.length - 1) {
+                goToNext();
+            } else {
+                // On the last slide, timer completion triggers navigation
+                handleGetStarted();
+            }
+        }, slideDuration);
 
-    return () => clearTimeout(timer);
-  }, [currentFeatureIndex]);
+        return () => clearTimeout(timer);
+    }, [currentFeatureIndex]);
 
 
 
@@ -339,50 +340,39 @@ export default function Splash() {
         })}
       </div>
 
-      {/* Footer Navigation */}
-      <div className={`absolute bottom-0 w-full p-8 flex flex-col items-center z-20 transition-opacity duration-300 ${isFinalCtaVisible ? 'opacity-0' : 'opacity-100'}`}>
-        <div className="flex justify-center gap-3 mb-6">
-          {features.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => setCurrentFeatureIndex(index)}
-              className={`w-2 h-2 rounded-full transition-all duration-300 ${currentFeatureIndex === index ? "bg-blue-400 scale-150" : "bg-gray-600 hover:bg-gray-500"}`}
-              aria-label={`Go to slide ${index + 1}`}
-            />
-          ))}
-        </div>
-        <div className="w-full max-w-xs">
-          <ProgressBar key={currentFeatureIndex} duration={slideDuration} />
-        </div>
-      </div>
+            {/* Footer Navigation */}
+            <div className="absolute bottom-0 w-full p-8 flex flex-col items-center z-20">
+                <div className="flex justify-center gap-3 mb-6">
+                    {features.map((_, index) => (
+                        <button
+                            key={index}
+                            onClick={() => setCurrentFeatureIndex(index)}
+                            className={`w-2 h-2 rounded-full transition-all duration-300 ${currentFeatureIndex === index ? "bg-blue-400 scale-150" : "bg-gray-600 hover:bg-gray-500"}`}
+                            aria-label={`Go to slide ${index + 1}`}
+                        />
+                    ))}
+                </div>
+                <div className="w-full max-w-xs">
+                   <ProgressBar key={currentFeatureIndex} duration={slideDuration} />
+                </div>
+            </div>
 
       {/* Side Navigation Buttons */}
-      {currentFeatureIndex > 0 && !isFinalCtaVisible && (
-        <button onClick={goToPrev} className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors z-20 cursor-pointer" aria-label="Previous slide">
+      {currentFeatureIndex > 0 && (
+        <button onClick={goToPrev} className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors z-20" aria-label="Previous slide">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
       )}
-      {currentFeatureIndex < features.length - 1 && !isFinalCtaVisible && (
-        <button onClick={goToNext} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors z-20 cursor-pointer" aria-label="Next slide">
+      {currentFeatureIndex < features.length - 1 && (
+        <button onClick={goToNext} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors z-20" aria-label="Next slide">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
       )}
 
-      {/* Final CTA Overlay */}
-      <div className={`absolute inset-0 w-full h-full flex flex-col justify-center items-center text-center p-8 z-40 bg-gray-900/70 backdrop-blur-sm transition-opacity duration-700 ease-in-out ${isFinalCtaVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <div className={`transition-all duration-700 ease-in-out ${isFinalCtaVisible ? 'scale-100 opacity-100' : 'scale-90 opacity-0'}`}>
-          <button
-            onClick={handleGetStarted}
-            className="px-12 py-4 text-3xl font-semibold rounded-full text-white bg-blue-600 hover:bg-blue-500 transform hover:scale-105 transition-all duration-300 ease-in-out animate-glow cursor-pointer"
-          >
-            Get Started
-          </button>
-        </div>
-      </div>
     </div>
   );
 }

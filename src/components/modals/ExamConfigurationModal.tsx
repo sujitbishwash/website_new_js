@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
 import { examGoalApi } from "../../lib/api-client";
+import { X } from "lucide-react";
 
 // --- TYPE DEFINITIONS (TypeScript) ---
 // Defines the structure for a single exam's details
@@ -564,8 +565,9 @@ export default function ExamConfigurationModal({
 
         <div className="p-5 border-b border-gray-700">
           <h3 className="text-2xl font-semibold">Exam Configuration</h3>
+
           <button
-          className="absolute top-3 right-3 p-2 text-gray-400 rounded-full hover:bg-gray-700 hover:text-white focus:outline-none z-10"
+          className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
           onClick={onClose}
           onMouseOver={(e) =>
               (e.currentTarget.style.color = theme.primaryText)
@@ -575,20 +577,7 @@ export default function ExamConfigurationModal({
             }
           aria-label="Close modal"
         >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="w-6 h-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
+            <X className="w-5 h-5" />
           </button>
           
         </div>

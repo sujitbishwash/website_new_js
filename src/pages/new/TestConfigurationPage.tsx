@@ -199,10 +199,10 @@ const TestConfigurationPageComponent = () => {
 
   return (
     <div className="bg-gradient-to-br from-background/10 to-background min-h-screen text-white font-sans p-4 sm:p-6 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-2xl mx-auto bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-8">
+      <div className="w-full max-w-2xl mx-auto bg-foreground/60 border border-gray-700 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-8">
         {/* --- Header --- */}
         <div className="text-center">
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-100">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Configure Your Test
           </h1>
           <p className="text-gray-400 mt-2">

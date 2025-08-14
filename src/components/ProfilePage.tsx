@@ -12,57 +12,7 @@ import {
 } from "../lib/utils";
 import { ROUTES } from "../routes/constants";
 
-//import { useNavigate } from "react-router-dom";
 
-// --- SVG ICON COMPONENTS ---
-// Using simple inline SVGs for icons to keep it self-contained.
-const GeneralIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10.323 1.627c.828 0 1.595.439 2.014 1.154l.822 1.4.053.07c.062.06.145.096.233.096l1.615.013.154.007c.768.057 1.463.49 1.85 1.164l.329.571.073.136c.315.642.318 1.395.008 2.04l-.071.136-.803 1.422a.34.34 0 0 0 0 .329l.803 1.42.071.137c.31.645.308 1.398-.008 2.04l-.073.136-.328.571a2.34 2.34 0 0 1-1.85 1.165l-.155.005-1.615.014a.34.34 0 0 0-.233.097l-.053.068-.822 1.401a2.34 2.34 0 0 1-2.014 1.155h-.647a2.33 2.33 0 0 1-1.931-1.024l-.082-.13-.822-1.402a.34.34 0 0 0-.2-.153l-.086-.012-1.615-.014A2.34 2.34 0 0 1 3.016 14.6l-.081-.13-.328-.572a2.34 2.34 0 0 1-.01-2.312l.802-1.421.033-.08a.34.34 0 0 0 0-.17l-.033-.08-.802-1.421a2.33 2.33 0 0 1 .01-2.312l.328-.571.081-.13A2.34 2.34 0 0 1 4.94 4.36l1.615-.013.086-.011a.34.34 0 0 0 .2-.155l.822-1.4.082-.13a2.34 2.34 0 0 1 1.931-1.024zm-.647 1.33c-.312 0-.603.144-.792.386l-.074.11-.821 1.401c-.26.443-.706.737-1.206.807l-.217.016-1.615.013c-.312.003-.603.15-.79.394l-.074.11-.328.571a1 1 0 0 0-.004.995l.802 1.421.095.196c.161.399.16.846 0 1.246l-.095.196-.802 1.42c-.174.31-.173.688.004.996l.328.57.075.11a1 1 0 0 0 .789.394l1.615.014.217.015c.5.07.946.366 1.206.808l.821 1.4.074.11c.189.242.48.388.792.388h.647c.356 0 .686-.19.867-.497l.821-1.4.122-.181c.31-.4.788-.639 1.301-.643l1.615-.014.132-.01c.304-.042.576-.223.732-.494l.328-.57.057-.118c.1-.243.102-.515.004-.758l-.057-.12-.803-1.42a1.67 1.67 0 0 1 0-1.638l.803-1.42.057-.12a1 1 0 0 0-.004-.758l-.057-.118-.328-.571a1 1 0 0 0-.732-.494l-.132-.01-1.615-.013a1.67 1.67 0 0 1-1.3-.642l-.123-.18-.821-1.401a1 1 0 0 0-.867-.497zM11.586 10a1.586 1.586 0 1 0-3.173 0 1.586 1.586 0 0 0 3.172 0m1.329 0a2.915 2.915 0 1 1-5.83 0 2.915 2.915 0 0 1 5.83 0" /></svg>
-);
-const AccountIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M16.585 10a6.585 6.585 0 1 0-10.969 4.912A5.65 5.65 0 0 1 10 12.835c1.767 0 3.345.81 4.383 2.077A6.57 6.57 0 0 0 16.585 10M10 14.165a4.32 4.32 0 0 0-3.305 1.53c.972.565 2.1.89 3.305.89a6.55 6.55 0 0 0 3.303-.89A4.32 4.32 0 0 0 10 14.165M11.835 8.5a1.835 1.835 0 1 0-3.67 0 1.835 1.835 0 0 0 3.67 0m6.08 1.5a7.915 7.915 0 1 1-15.83 0 7.915 7.915 0 0 1 15.83 0m-4.75-1.5a3.165 3.165 0 1 1-6.33 0 3.165 3.165 0 0 1 6.33 0" /></svg>
-);
-const NotificationsIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M10 2.043a6.705 6.705 0 0 1 6.666 5.978l.561 5.15.009.164c0 .816-.662 1.496-1.498 1.496h-1.836a3.999 3.999 0 0 1-7.804 0H4.262a1.5 1.5 0 0 1-1.49-1.66l.562-5.15.043-.317A6.705 6.705 0 0 1 10 2.044M7.48 14.831a2.666 2.666 0 0 0 5.038 0zM10 3.373a5.375 5.375 0 0 0-5.31 4.538l-.033.254-.562 5.15c-.01.1.067.186.167.186h11.476a.17.17 0 0 0 .167-.15v-.036l-.562-5.15A5.375 5.375 0 0 0 10 3.373" /></svg>
-);
-const PersonalizationIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="m12 14 4-4"></path>
-    <path d="M3.34 19a10 10 0 1 1 17.32 0"></path>
-  </svg>
-);
-const SecurityIcon = () => (
-  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><g stroke-width="0" /><g stroke-linecap="round" stroke-linejoin="round" /><path d="m15.814 4.186.442-.442zm0 8.139.442.442zm-9.859-1.768-.442-.442zM2.861 13.65l.442.442zm3.489 3.489-.442-.442zm3.093-3.094-.442-.442zm-6.936.613-.621.069zm.193 1.741-.621.069zm.9.9-.069.621zm1.741.193.068-.621zm-2.405-.603.442-.442zm.173.173-.442.442zm3.06-7.371-.605.156zm4.138 4.138-.156.605zm-3.942.389a.625.625 0 1 0-.879.888zm4.564-5.15a1.04 1.04 0 0 1 0-1.472l-.883-.883a2.29 2.29 0 0 0 0 3.241zm1.473 0a1.04 1.04 0 0 1-1.473 0l-.883.885a2.29 2.29 0 0 0 3.241 0zm0-1.472a1.04 1.04 0 0 1 0 1.473l.883.883a2.29 2.29 0 0 0 0-3.241zm.883-.883a2.29 2.29 0 0 0-3.241 0l.884.883a1.04 1.04 0 0 1 1.473 0zm2.086-2.086a5.13 5.13 0 0 1 0 7.256l.883.883a6.38 6.38 0 0 0 0-9.023zm.883-.883a6.38 6.38 0 0 0-9.023 0l.883.883a5.13 5.13 0 0 1 7.257 0zM5.513 10.115l-3.094 3.093.883.883 3.095-3.092zm1.279 7.466 1.033-1.033-.883-.884-1.033 1.033zm1.033-1.033 2.06-2.06-.883-.884-2.06 2.06zm-5.938-1.82.193 1.741 1.242-.138-.193-1.74zm1.645 3.192 1.741.193.138-1.242-1.74-.193zm-1.037-.588.173.173.883-.883-.173-.174zm1.175-.653a.2.2 0 0 1-.117-.057l-.884.883c.233.233.537.379.863.415zm-1.59-.21c.036.327.182.631.415.863l.883-.883a.2.2 0 0 1-.056-.118zm3.828.228a.6.6 0 0 1-.497.175l-.138 1.242a1.86 1.86 0 0 0 1.519-.533zm-3.489-3.489a1.86 1.86 0 0 0-.533 1.519l1.243-.138a.6.6 0 0 1 .175-.497zm4.357-3.671a5.13 5.13 0 0 1 1.341-4.909l-.883-.883a6.38 6.38 0 0 0-1.668 6.104zm8.597 2.346a5.13 5.13 0 0 1-4.91 1.342l-.311 1.21a6.38 6.38 0 0 0 6.104-1.667zm-5.487 2.603c.047-.046.142-.083.267-.052l.311-1.211c-.49-.125-1.058-.023-1.461.379zM6.397 11c.403-.403.505-.972.379-1.462l-1.211.311c.032.125-.006.22-.053.267zm1.426 4.662L6.365 14.22l-.878.888 1.458 1.442z" fill="currentColor" /></svg>
-);
-
-const DevelopmentIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
-  </svg>
-);
-const BillingIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>
-);
 const PlayIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -157,13 +107,13 @@ const countries = [
 const genders = ["Male", "Female", "Other", "Prefer not to say"];
 // Updated navItems to include icons, matching the image provided
 const navItems = [
-  { name: "General", icon: GeneralIcon },
-  { name: "Account", icon: AccountIcon },
-  { name: "Notifications", icon: NotificationsIcon },
-  { name: "Personalization", icon: PersonalizationIcon },
-  { name: "Plan and Billing", icon: BillingIcon },
-  { name: "Privacy and Security", icon: SecurityIcon },
-  { name: "Development", icon: DevelopmentIcon },
+  { name: "General", icon: Settings },
+  { name: "Account", icon: CircleUserRound },
+  { name: "Notifications", icon: Bell },
+  { name: "Personalization", icon: Gauge },
+  { name: "Plan and Billing", icon: SparklesIcon },
+  { name: "Privacy and Security", icon: KeyRound },
+  { name: "Development", icon: Wrench },
 ];
 
 const features = [
@@ -306,7 +256,7 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
   options,
   manageLink,
 }) => (
-  <div className="py-4 flex justify-between items-center border-b border-gray-700">
+  <div className="py-4 flex justify-between items-center border-b border-foreground/20">
     <div>
       <h3 className="text-base font-semibold text-white">{title}</h3>
       <p className="text-sm text-foreground max-w-md">{description}</p>
@@ -335,8 +285,8 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
 
 // --- MAIN MODAL COMPONENT ---
 import { ModeToggle } from "./mode-toggle";
-import { AccentToggle } from "./accent-toggle";
-import { RefreshCcw } from "lucide-react";
+import { AccentToggle } from "./Accent-toggle";
+import { Bell, CircleCheck, CircleUserRound, Gauge, KeyRound, RefreshCcw, Settings, Sparkle, Wrench } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
@@ -370,17 +320,17 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   // State for new notification settings
   const [responseNotifications, setResponseNotifications] = useState("Push");
   const [taskNotifications, setTaskNotifications] = useState("Push, Email");
-    const { logout } = useAuth();
+  const { logout } = useAuth();
 
   // State for "Privacy and Security" settings
   const [mfaEnabled, setMfaEnabled] = useState(false);
 
-    const handleLogoutConfirm = async () => {
-      await logout();
-      // Navigate to login page after logout is complete
-      navigate(ROUTES.LOGIN, { replace: true });
-    };
-  
+  const handleLogoutConfirm = async () => {
+    await logout();
+    // Navigate to login page after logout is complete
+    navigate(ROUTES.LOGIN, { replace: true });
+  };
+
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -465,7 +415,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 <option>Hindi</option>
               </select>
             </SettingRow>
-            <SettingRow title="Voice">
+            {/*<SettingRow title="Voice">
               <button className="flex items-center gap-2 text-foreground hover:bg-gray-700 px-3 py-1.5 rounded-md transition-colors">
                 <PlayIcon /> Play
               </button>
@@ -478,7 +428,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 <option>Cove</option>
                 <option>Juniper</option>
               </select>
-            </SettingRow>
+            </SettingRow>*/}
             <SettingRow title="Show follow up suggestions in chats">
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
@@ -495,7 +445,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Account":
         return (
           <div>
-            <div className="flex justify-between items-end mb-6 pb-4 border-b border-gray-700">
+
+            <div className="items-end mb-6 pb-4 flex justify-between items-center border-b border-foreground/20">
+
               <div>
                 <h1 className="text-3xl  text-foreground">Your Account</h1>
                 <p className="mt-1 text-muted-foreground">
@@ -504,17 +456,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 {profile && (
                   <div className="mt-2 text-xs text-gray-500">
                     <span className="inline-flex items-center gap-1">
-                      <svg
-                        className="w-3 h-3"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
+                      <CircleCheck
+                        className="w-3 h-3" />
                       Data synced from your account
                     </span>
                   </div>
@@ -534,7 +477,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 </button>
                 <button
                   onClick={toggleEditMode}
-                  className="px-5 py-2 text-sm font-semibold text-white rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg bg-gradient-to-r from-blue-600 to-blue-700"
+                  className="px-5 py-2 rounded-lg text-sm font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform hover:scale-105 focus:outline-none focus:shadow-sm cursor-pointer"
                 >
                   {isEditing ? "Save Changes" : "Edit Profile"}
                 </button>
@@ -675,7 +618,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               0 0 20px rgba(168, 85, 247, 0.6), 
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
-            <div className="flex justify-between items-end mb-6 border-b border-gray-700 pb-4">
+            <div className="flex justify-between items-end border-b border-foreground/20 pb-4">
+
               <div>
                 <h1 className="text-3xl  text-foreground">Upgrade</h1>
                 <p className="mt-1 text-muted-foreground">
@@ -732,7 +676,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               </label>
             </SettingRow>
             <SettingRow title="Log out of this device">
-              <button onClick={handleLogoutConfirm} className="px-4 py-1.5 text-sm font-semibold text-foreground bg-background hover:bg-foreground/10 rounded-lg transition-colors">
+              <button onClick={handleLogoutConfirm} className="px-4 py-1.5 text-sm font-semibold text-foreground bg-background hover:bg-foreground/20 border border-divider rounded-lg  transition-transform transition-colors transform focus:outline-none focus:shadow-sm cursor-pointer">
+              
+
                 Log out
               </button>
             </SettingRow>
@@ -740,7 +686,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               title="Log out of all devices"
               description="Log out of all active sessions across all devices, including your current session. It may take up to 30 minutes for other devices to be logged out."
             >
-              <button className="px-4 py-1.5 text-sm font-semibold text-foreground bg-red-600/20 hover:bg-red-500/30 border border-red-500 rounded-lg transition-colors">
+              <button className="px-4 py-1.5 text-sm font-semibold text-foreground bg-red-600/20 hover:bg-red-500/30 border border-red-500 rounded-lg transition-colors cursor-pointer">
                 Log out all
               </button>
             </SettingRow>
@@ -930,7 +876,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         <div
           ref={modalRef}
           className="relative w-full max-w-4xl h-[600px] mx-4 rounded-xl shadow-2xl bg-card flex overflow-hidden animate-slide-in"
-        ><button onClick={handleClose} className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-gray-700 hover:text-foreground transition-colors z-10 cursor-pointer">
+        ><button onClick={handleClose} className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
           {/* Left Side Navigation */}

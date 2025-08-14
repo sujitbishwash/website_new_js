@@ -473,13 +473,13 @@ export default function HomePage() {
             </div>
             <div
               onClick={() => setIsYouTubeModalOpen(true)}
-              className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border hover:border-accent"
+              className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-foreground/20 transition-all duration-300 cursor-pointer border border-border hover:border-accent"
             >
               <Clipboard className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
               <div>
                 <h2 className="font-semibold text-foreground">Paste Link</h2>
                 <p className="text-xs text-muted-foreground">
-                  paste youtube links
+                  Paste Youtube links
                 </p>
               </div>
             </div>
