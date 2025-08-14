@@ -379,7 +379,17 @@ const theme = {
 export default function ExamsPage() {
   console.log("🎬 ExamsPage: Component mounted/rendered");
 
-  const { profile, examGoal, clearCache } = useUser();
+  const {
+    profile,
+    examGoal,
+    clearCache,
+    fetchExamGoal,
+    refreshExamGoal,
+    syncExamGoalFromAuthContext,
+    debugCache,
+    isDataLoaded,
+    resetFetchFlags,
+  } = useUser();
   const { refreshUserData } = useAuth();
 
   console.log("👤 ExamsPage: User context data:", { profile, examGoal });
@@ -480,32 +490,29 @@ export default function ExamsPage() {
     fetchExamData();
   }, []);
 
-  // Fetch current exam goal from API if not in cache
+  // Fetch current exam goal from UserContext if not available
+  // OPTIMIZATION: This only runs once on mount to prevent unnecessary API calls on every navigation
   useEffect(() => {
     console.log("🔍 ExamsPage: Checking exam goal fetch...", { examGoal });
 
     const fetchCurrentExamGoal = async () => {
       if (!examGoal) {
         try {
-          console.log("🔍 ExamsPage: Fetching current exam goal from API...");
           console.log(
-            "🔧 ExamsPage: examGoalApi.getUserExamGoal available:",
-            !!examGoalApi?.getUserExamGoal
+            "🔍 ExamsPage: Fetching current exam goal from UserContext..."
           );
 
-          const response = await examGoalApi.getUserExamGoal();
-          console.log("🔍 ExamsPage: Exam goal API response:", response);
-
-          if (response.data.success && response.data.data) {
+          // First try to sync from AuthContext localStorage
+          const synced = syncExamGoalFromAuthContext();
+          if (synced) {
             console.log(
-              "📚 ExamsPage: Current exam goal from API:",
-              response.data.data
+              "✅ ExamsPage: Successfully synced exam goal from AuthContext"
             );
-            // The exam goal will be updated in UserContext through refreshUserData
-            // This ensures we have the latest data
-          } else {
-            console.log("⚠️ ExamsPage: No exam goal found in API response");
+            return;
           }
+
+          // If no sync, fetch from API using cache-first approach
+          await fetchExamGoal();
         } catch (err: any) {
           console.error(
             "❌ ExamsPage: Failed to fetch current exam goal:",
@@ -519,7 +526,7 @@ export default function ExamsPage() {
     };
 
     fetchCurrentExamGoal();
-  }, [examGoal]);
+  }, []); // Only run once on mount, not on every examGoal change
 
   // Auto-select category based on user's exam goal
   useEffect(() => {
@@ -557,6 +564,72 @@ export default function ExamsPage() {
       );
     }
   }, [examGoal, examData]);
+
+  // Ensure exam goal is fetched when component mounts and examData is available
+  // OPTIMIZATION: Only depends on examData to prevent loops, uses cache-first approach
+  useEffect(() => {
+    if (Object.keys(examData).length > 0 && !examGoal) {
+      console.log("🚀 ExamsPage: Exam data loaded, fetching exam goal...");
+
+      // First try to sync from AuthContext localStorage
+      const synced = syncExamGoalFromAuthContext();
+      if (synced) {
+        console.log(
+          "✅ ExamsPage: Successfully synced exam goal from AuthContext after exam data load"
+        );
+        return;
+      }
+
+      // If no sync, fetch from API using cache-first approach
+      fetchExamGoal();
+    }
+  }, [examData]); // Only depend on examData, not examGoal to prevent loops
+
+  // Sync exam goal data when component first mounts - only once
+  // OPTIMIZATION: Empty dependency array ensures this only runs once on mount
+  useEffect(() => {
+    console.log(
+      "🚀 ExamsPage: Component mounted, attempting to sync exam goal..."
+    );
+
+    // Try to sync from AuthContext localStorage first
+    const synced = syncExamGoalFromAuthContext();
+    if (synced) {
+      console.log(
+        "✅ ExamsPage: Successfully synced exam goal from AuthContext on mount"
+      );
+    } else {
+      console.log(
+        "⚠️ ExamsPage: No exam goal data found in AuthContext on mount"
+      );
+    }
+  }, []); // Only run once on mount
+
+  // Debug: Log exam goal changes - only for debugging, can be removed in production
+  useEffect(() => {
+    if (examGoal) {
+      console.log("🔍 ExamsPage: Exam goal state changed:", examGoal);
+
+      // Also log what's in AuthContext localStorage
+      try {
+        const userData = localStorage.getItem("userData");
+        if (userData) {
+          const parsedUserData = JSON.parse(userData);
+          console.log(
+            "📋 ExamsPage: AuthContext localStorage data:",
+            parsedUserData
+          );
+        } else {
+          console.log("📋 ExamsPage: No AuthContext localStorage data found");
+        }
+      } catch (error) {
+        console.warn(
+          "ExamsPage: Failed to parse AuthContext localStorage data:",
+          error
+        );
+      }
+    }
+  }, [examGoal]);
 
   const { categories, currentExams, selectedExamDetails, filteredExams } =
     useMemo(() => {
@@ -687,6 +760,9 @@ export default function ExamsPage() {
         // Clear cache and refresh user data
         clearCache();
         await refreshUserData();
+
+        // Also refresh exam goal data in UserContext
+        await fetchExamGoal(true); // Force refresh
 
         // Show success message for 3 seconds
         setTimeout(() => {
@@ -1254,6 +1330,101 @@ export default function ExamsPage() {
             <div style={{ marginBottom: "0.5rem" }}>
               <strong>Exam Goal in Cache:</strong>{" "}
               {examGoal ? `${examGoal.exam} (${examGoal.groupType})` : "None"}
+            </div>
+            <div style={{ marginBottom: "0.5rem" }}>
+              <strong>UserContext isDataLoaded:</strong>{" "}
+              {isDataLoaded ? "Yes" : "No"}
+            </div>
+            <div style={{ marginBottom: "0.5rem" }}>
+              <strong>AuthContext localStorage:</strong>{" "}
+              {(() => {
+                try {
+                  const userData = localStorage.getItem("userData");
+                  if (userData) {
+                    const parsed = JSON.parse(userData);
+                    return parsed?.exam && parsed?.group_type
+                      ? `${parsed.exam} (${parsed.group_type})`
+                      : "No exam goal";
+                  }
+                  return "No data";
+                } catch {
+                  return "Error parsing";
+                }
+              })()}
+            </div>
+            <div style={{ marginBottom: "0.5rem" }}>
+              <strong>Fetch Attempted:</strong> Always (cache-first approach)
+            </div>
+            <div style={{ marginBottom: "1rem" }}>
+              <button
+                onClick={debugCache}
+                style={{
+                  backgroundColor: theme.accent,
+                  color: "white",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "0.8rem",
+                  marginRight: "0.5rem",
+                }}
+              >
+                Debug Cache
+              </button>
+              <button
+                onClick={() => {
+                  const synced = syncExamGoalFromAuthContext();
+                  if (synced) {
+                    console.log("✅ Manual sync successful");
+                  } else {
+                    console.log("⚠️ Manual sync failed - no data found");
+                  }
+                }}
+                style={{
+                  backgroundColor: "#10B981",
+                  color: "white",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "0.8rem",
+                }}
+              >
+                Sync Exam Goal
+              </button>
+              <button
+                onClick={() => {
+                  console.log("🔄 Manually fetching exam goal from API...");
+                  fetchExamGoal(true);
+                }}
+                style={{
+                  backgroundColor: "#F59E0B",
+                  color: "white",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "0.8rem",
+                  marginLeft: "0.5rem",
+                }}
+              >
+                Fetch Exam Goal
+              </button>
+              <button
+                onClick={resetFetchFlags}
+                style={{
+                  backgroundColor: "#EF4444",
+                  color: "white",
+                  padding: "0.5rem 1rem",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer",
+                  fontSize: "0.8rem",
+                  marginLeft: "0.5rem",
+                }}
+              >
+                Reset Fetch Flags
+              </button>
             </div>
             {apiExamData.length > 0 && (
               <div style={{ marginTop: "1rem" }}>

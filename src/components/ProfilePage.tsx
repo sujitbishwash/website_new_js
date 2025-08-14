@@ -651,12 +651,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 isEditing={isEditing}
                 onChange={handleInputChange}
               />
-              <div>
-                <label className="block text-sm font-medium text-gray-400">
-                  Password
-                </label>
-                <p className="mt-1 text-base text-white">********</p>
-              </div>
+              {false && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-400">
+                    Password
+                  </label>
+                  <p className="mt-1 text-base text-white">********</p>
+                </div>
+              )}
               <DateField
                 label="Date of Birth"
                 name="dob"
@@ -701,31 +703,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 onChange={handleInputChange}
                 options={countries}
               />
-
-              {/* Exam Goal Information */}
-              {profile && (
-                <>
-                  <div className="col-span-1 md:col-span-2">
-                    <h3 className="text-lg font-semibold text-white mb-4 border-b border-gray-700 pb-2">
-                      Exam Goal Information
-                    </h3>
-                  </div>
-                  <ProfileField
-                    label="Exam Goal"
-                    name="examGoal"
-                    value={profile.examGoal?.exam || "Not set"}
-                    isEditing={false}
-                    onChange={() => {}}
-                  />
-                  <ProfileField
-                    label="Group Type"
-                    name="groupType"
-                    value={profile.examGoal?.groupType || "Not set"}
-                    isEditing={false}
-                    onChange={() => {}}
-                  />
-                </>
-              )}
 
               {/* Debug Information */}
               {process.env.NODE_ENV === "development" && profile && (
