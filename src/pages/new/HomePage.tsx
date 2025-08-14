@@ -491,9 +491,15 @@ export default function HomePage() {
   return (
     <div className="min-h-full bg-background text-foreground font-sans p-6">
       {/* Upgrade Button */}
-      <button onClick={() => { navigate(ROUTES.PREMIUM); }} className="fixed top-4 right-8 z-50 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-medium bg-[#F1F1FB] text-[#5D5BD0] hover:bg-[#E4E4F6] dark:bg-[#373669] dark:text-[#DCDBF6] dark:hover:bg-[#414071]">
+
+      <style>{`.glow-purple:hover {
+              box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 
+              0 0 20px rgba(168, 85, 247, 0.6), 
+              0 0 30px rgba(168, 85, 247, 0.4);
+            `}</style>
+      <button onClick={() => { navigate(ROUTES.PREMIUM); }} className="fixed top-4 right-8 z-50 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-[#F1F1FB] text-[#5D5BD0] hover:bg-[#E4E4F6] dark:bg-[#373669] dark:text-[#DCDBF6] dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none">
         <SparklesIcon className="h-5 w-5" />
-        <span>Upgrade your plan</span>
+        <span>Upgrade plan</span>
       </button>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl">
         {/* Header Card */}

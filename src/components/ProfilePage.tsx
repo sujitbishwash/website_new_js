@@ -42,7 +42,7 @@ const PersonalizationIcon = () => (
   </svg>
 );
 const SecurityIcon = () => (
-  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><g stroke-width="0" /><g stroke-linecap="round" stroke-linejoin="round" /><path d="M12.5 7.5h0.008M12.5 12.5a5 5 0 1 0 -4.955 -4.327c0.048 0.362 0.072 0.543 0.057 0.658a0.708 0.708 0 0 1 -0.098 0.288c-0.057 0.101 -0.156 0.2 -0.355 0.399l-4.258 4.258c-0.144 0.144 -0.217 0.217 -0.268 0.3a0.833 0.833 0 0 0 -0.1 0.242C2.5 14.413 2.5 14.515 2.5 14.719V16.167c0 0.467 0 0.7 0.091 0.878a0.833 0.833 0 0 0 0.364 0.364C3.133 17.5 3.367 17.5 3.833 17.5h1.448c0.204 0 0.306 0 0.402 -0.023a0.833 0.833 0 0 0 0.242 -0.1c0.083 -0.051 0.156 -0.123 0.3 -0.267l4.258 -4.259c0.199 -0.199 0.298 -0.298 0.4 -0.355a0.708 0.708 0 0 1 0.287 -0.098c0.115 -0.017 0.296 0.008 0.658 0.057Q12.158 12.5 12.5 12.5" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" /></svg>
+  <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><g stroke-width="0" /><g stroke-linecap="round" stroke-linejoin="round" /><path d="m15.814 4.186.442-.442zm0 8.139.442.442zm-9.859-1.768-.442-.442zM2.861 13.65l.442.442zm3.489 3.489-.442-.442zm3.093-3.094-.442-.442zm-6.936.613-.621.069zm.193 1.741-.621.069zm.9.9-.069.621zm1.741.193.068-.621zm-2.405-.603.442-.442zm.173.173-.442.442zm3.06-7.371-.605.156zm4.138 4.138-.156.605zm-3.942.389a.625.625 0 1 0-.879.888zm4.564-5.15a1.04 1.04 0 0 1 0-1.472l-.883-.883a2.29 2.29 0 0 0 0 3.241zm1.473 0a1.04 1.04 0 0 1-1.473 0l-.883.885a2.29 2.29 0 0 0 3.241 0zm0-1.472a1.04 1.04 0 0 1 0 1.473l.883.883a2.29 2.29 0 0 0 0-3.241zm.883-.883a2.29 2.29 0 0 0-3.241 0l.884.883a1.04 1.04 0 0 1 1.473 0zm2.086-2.086a5.13 5.13 0 0 1 0 7.256l.883.883a6.38 6.38 0 0 0 0-9.023zm.883-.883a6.38 6.38 0 0 0-9.023 0l.883.883a5.13 5.13 0 0 1 7.257 0zM5.513 10.115l-3.094 3.093.883.883 3.095-3.092zm1.279 7.466 1.033-1.033-.883-.884-1.033 1.033zm1.033-1.033 2.06-2.06-.883-.884-2.06 2.06zm-5.938-1.82.193 1.741 1.242-.138-.193-1.74zm1.645 3.192 1.741.193.138-1.242-1.74-.193zm-1.037-.588.173.173.883-.883-.173-.174zm1.175-.653a.2.2 0 0 1-.117-.057l-.884.883c.233.233.537.379.863.415zm-1.59-.21c.036.327.182.631.415.863l.883-.883a.2.2 0 0 1-.056-.118zm3.828.228a.6.6 0 0 1-.497.175l-.138 1.242a1.86 1.86 0 0 0 1.519-.533zm-3.489-3.489a1.86 1.86 0 0 0-.533 1.519l1.243-.138a.6.6 0 0 1 .175-.497zm4.357-3.671a5.13 5.13 0 0 1 1.341-4.909l-.883-.883a6.38 6.38 0 0 0-1.668 6.104zm8.597 2.346a5.13 5.13 0 0 1-4.91 1.342l-.311 1.21a6.38 6.38 0 0 0 6.104-1.667zm-5.487 2.603c.047-.046.142-.083.267-.052l.311-1.211c-.49-.125-1.058-.023-1.461.379zM6.397 11c.403-.403.505-.972.379-1.462l-1.211.311c.032.125-.006.22-.053.267zm1.426 4.662L6.365 14.22l-.878.888 1.458 1.442z" fill="currentColor" /></svg>
 );
 
 const DevelopmentIcon = () => (
@@ -73,6 +73,11 @@ const PlayIcon = () => (
   >
     <path d="M8 5v14l11-7z"></path>
   </svg>
+);
+
+
+const SparklesIcon = () => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>
 );
 
 // --- TYPESCRIPT INTERFACES ---
@@ -416,23 +421,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 onChange={(e) => setLanguage(e.target.value)}
                 className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option>Auto-detect</option>
                 <option>English</option>
-                <option>Spanish</option>
-              </select>
-            </SettingRow>
-            <SettingRow
-              title="Spoken language"
-              description="For best results, select the language you mainly speak. If it's not listed, it may still be supported via auto-detection."
-            >
-              <select
-                value={spokenLanguage}
-                onChange={(e) => setSpokenLanguage(e.target.value)}
-                className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option>Auto-detect</option>
-                <option>English (US)</option>
-                <option>English (UK)</option>
+                <option>Hindi</option>
               </select>
             </SettingRow>
             <SettingRow title="Voice">
@@ -465,7 +455,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Account":
         return (
           <div>
-            <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-end mb-6 pb-4 border-b border-gray-700">
               <div>
                 <h1 className="text-3xl  text-white">Your Account</h1>
                 <p className="mt-1 text-gray-400">
@@ -474,13 +464,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               </div>
               <button
                 onClick={toggleEditMode}
-                className="px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg focus:shadow-blue-500/50 bg-gradient-to-r from-blue-600 to-blue-700"
+                className="px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg focus:shadow-blue-500/50 bg-gradient-to-r from-blue-600 to-blue-700 cursor-pointer"
               >
                 {isEditing ? "Save Changes" : "Edit Profile"}
               </button>
             </div>
-
-            <hr className="border-t border-gray-700" />
 
             <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
               <ProfileField
@@ -567,7 +555,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             </h1>
             <NotificationSettingRow
               title="Responses"
-              description="Get notified when ChatGPT responds to requests that take time, like research or image generation."
+              description="Get notified when chatbot responds to requests that take time, like research or image generation."
               value={responseNotifications}
               onChange={(e) => setResponseNotifications(e.target.value)}
               options={["Push", "Email", "None"]}
@@ -586,17 +574,26 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Plan and Billing":
         return (
           <div>
-            <SettingRow
-              title="Upgrade"
-              description="You are currently on the free plan"
-            >
-              <button
+            <style>{`.glow-purple:hover {
+              box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 
+              0 0 20px rgba(168, 85, 247, 0.6), 
+              0 0 30px rgba(168, 85, 247, 0.4);
+            `}</style>
+            <div className="flex justify-between items-end mb-6 border-b border-gray-700 pb-4">
+              <div>
+                <h1 className="text-3xl  text-white">Upgrade</h1>
+                <p className="mt-1 text-gray-400">
+                  You are currently on the free plan
+                </p>
+              </div><button
                 onClick={onUpgradeClick}
-                className="px-5 py-2 text-sm font-semibold bg-white text-gray-900 rounded-lg shadow-md hover:bg-gray-200 transition-colors"
+                className="flex gap-1 px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md hover:bg-purple-100 transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg focus:shadow-blue-500/50 bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer"
               >
+                <SparklesIcon />
                 Upgrade Plan
               </button>
-            </SettingRow>
+
+            </div>
             <div className="mt-8 p-6 bg-gray-700/50 rounded-lg">
               <h2 className="text-xl  text-white">
                 Get everything in Free, and more.
@@ -837,8 +834,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           </button>
           {/* Left Side Navigation */}
           <nav className="w-1/4 bg-gray-900 p-2 flex flex-col">
-          <h2 className="text-xl text-white ml-4 mt-6 mb-8">Settings</h2>
-            
+            <h2 className="text-xl text-gray-400 ml-4 mt-6 mb-8">Settings</h2>
+
             <ul>
               {navItems.map((item) => (
                 <li key={item.name} className="mb-2">

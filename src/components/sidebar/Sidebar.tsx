@@ -1,5 +1,5 @@
 import {
-  Book,
+  LibraryBig,
   ChevronsLeft,
   Clock,
   FileCheck,
@@ -48,7 +48,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   const navItems = [
     { path: ROUTES.HOME, icon: Home, label: "Home" },
     { path: ROUTES.HISTORY, icon: Clock, label: "History" },
-    { path: ROUTES.BOOKS, icon: Book, label: "Books" },
+    { path: ROUTES.BOOKS, icon: LibraryBig, label: "Books" },
     { path: ROUTES.TEST_SERIES, icon: FileCheck, label: "Test Series" },
     {
       path: ROUTES.PREVIOUS_YEAR_PAPERS,

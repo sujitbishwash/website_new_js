@@ -59,7 +59,7 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
           </h2>
 
           <p className="text-muted-foreground mb-6">
-            Log out of AIPadhai as{" "}
+            Log out of AI Padhai as{" "}
             <span className="font-semibold text-foreground">{displayEmail}</span>?
           </p>
 
@@ -67,13 +67,13 @@ const LogoutModal: React.FC<LogoutModalProps> = ({
           <div className="flex flex-col space-y-3">
             <button
               onClick={onConfirm}
-              className="w-full px-4 py-3 font-semibold bg-primary text-primary-foreground rounded-lg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full px-4 py-3 font-semibold  bg-red-600/20 text-primary-foreground rounded-lg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
             >
               Log out
             </button>
             <button
               onClick={onClose}
-              className="w-full px-4 py-3 font-semibold text-foreground bg-transparent rounded-lg transition-colors hover:bg-accent/20 focus:outline-none focus:ring-2 focus:ring-ring"
+              className="w-full px-4 py-3 font-semibold text-foreground bg-transparent rounded-lg transition-colors hover:bg-primary/20 focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
             >
               Cancel
             </button>

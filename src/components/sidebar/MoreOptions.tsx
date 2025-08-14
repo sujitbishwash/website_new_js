@@ -6,6 +6,7 @@ import { useUser } from "@/contexts/UserContext";
 // --- TYPE DEFINITIONS ---
 type MenuItem = {
   icon: React.ReactNode;
+  trailingIcon?: React.ReactNode;
   label: string;
   action?: () => void;
   isDivider?: boolean;
@@ -134,6 +135,9 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20"><g stroke-width="0" /><g stroke-linecap="round" stroke-linejoin="round" /><g stroke="currentColor" stroke-width="1.5"><path d="M2.5 8.681c0 -2.665 0 -3.998 0.315 -4.446 0.314 -0.448 1.567 -0.877 4.072 -1.734l0.477 -0.163C8.671 1.89 9.323 1.667 10 1.667s1.329 0.223 2.635 0.671l0.477 0.163c2.506 0.857 3.758 1.287 4.072 1.734C17.5 4.683 17.5 6.017 17.5 8.681v1.312c0 4.698 -3.533 6.979 -5.749 7.947C11.15 18.202 10.85 18.333 10 18.333s-1.15 -0.132 -1.751 -0.394C6.032 16.971 2.5 14.692 2.5 9.992z" /><path cx="12" cy="9" r="2" d="M11.667 7.5A1.667 1.667 0 0 1 10 9.167A1.667 1.667 0 0 1 8.333 7.5A1.667 1.667 0 0 1 11.667 7.5z" /><path d="M13.333 12.5c0 0.921 0 1.667 -3.333 1.667s-3.333 -0.746 -3.333 -1.667 1.492 -1.667 3.333 -1.667 3.333 0.746 3.333 1.667Z" /></g></svg>
 
           ),
+          trailingIcon: (
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" transform="rotate(270)" width="20" height="20"><g stroke-width="0" /><g stroke-linecap="round" stroke-linejoin="round" /><path d="m5.833 5.833 8.333 8.333m0 0V5.833m0 8.333H5.833" stroke="currentColor" stroke-width="1.6666666666666667" stroke-linecap="round" stroke-linejoin="round" /></svg>
+          ),
           label: "Privacy Policy",
           action: handlePrivacyPolicyClick,
         },
@@ -143,6 +147,9 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
               <path d="M16.001 9.042V7.337c0-.711 0-1.205-.031-1.588a2.4 2.4 0 0 0-.112-.615l-.056-.13a1.84 1.84 0 0 0-.676-.732L15 4.202c-.158-.08-.37-.137-.745-.168-.383-.031-.877-.032-1.588-.032H7.333c-.71 0-1.204 0-1.588.032a2.4 2.4 0 0 0-.615.111L5 4.202a1.84 1.84 0 0 0-.731.676l-.07.126c-.081.158-.138.37-.168.745-.032.383-.033.877-.033 1.588v5.33c0 .71.001 1.204.033 1.588.03.375.087.587.167.745l.07.126c.177.287.43.522.732.676l.13.055c.144.052.333.09.615.113.384.03.877.032 1.588.032h3.262c.55 0 .874-.008 1.1-.03a4 4 0 0 1-.278-.533l-.053-.14a3.17 3.17 0 0 1 .841-3.348l.114-.099c.277-.225.643-.427 1.152-.714l2.453-1.38.034.062c.007-.032.017-.063.022-.095l.011-.103c.01-.113.01-.269.01-.58m-1.878 3.256c-.487.274-.732.415-.885.525l-.128.102a1.84 1.84 0 0 0-.489 1.942l.065.151c.04.083.099.182.181.319.142-.185.311-.47.624-1.016l1.404-2.458zM10 9.335a.666.666 0 0 1 0 1.33H6.666a.665.665 0 0 1 0-1.33zM7.796 6.002l.134.013a.665.665 0 0 1 0 1.303l-.134.014h-1.13a.665.665 0 0 1 0-1.33zm5.537 0 .134.013a.665.665 0 0 1 0 1.303l-.134.014h-3.037a.665.665 0 0 1 0-1.33zm3.998 3.04c0 .281.002.497-.014.695l-.024.194a3 3 0 0 1-.114.479l-.054.155a3 3 0 0 1-.169.364l-.239.427-2.071 3.625c-.348.608-.595 1.053-.913 1.392l-.142.14a3.2 3.2 0 0 1-.986.607l-.158.055c-.502.164-1.052.157-1.852.157H7.333c-.689 0-1.246 0-1.696-.036-.4-.033-.761-.098-1.098-.242l-.142-.067a3.17 3.17 0 0 1-1.262-1.166l-.122-.218c-.192-.376-.271-.782-.309-1.24-.036-.45-.036-1.007-.036-1.696v-5.33c0-.69 0-1.246.036-1.697.038-.457.117-.863.309-1.24l.122-.219c.304-.495.74-.9 1.262-1.165l.142-.066c.337-.144.697-.21 1.098-.242.45-.037 1.007-.036 1.696-.036h5.333c.69 0 1.246-.001 1.697.036.458.037.864.116 1.24.308l.219.122c.495.305.9.741 1.165 1.262l.066.143c.144.336.21.697.242 1.097.037.45.036 1.008.036 1.697z" />
             </svg>
 
+          ),
+          trailingIcon: (
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" transform="rotate(270)" width="20" height="20"><g stroke-width="0" /><g stroke-linecap="round" stroke-linejoin="round" /><path d="m5.833 5.833 8.333 8.333m0 0V5.833m0 8.333H5.833" stroke="currentColor" stroke-width="1.6666666666666667" stroke-linecap="round" stroke-linejoin="round" /></svg>
           ),
           label: "Terms of Use",
           action: handleTermsOfUseClick,
@@ -225,10 +232,9 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
       {isMenuOpen && (
         <div
           style={{
-            backgroundColor: theme.cardBackground,
             borderColor: theme.divider,
           }}
-          className="absolute bottom-full left-0 mb-1 w-64 p-2 rounded-t-lg shadow-2xl z-20 border animate-fade-in-up text-foreground"
+          className="bg-gray-700 absolute bottom-full left-0 mb-1 w-64 p-2 rounded-t-lg shadow-2xl z-20 border animate-fade-in-up text-foreground"
         >
           <div className="space-y-1">
             {menuOptions.map((item) =>
@@ -253,21 +259,19 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                         item.action?.();
                       }
                     }}
-                    style={{ color: theme.secondaryText }}
-                    className="w-full flex items-center justify-between space-x-3 p-2 text-left text-sm rounded-md transition-colors duration-200 hover:bg-accent hover:text-accent-foreground cursor-pointer"
+                    style={{ color: theme.primaryText }}
+                    className="w-full flex items-center justify-between space-x-3 p-2 text-left text-sm rounded-md transition-colors duration-200 hover:bg-accent hover:text-accent-foreground hover:text-white cursor-pointer"
                     onMouseOver={(e) => {
                       e.currentTarget.style.backgroundColor =
-                        theme.inputBackground;
-                      e.currentTarget.style.color = theme.primaryText;
+                        theme.divider;
                     }}
                     onMouseOut={(e) => {
                       e.currentTarget.style.backgroundColor = "transparent";
-                      e.currentTarget.style.color = theme.secondaryText;
                     }}
                   >
                     <div className="flex items-center space-x-3">
                       {item.icon}
-                      <span className="text-gray-300 hover:bg-gray-700 hover:text-white">
+                      <span>
                         {item.label}
                       </span>
                     </div>
@@ -289,24 +293,23 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                               child.action?.();
                               setMenuOpen(false);
                             }}
-                            style={{ color: theme.secondaryText }}
-                            className="w-full flex items-center space-x-3 p-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-md transition-colors duration-200 cursor-pointer"
+                            style={{ color: theme.primaryText }}
+                            className="w-full flex items-center space-x-3 p-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground text-gray-300 hover:text-white rounded-md transition-colors duration-200 cursor-pointer"
                             onMouseOver={(e) => {
                               e.currentTarget.style.backgroundColor =
-                                theme.inputBackground;
-                              e.currentTarget.style.color = theme.primaryText;
+                                theme.divider;
                             }}
                             onMouseOut={(e) => {
                               e.currentTarget.style.backgroundColor =
                                 "transparent";
-                              e.currentTarget.style.color = theme.secondaryText;
                             }}
                           >
                             {child.icon}
 
-                            <span className="text-gray-300 hover:bg-gray-700 hover:text-white">
+                            <span className="w-full">
                               {child.label}
                             </span>
+                            {child.trailingIcon}
                           </button>
                         ))}
                       </div>

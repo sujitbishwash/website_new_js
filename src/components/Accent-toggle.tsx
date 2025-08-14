@@ -15,7 +15,6 @@ import {
 } from "@/styles/theme";
 
 export function AccentToggle() {
-  const { setTheme } = useTheme();
   const colorThemes = getAvailableColorThemes();
   const handleColorTheme = (name: ColorThemeName) => {
     applyColorTheme(name);
