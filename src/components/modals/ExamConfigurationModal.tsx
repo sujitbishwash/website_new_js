@@ -559,7 +559,7 @@ export default function ExamConfigurationModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
       onClick={onClose}>
-      <div className="relative w-full max-w-2xl mx-4 bg-gray-900 rounded-xl shadow-2xl border border-gray-700 flex flex-col max-h-[90vh]"
+      <div className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-2xl border border-divider flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}>
 
         <div className="p-5 border-b border-gray-700">

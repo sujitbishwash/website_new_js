@@ -196,12 +196,10 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             }`}
         >
           <div
-            style={{ backgroundColor: theme.mutedText }}
-            className="w-8 h-8 rounded-full flex items-center justify-center"
+            className="rounded-full flex items-center justify-center cursor-pointer"
           >
-            <CircleUserRound
-              style={{ color: theme.cardBackground }}
-              className="w-8 h-8"
+            <CircleUserRound 
+              className="w-8 h-8 text-muted-foreground"
             />
           </div>
 
@@ -212,12 +210,12 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
             <p className="font-medium text-muted-foreground">
               {isLoading ? "Loading..." : profile?.name || "Empty"}
             </p>
-            <p className="font-medium text-muted-foreground text-xs">
+            <p className="font-medium text-muted-foreground text-sm">
               {error
                 ? "Error loading profile"
                 : isDataLoaded
-                ? "Free Plan"
-                : "Free Plan"}
+                  ? "Free Plan"
+                  : "Free Plan"}
             </p>
             {isBackgroundLoading && (
               <div className="flex items-center space-x-1 mt-1">
@@ -233,16 +231,13 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
           className={`w-5 h-5 ${isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
             }`}
         />
-        <div
-          style={{ backgroundColor: theme.mutedText }}
+        <div 
           className={`w-8 h-8 rounded-full flex items-center justify-center ${isContracted ? "opacity-100" : "lg:opacity-0 lg:hidden"
             }`}
         >
-          <Icon
-            path="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-            style={{ color: theme.cardBackground }}
-            className="w-5 h-5"
-          />
+          <CircleUserRound 
+              className="w-8 h-8 text-muted-foreground"
+            />
         </div>
       </button>
 
@@ -250,8 +245,9 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
         <div
           style={{
             borderColor: theme.divider,
+            backgroundColor: theme.inputBackground,
           }}
-          className="bg-gray-700 absolute bottom-full left-0 mb-1 w-64 p-2 rounded-t-lg shadow-2xl z-20 border animate-fade-in-up text-foreground"
+          className="absolute bottom-full left-0 mb-1 w-64 p-2 rounded-t-lg shadow-2xl z-20 border animate-fade-in-up text-foreground"
         >
           <div className="space-y-1">
             {menuOptions.map((item) =>
@@ -301,7 +297,12 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
                   </button>
 
                   {item.children && activeSubMenu === item.label && (
-                    <div className="bg-gray-700  border border-gray-500 absolute left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 animate-fade-in-up">
+                    <div
+                      style={{
+                        borderColor: theme.divider,
+                        backgroundColor: theme.inputBackground,
+                      }}
+                      className="border absolute left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 animate-fade-in-up">
                       <div className="space-y-1">
                         {item.children.map((child) => (
                           <button

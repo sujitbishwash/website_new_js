@@ -28,7 +28,6 @@ const HistoryStyles = () => (
   <style>{`
     /* --- Main Page Styles --- */
     .history-page {
-      background-color: #0d1117; /* Dark navy background */
       min-height: 100vh;
       padding: 40px;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
@@ -218,7 +217,7 @@ const HistoryPage = () => {
   return (
     <>
       <HistoryStyles />
-      <div className="history-page">
+      <div className="history-page bg-background text-foreground">
         <h1 className="main-title">Your Learning History</h1>
         <div className="history-grid">
           {learningHistoryData.map((item) => (

@@ -186,22 +186,21 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
   name,
 }) => (
   <div>
-    <label className="block text-sm font-medium text-gray-400">{label}</label>
+    <label className="block text-sm font-medium text-foreground">{label}</label>
     {isEditing ? (
       <input
         type={type}
         name={name}
         value={value}
         onChange={onChange}
-        className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
         autoComplete="off"
       />
     ) : (
       <div className="flex items-center gap-2">
         <p
-          className={`mt-1 text-base ${
-            value === "Not set" ? "text-gray-500 italic" : "text-white"
-          }`}
+          className={`mt-1 text-base ${value === "Not set" ? "text-foreground italic" : "text-foreground"
+            }`}
         >
           {value}
         </p>
@@ -235,13 +234,13 @@ const SelectField: React.FC<SelectFieldProps> = ({
   options,
 }) => (
   <div>
-    <label className="block text-sm font-medium text-gray-400">{label}</label>
+    <label className="block text-sm font-medium text-foreground">{label}</label>
     {isEditing ? (
       <select
         name={name}
         value={value}
         onChange={onChange}
-        className="mt-1 block w-full pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="mt-1 block w-full pl-3 pr-10 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
         <option value="" disabled>
           Select...
@@ -253,7 +252,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
         ))}
       </select>
     ) : (
-      <p className="mt-1 text-base text-white">{value}</p>
+      <p className="mt-1 text-base text-foreground">{value}</p>
     )}
   </div>
 );
@@ -266,17 +265,17 @@ const DateField: React.FC<{
   name: "dob";
 }> = ({ label, value, isEditing, onChange, name }) => (
   <div>
-    <label className="block text-sm font-medium text-gray-400">{label}</label>
+    <label className="block text-sm font-medium text-foreground">{label}</label>
     {isEditing ? (
       <input
         type="date"
         name={name}
         value={value}
         onChange={onChange}
-        className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     ) : (
-      <p className="mt-1 text-base text-white">{value}</p>
+      <p className="mt-1 text-base text-foreground">{value}</p>
     )}
   </div>
 );
@@ -287,9 +286,9 @@ const SettingRow: React.FC<SettingRowProps> = ({
   description,
   children,
 }) => (
-  <div className="py-4 flex justify-between items-center border-b border-gray-700">
+  <div className="py-4 flex justify-between items-center border-b border-foreground/20">
     <div>
-      <h3 className="text-base text-white">{title}</h3>
+      <h3 className="text-base text-foreground">{title}</h3>
       {description && (
         <p className="text-sm text-gray-400 max-w-md mt-1">{description}</p>
       )}
@@ -310,7 +309,7 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
   <div className="py-4 flex justify-between items-center border-b border-gray-700">
     <div>
       <h3 className="text-base font-semibold text-white">{title}</h3>
-      <p className="text-sm text-gray-400 max-w-md">{description}</p>
+      <p className="text-sm text-foreground max-w-md">{description}</p>
       {manageLink && (
         <a
           href="#"
@@ -323,7 +322,7 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
     <select
       value={value}
       onChange={onChange}
-      className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
     >
       {options.map((opt) => (
         <option key={opt} value={opt}>
@@ -337,6 +336,8 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
 // --- MAIN MODAL COMPONENT ---
 import { ModeToggle } from "./mode-toggle";
 import { AccentToggle } from "./accent-toggle";
+import { RefreshCcw } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
@@ -366,13 +367,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   const [spokenLanguage, setSpokenLanguage] = useState("Auto-detect");
   const [voice, setVoice] = useState("Breeze");
   const [showSuggestions, setShowSuggestions] = useState(true);
-
   // State for new notification settings
   const [responseNotifications, setResponseNotifications] = useState("Push");
   const [taskNotifications, setTaskNotifications] = useState("Push, Email");
+    const { logout } = useAuth();
 
   // State for "Privacy and Security" settings
   const [mfaEnabled, setMfaEnabled] = useState(false);
+
+    const handleLogoutConfirm = async () => {
+      await logout();
+      // Navigate to login page after logout is complete
+      navigate(ROUTES.LOGIN, { replace: true });
+    };
+  
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -440,7 +448,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "General":
         return (
           <div>
-            <h1 className="text-3xl text-white mb-6">General</h1>
+            <h1 className="text-3xl text-foreground mb-6">General</h1>
             <SettingRow title="Theme">
               <ModeToggle />
             </SettingRow>
@@ -451,20 +459,20 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-40 pl-3 pr-10 py-2 rounded-lg shadow-sm bg-background text-foreground border border-foreground/10 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
                 <option>English</option>
                 <option>Hindi</option>
               </select>
             </SettingRow>
             <SettingRow title="Voice">
-              <button className="flex items-center gap-2 text-white hover:bg-gray-700 px-3 py-1.5 rounded-md transition-colors">
+              <button className="flex items-center gap-2 text-foreground hover:bg-gray-700 px-3 py-1.5 rounded-md transition-colors">
                 <PlayIcon /> Play
               </button>
               <select
                 value={voice}
                 onChange={(e) => setVoice(e.target.value)}
-                className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-background text-foreground border border-foreground/10 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
                 <option>Breeze</option>
                 <option>Cove</option>
@@ -489,8 +497,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           <div>
             <div className="flex justify-between items-end mb-6 pb-4 border-b border-gray-700">
               <div>
-                <h1 className="text-3xl  text-white">Your Account</h1>
-                <p className="mt-1 text-gray-400">
+                <h1 className="text-3xl  text-foreground">Your Account</h1>
+                <p className="mt-1 text-muted-foreground">
                   View and edit your personal information.
                 </p>
                 {profile && (
@@ -518,26 +526,15 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     console.log("🔄 ProfilePage: Manual refresh requested");
                     // This will trigger a re-render when profile changes
                   }}
-                  className="px-3 py-2 text-sm font-semibold text-gray-300 rounded-lg border border-gray-600 hover:bg-gray-700 transition-colors"
+                  className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
                   title="Refresh profile data"
                 >
-                  <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
-                  </svg>
+                  <RefreshCcw
+                    className="w-4 h-4" />
                 </button>
                 <button
                   onClick={toggleEditMode}
-                  className="px-5 py-2 text-sm font-semibold text-white rounded-lg shadow-md transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg focus:shadow-blue-500/50 bg-gradient-to-r from-blue-600 to-blue-700"
+                  className="px-5 py-2 text-sm font-semibold text-white rounded-lg transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg bg-gradient-to-r from-blue-600 to-blue-700"
                 >
                   {isEditing ? "Save Changes" : "Edit Profile"}
                 </button>
@@ -570,10 +567,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               />
               {false && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-400">
+                  <label className="block text-sm font-medium text-foreground">
                     Password
                   </label>
-                  <p className="mt-1 text-base text-white">********</p>
+                  <p className="mt-1 text-base text-foreground">********</p>
                 </div>
               )}
               <DateField
@@ -623,11 +620,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
 
               {/* Debug Information */}
               {process.env.NODE_ENV === "development" && profile && (
-                <div className="col-span-1 md:col-span-2 mt-6 p-4 bg-gray-800/50 rounded-lg border border-gray-700">
+                <div className="col-span-1 md:col-span-2 mt-6 p-4 bg-accent rounded-lg border border-divider">
                   <h4 className="text-sm font-medium text-gray-400 mb-2">
                     Debug Info (Development Only)
                   </h4>
-                  <div className="text-xs text-gray-500 space-y-1">
+                  <div className="text-xs text-foreground space-y-1">
                     <div>
                       <strong>Profile ID:</strong> {profile.id || "N/A"}
                     </div>
@@ -649,7 +646,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Notifications":
         return (
           <div>
-            <h1 className="text-3xl  text-white mb-6">
+            <h1 className="text-3xl  text-foreground mb-6">
               Notifications
             </h1>
             <NotificationSettingRow
@@ -680,8 +677,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             `}</style>
             <div className="flex justify-between items-end mb-6 border-b border-gray-700 pb-4">
               <div>
-                <h1 className="text-3xl  text-white">Upgrade</h1>
-                <p className="mt-1 text-gray-400">
+                <h1 className="text-3xl  text-foreground">Upgrade</h1>
+                <p className="mt-1 text-muted-foreground">
                   You are currently on the free plan
                 </p>
               </div><button
@@ -693,8 +690,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               </button>
 
             </div>
-            <div className="mt-8 p-6 bg-gray-700/50 rounded-lg">
-              <h2 className="text-xl  text-white">
+            <div className="mt-8 p-6 bg-accent rounded-lg">
+              <h2 className="text-xl text-foreground">
                 Get everything in Free, and more.
               </h2>
               <ul className="mt-4 space-y-3">
@@ -709,7 +706,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     >
                       <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
                     </svg>
-                    <span className="text-gray-300">{feature}</span>
+                    <span className="text-foreground">{feature}</span>
                   </li>
                 ))}
               </ul>
@@ -719,7 +716,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Privacy and Security":
         return (
           <div>
-            <h1 className="text-3xl  text-white mb-6">Security</h1>
+            <h1 className="text-3xl  text-foreground mb-6">Security</h1>
             <SettingRow
               title="Multi-factor authentication"
               description="Require an extra security challenge when logging in. If you are unable to pass this challenge, you will have the option to recover your account via email."
@@ -735,7 +732,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               </label>
             </SettingRow>
             <SettingRow title="Log out of this device">
-              <button className="px-4 py-1.5 text-sm font-semibold text-white bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors">
+              <button onClick={handleLogoutConfirm} className="px-4 py-1.5 text-sm font-semibold text-foreground bg-background hover:bg-foreground/10 rounded-lg transition-colors">
                 Log out
               </button>
             </SettingRow>
@@ -743,7 +740,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               title="Log out of all devices"
               description="Log out of all active sessions across all devices, including your current session. It may take up to 30 minutes for other devices to be logged out."
             >
-              <button className="px-4 py-1.5 text-sm font-semibold text-white bg-red-600/20 hover:bg-red-500/30 border border-red-500 rounded-lg transition-colors">
+              <button className="px-4 py-1.5 text-sm font-semibold text-foreground bg-red-600/20 hover:bg-red-500/30 border border-red-500 rounded-lg transition-colors">
                 Log out all
               </button>
             </SettingRow>
@@ -752,10 +749,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Development":
         return (
           <div>
-            <h1 className="text-3xl  text-white mb-6">
+            <h1 className="text-3xl text-foreground mb-3">
               Development Tools
             </h1>
-            <p className="text-gray-400 mb-6">
+            <p className="text-muted-foreground mb-6">
               Development and testing utilities for debugging purposes.
             </p>
 
@@ -772,7 +769,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         "Splash screen state has been reset. Refresh the page to see the splash screen again."
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-foreground bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                   >
                     Reset Splash State
                   </button>
@@ -784,7 +781,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         'Splash screen state has been set to "completed". User will not see splash again.'
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-foreground bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
                   >
                     Mark Splash as Completed
                   </button>
@@ -792,7 +789,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     onClick={() => {
                       navigate(ROUTES.SPLASH);
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-foreground bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
                   >
                     View Splash Screen
                   </button>
@@ -809,7 +806,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       <span className="text-gray-300">First Time User:</span>
                       <span className="text-white">
                         {localStorage.getItem("aipadhai_first_time_user") ===
-                        null
+                          null
                           ? "Yes (null)"
                           : "No (false)"}
                       </span>
@@ -818,7 +815,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       <span className="text-gray-300">Has Seen Splash:</span>
                       <span className="text-white">
                         {localStorage.getItem("aipadhai_has_seen_splash") ===
-                        "true"
+                          "true"
                           ? "Yes"
                           : "No"}
                       </span>
@@ -828,7 +825,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       <span className="text-white">
                         {localStorage.getItem("aipadhai_first_time_user") ===
                           null &&
-                        localStorage.getItem("aipadhai_has_seen_splash") !==
+                          localStorage.getItem("aipadhai_has_seen_splash") !==
                           "true"
                           ? "Yes"
                           : "No"}
@@ -850,7 +847,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         "Authentication data has been cleared. You will need to login again."
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-foreground bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                   >
                     Clear Auth Data
                   </button>
@@ -859,12 +856,11 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       const token = getAuthToken();
                       const userData = getUserData();
                       alert(
-                        `Auth Token: ${
-                          token ? "Present" : "Not found"
+                        `Auth Token: ${token ? "Present" : "Not found"
                         }\nUser Data: ${userData ? "Present" : "Not found"}`
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-foreground bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
                   >
                     Check Auth Status
                   </button>
@@ -903,7 +899,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         );
       default:
         return (
-          <div className="text-white flex flex-col items-center justify-center h-full">
+          <div className="text-foreground flex flex-col items-center justify-center h-full">
             <h1 className="text-3xl ">{activeTab}</h1>
             <p className="mt-2 text-gray-400">
               Content for this section is not yet implemented.
@@ -933,13 +929,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         {/* Modal content: Attach the ref here */}
         <div
           ref={modalRef}
-          className="relative w-full max-w-4xl h-[600px] mx-4 rounded-xl shadow-2xl bg-gray-800 flex overflow-hidden animate-slide-in"
-        ><button onClick={handleClose} className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-gray-700 hover:text-white transition-colors z-10 cursor-pointer">
+          className="relative w-full max-w-4xl h-[600px] mx-4 rounded-xl shadow-2xl bg-card flex overflow-hidden animate-slide-in"
+        ><button onClick={handleClose} className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-gray-700 hover:text-foreground transition-colors z-10 cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
           {/* Left Side Navigation */}
-          <nav className="w-1/4 bg-gray-900 p-2 flex flex-col">
-            <h2 className="text-xl text-gray-400 ml-4 mt-6 mb-8">Settings</h2>
+          <nav className="w-1/4 bg-background p-2 flex flex-col">
+            <h2 className="text-xl text-muted-foreground/70 ml-4 mt-6 mb-8">Settings</h2>
 
             <ul>
               {navItems.map((item) => (
@@ -948,8 +944,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     href="#"
                     onClick={() => setActiveTab(item.name)}
                     className={`flex items-center gap-3 px-4 py-2 rounded-md text-sm font-medium transition-colors ${activeTab === item.name
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-300 hover:bg-gray-700 hover:text-white"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:bg-accent hover:text-foreground"
                       }`}
                   >
                     <item.icon />
@@ -964,6 +960,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
           <main className="w-3/4 p-8 overflow-y-auto">{renderContent()}</main>
         </div>
       </div>
+
     </>
   );
 };

@@ -85,6 +85,74 @@ export const palettes: Record<string, ThemeColors> = {
         yellow: "#EAB308",
         red: "#DC2626",
     },
+    sunset: {
+        background: "#181212",
+        cardBackground: "#1F1616",
+        inputBackground: "#2A1D1D",
+        primaryText: "#F4EDEB",
+        secondaryText: "#D9C5C2",
+        mutedText: "#A89895",
+        accent: "#E07A5F",
+        accentLight: "rgba(224, 122, 95, 0.08)",
+        buttonGradientFrom: "#D87B63",
+        buttonGradientTo: "#C16550",
+        divider: "#3A2B2B",
+        green: "#7FB77E",
+        yellow: "#E3B261",
+        red: "#D97A7A",
+    },
+
+    lavender: {
+        background: "#161320",
+        cardBackground: "#1E192B",
+        inputBackground: "#2A243A",
+        primaryText: "#EDEBFA",
+        secondaryText: "#C8C5E2",
+        mutedText: "#A09DB9",
+        accent: "#9A8FBF",
+        accentLight: "rgba(154, 143, 191, 0.08)",
+        buttonGradientFrom: "#A49AC4",
+        buttonGradientTo: "#8C82AE",
+        divider: "#3B3550",
+        green: "#7CA982",
+        yellow: "#D6B36B",
+        red: "#C98080",
+    },
+
+    rose: {
+        background: "#191417",
+        cardBackground: "#221B1F",
+        inputBackground: "#2E2329",
+        primaryText: "#FAF1F3",
+        secondaryText: "#E1D0D6",
+        mutedText: "#A89DA2",
+        accent: "#C87D93",
+        accentLight: "rgba(200, 125, 147, 0.08)",
+        buttonGradientFrom: "#C98A9E",
+        buttonGradientTo: "#B17285",
+        divider: "#3E3138",
+        green: "#7DAE88",
+        yellow: "#D6B36B",
+        red: "#C98080",
+    },
+
+    amber: {
+        background: "#1B1711",
+        cardBackground: "#241F18",
+        inputBackground: "#322A21",
+        primaryText: "#FAF5EB",
+        secondaryText: "#E4DACB",
+        mutedText: "#B3A692",
+        accent: "#C8A15A",
+        accentLight: "rgba(200, 161, 90, 0.08)",
+        buttonGradientFrom: "#CBAE74",
+        buttonGradientTo: "#B8955F",
+        divider: "#463C2F",
+        green: "#7CA982",
+        yellow: "#D6B36B",
+        red: "#C98080",
+    },
+
 };
 
 export type ColorThemeName = keyof typeof palettes;
@@ -102,21 +170,22 @@ export const applyColorTheme = (name: ColorThemeName) => {
         ? palette
         : {
             // Light mode overrides for professional contrast
-            background: "#FFFFFF",
-            cardBackground: "#FFFFFF",
-            inputBackground: "#F3F4F6",
-            primaryText: "#0F172A",
-            secondaryText: "#475569",
-            mutedText: "#64748B",
+            background: "#F4F6F8",   // light gray-blue page background
+            cardBackground: "#FFFFFF", // bright white for elevated elements
+            inputBackground: "#E9EEF3", // noticeably darker than background for strong field distinction
+
+            primaryText: "#1E293B",       // dark slate for better readability
+            secondaryText: "#4B5563",     // neutral gray for subtitles
+            mutedText: "#6B7280",         // softer gray for hints
             // keep accent family from selected palette for brand feel
             accent: palette.accent,
             accentLight: palette.accentLight,
             buttonGradientFrom: palette.buttonGradientFrom,
             buttonGradientTo: palette.buttonGradientTo,
-            divider: "#E5E7EB",
-            green: "#16A34A",
-            yellow: "#CA8A04",
-            red: "#DC2626",
+            divider: "#E2E8F0",           // light gray, less harsh than pure gray-200
+            green: "#22B573",             // balanced success tone
+            yellow: "#E2B23A",            // warm but not neon
+            red: "#E45858"                 // calm error red
         };
 
     const set = (key: keyof ThemeColors, value: string) =>
