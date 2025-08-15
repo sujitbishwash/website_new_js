@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -96,7 +95,10 @@ const CanvasIcon = () => (
   />
 );
 const SendIcon = () => (
-  <Icon path="M10.3009 13.6949L20.102 3.89742M10.5795 14.1355L12.8019 18.5804C13.339 19.6545 13.6075 20.1916 13.9458 20.3356C14.2394 20.4606 14.575 20.4379 14.8492 20.2747C15.1651 20.0866 15.3591 19.5183 15.7472 18.3818L19.9463 6.08434C20.2845 5.09409 20.4535 4.59896 20.3378 4.27142C20.2371 3.98648 20.013 3.76234 19.7281 3.66167C19.4005 3.54595 18.9054 3.71502 17.9151 4.05315L5.61763 8.2523C4.48114 8.64037 3.91289 8.83441 3.72478 9.15032C3.56153 9.42447 3.53891 9.76007 3.66389 10.0536C3.80791 10.3919 4.34498 10.6605 5.41912 11.1975L9.86397 13.42C10.041 13.5085 10.1295 13.5527 10.2061 13.6118C10.2742 13.6643 10.3352 13.7253 10.3876 13.7933C10.4468 13.87 10.491 13.9585 10.5795 14.1355Z" className="w-5 h-5" />
+  <Icon
+    path="M10.3009 13.6949L20.102 3.89742M10.5795 14.1355L12.8019 18.5804C13.339 19.6545 13.6075 20.1916 13.9458 20.3356C14.2394 20.4606 14.575 20.4379 14.8492 20.2747C15.1651 20.0866 15.3591 19.5183 15.7472 18.3818L19.9463 6.08434C20.2845 5.09409 20.4535 4.59896 20.3378 4.27142C20.2371 3.98648 20.013 3.76234 19.7281 3.66167C19.4005 3.54595 18.9054 3.71502 17.9151 4.05315L5.61763 8.2523C4.48114 8.64037 3.91289 8.83441 3.72478 9.15032C3.56153 9.42447 3.53891 9.76007 3.66389 10.0536C3.80791 10.3919 4.34498 10.6605 5.41912 11.1975L9.86397 13.42C10.041 13.5085 10.1295 13.5527 10.2061 13.6118C10.2742 13.6643 10.3352 13.7253 10.3876 13.7933C10.4468 13.87 10.491 13.9585 10.5795 14.1355Z"
+    className="w-5 h-5"
+  />
 );
 
 // --- Components ---
@@ -146,15 +148,18 @@ const SuggestionChips: React.FC = () => {
 };
 
 const Message: React.FC<MessageType> = ({ text, isUser }) => {
-  const markdownText = text.replace(/\\n/g, '\n');
+  const markdownText = text.replace(/\\n/g, "\n");
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        style={{ backgroundColor: isUser ? theme.accent : theme.cardBackground }}
-        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${isUser
-          ? "bg-blue-600 text-white rounded-br-none"
-          : "bg-gray-700 text-gray-200 rounded-bl-none"
-          }`}
+        style={{
+          backgroundColor: isUser ? theme.accent : theme.cardBackground,
+        }}
+        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+          isUser
+            ? "bg-blue-600 text-white rounded-br-none"
+            : "bg-gray-700 text-gray-200 rounded-bl-none"
+        }`}
       >
         <MarkdownRenderer content={markdownText} />
       </div>
@@ -210,8 +215,9 @@ const PlanSelector: React.FC = () => {
       >
         <span className="text-xs sm:text-sm font-medium">{selectedPlan}</span>
         <svg
-          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-            }`}
+          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -279,8 +285,9 @@ const ModeSelector: React.FC = () => {
           {selectedMode}
         </span>
         <svg
-          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-            }`}
+          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -318,16 +325,236 @@ const ModeSelector: React.FC = () => {
 
 // --- Markdown Renderer ---
 const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
-  const cleanText = content.replace(/\\n/g, '\n'); // actual line breaks
-  const beautified = content
-    .replace(/\\n/g, '\n')
-    .replace(/\*   /g, '- ')
-    .replace(/(\*{1,2})(?!.*\1)/g, '$1 ');
+  // Clean and process the content for better rendering
+  const processContent = (text: string) => {
+    return text
+      .replace(/\\n/g, "\n") // Convert escaped newlines to actual newlines
+      .replace(/^\*\s+/gm, "• ") // Convert standalone asterisks at line start to bullet points
+      .trim();
+  };
+
+  const processedContent = processContent(content);
+
   return (
     <div className="prose prose-invert prose-sm max-w-none">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{cleanText}</ReactMarkdown>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{"                      "}</ReactMarkdown>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{beautified}</ReactMarkdown>
+      <div className="text-sm leading-relaxed space-y-3">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            // Enhanced paragraph styling
+            p: ({ children, ...props }) => (
+              <p
+                {...props}
+                className="mb-3 text-gray-100 leading-6"
+                style={{
+                  fontSize: "0.95rem",
+                  lineHeight: "1.7",
+                  marginBottom: "1rem",
+                }}
+              >
+                {children}
+              </p>
+            ),
+            // Enhanced heading styling
+            h1: ({ children, ...props }) => (
+              <h1
+                {...props}
+                className="text-xl font-bold text-white mb-4 mt-6 pb-2 border-b border-gray-600"
+                style={{ fontSize: "1.25rem" }}
+              >
+                {children}
+              </h1>
+            ),
+            h2: ({ children, ...props }) => (
+              <h2
+                {...props}
+                className="text-lg font-semibold text-blue-300 mb-3 mt-5"
+                style={{ fontSize: "1.1rem" }}
+              >
+                {children}
+              </h2>
+            ),
+            h3: ({ children, ...props }) => (
+              <h3
+                {...props}
+                className="text-base font-medium text-blue-200 mb-2 mt-4"
+                style={{ fontSize: "1rem" }}
+              >
+                {children}
+              </h3>
+            ),
+            // Enhanced list styling
+            ul: ({ children, ...props }) => (
+              <ul
+                {...props}
+                className="ml-4 mb-4 space-y-2"
+                style={{ listStyleType: "disc" }}
+              >
+                {children}
+              </ul>
+            ),
+            ol: ({ children, ...props }) => (
+              <ol
+                {...props}
+                className="ml-4 mb-4 space-y-2"
+                style={{ listStyleType: "decimal" }}
+              >
+                {children}
+              </ol>
+            ),
+            li: ({ children, ...props }) => (
+              <li
+                {...props}
+                className="text-gray-200 leading-6"
+                style={{
+                  fontSize: "0.9rem",
+                  lineHeight: "1.6",
+                  marginBottom: "0.5rem",
+                }}
+              >
+                {children}
+              </li>
+            ),
+            // Enhanced code styling
+            code: ({ children, ...props }) => (
+              <code
+                {...props}
+                className="bg-gray-700 text-green-300 px-2 py-1 rounded text-sm font-mono"
+                style={{
+                  backgroundColor: "#374151",
+                  fontSize: "0.85rem",
+                  padding: "0.25rem 0.5rem",
+                }}
+              >
+                {children}
+              </code>
+            ),
+            pre: ({ children, ...props }) => (
+              <pre
+                {...props}
+                className="bg-gray-800 p-4 rounded-lg mb-4 overflow-x-auto border border-gray-600"
+                style={{
+                  backgroundColor: "#1F2937",
+                  padding: "1rem",
+                  marginBottom: "1.5rem",
+                }}
+              >
+                {children}
+              </pre>
+            ),
+            // Enhanced blockquote styling
+            blockquote: ({ children, ...props }) => (
+              <blockquote
+                {...props}
+                className="border-l-4 border-blue-400 pl-4 py-2 my-4 bg-gray-800/50 rounded-r-lg"
+                style={{
+                  borderLeftColor: "#60A5FA",
+                  paddingLeft: "1rem",
+                  paddingTop: "0.5rem",
+                  paddingBottom: "0.5rem",
+                  marginTop: "1rem",
+                  marginBottom: "1rem",
+                  backgroundColor: "rgba(31, 41, 55, 0.5)",
+                }}
+              >
+                {children}
+              </blockquote>
+            ),
+            // Enhanced strong/bold styling
+            strong: ({ children, ...props }) => (
+              <strong
+                {...props}
+                className="font-semibold text-white"
+                style={{ fontWeight: "600" }}
+              >
+                {children}
+              </strong>
+            ),
+            // Enhanced emphasis/italic styling
+            em: ({ children, ...props }) => (
+              <em
+                {...props}
+                className="italic text-blue-200"
+                style={{ fontStyle: "italic" }}
+              >
+                {children}
+              </em>
+            ),
+            // Enhanced link styling
+            a: ({ children, href, ...props }) => (
+              <a
+                {...props}
+                href={href}
+                className="text-blue-400 hover:text-blue-300 underline decoration-blue-400/50 hover:decoration-blue-300"
+                style={{
+                  color: "#60A5FA",
+                  textDecorationColor: "rgba(96, 165, 250, 0.5)",
+                }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {children}
+              </a>
+            ),
+            // Enhanced table styling
+            table: ({ children, ...props }) => (
+              <div className="overflow-x-auto mb-4">
+                <table
+                  {...props}
+                  className="min-w-full border-collapse border border-gray-600"
+                  style={{
+                    borderCollapse: "collapse",
+                    width: "100%",
+                  }}
+                >
+                  {children}
+                </table>
+              </div>
+            ),
+            th: ({ children, ...props }) => (
+              <th
+                {...props}
+                className="border border-gray-600 px-3 py-2 text-left font-semibold text-white bg-gray-700"
+                style={{
+                  border: "1px solid #4B5563",
+                  padding: "0.5rem 0.75rem",
+                  textAlign: "left",
+                  fontWeight: "600",
+                  backgroundColor: "#374151",
+                }}
+              >
+                {children}
+              </th>
+            ),
+            td: ({ children, ...props }) => (
+              <td
+                {...props}
+                className="border border-gray-600 px-3 py-2 text-gray-200"
+                style={{
+                  border: "1px solid #4B5563",
+                  padding: "0.5rem 0.75rem",
+                }}
+              >
+                {children}
+              </td>
+            ),
+            // Enhanced horizontal rule styling
+            hr: ({ ...props }) => (
+              <hr
+                {...props}
+                className="my-6 border-gray-600"
+                style={{
+                  marginTop: "1.5rem",
+                  marginBottom: "1.5rem",
+                  borderColor: "#4B5563",
+                }}
+              />
+            ),
+          }}
+        >
+          {processedContent}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 };
@@ -377,7 +604,8 @@ const ChatInput: React.FC<{
             </div>
           </div>
 
-          <div className="flex items-center gap-1">{/*
+          <div className="flex items-center gap-1">
+            {/*
             <button
               type="button"
               className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full"
@@ -420,9 +648,7 @@ export default function Chat({
   onSendMessage,
 }: ChatProps) {
   return (
-    <div
-      className="flex flex-col h-full bg-background text-primaryText"
-    >
+    <div className="flex flex-col h-full bg-background text-primaryText">
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 p-4">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col justify-center items-center p-4">
