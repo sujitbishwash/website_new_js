@@ -1,8 +1,8 @@
+import { X } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
 import { examGoalApi } from "../../lib/api-client";
-import { X } from "lucide-react";
 
 // --- TYPE DEFINITIONS (TypeScript) ---
 // Defines the structure for a single exam's details
@@ -558,28 +558,30 @@ export default function ExamConfigurationModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
-      onClick={onClose}>
-      <div className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-2xl border border-divider flex flex-col max-h-[90vh]"
-        onClick={(e) => e.stopPropagation()}>
-
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
+      onClick={onClose}
+    >
+      <div
+        className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-2xl border border-divider flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-5 border-b border-gray-700">
           <h3 className="text-2xl font-semibold">Exam Configuration</h3>
 
           <button
-          className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
-          onClick={onClose}
-          onMouseOver={(e) =>
+            className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+            onClick={onClose}
+            onMouseOver={(e) =>
               (e.currentTarget.style.color = theme.primaryText)
             }
             onMouseOut={(e) =>
               (e.currentTarget.style.color = theme.secondaryText)
             }
-          aria-label="Close modal"
-        >
+            aria-label="Close modal"
+          >
             <X className="w-5 h-5" />
           </button>
-          
         </div>
         <div style={styles.content}>
           {/* Current Exam Goal Display */}
@@ -589,7 +591,6 @@ export default function ExamConfigurationModal({
               {examGoal.groupType})
             </div>
           )}
-
           {/* Messages */}
           {updateMessage && (
             <div
@@ -598,21 +599,24 @@ export default function ExamConfigurationModal({
               {updateMessage}
             </div>
           )}
-
           {updateError && (
             <div style={{ ...styles.messageContainer, ...styles.errorMessage }}>
               {updateError}
             </div>
           )}
-
           {/* User Errors */}
           {userError && (
             <div style={{ ...styles.messageContainer, ...styles.errorMessage }}>
               {userError}
             </div>
           )}
-          <div style={{ ...styles.controlsContainer, ...{ flexDirection: window.innerWidth < 600 ? 'column' : 'row' } }}>
-           <div style={{ ...styles.controlGroup, flex: 1 }}>
+          <div
+            style={{
+              ...styles.controlsContainer,
+              ...{ flexDirection: window.innerWidth < 600 ? "column" : "row" },
+            }}
+          >
+            <div style={{ ...styles.controlGroup, flex: 1 }}>
               <label htmlFor="category-select" style={styles.label}>
                 Exam Category
               </label>
@@ -623,7 +627,7 @@ export default function ExamConfigurationModal({
                 style={styles.select}
                 disabled={userLoading}
               >
-                {categories.map(category => (
+                {categories.map((category) => (
                   <option key={category.key} value={category.key}>
                     {category.displayName}
                   </option>
@@ -648,37 +652,6 @@ export default function ExamConfigurationModal({
                 ))}
               </select>
             </div>
-          </div>
-
-          {/* Update Button */}
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "flex-end",
-              marginBottom: "2rem",
-            }}
-          >
-            <button
-              onClick={handleUpdateExamGoal}
-              disabled={isUpdating || userLoading}
-              style={
-                isUpdating || userLoading
-                  ? styles.updateButtonDisabled
-                  : styles.updateButton
-              }
-              onMouseOver={(e) => {
-                if (!isUpdating && !userLoading) {
-                  e.currentTarget.style.backgroundColor = "#3B82F6";
-                }
-              }}
-              onMouseOut={(e) => {
-                if (!isUpdating && !userLoading) {
-                  e.currentTarget.style.backgroundColor = theme.accent;
-                }
-              }}
-            >
-              {isUpdating ? "Updating..." : "Update Exam Goal"}
-            </button>
           </div>
 
           {selectedExamDetails && (
@@ -715,15 +688,33 @@ export default function ExamConfigurationModal({
 
         {/* Modal Actions (Footer) */}
         <div className="flex justify-end items-center gap-4 p-5 border-t border-gray-700">
-          <button onClick={onClose}
+          <button
+            onClick={onClose}
             className="px-6 py-2 font-medium text-gray-300 bg-transparent rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
           >
             Cancel
           </button>
           <button
+            onClick={handleUpdateExamGoal}
+            disabled={isUpdating || userLoading}
+            style={
+              isUpdating || userLoading
+                ? styles.updateButtonDisabled
+                : styles.updateButton
+            }
+            onMouseOver={(e) => {
+              if (!isUpdating && !userLoading) {
+                e.currentTarget.style.backgroundColor = "#3B82F6";
+              }
+            }}
+            onMouseOut={(e) => {
+              if (!isUpdating && !userLoading) {
+                e.currentTarget.style.backgroundColor = theme.accent;
+              }
+            }}
             className="px-6 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
           >
-            Save
+            {isUpdating ? "Updating..." : "Update Exam Goal"}
           </button>
         </div>
       </div>
