@@ -27,114 +27,7 @@ interface LearningHistoryItem {
   youtubeYRL: string;
 }
 
-// --- CSS Styles Component ---
-// The CSS is now included directly in the component to avoid file resolution errors.
-const HistoryStyles = () => (
-  <style>{`
-    /* --- Main Page Styles --- */
-    .history-page {
-      background-color: #0d1117; /* Dark navy background */
-      min-height: 100vh;
-      padding: 40px;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      color: #c9d1d9;
-    }
-
-    .main-title {
-      text-align: center;
-      color: #58a6ff; /* Prominent blue color */
-      font-size: 2.5rem;
-      margin-bottom: 40px;
-    }
-
-    /* --- Grid Layout for Cards --- */
-    .history-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    /* --- Reusable CourseCard Styles --- */
-    .course-card {
-      background-color: #161b22; /* Darker card background */
-      border: 1px solid #30363d;
-      border-radius: 8px;
-      overflow: hidden;
-      position: relative; /* Required for the overlay */
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: pointer;
-    }
-
-    .course-card:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(88, 166, 255, 0.2);
-    }
-
-    .card-image {
-      height: 150px;
-      background-size: cover;
-      background-position: center;
-      border-bottom: 1px solid #30363d;
-    }
-
-    .card-content {
-      padding: 20px;
-    }
-
-    .card-content h3 {
-      margin-top: 0;
-      font-size: 1.2rem;
-      color: #f0f6fc;
-    }
-
-    .card-content p {
-      font-size: 0.9rem;
-      color: #8b949e;
-      line-height: 1.5;
-    }
-
-    /* --- Metadata Overlay Styles --- */
-    .metadata-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: rgba(22, 27, 34, 0.95); /* Semi-transparent overlay */
-      color: #f0f6fc;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s ease, visibility 0.3s ease;
-      padding: 20px;
-    }
-
-    .metadata-overlay.visible {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .metadata-item {
-      font-size: 1.1rem;
-      margin: 5px 0;
-    }
-
-    .metadata-item span {
-      font-weight: 600;
-      color: #58a6ff;
-    }
-  `}</style>
-);
-
 // --- Reusable CourseCard Component ---
-// This component displays a single course card.
 const CourseCard: React.FC<CourseCardProps> = ({
   title,
   description,
@@ -159,7 +52,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 
   return (
     <div
-      className="course-card"
+      className={`bg-background border border-[#30363d] rounded-lg overflow-hidden relative transition-transform duration-300 ease-in-out cursor-pointer hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(88,166,255,0.2)]`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => {
@@ -167,25 +60,34 @@ const CourseCard: React.FC<CourseCardProps> = ({
       }}
     >
       <div
-        className="card-image"
+        className="h-[150px] bg-cover bg-center border-b border-[#30363d]"
         style={{ backgroundImage: `url(${imageUrl})` }}
       ></div>
-      <div className="card-content">
-        <h3>{title}</h3>
-        <p>{description}</p>
+      <div className="p-5">
+        <h3 className="mt-0 text-[1.2rem] text-foreground">{title}</h3>
+        <p className="text-sm text-muted-foreground leading-[1.5]">
+          {description}
+        </p>
       </div>
 
-      {/* This is the overlay that appears on hover if metadata exists */}
+      {/* Metadata Overlay */}
       {hasMetadata && (
-        <div className={`metadata-overlay ${isHovered ? "visible" : ""}`}>
-          <div className="metadata-item">
-            <span>Exam:</span> {metadata.exam}
+        <div
+          className={`absolute inset-0 bg-[rgba(22,27,34,0.95)] backdrop-blur-sm text-[#f0f6fc] flex flex-col items-center justify-center text-center opacity-0 invisible transition-opacity duration-300 ease-in-out p-5 ${
+            isHovered ? "opacity-100 visible" : ""
+          }`}
+        >
+          <div className="text-[1.1rem] my-1">
+            <span className="font-semibold text-[#58a6ff]">Exam:</span>{" "}
+            {metadata.exam}
           </div>
-          <div className="metadata-item">
-            <span>Subject:</span> {metadata.subject}
+          <div className="text-[1.1rem] my-1">
+            <span className="font-semibold text-[#58a6ff]">Subject:</span>{" "}
+            {metadata.subject}
           </div>
-          <div className="metadata-item">
-            <span>Year:</span> {metadata.year}
+          <div className="text-[1.1rem] my-1">
+            <span className="font-semibold text-[#58a6ff]">Year:</span>{" "}
+            {metadata.year}
           </div>
         </div>
       )}
@@ -194,9 +96,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 };
 
 // --- Main Page Component ---
-// This component holds the title and the grid of cards.
 const HistoryPage = () => {
-  // Sample data. In a real app, this would come from an API.
   const learningHistoryData: LearningHistoryItem[] = [
     {
       id: 1,
@@ -240,26 +140,22 @@ const HistoryPage = () => {
   ];
 
   return (
-    <>
-      <HistoryStyles />
-      <div className="history-page">
-        <h1 className="main-title">Your Learning History</h1>
-        <div className="history-grid">
-          {learningHistoryData.map((item) => (
-            <CourseCard
-              key={item.id}
-              title={item.title}
-              description={item.description}
-              imageUrl={item.imageUrl}
-              metadata={item.metadata}
-              youtubeYRL={item.youtubeYRL}
-            />
-          ))}
-        </div>
+    <div className="min-h-screen p-10 font-sans text-foreground bg-background text-foreground">
+      <h1 className="text-center text-[2.5rem] mb-10">Your Learning History</h1>
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8 max-w-[1200px] mx-auto">
+        {learningHistoryData.map((item) => (
+          <CourseCard
+            key={item.id}
+            title={item.title}
+            description={item.description}
+            imageUrl={item.imageUrl}
+            metadata={item.metadata}
+            youtubeYRL={item.youtubeYRL}
+          />
+        ))}
       </div>
-    </>
+    </div>
   );
 };
 
 export default HistoryPage;
-// saving

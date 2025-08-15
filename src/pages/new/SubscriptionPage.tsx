@@ -1,4 +1,5 @@
 import { theme } from "@/styles/theme";
+import { X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -245,12 +246,19 @@ const SubscriptionPage = () => {
     <>
       <SubscriptionStyles />
       <div className="subscription-page">
-        <button className="close-button" onClick={handleClose} aria-label="Close">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
+        <button
+          className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+          onClick={handleClose}
+          onMouseOver={(e) =>
+              (e.currentTarget.style.color = theme.primaryText)
+            }
+            onMouseOut={(e) =>
+              (e.currentTarget.style.color = theme.secondaryText)
+            }
+          aria-label="Close modal"
+        >
+            <X className="w-5 h-5" />
+          </button>
 
         <div className="subscription-container">
           <div className="offer-banner">

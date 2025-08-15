@@ -175,7 +175,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
-    <div className="bg-gray-800 rounded-xl border border-gray-700 p-1">
+    <div className="bg-background text-foreground rounded-xl border border-gray-700 p-1">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-3 sm:px-4 pt-3 pb-2 gap-2">
         <div className="flex items-center border border-gray-700 rounded-lg p-1">
           <button
@@ -329,18 +329,18 @@ const AITutorPanel: React.FC<{
     };
 
     return (
-      <div className={`rounded-xl border border-gray-700 bg-gray-800 flex flex-col h-full  ${isLeftColumnVisible ? "max-h-[90vh]"
+      <div className={`rounded-xl border border-gray-700 bg-card flex flex-col h-full  ${isLeftColumnVisible ? "max-h-[90vh]"
         : "max-h-[83vh]"
         }`}>
-        <div className="relative bg-gray-800 border-b border-gray-700 rounded-t-xl">
+        <div className="relative border-b border-gray-700 rounded-t-xl">
           <div className={`flex items-center  ${isLeftColumnVisible ? "justify-between"
-            : "justify-center"}  border border-gray-700 rounded-lg p-2 w-full overflow-x-auto pb-2 custom-scrollbar pr-12`}>
+            : "justify-center"} rounded-lg p-2 w-full overflow-x-auto pb-2 custom-scrollbar pr-12`}>
             {modes.map(({ key, label, icon }) => (
               <button
                 key={key}
                 onClick={() => onModeChange(key)}
                 className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${currentMode === key
-                  ? "bg-gray-900 shadow-sm text-gray-100"
+                  ? "bg-background shadow-sm text-gray-100"
                   : "text-gray-400 hover:bg-gray-700"
                   }`}
               >
@@ -391,12 +391,12 @@ const ShareModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center text-foreground bg-black/20 backdrop-blur-sm animate-fade-in p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-gray-800 rounded-xl shadow-lg p-6 w-full max-w-md m-4 border border-gray-700">
+      <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-md m-4 border border-gray-700">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-white">Share Public Link</h2>
+          <h2 className="text-xl font-bold">Share Public Link</h2>
           <button
             onClick={onClose}
             className="p-1 rounded-full text-gray-400 hover:bg-gray-700"
@@ -405,7 +405,7 @@ const ShareModal: React.FC<{
           </button>
         </div>
         <div className="space-y-4">
-          <div className="flex items-center space-x-2 bg-gray-900 border border-gray-700 rounded-lg p-2">
+          <div className="flex items-center space-x-2 bg-background border border-gray-700 rounded-lg p-2">
             <input
               type="text"
               readOnly
@@ -414,7 +414,7 @@ const ShareModal: React.FC<{
             />
             <button
               onClick={copyToClipboard}
-              className="flex items-center gap-2 bg-blue-600 text-white px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700"
+              className="flex items-center gap-2 bg-blue-600 px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700"
             >
               <CopyIcon /> {copySuccess || "Copy"}
             </button>
@@ -424,17 +424,17 @@ const ShareModal: React.FC<{
           </div>
           <div className="flex justify-center gap-4">
             {/* Add your social media icons here */}
-            <button className="p-3 bg-gray-700 rounded-full text-white hover:bg-gray-600">
+            <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M22.675 0h-21.35C.589 0 0 .589 0 1.325v21.351C0 23.411.589 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.735 0 1.325-.589 1.325-1.325V1.325C24 .589 23.411 0 22.675 0z" />
               </svg>
             </button>
-            <button className="p-3 bg-gray-700 rounded-full text-white hover:bg-gray-600">
+            <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.223.085c.645 1.956 2.52 3.375 4.738 3.414A9.87 9.87 0 010 17.54a13.94 13.94 0 007.548 2.212c9.142 0 14.307-7.477 14.307-14.055 0-.213-.005-.426-.015-.637.96-.695 1.795-1.56 2.457-2.54z" />
               </svg>
             </button>
-            <button className="p-3 bg-gray-700 rounded-full text-white hover:bg-gray-600">
+            <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.784.305-1.487.74-2.173 1.428a4.898 4.898 0 00-1.427 2.173c-.297.765-.497 1.635-.558 2.913-.058 1.28-.072 1.687-.072 4.947s.013 3.667.072 4.947c.06 1.278.26 2.148.558 2.913.305.784.74 1.487 1.428 2.173a4.898 4.898 0 002.173 1.427c.765.297 1.635.497 2.913.558 1.28.058 1.687.072 4.947.072s3.667-.013 4.947-.072c1.278-.06 2.148-.26 2.913-.558.784-.305 1.487-.74 2.173-1.427a4.898 4.898 0 001.428-2.173c.297-.765.497-1.635.558-2.913.058-1.28.072-1.687.072-4.947s-.013-3.667-.072-4.947c-.06-1.278-.26-2.148-.558-2.913-.305-.784-.74-1.487-1.428-2.173a4.898 4.898 0 00-2.173-1.428c-.765-.297-1.635-.497-2.913-.558C15.667.015 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.013 3.585-.07 4.85c-.053 1.17-.249 1.805-.413 2.227-.217.562-.477.96-.896 1.382-.42.419-.819.679-1.381.896-.422.164-1.057.36-2.227.413-1.266.057-1.646.07-4.85.07s-3.585-.013-4.85-.07c-1.17-.053-1.805-.249-2.227-.413-.562-.217-.96-.477-1.382-.896-.419-.42-.679-.819-.896-1.381-.164-.422-.36-1.057-.413-2.227-.057-1.266-.07-1.646-.07-4.85s.013-3.585.07-4.85c.053-1.17.249-1.805.413-2.227.217-.562.477-.96.896-1.382.42-.419.819-.679-1.381-.896.422-.164 1.057-.36 2.227-.413C8.415 2.176 8.797 2.16 12 2.16zm0 5.48c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7.16c-1.469 0-2.66-1.19-2.66-2.66s1.19-2.66 2.66-2.66 2.66 1.19 2.66 2.66-1.19 2.66-2.66 2.66zm6.336-7.73c0 .552-.448 1-1 1s-1-.448-1-1 .448-1 1-1 1 .448 1 1z" />
               </svg>
@@ -637,7 +637,7 @@ const VideoPage: React.FC = () => {
   };
 
   return (
-    <div className="bg-gray-900 min-h-screen font-sans text-gray-200">
+    <div className="bg-background text-foreground min-h-screen font-sans text-gray-200">
       <div className="container mx-auto sm:px-4 lg:px-6 sm:py-6">
         <main className="grid grid-cols-1 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
           <div className={`xl:col-span-3 space-y-4 sm:space-y-6 ${isLeftColumnVisible ? '' : 'hidden'}`}>

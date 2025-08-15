@@ -25,16 +25,16 @@ export function ModeToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          type="button"
+
+        <button
           onMouseDown={(e) => e.stopPropagation()}
+          className="px-2 py-2 shadow-sm rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
+          title="Refresh profile data"
         >
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+          <Sun className="h-[1.2rem] w-[1.2rem] block dark:hidden" />
+          <Moon className="h-[1.2rem] w-[1.2rem] hidden dark:block" />
+        </button>
+
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"

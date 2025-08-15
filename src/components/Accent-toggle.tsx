@@ -27,11 +27,9 @@ export function AccentToggle() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          type="button"
+        <button
           onMouseDown={(e) => e.stopPropagation()}
+          className="px-2 py-2 shadow-sm rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
         >
           <div
             className="rounded-full w-4 h-4"
@@ -41,7 +39,7 @@ export function AccentToggle() {
                 palettes.slate.buttonGradientFrom,
             }}
           />
-        </Button>
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="end"

@@ -353,8 +353,8 @@ const ChatInput: React.FC<{
   };
 
   return (
-    <div className="p-2 bg-gray-800 border-t border-gray-700">
-      <div className="bg-gray-900 border border-gray-700 rounded-xl p-2 flex flex-col">
+    <div className="p-2 bg-card border-t border-gray-700">
+      <div className="bg-background border border-gray-700 rounded-xl p-2 flex flex-col">
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -362,7 +362,7 @@ const ChatInput: React.FC<{
           placeholder="Ask a question..."
           rows={1}
           style={{ minHeight: "40px", maxHeight: "200px" }}
-          className="w-full bg-gray text-white placeholder-gray-400 focus:outline-none p-2 sm:pl-4 sm:pr-4 text-sm sm:text-base min-w-0"
+          className="w-full bg-gray text-foreground placeholder-gray-400 focus:outline-none p-2 sm:pl-4 sm:pr-4 text-sm sm:text-base min-w-0"
         />
         <div className="flex items-center justify-between gap-1">
           <div className="flex items-center justify-between mt-2">
@@ -421,8 +421,7 @@ export default function Chat({
 }: ChatProps) {
   return (
     <div
-      className="flex flex-col h-full"
-      style={{ backgroundColor: theme.background }}
+      className="flex flex-col h-full bg-background text-primaryText"
     >
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 p-4">
         {messages.length === 0 && (
