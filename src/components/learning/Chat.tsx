@@ -329,7 +329,6 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
   const processContent = (text: string) => {
     return text
       .replace(/\\n/g, "\n") // Convert escaped newlines to actual newlines
-      .replace(/^\*\s+/gm, "• ") // Convert standalone asterisks at line start to bullet points
       .trim();
   };
 
@@ -337,29 +336,29 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
 
   return (
     <div className="prose prose-invert prose-sm max-w-none">
-      <div className="text-sm leading-relaxed space-y-3">
+      <div className="text-sm leading-relaxed space-y-4">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
-            // Enhanced paragraph styling
+            // Enhanced paragraph styling with better spacing
             p: ({ children, ...props }) => (
               <p
                 {...props}
-                className="mb-3 text-gray-100 leading-6"
+                className="mb-4 text-gray-100 leading-7"
                 style={{
                   fontSize: "0.95rem",
-                  lineHeight: "1.7",
-                  marginBottom: "1rem",
+                  lineHeight: "1.8",
+                  marginBottom: "1.25rem",
                 }}
               >
                 {children}
               </p>
             ),
-            // Enhanced heading styling
+            // Enhanced heading styling with distinct backgrounds
             h1: ({ children, ...props }) => (
               <h1
                 {...props}
-                className="text-xl font-bold text-white mb-4 mt-6 pb-2 border-b border-gray-600"
+                className="text-xl font-bold text-white mb-6 mt-8 pb-3 px-4 py-3 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg border-l-4 border-blue-400"
                 style={{ fontSize: "1.25rem" }}
               >
                 {children}
@@ -368,7 +367,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             h2: ({ children, ...props }) => (
               <h2
                 {...props}
-                className="text-lg font-semibold text-blue-300 mb-3 mt-5"
+                className="text-lg font-semibold text-blue-200 mb-4 mt-6 px-3 py-2 bg-blue-900/20 rounded-md border-l-3 border-blue-300"
                 style={{ fontSize: "1.1rem" }}
               >
                 {children}
@@ -377,17 +376,17 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             h3: ({ children, ...props }) => (
               <h3
                 {...props}
-                className="text-base font-medium text-blue-200 mb-2 mt-4"
+                className="text-base font-medium text-blue-100 mb-3 mt-5 px-3 py-2 bg-blue-800/15 rounded-md border-l-2 border-blue-200"
                 style={{ fontSize: "1rem" }}
               >
                 {children}
               </h3>
             ),
-            // Enhanced list styling
+            // Enhanced list styling with proper spacing and visual hierarchy
             ul: ({ children, ...props }) => (
               <ul
                 {...props}
-                className="ml-4 mb-4 space-y-2"
+                className="ml-6 mb-6 space-y-3"
                 style={{ listStyleType: "disc" }}
               >
                 {children}
@@ -396,7 +395,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             ol: ({ children, ...props }) => (
               <ol
                 {...props}
-                className="ml-4 mb-4 space-y-2"
+                className="ml-6 mb-6 space-y-3"
                 style={{ listStyleType: "decimal" }}
               >
                 {children}
@@ -405,21 +404,22 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             li: ({ children, ...props }) => (
               <li
                 {...props}
-                className="text-gray-200 leading-6"
+                className="text-gray-200 leading-7 pl-2"
                 style={{
                   fontSize: "0.9rem",
-                  lineHeight: "1.6",
-                  marginBottom: "0.5rem",
+                  lineHeight: "1.8",
+                  marginBottom: "0.75rem",
+                  display: "list-item",
                 }}
               >
                 {children}
               </li>
             ),
-            // Enhanced code styling
+            // Enhanced code styling with better contrast
             code: ({ children, ...props }) => (
               <code
                 {...props}
-                className="bg-gray-700 text-green-300 px-2 py-1 rounded text-sm font-mono"
+                className="bg-gray-700 text-green-300 px-2 py-1 rounded text-sm font-mono border border-gray-600"
                 style={{
                   backgroundColor: "#374151",
                   fontSize: "0.85rem",
@@ -432,49 +432,52 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             pre: ({ children, ...props }) => (
               <pre
                 {...props}
-                className="bg-gray-800 p-4 rounded-lg mb-4 overflow-x-auto border border-gray-600"
+                className="bg-gray-800 p-4 rounded-lg mb-6 overflow-x-auto border border-gray-600 shadow-lg"
                 style={{
                   backgroundColor: "#1F2937",
-                  padding: "1rem",
-                  marginBottom: "1.5rem",
+                  padding: "1.25rem",
+                  marginBottom: "2rem",
                 }}
               >
                 {children}
               </pre>
             ),
-            // Enhanced blockquote styling
+            // Enhanced blockquote styling for key points
             blockquote: ({ children, ...props }) => (
               <blockquote
                 {...props}
-                className="border-l-4 border-blue-400 pl-4 py-2 my-4 bg-gray-800/50 rounded-r-lg"
+                className="border-l-4 border-yellow-400 pl-6 py-4 my-6 bg-yellow-900/20 rounded-r-lg shadow-sm"
                 style={{
-                  borderLeftColor: "#60A5FA",
-                  paddingLeft: "1rem",
-                  paddingTop: "0.5rem",
-                  paddingBottom: "0.5rem",
-                  marginTop: "1rem",
-                  marginBottom: "1rem",
-                  backgroundColor: "rgba(31, 41, 55, 0.5)",
+                  borderLeftColor: "#FBBF24",
+                  paddingLeft: "1.5rem",
+                  paddingTop: "1rem",
+                  paddingBottom: "1rem",
+                  marginTop: "1.5rem",
+                  marginBottom: "1.5rem",
+                  backgroundColor: "rgba(251, 191, 36, 0.1)",
                 }}
               >
-                {children}
+                <div className="flex items-start space-x-2">
+                  <span className="text-yellow-400 text-lg">💡</span>
+                  <div className="text-yellow-100 font-medium">{children}</div>
+                </div>
               </blockquote>
             ),
-            // Enhanced strong/bold styling
+            // Enhanced strong/bold styling for concepts
             strong: ({ children, ...props }) => (
               <strong
                 {...props}
-                className="font-semibold text-white"
-                style={{ fontWeight: "600" }}
+                className="font-bold text-white bg-blue-900/30 px-2 py-1 rounded border border-blue-700/50"
+                style={{ fontWeight: "700" }}
               >
                 {children}
               </strong>
             ),
-            // Enhanced emphasis/italic styling
+            // Enhanced emphasis/italic styling for examples
             em: ({ children, ...props }) => (
               <em
                 {...props}
-                className="italic text-blue-200"
+                className="italic text-purple-200 bg-purple-900/20 px-2 py-1 rounded border border-purple-700/50"
                 style={{ fontStyle: "italic" }}
               >
                 {children}
@@ -485,7 +488,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
               <a
                 {...props}
                 href={href}
-                className="text-blue-400 hover:text-blue-300 underline decoration-blue-400/50 hover:decoration-blue-300"
+                className="text-blue-400 hover:text-blue-300 underline decoration-blue-400/50 hover:decoration-blue-300 bg-blue-900/20 px-2 py-1 rounded hover:bg-blue-800/30 transition-colors"
                 style={{
                   color: "#60A5FA",
                   textDecorationColor: "rgba(96, 165, 250, 0.5)",
@@ -498,10 +501,10 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             ),
             // Enhanced table styling
             table: ({ children, ...props }) => (
-              <div className="overflow-x-auto mb-4">
+              <div className="overflow-x-auto mb-6">
                 <table
                   {...props}
-                  className="min-w-full border-collapse border border-gray-600"
+                  className="min-w-full border-collapse border border-gray-600 rounded-lg overflow-hidden shadow-lg"
                   style={{
                     borderCollapse: "collapse",
                     width: "100%",
@@ -514,12 +517,12 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             th: ({ children, ...props }) => (
               <th
                 {...props}
-                className="border border-gray-600 px-3 py-2 text-left font-semibold text-white bg-gray-700"
+                className="border border-gray-600 px-4 py-3 text-left font-bold text-white bg-gradient-to-r from-gray-700 to-gray-600"
                 style={{
                   border: "1px solid #4B5563",
-                  padding: "0.5rem 0.75rem",
+                  padding: "0.75rem 1rem",
                   textAlign: "left",
-                  fontWeight: "600",
+                  fontWeight: "700",
                   backgroundColor: "#374151",
                 }}
               >
@@ -529,10 +532,10 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             td: ({ children, ...props }) => (
               <td
                 {...props}
-                className="border border-gray-600 px-3 py-2 text-gray-200"
+                className="border border-gray-600 px-4 py-3 text-gray-200 bg-gray-800/50"
                 style={{
                   border: "1px solid #4B5563",
-                  padding: "0.5rem 0.75rem",
+                  padding: "0.75rem 1rem",
                 }}
               >
                 {children}
@@ -542,11 +545,12 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             hr: ({ ...props }) => (
               <hr
                 {...props}
-                className="my-6 border-gray-600"
+                className="my-8 border-gray-600 border-2"
                 style={{
-                  marginTop: "1.5rem",
-                  marginBottom: "1.5rem",
+                  marginTop: "2rem",
+                  marginBottom: "2rem",
                   borderColor: "#4B5563",
+                  borderWidth: "2px",
                 }}
               />
             ),
