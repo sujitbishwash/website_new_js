@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -96,7 +95,10 @@ const CanvasIcon = () => (
   />
 );
 const SendIcon = () => (
-  <Icon path="M10.3009 13.6949L20.102 3.89742M10.5795 14.1355L12.8019 18.5804C13.339 19.6545 13.6075 20.1916 13.9458 20.3356C14.2394 20.4606 14.575 20.4379 14.8492 20.2747C15.1651 20.0866 15.3591 19.5183 15.7472 18.3818L19.9463 6.08434C20.2845 5.09409 20.4535 4.59896 20.3378 4.27142C20.2371 3.98648 20.013 3.76234 19.7281 3.66167C19.4005 3.54595 18.9054 3.71502 17.9151 4.05315L5.61763 8.2523C4.48114 8.64037 3.91289 8.83441 3.72478 9.15032C3.56153 9.42447 3.53891 9.76007 3.66389 10.0536C3.80791 10.3919 4.34498 10.6605 5.41912 11.1975L9.86397 13.42C10.041 13.5085 10.1295 13.5527 10.2061 13.6118C10.2742 13.6643 10.3352 13.7253 10.3876 13.7933C10.4468 13.87 10.491 13.9585 10.5795 14.1355Z" className="w-5 h-5" />
+  <Icon
+    path="M10.3009 13.6949L20.102 3.89742M10.5795 14.1355L12.8019 18.5804C13.339 19.6545 13.6075 20.1916 13.9458 20.3356C14.2394 20.4606 14.575 20.4379 14.8492 20.2747C15.1651 20.0866 15.3591 19.5183 15.7472 18.3818L19.9463 6.08434C20.2845 5.09409 20.4535 4.59896 20.3378 4.27142C20.2371 3.98648 20.013 3.76234 19.7281 3.66167C19.4005 3.54595 18.9054 3.71502 17.9151 4.05315L5.61763 8.2523C4.48114 8.64037 3.91289 8.83441 3.72478 9.15032C3.56153 9.42447 3.53891 9.76007 3.66389 10.0536C3.80791 10.3919 4.34498 10.6605 5.41912 11.1975L9.86397 13.42C10.041 13.5085 10.1295 13.5527 10.2061 13.6118C10.2742 13.6643 10.3352 13.7253 10.3876 13.7933C10.4468 13.87 10.491 13.9585 10.5795 14.1355Z"
+    className="w-5 h-5"
+  />
 );
 
 // --- Components ---
@@ -146,15 +148,18 @@ const SuggestionChips: React.FC = () => {
 };
 
 const Message: React.FC<MessageType> = ({ text, isUser }) => {
-  const markdownText = text.replace(/\\n/g, '\n');
+  const markdownText = text.replace(/\\n/g, "\n");
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        style={{ backgroundColor: isUser ? theme.accent : theme.cardBackground }}
-        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${isUser
-          ? "bg-blue-600 text-white rounded-br-none"
-          : "bg-gray-700 text-gray-200 rounded-bl-none"
-          }`}
+        style={{
+          backgroundColor: isUser ? theme.accent : theme.cardBackground,
+        }}
+        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+          isUser
+            ? "bg-blue-600 text-white rounded-br-none"
+            : "bg-gray-700 text-gray-200 rounded-bl-none"
+        }`}
       >
         <MarkdownRenderer content={markdownText} />
       </div>
@@ -210,8 +215,9 @@ const PlanSelector: React.FC = () => {
       >
         <span className="text-xs sm:text-sm font-medium">{selectedPlan}</span>
         <svg
-          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-            }`}
+          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -279,8 +285,9 @@ const ModeSelector: React.FC = () => {
           {selectedMode}
         </span>
         <svg
-          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
-            }`}
+          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -318,16 +325,240 @@ const ModeSelector: React.FC = () => {
 
 // --- Markdown Renderer ---
 const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
-  const cleanText = content.replace(/\\n/g, '\n'); // actual line breaks
-  const beautified = content
-    .replace(/\\n/g, '\n')
-    .replace(/\*   /g, '- ')
-    .replace(/(\*{1,2})(?!.*\1)/g, '$1 ');
+  // Clean and process the content for better rendering
+  const processContent = (text: string) => {
+    return text
+      .replace(/\\n/g, "\n") // Convert escaped newlines to actual newlines
+      .trim();
+  };
+
+  const processedContent = processContent(content);
+
   return (
     <div className="prose prose-invert prose-sm max-w-none">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{cleanText}</ReactMarkdown>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{"                      "}</ReactMarkdown>
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{beautified}</ReactMarkdown>
+      <div className="text-sm leading-relaxed space-y-4">
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            // Enhanced paragraph styling with better spacing
+            p: ({ children, ...props }) => (
+              <p
+                {...props}
+                className="mb-4 text-gray-100 leading-7"
+                style={{
+                  fontSize: "0.95rem",
+                  lineHeight: "1.8",
+                  marginBottom: "1.25rem",
+                }}
+              >
+                {children}
+              </p>
+            ),
+            // Enhanced heading styling with distinct backgrounds
+            h1: ({ children, ...props }) => (
+              <h1
+                {...props}
+                className="text-xl font-bold text-white mb-6 mt-8 pb-3 px-4 py-3 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg border-l-4 border-blue-400"
+                style={{ fontSize: "1.25rem" }}
+              >
+                {children}
+              </h1>
+            ),
+            h2: ({ children, ...props }) => (
+              <h2
+                {...props}
+                className="text-lg font-semibold text-blue-200 mb-4 mt-6 px-3 py-2 bg-blue-900/20 rounded-md border-l-3 border-blue-300"
+                style={{ fontSize: "1.1rem" }}
+              >
+                {children}
+              </h2>
+            ),
+            h3: ({ children, ...props }) => (
+              <h3
+                {...props}
+                className="text-base font-medium text-blue-100 mb-3 mt-5 px-3 py-2 bg-blue-800/15 rounded-md border-l-2 border-blue-200"
+                style={{ fontSize: "1rem" }}
+              >
+                {children}
+              </h3>
+            ),
+            // Enhanced list styling with proper spacing and visual hierarchy
+            ul: ({ children, ...props }) => (
+              <ul
+                {...props}
+                className="ml-6 mb-6 space-y-3"
+                style={{ listStyleType: "disc" }}
+              >
+                {children}
+              </ul>
+            ),
+            ol: ({ children, ...props }) => (
+              <ol
+                {...props}
+                className="ml-6 mb-6 space-y-3"
+                style={{ listStyleType: "decimal" }}
+              >
+                {children}
+              </ol>
+            ),
+            li: ({ children, ...props }) => (
+              <li
+                {...props}
+                className="text-gray-200 leading-7 pl-2"
+                style={{
+                  fontSize: "0.9rem",
+                  lineHeight: "1.8",
+                  marginBottom: "0.75rem",
+                  display: "list-item",
+                }}
+              >
+                {children}
+              </li>
+            ),
+            // Enhanced code styling with better contrast
+            code: ({ children, ...props }) => (
+              <code
+                {...props}
+                className="bg-gray-700 text-green-300 px-2 py-1 rounded text-sm font-mono border border-gray-600"
+                style={{
+                  backgroundColor: "#374151",
+                  fontSize: "0.85rem",
+                  padding: "0.25rem 0.5rem",
+                }}
+              >
+                {children}
+              </code>
+            ),
+            pre: ({ children, ...props }) => (
+              <pre
+                {...props}
+                className="bg-gray-800 p-4 rounded-lg mb-6 overflow-x-auto border border-gray-600 shadow-lg"
+                style={{
+                  backgroundColor: "#1F2937",
+                  padding: "1.25rem",
+                  marginBottom: "2rem",
+                }}
+              >
+                {children}
+              </pre>
+            ),
+            // Enhanced blockquote styling for key points
+            blockquote: ({ children, ...props }) => (
+              <blockquote
+                {...props}
+                className="border-l-4 border-yellow-400 pl-6 py-4 my-6 bg-yellow-900/20 rounded-r-lg shadow-sm"
+                style={{
+                  borderLeftColor: "#FBBF24",
+                  paddingLeft: "1.5rem",
+                  paddingTop: "1rem",
+                  paddingBottom: "1rem",
+                  marginTop: "1.5rem",
+                  marginBottom: "1.5rem",
+                  backgroundColor: "rgba(251, 191, 36, 0.1)",
+                }}
+              >
+                <div className="flex items-start space-x-2">
+                  <span className="text-yellow-400 text-lg">💡</span>
+                  <div className="text-yellow-100 font-medium">{children}</div>
+                </div>
+              </blockquote>
+            ),
+            // Enhanced strong/bold styling for concepts
+            strong: ({ children, ...props }) => (
+              <strong
+                {...props}
+                className="font-bold text-white bg-blue-900/30 px-2 py-1 rounded border border-blue-700/50"
+                style={{ fontWeight: "700" }}
+              >
+                {children}
+              </strong>
+            ),
+            // Enhanced emphasis/italic styling for examples
+            em: ({ children, ...props }) => (
+              <em
+                {...props}
+                className="italic text-purple-200 bg-purple-900/20 px-2 py-1 rounded border border-purple-700/50"
+                style={{ fontStyle: "italic" }}
+              >
+                {children}
+              </em>
+            ),
+            // Enhanced link styling
+            a: ({ children, href, ...props }) => (
+              <a
+                {...props}
+                href={href}
+                className="text-blue-400 hover:text-blue-300 underline decoration-blue-400/50 hover:decoration-blue-300 bg-blue-900/20 px-2 py-1 rounded hover:bg-blue-800/30 transition-colors"
+                style={{
+                  color: "#60A5FA",
+                  textDecorationColor: "rgba(96, 165, 250, 0.5)",
+                }}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {children}
+              </a>
+            ),
+            // Enhanced table styling
+            table: ({ children, ...props }) => (
+              <div className="overflow-x-auto mb-6">
+                <table
+                  {...props}
+                  className="min-w-full border-collapse border border-gray-600 rounded-lg overflow-hidden shadow-lg"
+                  style={{
+                    borderCollapse: "collapse",
+                    width: "100%",
+                  }}
+                >
+                  {children}
+                </table>
+              </div>
+            ),
+            th: ({ children, ...props }) => (
+              <th
+                {...props}
+                className="border border-gray-600 px-4 py-3 text-left font-bold text-white bg-gradient-to-r from-gray-700 to-gray-600"
+                style={{
+                  border: "1px solid #4B5563",
+                  padding: "0.75rem 1rem",
+                  textAlign: "left",
+                  fontWeight: "700",
+                  backgroundColor: "#374151",
+                }}
+              >
+                {children}
+              </th>
+            ),
+            td: ({ children, ...props }) => (
+              <td
+                {...props}
+                className="border border-gray-600 px-4 py-3 text-gray-200 bg-gray-800/50"
+                style={{
+                  border: "1px solid #4B5563",
+                  padding: "0.75rem 1rem",
+                }}
+              >
+                {children}
+              </td>
+            ),
+            // Enhanced horizontal rule styling
+            hr: ({ ...props }) => (
+              <hr
+                {...props}
+                className="my-8 border-gray-600 border-2"
+                style={{
+                  marginTop: "2rem",
+                  marginBottom: "2rem",
+                  borderColor: "#4B5563",
+                  borderWidth: "2px",
+                }}
+              />
+            ),
+          }}
+        >
+          {processedContent}
+        </ReactMarkdown>
+      </div>
     </div>
   );
 };
@@ -377,7 +608,8 @@ const ChatInput: React.FC<{
             </div>
           </div>
 
-          <div className="flex items-center gap-1">{/*
+          <div className="flex items-center gap-1">
+            {/*
             <button
               type="button"
               className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full"
@@ -420,9 +652,7 @@ export default function Chat({
   onSendMessage,
 }: ChatProps) {
   return (
-    <div
-      className="flex flex-col h-full bg-background text-primaryText"
-    >
+    <div className="flex flex-col h-full bg-background text-primaryText">
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 p-4">
         {messages.length === 0 && (
           <div className="flex-1 flex flex-col justify-center items-center p-4">

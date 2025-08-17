@@ -12,22 +12,16 @@ import {
 } from "../lib/utils";
 import { ROUTES } from "../routes/constants";
 
-
-const PlayIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    viewBox="0 0 24 24"
-    fill="currentColor"
-  >
-    <path d="M8 5v14l11-7z"></path>
-  </svg>
-);
-
-
 const SparklesIcon = () => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path>
+  </svg>
 );
 
 // --- TYPESCRIPT INTERFACES ---
@@ -149,8 +143,9 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
     ) : (
       <div className="flex items-center gap-2">
         <p
-          className={`mt-1 text-base ${value === "Not set" ? "text-foreground italic" : "text-foreground"
-            }`}
+          className={`mt-1 text-base ${
+            value === "Not set" ? "text-foreground italic" : "text-foreground"
+          }`}
         >
           {value}
         </p>
@@ -284,10 +279,19 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
 );
 
 // --- MAIN MODAL COMPONENT ---
-import { ModeToggle } from "./mode-toggle";
-import { AccentToggle } from "./Accent-toggle";
-import { Bell, CircleCheck, CircleUserRound, Gauge, KeyRound, RefreshCcw, Settings, Sparkle, Wrench } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import {
+  Bell,
+  CircleCheck,
+  CircleUserRound,
+  Gauge,
+  KeyRound,
+  RefreshCcw,
+  Settings,
+  Wrench,
+} from "lucide-react";
+import { AccentToggle } from "./Accent-toggle";
+import { ModeToggle } from "./mode-toggle";
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
@@ -331,7 +335,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     navigate(ROUTES.LOGIN, { replace: true });
   };
 
-
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
@@ -372,7 +375,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       // Ignore clicks inside Radix DropdownMenu portals or triggers
       const isInsideDropdown = Boolean(
         target.closest("[data-slot^='dropdown-menu-']") ||
-        target.closest("[data-slot='button']")
+          target.closest("[data-slot='button']")
       );
       if (isInsideDropdown) return;
 
@@ -445,9 +448,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Account":
         return (
           <div>
-
             <div className="items-end mb-6 pb-4 flex justify-between items-center border-b border-foreground/20">
-
               <div>
                 <h1 className="text-3xl  text-foreground">Your Account</h1>
                 <p className="mt-1 text-muted-foreground">
@@ -456,8 +457,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 {profile && (
                   <div className="mt-2 text-xs text-gray-500">
                     <span className="inline-flex items-center gap-1">
-                      <CircleCheck
-                        className="w-3 h-3" />
+                      <CircleCheck className="w-3 h-3" />
                       Data synced from your account
                     </span>
                   </div>
@@ -472,8 +472,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                   className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
                   title="Refresh profile data"
                 >
-                  <RefreshCcw
-                    className="w-4 h-4" />
+                  <RefreshCcw className="w-4 h-4" />
                 </button>
                 <button
                   onClick={toggleEditMode}
@@ -589,9 +588,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Notifications":
         return (
           <div>
-            <h1 className="text-3xl  text-foreground mb-6">
-              Notifications
-            </h1>
+            <h1 className="text-3xl text-foreground mb-6">Notifications</h1>
             <NotificationSettingRow
               title="Responses"
               description="Get notified when chatbot responds to requests that take time, like research or image generation."
@@ -619,20 +616,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
             <div className="flex justify-between items-end border-b border-foreground/20 pb-4">
-
               <div>
                 <h1 className="text-3xl  text-foreground">Upgrade</h1>
                 <p className="mt-1 text-muted-foreground">
                   You are currently on the free plan
                 </p>
-              </div><button
+              </div>
+              <button
                 onClick={onUpgradeClick}
                 className="flex gap-1 px-4 py-2 text-sm font-semibold text-white rounded-lg shadow-md hover:bg-purple-100 transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none focus:shadow-lg focus:shadow-blue-500/50 bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer"
               >
                 <SparklesIcon />
                 Upgrade Plan
               </button>
-
             </div>
             <div className="mt-8 p-6 bg-accent rounded-lg">
               <h2 className="text-xl text-foreground">
@@ -676,9 +672,10 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               </label>
             </SettingRow>
             <SettingRow title="Log out of this device">
-              <button onClick={handleLogoutConfirm} className="px-4 py-1.5 text-sm font-semibold text-foreground bg-background hover:bg-foreground/20 border border-divider rounded-lg  transition-transform transition-colors transform focus:outline-none focus:shadow-sm cursor-pointer">
-              
-
+              <button
+                onClick={handleLogoutConfirm}
+                className="px-4 py-1.5 text-sm font-semibold text-foreground bg-background hover:bg-foreground/20 border border-divider rounded-lg  transition-transform transition-colors transform focus:outline-none focus:shadow-sm cursor-pointer"
+              >
                 Log out
               </button>
             </SettingRow>
@@ -695,9 +692,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Development":
         return (
           <div>
-            <h1 className="text-3xl text-foreground mb-3">
-              Development Tools
-            </h1>
+            <h1 className="text-3xl text-foreground mb-3">Development Tools</h1>
             <p className="text-muted-foreground mb-6">
               Development and testing utilities for debugging purposes.
             </p>
@@ -752,7 +747,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       <span className="text-gray-300">First Time User:</span>
                       <span className="text-white">
                         {localStorage.getItem("aipadhai_first_time_user") ===
-                          null
+                        null
                           ? "Yes (null)"
                           : "No (false)"}
                       </span>
@@ -761,7 +756,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       <span className="text-gray-300">Has Seen Splash:</span>
                       <span className="text-white">
                         {localStorage.getItem("aipadhai_has_seen_splash") ===
-                          "true"
+                        "true"
                           ? "Yes"
                           : "No"}
                       </span>
@@ -771,7 +766,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       <span className="text-white">
                         {localStorage.getItem("aipadhai_first_time_user") ===
                           null &&
-                          localStorage.getItem("aipadhai_has_seen_splash") !==
+                        localStorage.getItem("aipadhai_has_seen_splash") !==
                           "true"
                           ? "Yes"
                           : "No"}
@@ -802,7 +797,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       const token = getAuthToken();
                       const userData = getUserData();
                       alert(
-                        `Auth Token: ${token ? "Present" : "Not found"
+                        `Auth Token: ${
+                          token ? "Present" : "Not found"
                         }\nUser Data: ${userData ? "Present" : "Not found"}`
                       );
                     }}

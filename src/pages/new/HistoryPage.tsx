@@ -1,4 +1,7 @@
+import { videoApi } from "@/lib/api-client";
+import { buildVideoLearningRoute } from "@/routes/constants";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // --- Type Definitions ---
 interface CourseMetadata {
@@ -12,6 +15,7 @@ interface CourseCardProps {
   description: string;
   imageUrl: string;
   metadata?: CourseMetadata;
+  youtubeYRL: string;
 }
 
 interface LearningHistoryItem {
@@ -20,6 +24,7 @@ interface LearningHistoryItem {
   description: string;
   imageUrl: string;
   metadata: CourseMetadata;
+  youtubeYRL: string;
 }
 
 // --- Reusable CourseCard Component ---
@@ -28,15 +33,31 @@ const CourseCard: React.FC<CourseCardProps> = ({
   description,
   imageUrl,
   metadata,
+  youtubeYRL,
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const hasMetadata = metadata && Object.keys(metadata).length > 0;
+  const navigate = useNavigate();
+
+  const handleSuggestedVideoClick = async (videoUrl: string) => {
+    try {
+      // If validation passes, fetch video details
+      const details = await videoApi.getVideoDetail(videoUrl);
+
+      navigate(buildVideoLearningRoute(details.external_source_id));
+    } catch (err: any) {
+    } finally {
+    }
+  };
 
   return (
     <div
       className={`bg-background border border-[#30363d] rounded-lg overflow-hidden relative transition-transform duration-300 ease-in-out cursor-pointer hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(88,166,255,0.2)]`}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onClick={() => {
+        handleSuggestedVideoClick(youtubeYRL);
+      }}
     >
       <div
         className="h-[150px] bg-cover bg-center border-b border-[#30363d]"
@@ -44,7 +65,9 @@ const CourseCard: React.FC<CourseCardProps> = ({
       ></div>
       <div className="p-5">
         <h3 className="mt-0 text-[1.2rem] text-foreground">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-[1.5]">{description}</p>
+        <p className="text-sm text-muted-foreground leading-[1.5]">
+          {description}
+        </p>
       </div>
 
       {/* Metadata Overlay */}
@@ -81,6 +104,7 @@ const HistoryPage = () => {
       description:
         "Quick tricks and concepts for solving percentage questions efficiently.",
       imageUrl: "https://placehold.co/600x400/1a2a45/ffffff?text=Math",
+      youtubeYRL: "https://www.youtube.com/watch?v=Eq7EUqRCoW8",
       metadata: {
         exam: "IBPS PO",
         subject: "Mathematics",
@@ -93,6 +117,7 @@ const HistoryPage = () => {
       description:
         "Learn important vocabulary words frequently asked in SSC CGL exams.",
       imageUrl: "https://placehold.co/600x400/1a2a45/ffffff?text=English",
+      youtubeYRL: "https://www.youtube.com/watch?v=TQaf1c6EV3U",
       metadata: {
         exam: "SSC CGL",
         subject: "English Language",
@@ -105,6 +130,7 @@ const HistoryPage = () => {
       description:
         "Practice key General Awareness questions based on the latest NTPC syllabus.",
       imageUrl: "https://placehold.co/600x400/1a2a45/ffffff?text=GK",
+      youtubeYRL: "https://www.youtube.com/watch?v=5Rh2gZbOeJo",
       metadata: {
         exam: "Railway NTPC",
         subject: "General Awareness",
@@ -124,6 +150,7 @@ const HistoryPage = () => {
             description={item.description}
             imageUrl={item.imageUrl}
             metadata={item.metadata}
+            youtubeYRL={item.youtubeYRL}
           />
         ))}
       </div>
