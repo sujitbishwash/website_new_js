@@ -73,7 +73,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       <aside
         className={`fixed top-0 left-0 h-screen bg-card text-foreground border-r border-border flex flex-col z-40 transition-all duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static ${isContracted ? "lg:w-20" : "lg:w-64"}`}
+        } lg:translate-x-0 lg:static w-72 ${isContracted ? "lg:w-20" : "lg:w-64"}`}
       >
         {/*Header with close button for mobile
         <div className="p-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
@@ -87,7 +87,7 @@ const Sidebar: React.FC<SidebarProps> = ({
         </div>*/}
 
         {/* Header with contract/close buttons */}
-        <div className="p-4 border-b border-border bg-card text-foreground flex items-center justify-between flex-shrink-0 h-[65px]">
+        <div className="p-4 border-border bg-card text-foreground flex items-center justify-between flex-shrink-0 h-[65px]">
           {/* Title hides when contracted on large screens */}
           <div
             className={`flex items-center gap-2 overflow-hidden transition-all duration-300 ${

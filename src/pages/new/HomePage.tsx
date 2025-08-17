@@ -8,7 +8,8 @@ import {
   CirclePlay,
   Clipboard,
   ClipboardList,
-  FileUp
+  FileUp,
+  RefreshCcw
 } from "lucide-react";
 
 // --- Type Definitions ---
@@ -442,7 +443,7 @@ export default function HomePage() {
     }
   };
   return (
-    <div className="min-h-full bg-background text-foreground font-sans p-6">
+    <div className="min-h-full bg-background text-foreground font-sans mt-6 sm:p-6">
       {/* Upgrade Button */}
 
       <style>{`.glow-purple:hover {
@@ -450,17 +451,17 @@ export default function HomePage() {
               0 0 20px rgba(168, 85, 247, 0.6), 
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
-      <button onClick={() => { navigate(ROUTES.PREMIUM); }} className="fixed top-4 right-8 z-50 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none">
+      <button onClick={() => { navigate(ROUTES.PREMIUM); }} className="fixed top-4 right-4 sm:right-8 z-20 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none">
         <SparklesIcon className="h-5 w-5" />
         <span>Upgrade plan</span>
       </button>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl">
         {/* Header Card */}
         <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
-          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2">
+          <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 text-center">
             What do you want to learn today?
           </h1>
-          <p className="text-muted-foreground mb-6">
+          <p className="text-muted-foreground mb-6 text-center">
             Start by uploading a file or pasting a video link.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -490,7 +491,7 @@ export default function HomePage() {
 
         {/* Recommended Videos Card */}
         <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
-          <div className="flex items-center justify-between mb-5">
+          <div className="flex items-start justify-between mb-5">
             <h2 className="text-2xl font-bold text-foreground">
               Recommended Videos
             </h2>
@@ -516,19 +517,8 @@ export default function HomePage() {
               disabled={isLoadingVideos}
               className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
+              <RefreshCcw className="w-4 h-4" />
+
               Refresh
             </button>
           </div>
