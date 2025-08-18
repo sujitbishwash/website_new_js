@@ -84,10 +84,11 @@ export default function ExamInformationPage() {
   const testConfig = location.state?.testConfig;
 
   return (
-    <div className="bg-gray-900 text-gray-300 min-h-screen font-sans">
-      <div className="bg-gray-800 rounded-2xl shadow-2xl shadow-indigo-500/10 overflow-hidden">
-        {/* Header Section */}
-        <header className="flex justify-between items-center p-6 border-b border-gray-700">
+    <div className="bg-gray-900 text-gray-300 min-h-screen font-sans flex items-center justify-center">
+      {/* The card is now a flex container with a column direction and a max height */}
+      <div className="bg-gray-800 rounded-2xl shadow-2xl shadow-indigo-500/10 overflow-hidden w-full max-w-5xl flex flex-col h-full max-h-[95vh]">
+        {/* Header Section - This part will not scroll */}
+        <header className="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-700">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">
             Exam Instructions
           </h1>
@@ -113,8 +114,8 @@ export default function ExamInformationPage() {
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="p-6 sm:p-8 space-y-8">
+       {/* Main Content - This area will grow and become scrollable if content overflows */}
+        <main className="flex-grow overflow-y-auto p-6 sm:p-8 space-y-8">
           {/* General Instructions */}
           <section>
             <h2 className="text-xl font-semibold text-indigo-400 mb-4">
@@ -181,8 +182,8 @@ export default function ExamInformationPage() {
           </section>
         </main>
 
-        {/* Footer with Navigation Buttons */}
-        <footer className="flex justify-between items-center p-6 border-t border-gray-700">
+        {/* Footer with Navigation Buttons - This part will not scroll */}
+        <footer className="flex-shrink-0 flex justify-between items-center p-6 border-t border-gray-700">
           <button
             onClick={() =>
               navigate(ROUTES.TEST_SERIES, {

@@ -211,6 +211,11 @@ const TestConfigurationPageComponent = () => {
         </div>
 
         {/* --- User Profile Section --- */}
+         {profile && examGoal && (<div className="mt-4 flex justify-center items-center gap-3">
+            <span className="bg-indigo-500/20 text-indigo-300 text-xs font-medium px-3 py-1 rounded-full">State Board</span>
+            <span className="bg-teal-500/20 text-teal-300 text-xs font-medium px-3 py-1 rounded-full">Class 10</span>
+          </div>
+          )}
         {profile && examGoal && (
           <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl flex flex-1 items-center justify-between">
             <div>
