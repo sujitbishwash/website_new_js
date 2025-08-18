@@ -329,9 +329,11 @@ const AITutorPanel: React.FC<{
     };
 
     return (
-      <div className={`rounded-xl border border-gray-700 bg-card flex flex-col h-full  ${isLeftColumnVisible ? "max-h-[90vh]"
-        : "max-h-[83vh]"
-        }`}>
+      <div className={`rounded-xl flex flex-col h-full ${
+        isLeftColumnVisible 
+          ? "border border-gray-700 bg-card max-h-[90vh]" 
+          : "max-h-[83vh]"
+      }`}>
         <div className="relative border-b border-gray-700 rounded-t-xl">
           <div className={`flex items-center  ${isLeftColumnVisible ? "justify-between"
             : "justify-center"} rounded-lg p-2 w-full overflow-x-auto pb-2 custom-scrollbar pr-12`}>
