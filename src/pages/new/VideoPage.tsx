@@ -6,6 +6,9 @@ import { theme } from "@/styles/theme";
 import { useEffect, useState } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
+import { useNavigate } from "react-router-dom";
+import { ROUTES } from "@/routes/constants";
+import { Eye, EyeOff } from "lucide-react";
 
 // Type definitions
 interface IconProps {
@@ -116,6 +119,9 @@ const XIcon = () => <Icon path="M18 6L6 18 M6 6l12 12" className="w-5 h-5" />;
 
 const MaximizeIcon = () => <Icon path="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" className="w-5 h-5" />;
 const MinimizeIcon = () => <Icon path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" className="w-5 h-5" />;
+const SparklesIcon: React.FC<IconProps> = ({  }) => (
+  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>
+);
 // --- Sub-Components for Modularity ---
 
 interface HeaderProps {
@@ -128,7 +134,10 @@ interface HeaderProps {
   isLeftColumnVisible: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading, onToggleVideo, isVideoVisible, onShare, onToggleFullScreen, isLeftColumnVisible }) => (
+const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading,  onShare}) => {
+    const navigate = useNavigate();
+  
+  return (
   <header className="flex justify-between items-center mb-4 sm:mb-6 gap-4">
     <div className="flex-1 min-w-0">
       <h1 className="text-md text-gray-500 truncate">
@@ -138,19 +147,18 @@ const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading, onToggleVideo, 
           videoDetail?.title || "Video Title Not Available"
         )}
       </h1>
+      
+      
     </div>
-    <div className="flex items-center space-x-2 flex-shrink-0">
-
-      {isLeftColumnVisible ? (<button onClick={onToggleVideo} title={isVideoVisible ? 'Hide Video' : 'Show Video'} className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors">
-        {isVideoVisible ? <VideoOffIcon /> : <VideoOnIcon />}
+    <button onClick={onShare} title="Share" className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors`}>
+        <ShareIcon  />
       </button>
-      ) : ""}
-      <button onClick={onShare} title="Share" className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors`}>
-        <ShareIcon />
-      </button>
-    </div>
+      <button onClick={() => { navigate(ROUTES.PREMIUM); }} className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none">
+              <SparklesIcon path="" className="h-5 w-5" />
+              <span>Upgrade plan</span>
+            </button>
   </header>
-);
+)};
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => (
   <div className="aspect-w-16 aspect-h-9 bg-black rounded-xl overflow-hidden shadow-lg mb-4">
@@ -175,7 +183,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
-    <div className="bg-background text-foreground rounded-xl border border-gray-700 p-1">
+    <div className="bg-background text-foreground rounded-xl border border-gray-700 p-1 hidden sm:block">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-3 sm:px-4 pt-3 pb-2 gap-2">
         <div className="flex items-center border border-gray-700 rounded-lg p-1">
           <button
@@ -218,7 +226,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
           </div>
         </div>
       </div>
-      <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
+      <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 max-h-[250px] sm:max-h-[100px] overflow-y-auto">
         {activeTab === "chapters" ? (
           isLoadingChapters ? (
             <div className="text-center py-6 sm:py-8">
@@ -295,6 +303,11 @@ const AITutorPanel: React.FC<{
 
   onToggleFullScreen: () => void;
   isLeftColumnVisible: boolean;
+  
+  onToggleVideo: () => void;
+  isVideoVisible: boolean;
+  onShare: () => void;
+  
 }> = ({
   currentMode,
   onModeChange,
@@ -305,6 +318,7 @@ const AITutorPanel: React.FC<{
   onSendMessage,
   onToggleFullScreen,
   isLeftColumnVisible,
+  onToggleVideo, isVideoVisible, onShare
 }) => {
     const modes: { key: LearningMode; label: string; icon: any }[] = [
       { key: "chat", label: "Chat", icon: <ChatIcon /> },
@@ -329,9 +343,31 @@ const AITutorPanel: React.FC<{
     };
 
     return (
-      <div className={`rounded-xl border border-gray-700 bg-card flex flex-col h-full  ${isLeftColumnVisible ? "max-h-[90vh]"
-        : "max-h-[83vh]"
+      <div className={`rounded-xl border border-gray-700 bg-card flex flex-col h-full  ${isLeftColumnVisible ? "max-h-[84vh]"
+        : "max-h-[85vh]"
         }`}>
+
+      {isLeftColumnVisible ? (
+  <button
+    onClick={onToggleVideo}
+    className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium 
+               bg-background text-white hover:bg-indigo-700 active:bg-indigo-800 
+               transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 block sm:hidden"
+  >
+    {isVideoVisible ? (
+      <>
+        <EyeOff className="w-4 h-4" />
+        <span>Hide Video</span>
+      </>
+    ) : (
+      <>
+        <Eye className="w-4 h-4" />
+        <span>Show Video</span>
+      </>
+    )}
+  </button>
+) : null}
+
         <div className="relative border-b border-gray-700 rounded-t-xl">
           <div className={`flex items-center  ${isLeftColumnVisible ? "justify-between"
             : "justify-center"} rounded-lg p-2 w-full overflow-x-auto pb-2 custom-scrollbar pr-12`}>
@@ -639,36 +675,7 @@ const VideoPage: React.FC = () => {
   return (
     <div className="bg-background text-foreground min-h-screen font-sans text-gray-200">
       <div className="container mx-auto sm:px-4 lg:px-6 sm:py-6">
-        <main className="grid grid-cols-1 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
-          <div className={`xl:col-span-3 space-y-4 sm:space-y-6 ${isLeftColumnVisible ? '' : 'hidden'}`}>
-            <Header
-              videoDetail={videoDetail}
-              isLoading={isLoadingVideo}
-              onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
-              isVideoVisible={isVideoVisible}
-              onShare={() => setIsShareModalOpen(true)}
-
-              onToggleFullScreen={() => setIsLeftColumnVisible(!isLeftColumnVisible)}
-              isLeftColumnVisible={isLeftColumnVisible}
-            />
-
-            {isVideoVisible && (
-              <VideoPlayer
-                src={`https://www.youtube.com/embed/${currentVideoId}`}
-              />
-            )}
-            <ContentTabs
-              chapters={chapters}
-              transcript={transcript}
-              isLoadingChapters={isLoadingChapters}
-              isLoadingTranscript={isLoadingTranscript}
-              chaptersError={chaptersError}
-              transcriptError={transcriptError}
-            />
-          </div>
-          <div className={`${isLeftColumnVisible ? 'xl:col-span-2' : 'xl:col-span-5'}`}>
-            {!isLeftColumnVisible && (
-              <Header
+        <Header
                 videoDetail={videoDetail}
                 isLoading={isLoadingVideo}
                 onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
@@ -678,8 +685,28 @@ const VideoPage: React.FC = () => {
                 onToggleFullScreen={() => setIsLeftColumnVisible(!isLeftColumnVisible)}
                 isLeftColumnVisible={isLeftColumnVisible}
               />
+        <main className="grid grid-cols-1 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
+          <div className={`xl:col-span-3 space-y-4 sm:space-y-6 ${isLeftColumnVisible ? '' : 'hidden'}`}>
 
+            {isVideoVisible && (
+              <div><VideoPlayer
+                src={`https://www.youtube.com/embed/${currentVideoId}`}
+              />
+              <ContentTabs
+              chapters={chapters}
+              transcript={transcript}
+              isLoadingChapters={isLoadingChapters}
+              isLoadingTranscript={isLoadingTranscript}
+              chaptersError={chaptersError}
+              transcriptError={transcriptError}
+            />
+            </div>
             )}
+            
+          </div>
+          <div className={`${isLeftColumnVisible ? 'xl:col-span-2' : 'xl:col-span-5'}`}>
+            
+              
             <AITutorPanel
               currentMode={currentMode}
               onModeChange={handleModeChange}
@@ -690,6 +717,9 @@ const VideoPage: React.FC = () => {
               onSendMessage={handleSendMessage}
               isLeftColumnVisible={isLeftColumnVisible}
               onToggleFullScreen={() => setIsLeftColumnVisible(!isLeftColumnVisible)}
+              onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
+              isVideoVisible={isVideoVisible}
+              onShare={() => setIsShareModalOpen(true)}
             />
           </div>
         </main>

@@ -51,7 +51,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
     />
     <label
       htmlFor={id}
-      className={`flex items-center cursor-pointer py-2.5 px-5 rounded-lg transition-all duration-300 ease-in-out border
+      className={`flex items-center cursor-pointer py-2 px-3 rounded-lg transition-all duration-300 ease-in-out border
                 ${
                   disabled
                     ? "bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed"
@@ -64,7 +64,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
                 }`}
     >
       <span
-        className={`w-4 h-4 inline-block mr-3 rounded-full border-2 transition-all duration-300 ${
+        className={`w-4 h-4 inline-block mr-2 rounded-full border-2 transition-all duration-300 ${
           checked ? "border-white bg-white" : "border-gray-400 bg-gray-700"
         }`}
       ></span>
@@ -188,8 +188,8 @@ const TestConfigurationPageComponent = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-br from-background/10 to-background min-h-screen text-white font-sans p-4 sm:p-6 md:p-8 flex items-center justify-center">
-        <div className="w-full max-w-2xl mx-auto bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-6 sm:p-8 text-center">
+      <div className="bg-gradient-to-br from-background/10 to-background min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
+        <div className="w-full max-w-2xl mx-auto bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-4 sm:p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-400">Loading Test configuration...</p>
         </div>
@@ -198,53 +198,32 @@ const TestConfigurationPageComponent = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-background/10 to-background min-h-screen text-white font-sans p-4 sm:p-6 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-2xl mx-auto bg-foreground/60 border border-gray-700 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-8">
+    <div className="bg-gradient-to-br from-gray-900 to-black min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
+      <div className="w-full max-w-7xl mx-auto bg-gray-800/50 border border-gray-700 rounded-2xl shadow-2xl p-4 sm:p-8 space-y-6 ">
         {/* --- Header --- */}
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Configure Your Test
           </h1>
-          <p className="text-gray-400 mt-2">
+          <p className="text-gray mt-2">
             Select your preferences to start a practice test.
           </p>
         </div>
 
         {/* --- User Profile Section --- */}
-        {profile && (
-          <div className="p-6 bg-blue-900/20 border border-blue-700/50 rounded-xl">
-            <h2 className="text-lg font-semibold text-blue-200 mb-3">
-              Student Information
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-400">Name:</span>
-                <span className="ml-2 text-white font-medium">
-                  {profile.name || "Not set"}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-400">Email:</span>
-                <span className="ml-2 text-white font-medium">
-                  {profile.email}
-                </span>
-              </div>
-              {examGoal && (
-                <>
-                  <div>
-                    <span className="text-gray-400">Exam Goal:</span>
-                    <span className="ml-2 text-white font-medium">
-                      {examGoal.exam}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Group Type:</span>
-                    <span className="ml-2 text-white font-medium">
-                      {examGoal.groupType}
-                    </span>
-                  </div>
-                </>
-              )}
+        {profile && examGoal && (
+          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl flex flex-1 items-center justify-between">
+            <div>
+              <span className="text-gray-400">Exam Goal:</span>
+              <span className="ml-2 text-white font-large font-semibold">
+                {examGoal.exam}
+              </span>
+            </div>
+            <div>
+              <span className="text-gray-400">Group Type:</span>
+              <span className="ml-2 text-white font-large font-semibold">
+                {examGoal.groupType}
+              </span>
             </div>
           </div>
         )}
@@ -257,9 +236,9 @@ const TestConfigurationPageComponent = () => {
         )}
 
         {/* --- Form Sections --- */}
-        <div className="space-y-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* 1. Select Subject */}
-          <div className="p-6 bg-black/20 border border-gray-700/80 rounded-xl">
+          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">
               1. Select Subject
             </h2>
@@ -280,8 +259,8 @@ const TestConfigurationPageComponent = () => {
             </div>
           </div>
 
-          {/* 2. Select Sub-Topic (dynamic) */}
-          <div className="p-6 bg-black/20 border border-gray-700/80 rounded-xl">
+          {/* 2. Select Sub-Topic */}
+          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">
               2. Select Sub-Topic (Optional)
             </h2>
@@ -309,7 +288,7 @@ const TestConfigurationPageComponent = () => {
           </div>
 
           {/* 3. Select Difficulty Level */}
-          <div className="p-6 bg-black/20 border border-gray-700/80 rounded-xl">
+          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">
               3. Select Difficulty Level
             </h2>
@@ -331,7 +310,7 @@ const TestConfigurationPageComponent = () => {
           </div>
 
           {/* 4. Select Language */}
-          <div className="p-6 bg-black/20 border border-gray-700/80 rounded-xl">
+          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">
               4. Select Language
             </h2>
@@ -354,7 +333,7 @@ const TestConfigurationPageComponent = () => {
         </div>
 
         {/* --- Continue Button --- */}
-        <div className="pt-6 flex justify-center">
+        <div className="flex justify-end">
           <button
             onClick={handleContinue}
             disabled={
@@ -363,7 +342,7 @@ const TestConfigurationPageComponent = () => {
               !selectedDifficulty ||
               !selectedLanguage
             }
-            className={`font-bold py-3 px-12 rounded-full text-lg transition-all duration-300 ease-in-out transform focus:outline-none focus:ring-4 focus:ring-blue-500/50 ${
+            className={`font-bold py-3 px-12 rounded-full text-lg transition-all duration-300 ease-in-out transform focus:outline-none focus:ring-4 focus:ring-blue-500/50 cursor-pointer ${
               isSubmitting ||
               !selectedSubject ||
               !selectedDifficulty ||

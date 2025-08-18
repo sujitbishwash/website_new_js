@@ -851,7 +851,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     }
   };
 
-  return (
+    return (
     <>
       <style>{`
         @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
@@ -860,22 +860,22 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         .animate-slide-in { animation: slide-in 0.3s ease-out; }
       `}</style>
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
-        <div ref={modalRef} className="relative w-full max-w-4xl h-auto max-h-[90vh] md:h-[650px] rounded-xl shadow-2xl bg-card flex flex-col md:flex-row overflow-hidden animate-slide-in">
+        <div ref={modalRef} className="relative w-full max-w-4xl h-[90vh] max-h-[620px] rounded-xl shadow-2xl bg-card flex flex-col md:flex-row overflow-hidden animate-slide-in">
           <button onClick={handleClose} className="absolute top-3 right-3 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
           <nav className="w-full md:w-1/3 lg:w-1/4 bg-background p-4 flex-shrink-0 border-b md:border-b-0 md:border-r border-foreground/20">
-            <h2 className="text-xl text-muted-foreground/70 ml-4 mt-2 mb-4">Settings</h2>
+            <h2 className="text-xl text-muted-foreground/70 ml-4 mt-2 mb-4 hidden md:block">Settings</h2>
             <ul className="flex flex-row flex-wrap md:flex-col gap-2">
               {navItems.map((item) => (
                 <li key={item.name} className="flex-shrink-0">
                   <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(item.name); }} className={`flex items-center gap-2 md:gap-3 px-3 py-2 rounded-full md:rounded-md text-sm font-medium transition-colors ${activeTab === item.name ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}>
-                    <item.icon className="w-5 h-5 flex-shrink-0 hidden md:block" />
+                    <item.icon className="w-5 h-5 flex-shrink-0" />
                     <span className="whitespace-nowrap md:whitespace-normal">{item.name}</span>
                   </a>
                 </li>
               ))}
             </ul>
           </nav>
-          <main className="w-full md:w-2/3 lg:w-3/4 p-4 md:p-8 overflow-y-auto">{renderContent()}</main>
+          <main className="w-full md:w-2/3 lg:w-3/4 p-4 md:p-8 overflow-y-auto flex-grow">{renderContent()}</main>
         </div>
       </div>
     </>

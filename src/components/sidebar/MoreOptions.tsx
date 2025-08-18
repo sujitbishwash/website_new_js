@@ -54,6 +54,7 @@ interface ProfileMenuProps {
   onProfileClick: () => void;
   onUpgradeClick: () => void;
   onExamConfigurationClick: () => void;
+  onToggle: () => void;
 }
 
 const ProfileMenu: React.FC<ProfileMenuProps> = ({
@@ -62,6 +63,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onProfileClick,
   onUpgradeClick,
   onExamConfigurationClick,
+  onToggle,
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
@@ -80,10 +82,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
     profile?.email || "user@example.com"
   );
 
-  const handleExamConfigurationClick = () => {
-    onExamConfigurationClick();
-    setMenuOpen(false);
-  };
+
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -100,25 +99,39 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  ///yo
+  
+  const handleExamConfigurationClick = () => {
+    onToggle(); // Close the sidebar if it's open
+    onExamConfigurationClick();
+    setMenuOpen(false);
+  };
+
   const handleProfileClick = () => {
+    onToggle(); // Close the sidebar if it's open
     onProfileClick();
     setMenuOpen(false);
   };
 
   const handleUpgradeClick = () => {
+    onToggle(); // Close the sidebar if it's open
     onUpgradeClick();
     setMenuOpen(false);
   };
 
   const handlePrivacyPolicyClick = () => {
+    onToggle(); // Close the sidebar if it's open
     window.open(ROUTES.PRIVACY_POLICY, "_blank");
   };
 
   const handleTermsOfUseClick = () => {
+    onToggle(); // Close the sidebar if it's open
     window.open(ROUTES.TERMS_AND_CONDITIONS, "_blank");
   };
-
+const handleLogoutClick = () => {
+    onToggle(); // Close the sidebar if it's open
+        onLogoutClick();
+        setMenuOpen(false);
+      };
   const menuOptions: MenuItem[] = [
     {
       icon: (
@@ -167,10 +180,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
     {
       icon: <LogOut className="w-5 h-5" />,
       label: "Log Out",
-      action: () => {
-        onLogoutClick();
-        setMenuOpen(false);
-      },
+      action: handleLogoutClick
     },
   ];
 
@@ -318,12 +328,14 @@ const Moreoptions = ({
   onProfileClick,
   onUpgradeClick,
   onExamConfigurationClick,
+  onToggle,
 }: {
   isContracted: boolean;
   onLogoutClick: () => void;
   onProfileClick: () => void;
   onUpgradeClick: () => void;
   onExamConfigurationClick: () => void;
+  onToggle: () => void;
 }) => {
   return (
     // Set the background on the main container
@@ -350,6 +362,7 @@ const Moreoptions = ({
           onProfileClick={onProfileClick}
           onUpgradeClick={onUpgradeClick}
           onExamConfigurationClick={onExamConfigurationClick}
+          onToggle={onToggle}
         />
       </div>
     </div>

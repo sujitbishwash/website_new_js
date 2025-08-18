@@ -84,8 +84,8 @@ export default function ExamInformationPage() {
   const testConfig = location.state?.testConfig;
 
   return (
-    <div className="bg-gray-900 text-gray-300 min-h-screen font-sans p-4 sm:p-6 lg:p-8">
-      <div className="max-w-7xl mx-auto bg-gray-800 rounded-2xl shadow-2xl shadow-indigo-500/10 overflow-hidden">
+    <div className="bg-gray-900 text-gray-300 min-h-screen font-sans">
+      <div className="bg-gray-800 rounded-2xl shadow-2xl shadow-indigo-500/10 overflow-hidden">
         {/* Header Section */}
         <header className="flex justify-between items-center p-6 border-b border-gray-700">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">

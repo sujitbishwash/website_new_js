@@ -183,6 +183,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           onProfileClick={onProfileClick}
           onUpgradeClick={onUpgradeClick}
           onExamConfigurationClick={onExamConfigurationClick}
+          onToggle={onToggle}
         />
       </aside>
     </>

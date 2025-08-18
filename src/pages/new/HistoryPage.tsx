@@ -140,7 +140,7 @@ const HistoryPage = () => {
   ];
 
   return (
-    <div className="min-h-screen p-10 font-sans text-foreground bg-background text-foreground">
+    <div className="min-h-screen p-10 font-sans text-foreground bg-background text-foreground mt-10">
       <h1 className="text-center text-[2.5rem] mb-10">Your Learning History</h1>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8 max-w-[1200px] mx-auto">
         {learningHistoryData.map((item) => (
