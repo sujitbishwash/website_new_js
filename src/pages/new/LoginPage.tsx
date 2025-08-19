@@ -1,10 +1,15 @@
 import { authApi } from "@/lib/api-client";
 import { theme } from "@/styles/theme";
-import React, { useState } from "react";
+import React, {
+  useState,
+  useEffect,
+  KeyboardEvent,
+  ClipboardEvent,
+} from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROUTES } from "../../routes/constants";
-
+import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg"; // Adjust path as needed
 // --- Style Objects ---
 // This approach uses 100% inline styles to avoid dependency on any CSS framework.
 const styles = {
@@ -235,7 +240,7 @@ const LoginPage: React.FC = () => {
             navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
           }
         } catch (error) {
-          console.error("Error checking exam goal:", error);
+          console.error("Error checking user state:", error);
           // Fallback to personal details page if exam goal API fails
           navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
@@ -280,7 +285,7 @@ const LoginPage: React.FC = () => {
           }
         `}
       </style>
-      <div style={styles.appContainer}>
+      <div className="bg-gradient-to-br from-gray-900 to-black min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
         <LoginCard />
       </div>
     </>
@@ -293,33 +298,52 @@ interface EmailInputProps {
   email: string;
   setEmail: (email: string) => void;
   hasError?: boolean;
+  onHitEnter: () => void;
 }
 
 const EmailInput: React.FC<EmailInputProps> = ({
   email,
   setEmail,
   hasError = false,
-}) => (
-  <input
-    type="email"
-    value={email}
-    onChange={(e) => setEmail(e.target.value)}
-    placeholder="Enter your email"
-    style={hasError ? styles.inputFieldError : styles.inputField}
-  />
-);
+  onHitEnter,
+}) => {
+  const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      onHitEnter();
+    }
+  };
+  return (
+    <input
+      type="email"
+      value={email}
+      onChange={(e) => setEmail(e.target.value)}
+      placeholder="Enter your email"
+      style={hasError ? styles.inputFieldError : styles.inputField}
+      onKeyDown={handleKeyDown}
+    />
+  );
+};
 
 interface OtpInputProps {
   otp: string[];
   setOtp: (otp: string[]) => void;
+  onOtpComplete: () => void;
 }
 
-const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp }) => {
+const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp, onOtpComplete }) => {
+  useEffect(() => {
+    if (otp.join("").length === 6) {
+      onOtpComplete();
+    }
+  }, [otp, onOtpComplete]);
   const handleChange = (element: HTMLInputElement, index: number) => {
-    if (isNaN(Number(element.value))) return false;
+    if (isNaN(Number(element.value))) return;
+
     const newOtp = [...otp];
     newOtp[index] = element.value;
     setOtp(newOtp);
+
     if (element.value && element.nextSibling instanceof HTMLInputElement) {
       element.nextSibling.focus();
     }
@@ -339,6 +363,7 @@ const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp }) => {
   };
 
   const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
     const value = e.clipboardData.getData("text");
     if (isNaN(Number(value)) || value.length !== 6) return;
     const newOtp = value.split("");
@@ -355,6 +380,7 @@ const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp }) => {
       {otp.map((data, index) => (
         <input
           key={index}
+          className="otp-input-box"
           type="text"
           name="otp"
           maxLength={1}
@@ -362,7 +388,7 @@ const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp }) => {
           onChange={(e) => handleChange(e.target, index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
           onFocus={(e) => e.currentTarget.select()}
-          onPaste={index === 0 ? handlePaste : () => {}}
+          onPaste={index === 0 ? handlePaste : (e) => e.preventDefault()}
           style={{
             ...styles.otpInputBox,
             ...(data ? { borderColor: theme.accent } : {}),
@@ -431,21 +457,15 @@ const LoginCard: React.FC = () => {
   const isOtpComplete = otp.join("").length === 6;
 
   const handleSendOtp = async () => {
+    setIsLoading(true);
+    setError("");
+    setSuccess("");
+    if (!isEmailValid) {
+      setError("Please enter a valid email address.");
+      setIsLoading(false);
+      return;
+    }
     try {
-      setIsLoading(true);
-      setError("");
-      setSuccess("");
-
-      if (!email) {
-        setError("Please enter an email address.");
-        return;
-      }
-
-      if (!isEmailValid) {
-        setError("Please enter a valid email address.");
-        return;
-      }
-
       console.log("📧 Sending OTP to:", email);
 
       // Call the API to send OTP
@@ -463,17 +483,16 @@ const LoginCard: React.FC = () => {
   };
 
   const handleVerifyOtp = async () => {
+    if (isLoading) return; // Prevent multiple submissions
+    setIsLoading(true);
+    setError("");
+    const finalOtp = otp.join("");
+    if (finalOtp.length !== 6) {
+      setError("Please enter the complete 6-digit OTP.");
+      setIsLoading(false);
+      return;
+    }
     try {
-      setIsLoading(true);
-      setError("");
-      setSuccess("");
-
-      const finalOtp = otp.join("");
-      if (finalOtp.length !== 6) {
-        setError("Please enter the complete 6-digit OTP.");
-        return;
-      }
-
       console.log("🔐 Verifying OTP:", finalOtp, "for email:", email);
 
       // Call the API to verify OTP
@@ -532,9 +551,9 @@ const LoginCard: React.FC = () => {
   };
 
   return (
-    <div style={styles.loginCard}>
-      <Header />
-      <div style={styles.formContainer}>
+    <div className="bg-background text-foreground rounded-[1.25rem] shadow-lg p-10 max-w-[26rem] w-full border border-gray-700 box-border">
+      <Header />
+      <div className="mt-8">
         <GoogleSignInButton />
         <OrDivider />
 
@@ -542,52 +561,67 @@ const LoginCard: React.FC = () => {
           // Stage 1: Choose login method or enter email
           showEmailLogin ? (
             <>
-              {" "}
               <EmailInput
                 email={email}
                 setEmail={handleEmailChange}
                 hasError={Boolean(error)}
-              />{" "}
-              {error && <div style={styles.errorMessage}>{error}</div>}{" "}
+                onHitEnter={handleSendOtp}
+              />
+              {error && (
+                <div className="text-[#d93025] text-sm mt-2 text-center">
+                  {error}
+                </div>
+              )}
               <ActionButton
                 text="Send OTP"
                 onClick={handleSendOtp}
-                disabled={!isEmailValid}
+                disabled={!isEmailValid || isLoading}
                 loading={isLoading}
                 loadingText="Sending OTP..."
-              />{" "}
+              />
             </>
           ) : (
             <button
-              style={styles.emailLoginButton}
+              className="bg-transparent border-none text-[#007aff] cursor-pointer block w-full text-center p-2 text-base font-medium"
               onClick={() => setShowEmailLogin(true)}
             >
-              Login with Email{" "}
+              Continue with Email
             </button>
           )
         ) : (
-          // OTP Input
           <>
-            <div style={styles.otpInfoContainer}>
-              <span style={styles.otpInfoText}>
-                Enter the OTP sent to <strong>{email}</strong>
+            <div className="text-center mb-4">
+              <span className="text-[#6e6e73] text-sm">
+                Enter the code sent to <strong>{email}</strong>
               </span>
               <button
                 onClick={handleChangeEmail}
-                style={styles.changeEmailButton}
+                className="text-[#007aff] bg-none border-none cursor-pointer no-underline ml-2 text-sm font-medium"
               >
                 Change
               </button>
             </div>
-            <OtpInput otp={otp} setOtp={setOtp} />
-            {error && <div style={styles.errorMessage}>{error}</div>}
-            {success && <div style={styles.successMessage}>{success}</div>}
+            <OtpInput
+              otp={otp}
+              setOtp={setOtp}
+              onOtpComplete={handleVerifyOtp}
+            />
+            {error && (
+              <div className="text-[#d93025] text-sm mt-2 text-center">
+                {error}
+              </div>
+            )}
+            {success && !error && (
+              <div className="text-[#34c759] text-sm mt-2 text-center">
+                {success}
+              </div>
+            )}
             <ActionButton
-              text="Verify OTP"
+              text="Verify"
               onClick={handleVerifyOtp}
-              disabled={!isOtpComplete}
+              disabled={!isOtpComplete || isLoading}
               loading={isLoading}
-              loadingText="Verifying OTP..."
+              loadingText="Verifying..."
             />
           </>
         )}
@@ -598,9 +632,19 @@ const LoginCard: React.FC = () => {
 };
 
 const Header: React.FC = () => (
-  <div style={styles.headerContainer}>
-    <h1 style={styles.headerTitle}>Welcome Back</h1>
-    <p style={styles.headerSubtitle}>
+  <div className="text-center mb-8">
+    <div className="flex w-full bg-orange justify-center items-center">
+      <img
+        src={AiPadhaiLogo}
+        alt="Logo"
+        className="h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 lg:h-20 lg:w-20"
+      />
+    </div>
+
+    <h1 className="text-foreground text-3xl font-semibold tracking-wide">
+      Welcome Back
+    </h1>
+    <p className="text-[#6e6e73] mt-2 text-base">
       Sign in to continue your AI Padhai journey
     </p>
   </div>
@@ -611,8 +655,8 @@ const GoogleSignInButton: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
+    setIsLoading(true);
     try {
-      setIsLoading(true);
       const { data, error } = await signInWithGoogle();
 
       if (error) {
@@ -631,54 +675,44 @@ const GoogleSignInButton: React.FC = () => {
 
   return (
     <button
-      style={styles.googleButton}
+      className="bg-background text-foreground w-full flex items-center justify-center font-medium py-3 px-4 rounded-xl border border-divider cursor-pointer transition-colors duration-200 ease-in-out hover:bg-foreground/20"
       onClick={handleGoogleSignIn}
       disabled={isLoading}
     >
-      <svg
-        style={{ width: "1.5rem", height: "1.5rem", marginRight: "0.75rem" }}
-        viewBox="0 0 48 48"
-      >
-        <path
-          fill="#FFC107"
-          d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039L38.802 8.841C34.553 4.806 29.602 2.5 24 2.5C11.983 2.5 2.5 11.983 2.5 24s9.483 21.5 21.5 21.5c11.147 0 20.25-8.673 20.25-19.75c0-1.343-.138-2.65-.389-3.917z"
-        ></path>
-        <path
-          fill="#FF3D00"
-          d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12.5 24 12.5c3.059 0 5.842 1.154 7.961 3.039l5.841-5.841C34.553 4.806 29.602 2.5 24 2.5C16.318 2.5 9.642 6.735 6.306 14.691z"
-        ></path>
-        <path
-          fill="#4CAF50"
-          d="M24 45.5c5.842 0 11.017-1.939 14.686-5.22l-6.571-4.819c-1.926 1.386-4.32 2.22-6.815 2.22c-5.22 0-9.651-3.657-11.303-8.841l-6.571 4.82C9.642 38.265 16.318 45.5 24 45.5z"
-        ></path>
-        <path
-          fill="#1976D2"
-          d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.16-4.082 5.581l6.571 4.82c3.584-3.264 6.282-8.132 6.282-14.318c0-1.343-.138-2.65-.389-3.917z"
-        ></path>
-      </svg>
-      {isLoading ? "Signing in..." : "Sign in with Google"}
+        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"  style={{marginRight: "0.75rem" }}>
+  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09" fill="#4285F4"/>
+  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23" fill="#34A853"/>
+  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22z" fill="#FBBC05"/>
+  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53" fill="#EA4335"/>
+  <path d="M1 1h22v22H1z" fill="none"/>
+</svg>
+
+      {isLoading ? "Signing in..." : "Continue with Google"}
     </button>
   );
 };
 
 const OrDivider: React.FC = () => (
-  <div style={styles.dividerContainer}>
-    <hr style={styles.hr} />
-    <span style={styles.dividerText}>OR</span>
-    <hr style={styles.hr} />
+  <div className="flex items-center my-6">
+    <hr className="flex-grow border-t border-[#d2d2d7]" />
+    <span className="text-[#86868b] px-4 text-xs font-medium uppercase">
+      OR
+    </span>
+    <hr className="flex-grow border-t border-[#d2d2d7]" />
   </div>
 );
 
 const PrivacyPolicyLink: React.FC = () => (
-  <p style={styles.privacyPolicy}>
+  <p className="text-[#86868b] text-center text-xs leading-relaxed mt-8">
     By continuing, you agree to our{" "}
-    <button
-      onClick={() => window.open(ROUTES.PRIVACY_POLICY, "_blank")}
-      style={styles.privacyLink}
-      className="cursor-pointer border-none bg-transparent p-0"
+    <a
+      href={ROUTES.PRIVACY_POLICY}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-[#007aff] no-underline"
     >
       Privacy Policy
-    </button>
+    </a>
   </p>
 );
 

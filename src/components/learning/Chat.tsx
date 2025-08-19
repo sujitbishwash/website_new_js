@@ -105,12 +105,12 @@ const SendIcon = () => (
 // --- Components ---
 
 const ChatHeader: React.FC = () => (
-  <div className="text-center p-4 md:p-6">
-    <div className="inline-block p-4 bg-gray-800 rounded-full mb-4">
+  <div className="text-center p-6 md:p-8">
+    <div className="inline-block p-6 bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-full mb-6 border border-blue-600/30 shadow-lg backdrop-blur-sm">
       <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="40"
-        height="40"
+        width="48"
+        height="48"
         viewBox="0 0 24 24"
         fill="none"
         stroke={theme.secondaryText}
@@ -123,16 +123,26 @@ const ChatHeader: React.FC = () => (
     </div>
     {/* Changed title from "AI Tutor" to "AI Padhai" */}
     <h1
-      className="text-2xl sm:text-3xl font-bold"
-      style={{ color: theme.primaryText }}
+      className="text-3xl sm:text-4xl font-bold mb-4"
+      style={{
+        color: theme.primaryText,
+        background: "linear-gradient(135deg, #60A5FA 0%, #A78BFA 100%)",
+        WebkitBackgroundClip: "text",
+        WebkitTextFillColor: "transparent",
+        backgroundClip: "text",
+      }}
     >
       Learn with AI Padhai
     </h1>
+    <p className="text-gray-300 text-lg max-w-md mx-auto leading-relaxed">
+      Your intelligent learning companion for personalized education and
+      interactive discussions
+    </p>
   </div>
 );
 
 const SuggestionChip: React.FC<{ text: string }> = ({ text }) => (
-  <button className="bg-gray-700/80 hover:bg-gray-600 transition-colors duration-200 text-sm md:text-base text-gray-200 py-2 px-4 rounded-full backdrop-blur-sm">
+  <button className="bg-gradient-to-r from-gray-700/80 to-gray-600/80 hover:from-gray-600/90 hover:to-gray-500/90 transition-all duration-300 text-sm md:text-base text-gray-200 py-3 px-6 rounded-full backdrop-blur-sm border border-gray-600/50 hover:border-gray-500/60 shadow-lg hover:shadow-xl transform hover:scale-105">
     {text}
   </button>
 );
@@ -140,7 +150,7 @@ const SuggestionChip: React.FC<{ text: string }> = ({ text }) => (
 const SuggestionChips: React.FC = () => {
   const suggestions = ["Quiz", "Flashcards", "Summary"];
   return (
-    <div className="flex flex-wrap justify-center gap-2 sm:gap-3 p-4">
+    <div className="flex flex-wrap justify-center gap-4 sm:gap-6 p-6">
       {suggestions.map((item) => (
         <SuggestionChip key={item} text={item} />
       ))}
@@ -150,16 +160,38 @@ const SuggestionChips: React.FC = () => {
 
 const Message: React.FC<MessageType> = ({ text, isUser }) => {
   const markdownText = text.replace(/\\n/g, "\n");
+
+  // Check if message contains specific content types for enhanced styling
+  const hasKeyPoints =
+    text.includes("💡") ||
+    text.toLowerCase().includes("key point") ||
+    text.toLowerCase().includes("important");
+  const hasExamples =
+    text.toLowerCase().includes("example") ||
+    text.toLowerCase().includes("for instance");
+  const hasConcepts =
+    text.toLowerCase().includes("concept") ||
+    text.toLowerCase().includes("definition");
+  const hasExplanation =
+    text.toLowerCase().includes("explanation") ||
+    text.toLowerCase().includes("means") ||
+    text.toLowerCase().includes("refers to");
+
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-6`}>
       <div
-        style={{
-          backgroundColor: isUser ? theme.accent : theme.cardBackground,
-        }}
-        className={`max-w-xs lg:max-w-md px-4 py-2 rounded-2xl ${
+        className={`max-w-xs lg:max-w-md xl:max-w-lg px-5 py-4 rounded-2xl ${
           isUser
-            ? "bg-blue-600 text-white rounded-br-none"
-            : "bg-gray-700 text-gray-200 rounded-bl-none"
+            ? "bg-blue-600 text-white rounded-br-none shadow-lg"
+            : hasKeyPoints
+            ? "bg-transparent text-yellow-100 rounded-bl-none"
+            : hasExamples
+            ? "bg-transparent text-purple-100 rounded-bl-none"
+            : hasConcepts
+            ? "bg-transparent text-blue-100 rounded-bl-none"
+            : hasExplanation
+            ? "bg-transparent text-green-100 rounded-bl-none"
+            : "bg-transparent text-gray-100 rounded-bl-none"
         }`}
       >
         <MarkdownRenderer content={markdownText} />
@@ -178,7 +210,7 @@ const MessageList: React.FC<{ messages: MessageType[] }> = ({ messages }) => {
   useEffect(scrollToBottom, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+    <div className="flex-1 overflow-y-auto space-y-2 pr-2 py-4">
       {messages.map((msg, index) => (
         <Message key={index} text={msg.text} isUser={msg.isUser} />
       ))}
@@ -337,7 +369,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
 
   return (
     <div className="prose prose-invert prose-sm max-w-none">
-      <div className="text-sm leading-relaxed space-y-4">
+      <div className="text-sm leading-relaxed space-y-6">
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
@@ -345,21 +377,21 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             p: ({ children, ...props }) => (
               <p
                 {...props}
-                className="mb-4 text-gray-100 leading-7"
+                className="mb-5 text-gray-100 leading-7"
                 style={{
                   fontSize: "0.95rem",
                   lineHeight: "1.8",
-                  marginBottom: "1.25rem",
+                  marginBottom: "1.5rem",
                 }}
               >
                 {children}
               </p>
             ),
-            // Enhanced heading styling with distinct backgrounds
+            // Clean, minimal heading styling without backgrounds
             h1: ({ children, ...props }) => (
               <h1
                 {...props}
-                className="text-xl font-bold text-white mb-6 mt-8 pb-3 px-4 py-3 bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-lg border-l-4 border-blue-400"
+                className="text-xl font-bold text-white mb-6 mt-8 pb-2 border-b border-gray-600/30"
                 style={{ fontSize: "1.25rem" }}
               >
                 {children}
@@ -368,7 +400,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             h2: ({ children, ...props }) => (
               <h2
                 {...props}
-                className="text-lg font-semibold text-blue-200 mb-4 mt-6 px-3 py-2 bg-blue-900/20 rounded-md border-l-3 border-blue-300"
+                className="text-lg font-semibold text-blue-200 mb-4 mt-6"
                 style={{ fontSize: "1.1rem" }}
               >
                 {children}
@@ -377,7 +409,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             h3: ({ children, ...props }) => (
               <h3
                 {...props}
-                className="text-base font-medium text-blue-100 mb-3 mt-5 px-3 py-2 bg-blue-800/15 rounded-md border-l-2 border-blue-200"
+                className="text-base font-medium text-blue-100 mb-3 mt-5"
                 style={{ fontSize: "1rem" }}
               >
                 {children}
@@ -420,9 +452,9 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             code: ({ children, ...props }) => (
               <code
                 {...props}
-                className="bg-gray-700 text-green-300 px-2 py-1 rounded text-sm font-mono border border-gray-600"
+                className="bg-gray-700/50 text-green-300 px-2 py-1 rounded text-sm font-mono border border-gray-600/50"
                 style={{
-                  backgroundColor: "#374151",
+                  backgroundColor: "rgba(55, 65, 81, 0.5)",
                   fontSize: "0.85rem",
                   padding: "0.25rem 0.5rem",
                 }}
@@ -433,9 +465,9 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             pre: ({ children, ...props }) => (
               <pre
                 {...props}
-                className="bg-gray-800 p-4 rounded-lg mb-6 overflow-x-auto border border-gray-600 shadow-lg"
+                className="bg-gray-800/50 p-4 rounded-lg mb-6 overflow-x-auto border border-gray-600/50 shadow-lg backdrop-blur-sm"
                 style={{
-                  backgroundColor: "#1F2937",
+                  backgroundColor: "rgba(31, 41, 55, 0.5)",
                   padding: "1.25rem",
                   marginBottom: "2rem",
                 }}
@@ -443,11 +475,11 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
                 {children}
               </pre>
             ),
-            // Enhanced blockquote styling for key points
+            // Enhanced blockquote styling for key points with full-width design
             blockquote: ({ children, ...props }) => (
               <blockquote
                 {...props}
-                className="border-l-4 border-yellow-400 pl-6 py-4 my-6 bg-yellow-900/20 rounded-r-lg shadow-sm"
+                className="border-l-4 border-yellow-400 pl-6 py-4 my-6 bg-yellow-900/10 rounded-r-lg shadow-sm backdrop-blur-sm"
                 style={{
                   borderLeftColor: "#FBBF24",
                   paddingLeft: "1.5rem",
@@ -455,11 +487,11 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
                   paddingBottom: "1rem",
                   marginTop: "1.5rem",
                   marginBottom: "1.5rem",
-                  backgroundColor: "rgba(251, 191, 36, 0.1)",
+                  backgroundColor: "rgba(251, 191, 36, 0.05)",
                 }}
               >
-                <div className="flex items-start space-x-2">
-                  <span className="text-yellow-400 text-lg">💡</span>
+                <div className="flex items-start space-x-3">
+                  <span className="text-yellow-400 text-xl">💡</span>
                   <div className="text-yellow-100 font-medium">{children}</div>
                 </div>
               </blockquote>
@@ -468,7 +500,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             strong: ({ children, ...props }) => (
               <strong
                 {...props}
-                className="font-bold text-white bg-blue-900/30 px-2 py-1 rounded border border-blue-700/50"
+                className="font-bold text-white bg-blue-900/20 px-2 py-1 rounded border border-blue-700/30"
                 style={{ fontWeight: "700" }}
               >
                 {children}
@@ -478,7 +510,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             em: ({ children, ...props }) => (
               <em
                 {...props}
-                className="italic text-purple-200 bg-purple-900/20 px-2 py-1 rounded border border-purple-700/50"
+                className="italic text-purple-200 bg-purple-900/20 px-2 py-1 rounded border border-purple-700/30"
                 style={{ fontStyle: "italic" }}
               >
                 {children}
@@ -505,7 +537,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
               <div className="overflow-x-auto mb-6">
                 <table
                   {...props}
-                  className="min-w-full border-collapse border border-gray-600 rounded-lg overflow-hidden shadow-lg"
+                  className="min-w-full border-collapse border border-gray-600/50 rounded-lg overflow-hidden shadow-lg backdrop-blur-sm"
                   style={{
                     borderCollapse: "collapse",
                     width: "100%",
@@ -518,13 +550,13 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             th: ({ children, ...props }) => (
               <th
                 {...props}
-                className="border border-gray-600 px-4 py-3 text-left font-bold text-white bg-gradient-to-r from-gray-700 to-gray-600"
+                className="border border-gray-600/50 px-4 py-3 text-left font-bold text-white bg-gray-700/50"
                 style={{
-                  border: "1px solid #4B5563",
+                  border: "1px solid rgba(75, 85, 99, 0.5)",
                   padding: "0.75rem 1rem",
                   textAlign: "left",
                   fontWeight: "700",
-                  backgroundColor: "#374151",
+                  backgroundColor: "rgba(55, 65, 81, 0.5)",
                 }}
               >
                 {children}
@@ -533,10 +565,11 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             td: ({ children, ...props }) => (
               <td
                 {...props}
-                className="border border-gray-600 px-4 py-3 text-gray-200 bg-gray-800/50"
+                className="border border-gray-600/50 px-4 py-3 text-gray-200 bg-gray-800/30"
                 style={{
-                  border: "1px solid #4B5563",
+                  border: "1px solid rgba(75, 85, 99, 0.5)",
                   padding: "0.75rem 1rem",
+                  backgroundColor: "rgba(31, 41, 55, 0.3)",
                 }}
               >
                 {children}
@@ -546,11 +579,11 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             hr: ({ ...props }) => (
               <hr
                 {...props}
-                className="my-8 border-gray-600 border-2"
+                className="my-8 border-gray-600/30 border-2"
                 style={{
                   marginTop: "2rem",
                   marginBottom: "2rem",
-                  borderColor: "#4B5563",
+                  borderColor: "rgba(75, 85, 99, 0.3)",
                   borderWidth: "2px",
                 }}
               />
@@ -654,15 +687,19 @@ export default function Chat({
 }: ChatProps) {
   return (
     <div className="flex flex-col h-full bg-background text-primaryText">
-      <div className="flex-1 overflow-y-auto space-y-4 pr-2 p-4">
+      <div className="flex-1 overflow-y-auto space-y-6 pr-2 p-6">
         {messages.length === 0 && (
-          <div className="flex-1 flex flex-col justify-center items-center p-4">
+          <div className="flex-1 flex flex-col justify-center items-center p-8 space-y-8">
             <ChatHeader />
             <SuggestionChips />
           </div>
         )}
         {messages.length > 0 && <MessageList messages={messages} />}
-        {error && <div className="text-red-400 text-sm">{error}</div>}
+        {error && (
+          <div className="text-red-400 text-sm bg-red-900/20 border border-red-600/30 rounded-lg px-4 py-3 text-center">
+            {error}
+          </div>
+        )}
       </div>
       <ChatInput onSendMessage={onSendMessage} isLoading={isLoading} />
     </div>

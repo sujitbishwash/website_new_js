@@ -455,7 +455,7 @@ export default function HomePage() {
         <SparklesIcon className="h-5 w-5" />
         <span>Upgrade plan</span>
       </button>
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 max-w-5xl">
+      <div className="container mx-auto sm:px-6 lg:px-8 py-12 max-w-5xl">
         {/* Header Card */}
         <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-2 text-center">
@@ -490,7 +490,7 @@ export default function HomePage() {
         {/* --- SEQUENTIAL LAYOUT --- */}
 
         {/* Recommended Videos Card */}
-        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+        <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
           <div className="flex items-start justify-between mb-5">
             <h2 className="text-2xl font-bold text-foreground">
               Recommended Videos
@@ -577,7 +577,7 @@ export default function HomePage() {
         </div>
 
         {/* Recommended Reading Card */}
-        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+        <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
           <h2 className="text-2xl font-bold text-foreground mb-5">
             Recommended Reading
           </h2>
@@ -605,7 +605,7 @@ export default function HomePage() {
         </div>
 
         {/* Recommended Tests Card */}
-        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+        <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
           <h2 className="text-2xl font-bold text-foreground mb-5">
             Recommended Tests
           </h2>
@@ -636,7 +636,7 @@ export default function HomePage() {
         </div>
 
         {/* Continue Learning Card */}
-        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+        <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
           <h2 className="text-2xl font-bold text-foreground mb-5 flex justify-between items-center">
             <span>Continue Learning</span>
             <a
@@ -693,7 +693,7 @@ export default function HomePage() {
         </div>
 
         {/* Attempted Tests Card */}
-        <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
+        <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
           <h2 className="text-2xl font-bold text-foreground mb-5 flex justify-between items-center">
             <span>Attempted Tests</span>
             <a
@@ -756,7 +756,7 @@ export default function HomePage() {
         </div>
 
         {/* Explore Topics Card */}
-        <div className="bg-card rounded-xl p-6 shadow-2xl border border-border">
+        <div className="bg-card rounded-xl p-3 sm:p-6 shadow-2xl border border-border">
           <h2 className="text-2xl font-bold text-foreground mb-5">
             Explore Topics
           </h2>
