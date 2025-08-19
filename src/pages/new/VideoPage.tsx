@@ -8,7 +8,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/routes/constants";
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, Facebook, Instagram, Link } from "lucide-react";
 
 // Type definitions
 interface IconProps {
@@ -117,10 +117,28 @@ const CopyIcon = () => (
 );
 const XIcon = () => <Icon path="M18 6L6 18 M6 6l12 12" className="w-5 h-5" />;
 
-const MaximizeIcon = () => <Icon path="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" className="w-5 h-5" />;
-const MinimizeIcon = () => <Icon path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" className="w-5 h-5" />;
-const SparklesIcon: React.FC<IconProps> = ({  }) => (
-  <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg" ><path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path></svg>
+const MaximizeIcon = () => (
+  <Icon
+    path="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"
+    className="w-5 h-5"
+  />
+);
+const MinimizeIcon = () => (
+  <Icon
+    path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"
+    className="w-5 h-5"
+  />
+);
+const SparklesIcon: React.FC<IconProps> = ({}) => (
+  <svg
+    width="20"
+    height="20"
+    viewBox="0 0 20 20"
+    fill="currentColor"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path>
+  </svg>
 );
 // --- Sub-Components for Modularity ---
 
@@ -134,41 +152,71 @@ interface HeaderProps {
   isLeftColumnVisible: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading,  onShare}) => {
-    const navigate = useNavigate();
-  
+const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading, onShare }) => {
+  const navigate = useNavigate();
+
   return (
-  <header className="flex justify-between items-center mb-4 sm:mb-6 gap-4">
-    <div className="flex-1 min-w-0">
-      <h1 className="text-md text-gray-500 truncate">
-        {isLoading ? (
-          <div className="h-8 bg-gray-700 rounded w-3/4 animate-pulse"></div>
-        ) : (
-          videoDetail?.title || "Video Title Not Available"
-        )}
-      </h1>
-      
-      
-    </div>
-    <button onClick={onShare} title="Share" className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors`}>
-        <ShareIcon  />
-      </button>
-      <button onClick={() => { navigate(ROUTES.PREMIUM); }} className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none">
-              <SparklesIcon path="" className="h-5 w-5" />
-              <span>Upgrade plan</span>
-            </button>
-  </header>
-)};
+    <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 sm:gap-4">
+      <div className="flex-1 min-w-0">
+        <h1 className="text-md text-gray-500 truncate">
+          {isLoading ? (
+            <div className="h-8 bg-gray-700 rounded w-3/4 animate-pulse"></div>
+          ) : (
+            videoDetail?.title || "Video Title Not Available"
+          )}
+        </h1>
+      </div>
+      <div className="flex items-center gap-2 self-start sm:self-center">
+        <button
+          onClick={onShare}
+          title="Share"
+          className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors`}
+        >
+          <ShareIcon />
+        </button>
+        <button
+          onClick={() => {
+            navigate(ROUTES.PREMIUM);
+          }}
+          className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none"
+        >
+          <SparklesIcon path="" className="h-5 w-5" />
+          <span className="hidden sm:inline">Upgrade plan</span>
+          <span className="sm:hidden">Upgrade</span>
+        </button>
+        <button
+          onClick={() => {
+            navigate(ROUTES.PREMIUM);
+          }}
+          className="flex items-center gap-1.5 rounded-full py-2 ps-2.5 pe-3.5 text-sm font-semibold bg-gray-200 dark:bg-[#373669] text-gray-800 dark:text-gray-100 hover:bg-gradient-to-r from-blue-600 to-purple-700 hover:text-white transition-all transform hover:scale-105 focus:outline-none glow-on-hover"
+        >
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            {" "}
+            <path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path>{" "}
+          </svg>
+          <span className="hidden sm:inline">Upgrade plan</span>
+          <span className="sm:hidden">Upgrade</span>
+        </button>
+      </div>
+    </header>
+  );
+};
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => (
-  <div className="aspect-w-16 aspect-h-9 bg-black rounded-xl overflow-hidden shadow-lg mb-4">
+  <div className="aspect-video bg-black rounded-xl overflow-hidden shadow-lg mb-4">
     <iframe
       src={src}
       title="YouTube video player"
       frameBorder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
       allowFullScreen
-      className="w-full h-full rounded-xl"
+      className="w-full h-full"
     ></iframe>
   </div>
 );
@@ -188,19 +236,21 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
         <div className="flex items-center border border-gray-700 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("chapters")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${activeTab === "chapters"
-              ? "bg-gray-900 shadow-sm text-gray-100"
-              : "text-gray-400 hover:bg-gray-700"
-              }`}
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+              activeTab === "chapters"
+                ? "bg-gray-900 shadow-sm text-gray-100"
+                : "text-gray-400 hover:bg-gray-700"
+            }`}
           >
             <ChaptersIcon /> Chapters
           </button>
           <button
             onClick={() => setActiveTab("transcripts")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${activeTab === "transcripts"
-              ? "bg-gray-900 shadow-sm text-gray-100"
-              : "text-gray-400 hover:bg-gray-700"
-              }`}
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+              activeTab === "transcripts"
+                ? "bg-gray-900 shadow-sm text-gray-100"
+                : "text-gray-400 hover:bg-gray-700"
+            }`}
           >
             <TranscriptIcon /> Transcripts
           </button>
@@ -303,11 +353,10 @@ const AITutorPanel: React.FC<{
 
   onToggleFullScreen: () => void;
   isLeftColumnVisible: boolean;
-  
+
   onToggleVideo: () => void;
   isVideoVisible: boolean;
   onShare: () => void;
-  
 }> = ({
   currentMode,
   onModeChange,
@@ -318,84 +367,77 @@ const AITutorPanel: React.FC<{
   onSendMessage,
   onToggleFullScreen,
   isLeftColumnVisible,
-  onToggleVideo, isVideoVisible, onShare
+  onToggleVideo,
+  isVideoVisible,
+  onShare,
 }) => {
-    const modes: { key: LearningMode; label: string; icon: any }[] = [
-      { key: "chat", label: "Chat", icon: <ChatIcon /> },
-      { key: "flashcards", label: "Flashcards", icon: <FlashcardsIcon /> },
-      { key: "quiz", label: "Quiz", icon: <QuizIcon /> },
-      { key: "summary", label: "Summary", icon: <SummaryIcon /> },
-    ];
+  const modes: { key: LearningMode; label: string; icon: any }[] = [
+    { key: "chat", label: "Chat", icon: <ChatIcon /> },
+    { key: "flashcards", label: "Flashcards", icon: <FlashcardsIcon /> },
+    { key: "quiz", label: "Quiz", icon: <QuizIcon /> },
+    { key: "summary", label: "Summary", icon: <SummaryIcon /> },
+  ];
 
-    const components = {
-      chat: (
-        <Chat
-          videoId={videoId}
-          messages={chatMessages}
-          isLoading={isChatLoading}
-          error={chatError}
-          onSendMessage={onSendMessage}
-        />
-      ),
-      flashcards: <Flashcards />,
-      quiz: <Quiz />,
-      summary: <Summary />,
-    };
+  const components = {
+    chat: (
+      <Chat
+        videoId={videoId}
+        messages={chatMessages}
+        isLoading={isChatLoading}
+        error={chatError}
+        onSendMessage={onSendMessage}
+      />
+    ),
+    flashcards: <Flashcards />,
+    quiz: <Quiz />,
+    summary: <Summary />,
+  };
 
-    return (
-      <div className={`rounded-xl border border-gray-700 bg-card flex flex-col h-full  ${isLeftColumnVisible ? "max-h-[84vh]"
-        : "max-h-[85vh]"
-        }`}>
-
-      {isLeftColumnVisible ? (
-  <button
-    onClick={onToggleVideo}
-    className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium 
-               bg-background text-white hover:bg-indigo-700 active:bg-indigo-800 
-               transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 block sm:hidden"
-  >
-    {isVideoVisible ? (
-      <>
-        <EyeOff className="w-4 h-4" />
-        <span>Hide Video</span>
-      </>
-    ) : (
-      <>
-        <Eye className="w-4 h-4" />
-        <span>Show Video</span>
-      </>
-    )}
-  </button>
-) : null}
-
-        <div className="relative border-b border-gray-700 rounded-t-xl">
-          <div className={`flex items-center  ${isLeftColumnVisible ? "justify-between"
-            : "justify-center"} rounded-lg p-2 w-full overflow-x-auto pb-2 custom-scrollbar pr-12`}>
-            {modes.map(({ key, label, icon }) => (
-              <button
-                key={key}
-                onClick={() => onModeChange(key)}
-                className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${currentMode === key
+  return (
+    <div
+      className={`rounded-xl border border-gray-700 bg-card flex flex-col h-full
+    max-h-[calc(100vh-450px)]   // mobile default
+    sm:max-h-[93vh]             // for >=640px screens
+  `}
+    >
+      <div className="relative border-b border-gray-700 rounded-t-xl p-2">
+        <div
+          className={`flex items-center  ${
+            isLeftColumnVisible ? "justify-between" : "justify-center"
+          } rounded-lg p-2 w-full overflow-x-auto pb-2 custom-scrollbar pr-12`}
+        >
+          {modes.map(({ key, label, icon }) => (
+            <button
+              key={key}
+              onClick={() => onModeChange(key)}
+              className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+                currentMode === key
                   ? "bg-background shadow-sm text-gray-100"
                   : "text-gray-400 hover:bg-gray-700"
-                  }`}
-              >
-                {icon} {label}
-              </button>
-            ))}
-          </div>
-          <div className="absolute top-1 right-2">
-            <button onClick={onToggleFullScreen} title={isLeftColumnVisible ? 'Full Screen Chat' : 'Exit Full Screen'} className="p-2 text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors">
-              {isLeftColumnVisible ? <MaximizeIcon /> : <MinimizeIcon />}
+              }`}
+            >
+              {icon} {label}
             </button>
-          </div>
+          ))}
         </div>
-        <div className="flex-1 overflow-hidden min-h-0  rounded-b-xl">
-          {components[currentMode]}
+        <div className="absolute top-1/2 -translate-y-1/2 right-2 hidden sm:block">
+          <button
+            onClick={onToggleFullScreen}
+            title={
+              isLeftColumnVisible ? "Full Screen Chat" : "Exit Full Screen"
+            }
+            className="p-2 text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
+          >
+            {isLeftColumnVisible ? <MaximizeIcon /> : <MinimizeIcon />}
+          </button>
         </div>
       </div>
-    );
-  };
+      <div className="flex-1 overflow-hidden min-h-0 rounded-b-xl">
+        {components[currentMode]}
+      </div>
+    </div>
+  );
+};
 
 const ShareModal: React.FC<{
   isOpen: boolean;
@@ -452,7 +494,7 @@ const ShareModal: React.FC<{
               onClick={copyToClipboard}
               className="flex items-center gap-2 bg-blue-600 px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700"
             >
-              <CopyIcon /> {copySuccess || "Copy"}
+              <Link /> {copySuccess || "Copy"}
             </button>
           </div>
           <div className="text-center text-gray-400 text-sm">
@@ -461,9 +503,7 @@ const ShareModal: React.FC<{
           <div className="flex justify-center gap-4">
             {/* Add your social media icons here */}
             <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M22.675 0h-21.35C.589 0 0 .589 0 1.325v21.351C0 23.411.589 24 1.325 24H12.82v-9.294H9.692v-3.622h3.128V8.413c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12V24h6.116c.735 0 1.325-.589 1.325-1.325V1.325C24 .589 23.411 0 22.675 0z" />
-              </svg>
+              <Facebook className="w-6 h-6" />
             </button>
             <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
               <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
@@ -471,9 +511,7 @@ const ShareModal: React.FC<{
               </svg>
             </button>
             <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.784.305-1.487.74-2.173 1.428a4.898 4.898 0 00-1.427 2.173c-.297.765-.497 1.635-.558 2.913-.058 1.28-.072 1.687-.072 4.947s.013 3.667.072 4.947c.06 1.278.26 2.148.558 2.913.305.784.74 1.487 1.428 2.173a4.898 4.898 0 002.173 1.427c.765.297 1.635.497 2.913.558 1.28.058 1.687.072 4.947.072s3.667-.013 4.947-.072c1.278-.06 2.148-.26 2.913-.558.784-.305 1.487-.74 2.173-1.427a4.898 4.898 0 001.428-2.173c.297-.765.497-1.635.558-2.913.058-1.28.072-1.687.072-4.947s-.013-3.667-.072-4.947c-.06-1.278-.26-2.148-.558-2.913-.305-.784-.74-1.487-1.428-2.173a4.898 4.898 0 00-2.173-1.428c-.765-.297-1.635-.497-2.913-.558C15.667.015 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.013 3.585-.07 4.85c-.053 1.17-.249 1.805-.413 2.227-.217.562-.477.96-.896 1.382-.42.419-.819.679-1.381.896-.422.164-1.057.36-2.227.413-1.266.057-1.646.07-4.85.07s-3.585-.013-4.85-.07c-1.17-.053-1.805-.249-2.227-.413-.562-.217-.96-.477-1.382-.896-.419-.42-.679-.819-.896-1.381-.164-.422-.36-1.057-.413-2.227-.057-1.266-.07-1.646-.07-4.85s.013-3.585.07-4.85c.053-1.17.249-1.805.413-2.227.217-.562.477-.96.896-1.382.42-.419.819-.679-1.381-.896.422-.164 1.057-.36 2.227-.413C8.415 2.176 8.797 2.16 12 2.16zm0 5.48c-2.49 0-4.5 2.01-4.5 4.5s2.01 4.5 4.5 4.5 4.5-2.01 4.5-4.5-2.01-4.5-4.5-4.5zm0 7.16c-1.469 0-2.66-1.19-2.66-2.66s1.19-2.66 2.66-2.66 2.66 1.19 2.66 2.66-1.19 2.66-2.66 2.66zm6.336-7.73c0 .552-.448 1-1 1s-1-.448-1-1 .448-1 1-1 1 .448 1 1z" />
-              </svg>
+              <Instagram className="w-6 h-6" />
             </button>
           </div>
         </div>
@@ -675,38 +713,60 @@ const VideoPage: React.FC = () => {
   return (
     <div className="bg-background text-foreground min-h-screen font-sans text-gray-200">
       <div className="container mx-auto sm:px-4 lg:px-6 sm:py-6">
-        <Header
-                videoDetail={videoDetail}
-                isLoading={isLoadingVideo}
-                onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
-                isVideoVisible={isVideoVisible}
-                onShare={() => setIsShareModalOpen(true)}
-
-                onToggleFullScreen={() => setIsLeftColumnVisible(!isLeftColumnVisible)}
-                isLeftColumnVisible={isLeftColumnVisible}
-              />
         <main className="grid grid-cols-1 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
-          <div className={`xl:col-span-3 space-y-4 sm:space-y-6 ${isLeftColumnVisible ? '' : 'hidden'}`}>
-
-            {isVideoVisible && (
-              <div><VideoPlayer
-                src={`https://www.youtube.com/embed/${currentVideoId}`}
-              />
-              <ContentTabs
-              chapters={chapters}
-              transcript={transcript}
-              isLoadingChapters={isLoadingChapters}
-              isLoadingTranscript={isLoadingTranscript}
-              chaptersError={chaptersError}
-              transcriptError={transcriptError}
+          <div
+            className={`xl:col-span-3 space-y-4 sm:space-y-6 ${
+              isLeftColumnVisible ? "" : "hidden"
+            }`}
+          >
+            <Header
+              videoDetail={videoDetail}
+              isLoading={isLoadingVideo}
+              onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
+              isVideoVisible={isVideoVisible}
+              onShare={() => setIsShareModalOpen(true)}
+              onToggleFullScreen={() =>
+                setIsLeftColumnVisible(!isLeftColumnVisible)
+              }
+              isLeftColumnVisible={isLeftColumnVisible}
             />
-            </div>
+            {isVideoVisible && (
+              <div>
+                <VideoPlayer
+                  src={`https://www.youtube.com/embed/${currentVideoId}`}
+                />
+                <ContentTabs
+                  chapters={chapters}
+                  transcript={transcript}
+                  isLoadingChapters={isLoadingChapters}
+                  isLoadingTranscript={isLoadingTranscript}
+                  chaptersError={chaptersError}
+                  transcriptError={transcriptError}
+                />
+              </div>
             )}
-            
           </div>
-          <div className={`${isLeftColumnVisible ? 'xl:col-span-2' : 'xl:col-span-5'}`}>
-            
-              
+          <div
+            className={`${
+              isLeftColumnVisible ? "xl:col-span-2" : "xl:col-span-5"
+            }`}
+          >
+            {" "}
+            {isLeftColumnVisible ? (
+              <div className="sm:hidden mb-4">
+                <button
+                  onClick={() => setIsVideoVisible(!isVideoVisible)}
+                  className="flex w-full items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white hover:bg-gray-700 transition-colors shadow-sm"
+                >
+                  {isVideoVisible ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                  <span>{isVideoVisible ? "Hide" : "Show"} Video Player</span>
+                </button>
+              </div>
+            ) : null}
             <AITutorPanel
               currentMode={currentMode}
               onModeChange={handleModeChange}
@@ -716,7 +776,9 @@ const VideoPage: React.FC = () => {
               chatError={chatError}
               onSendMessage={handleSendMessage}
               isLeftColumnVisible={isLeftColumnVisible}
-              onToggleFullScreen={() => setIsLeftColumnVisible(!isLeftColumnVisible)}
+              onToggleFullScreen={() =>
+                setIsLeftColumnVisible(!isLeftColumnVisible)
+              }
               onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
               isVideoVisible={isVideoVisible}
               onShare={() => setIsShareModalOpen(true)}

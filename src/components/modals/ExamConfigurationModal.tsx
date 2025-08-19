@@ -471,7 +471,6 @@ export default function ExamConfigurationModal({
       width: "100%",
     },
     updateButton: {
-      padding: "0.75rem 1.5rem",
       backgroundColor: theme.accent,
       color: theme.primaryText,
       border: "none",

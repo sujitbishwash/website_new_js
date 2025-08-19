@@ -1,3 +1,4 @@
+import { SendHorizonal } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -634,7 +635,7 @@ const ChatInput: React.FC<{
               className="p-2 text-white bg-gray-700 rounded-full hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 cursor-pointer"
               disabled={isLoading}
             >
-              <SendIcon />
+              <SendHorizonal />
             </button>
           </div>
         </div>

@@ -145,6 +145,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                       if (window.innerWidth < 1024) {
                         onToggle();
                       }
+                      if (item.path === ROUTES.TEST_SERIES) {
+                        onContractToggle();
+                      }
                     }}
                     className={`group flex items-center ${
                       isContracted ? "" : "space-x-3"

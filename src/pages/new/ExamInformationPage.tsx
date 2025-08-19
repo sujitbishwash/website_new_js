@@ -84,9 +84,7 @@ export default function ExamInformationPage() {
   const testConfig = location.state?.testConfig;
 
   return (
-    <div className="bg-gray-900 text-gray-300 min-h-screen font-sans flex items-center justify-center">
-      {/* The card is now a flex container with a column direction and a max height */}
-      <div className="bg-gray-800 rounded-2xl shadow-2xl shadow-indigo-500/10 overflow-hidden w-full max-w-5xl flex flex-col h-full max-h-[95vh]">
+      <div className="bg-gray-800 overflow-hidden w-full flex flex-col max-h-[100vh]">
         {/* Header Section - This part will not scroll */}
         <header className="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-700">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">
@@ -209,7 +207,6 @@ export default function ExamInformationPage() {
           </button>
         </footer>
       </div>
-    </div>
   );
 }
 

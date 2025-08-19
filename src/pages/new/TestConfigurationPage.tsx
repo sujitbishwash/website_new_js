@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { fetchTestSeriesFormData, testSeriesApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
+import { Pen } from "lucide-react";
 
 // --- Type Definitions ---
 interface RadioButtonProps {
@@ -59,7 +60,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
                 }
                 ${
                   checked
-                    ? "bg-blue-600 border-blue-500 text-white shadow-lg ring-2 ring-blue-500/50"
+                    ? "bg-blue-600 border-blue-500 text-white shadow-lg"
                     : "bg-gray-700 hover:bg-gray-600 hover:border-gray-500"
                 }`}
     >
@@ -199,7 +200,7 @@ const TestConfigurationPageComponent = () => {
 
   return (
     <div className="bg-gradient-to-br from-gray-900 to-black min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-7xl mx-auto bg-gray-800/50 border border-gray-700 rounded-2xl shadow-2xl p-4 sm:p-8 space-y-6 ">
+      <div className="w-full max-w-7xl mx-auto bg-background border border-gray-700 rounded-2xl shadow-2xl p-4 mt-15 sm:mt-0 sm:p-8 space-y-6 ">
         {/* --- Header --- */}
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
@@ -211,25 +212,24 @@ const TestConfigurationPageComponent = () => {
         </div>
 
         {/* --- User Profile Section --- */}
-         {profile && examGoal && (<div className="mt-4 flex justify-center items-center gap-3">
-            <span className="bg-indigo-500/20 text-indigo-300 text-xs font-medium px-3 py-1 rounded-full">State Board</span>
-            <span className="bg-teal-500/20 text-teal-300 text-xs font-medium px-3 py-1 rounded-full">Class 10</span>
-          </div>
-          )}
         {profile && examGoal && (
-          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl flex flex-1 items-center justify-between">
-            <div>
-              <span className="text-gray-400">Exam Goal:</span>
-              <span className="ml-2 text-white font-large font-semibold">
-                {examGoal.exam}
-              </span>
-            </div>
-            <div>
-              <span className="text-gray-400">Group Type:</span>
-              <span className="ml-2 text-white font-large font-semibold">
-                {examGoal.groupType}
-              </span>
-            </div>
+          <div className="mt-4 flex justify-center items-center gap-3">
+            <span className="bg-indigo-500/20 text-indigo-300 text-xs font-medium px-3 py-1 rounded-full">
+              Exam Goal: {examGoal.exam}
+            </span>
+            <span className="bg-teal-500/20 text-teal-300 text-xs font-medium px-3 py-1 rounded-full">
+              Group Type: {examGoal.groupType}
+            </span>
+            <button
+              onClick={() => {
+                console.log("🔄 ProfilePage: Manual refresh requested");
+                // This will trigger a re-render when profile changes
+              }}
+              className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
+              title="Refresh profile data"
+            >
+              <Pen className="w-4 h-4" />
+            </button>
           </div>
         )}
 
@@ -347,13 +347,13 @@ const TestConfigurationPageComponent = () => {
               !selectedDifficulty ||
               !selectedLanguage
             }
-            className={`font-bold py-3 px-12 rounded-full text-lg transition-all duration-300 ease-in-out transform focus:outline-none focus:ring-4 focus:ring-blue-500/50 cursor-pointer ${
+            className={`font-bold py-3 px-12 rounded-full text-lg transition-all duration-300 ease-in-out transform cursor-pointer ${
               isSubmitting ||
               !selectedSubject ||
               !selectedDifficulty ||
               !selectedLanguage
                 ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white hover:scale-105"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}
           >
             {isSubmitting ? "Creating Test..." : "Continue"}
