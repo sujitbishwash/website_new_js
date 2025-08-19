@@ -1,11 +1,22 @@
+import VideoFeedbackModal, {
+  CondensedFeedback,
+} from "@/components/feedback/VideoFeedbackModal";
 import Chat from "@/components/learning/Chat";
 import Flashcards from "@/components/learning/Flashcards";
 import Quiz from "@/components/learning/Quiz";
 import Summary from "@/components/learning/Summary";
+import { useVideoFeedback } from "@/hooks/useVideoFeedback";
 import { theme } from "@/styles/theme";
-import { useEffect, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
+
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
 
 // Type definitions
 interface IconProps {
@@ -30,6 +41,12 @@ interface ContentTabsProps {
   isLoadingTranscript: boolean;
   chaptersError: string | null;
   transcriptError: string | null;
+  videoId?: string;
+  videoTitle?: string;
+  watchPercentage?: number;
+  sessionStartTime?: Date;
+  onFeedbackSubmit: (payload: any) => void;
+  onFeedbackSkip: () => void;
 }
 
 // Learning mode types
@@ -114,8 +131,18 @@ const CopyIcon = () => (
 );
 const XIcon = () => <Icon path="M18 6L6 18 M6 6l12 12" className="w-5 h-5" />;
 
-const MaximizeIcon = () => <Icon path="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3" className="w-5 h-5" />;
-const MinimizeIcon = () => <Icon path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3" className="w-5 h-5" />;
+const MaximizeIcon = () => (
+  <Icon
+    path="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"
+    className="w-5 h-5"
+  />
+);
+const MinimizeIcon = () => (
+  <Icon
+    path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"
+    className="w-5 h-5"
+  />
+);
 // --- Sub-Components for Modularity ---
 
 interface HeaderProps {
@@ -128,7 +155,15 @@ interface HeaderProps {
   isLeftColumnVisible: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading, onToggleVideo, isVideoVisible, onShare, onToggleFullScreen, isLeftColumnVisible }) => (
+const Header: React.FC<HeaderProps> = ({
+  videoDetail,
+  isLoading,
+  onToggleVideo,
+  isVideoVisible,
+  onShare,
+  onToggleFullScreen,
+  isLeftColumnVisible,
+}) => (
   <header className="flex justify-between items-center mb-4 sm:mb-6 gap-4">
     <div className="flex-1 min-w-0">
       <h1 className="text-md text-gray-500 truncate">
@@ -140,30 +175,48 @@ const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading, onToggleVideo, 
       </h1>
     </div>
     <div className="flex items-center space-x-2 flex-shrink-0">
-
-      {isLeftColumnVisible ? (<button onClick={onToggleVideo} title={isVideoVisible ? 'Hide Video' : 'Show Video'} className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors">
-        {isVideoVisible ? <VideoOffIcon /> : <VideoOnIcon />}
-      </button>
-      ) : ""}
-      <button onClick={onShare} title="Share" className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors`}>
+      {isLeftColumnVisible ? (
+        <button
+          onClick={onToggleVideo}
+          title={isVideoVisible ? "Hide Video" : "Show Video"}
+          className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors"
+        >
+          {isVideoVisible ? <VideoOffIcon /> : <VideoOnIcon />}
+        </button>
+      ) : (
+        ""
+      )}
+      <button
+        onClick={onShare}
+        title="Share"
+        className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors`}
+      >
         <ShareIcon />
       </button>
     </div>
   </header>
 );
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => (
-  <div className="aspect-w-16 aspect-h-9 bg-black rounded-xl overflow-hidden shadow-lg mb-4">
-    <iframe
-      src={src}
-      title="YouTube video player"
-      frameBorder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-      allowFullScreen
-      className="w-full h-full rounded-xl"
-    ></iframe>
-  </div>
-);
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const separator = src.includes("?") ? "&" : "?";
+  const apiSrc = `${src}${separator}enablejsapi=1&origin=${encodeURIComponent(
+    origin
+  )}`;
+  return (
+    <div className="aspect-w-16 aspect-h-9 bg-black rounded-xl overflow-hidden shadow-lg mb-4">
+      <iframe
+        id="yt-player-iframe"
+        src={apiSrc}
+        title="YouTube video player"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowFullScreen
+        className="w-full h-full rounded-xl"
+      ></iframe>
+    </div>
+  );
+};
 
 const ContentTabs: React.FC<ContentTabsProps> = ({
   chapters,
@@ -172,6 +225,12 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   isLoadingTranscript,
   chaptersError,
   transcriptError,
+  videoId,
+  videoTitle,
+  watchPercentage,
+  sessionStartTime,
+  onFeedbackSubmit,
+  onFeedbackSkip,
 }) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
@@ -180,19 +239,21 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
         <div className="flex items-center border border-gray-700 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("chapters")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${activeTab === "chapters"
-              ? "bg-gray-900 shadow-sm text-gray-100"
-              : "text-gray-400 hover:bg-gray-700"
-              }`}
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+              activeTab === "chapters"
+                ? "bg-gray-900 shadow-sm text-gray-100"
+                : "text-gray-400 hover:bg-gray-700"
+            }`}
           >
             <ChaptersIcon /> Chapters
           </button>
           <button
             onClick={() => setActiveTab("transcripts")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${activeTab === "transcripts"
-              ? "bg-gray-900 shadow-sm text-gray-100"
-              : "text-gray-400 hover:bg-gray-700"
-              }`}
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+              activeTab === "transcripts"
+                ? "bg-gray-900 shadow-sm text-gray-100"
+                : "text-gray-400 hover:bg-gray-700"
+            }`}
           >
             <TranscriptIcon /> Transcripts
           </button>
@@ -216,6 +277,20 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
               className="toggle-label block overflow-hidden h-5 sm:h-6 rounded-full bg-gray-600 cursor-pointer"
             ></label>
           </div>
+
+          {/* Condensed Feedback Component */}
+          <CondensedFeedback
+            videoId={videoId}
+            videoTitle={videoTitle}
+            watchPercentage={watchPercentage}
+            sessionDuration={
+              sessionStartTime
+                ? Math.floor((Date.now() - sessionStartTime.getTime()) / 1000)
+                : undefined
+            }
+            onFeedbackSubmit={onFeedbackSubmit}
+            onFeedbackSkip={onFeedbackSkip}
+          />
         </div>
       </div>
       <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 max-h-[250px] sm:max-h-[300px] overflow-y-auto">
@@ -306,62 +381,74 @@ const AITutorPanel: React.FC<{
   onToggleFullScreen,
   isLeftColumnVisible,
 }) => {
-    const modes: { key: LearningMode; label: string; icon: any }[] = [
-      { key: "chat", label: "Chat", icon: <ChatIcon /> },
-      { key: "flashcards", label: "Flashcards", icon: <FlashcardsIcon /> },
-      { key: "quiz", label: "Quiz", icon: <QuizIcon /> },
-      { key: "summary", label: "Summary", icon: <SummaryIcon /> },
-    ];
+  const modes: { key: LearningMode; label: string; icon: any }[] = [
+    { key: "chat", label: "Chat", icon: <ChatIcon /> },
+    { key: "flashcards", label: "Flashcards", icon: <FlashcardsIcon /> },
+    { key: "quiz", label: "Quiz", icon: <QuizIcon /> },
+    { key: "summary", label: "Summary", icon: <SummaryIcon /> },
+  ];
 
-    const components = {
-      chat: (
-        <Chat
-          videoId={videoId}
-          messages={chatMessages}
-          isLoading={isChatLoading}
-          error={chatError}
-          onSendMessage={onSendMessage}
-        />
-      ),
-      flashcards: <Flashcards />,
-      quiz: <Quiz />,
-      summary: <Summary />,
-    };
+  const components = {
+    chat: (
+      <Chat
+        videoId={videoId}
+        messages={chatMessages}
+        isLoading={isChatLoading}
+        error={chatError}
+        onSendMessage={onSendMessage}
+      />
+    ),
+    flashcards: <Flashcards />,
+    quiz: <Quiz />,
+    summary: <Summary />,
+  };
 
-    return (
-      <div className={`rounded-xl flex flex-col h-full ${
-        isLeftColumnVisible 
-          ? "border border-gray-700 bg-card max-h-[90vh]" 
+  return (
+    <div
+      className={`rounded-xl flex flex-col h-full ${
+        isLeftColumnVisible
+          ? "border border-gray-700 bg-card max-h-[90vh]"
           : "max-h-[83vh]"
-      }`}>
-        <div className="relative border-b border-gray-700 rounded-t-xl">
-          <div className={`flex items-center  ${isLeftColumnVisible ? "justify-between"
-            : "justify-center"} rounded-lg p-2 w-full overflow-x-auto pb-2 custom-scrollbar pr-12`}>
-            {modes.map(({ key, label, icon }) => (
-              <button
-                key={key}
-                onClick={() => onModeChange(key)}
-                className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${currentMode === key
+      }`}
+    >
+      <div className="relative border-b border-gray-700 rounded-t-xl">
+        <div
+          className={`flex items-center  ${
+            isLeftColumnVisible ? "justify-between" : "justify-center"
+          } rounded-lg p-2 w-full overflow-x-auto pb-2 custom-scrollbar pr-12`}
+        >
+          {modes.map(({ key, label, icon }) => (
+            <button
+              key={key}
+              onClick={() => onModeChange(key)}
+              className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+                currentMode === key
                   ? "bg-background shadow-sm text-gray-100"
                   : "text-gray-400 hover:bg-gray-700"
-                  }`}
-              >
-                {icon} {label}
-              </button>
-            ))}
-          </div>
-          <div className="absolute top-1 right-2">
-            <button onClick={onToggleFullScreen} title={isLeftColumnVisible ? 'Full Screen Chat' : 'Exit Full Screen'} className="p-2 text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors">
-              {isLeftColumnVisible ? <MaximizeIcon /> : <MinimizeIcon />}
+              }`}
+            >
+              {icon} {label}
             </button>
-          </div>
+          ))}
         </div>
-        <div className="flex-1 overflow-hidden min-h-0  rounded-b-xl">
-          {components[currentMode]}
+        <div className="absolute top-1 right-2">
+          <button
+            onClick={onToggleFullScreen}
+            title={
+              isLeftColumnVisible ? "Full Screen Chat" : "Exit Full Screen"
+            }
+            className="p-2 text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
+          >
+            {isLeftColumnVisible ? <MaximizeIcon /> : <MinimizeIcon />}
+          </button>
         </div>
       </div>
-    );
-  };
+      <div className="flex-1 overflow-hidden min-h-0  rounded-b-xl">
+        {components[currentMode]}
+      </div>
+    </div>
+  );
+};
 
 const ShareModal: React.FC<{
   isOpen: boolean;
@@ -452,6 +539,7 @@ const ShareModal: React.FC<{
 const VideoPage: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // State for video data
   const [videoDetail, setVideoDetail] = useState<VideoDetail | null>(null);
@@ -477,8 +565,254 @@ const VideoPage: React.FC = () => {
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatInitialized, setChatInitialized] = useState(false);
 
+  // Video player ref for tracking progress
+  const videoPlayerRef = useRef<HTMLIFrameElement>(null);
+  const videoDurationRef = useRef<number>(0);
+  const currentTimeRef = useRef<number>(0);
+  const ytPlayerRef = useRef<any>(null);
+  const progressIntervalRef = useRef<number | null>(null);
+
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
+
+  // Feedback functionality
+  const {
+    isFeedbackModalOpen,
+    feedbackSuggestions,
+    isLoadingSuggestions,
+    sessionStartTime,
+    watchPercentage,
+    openFeedbackModal,
+    closeFeedbackModal,
+    submitFeedback,
+    skipFeedback,
+    startSession,
+    updateWatchPercentage,
+    shouldShowFeedbackOnLeave,
+    setShouldShowFeedbackOnLeave,
+  } = useVideoFeedback({
+    videoId: currentVideoId || "",
+    videoTitle: videoDetail?.title,
+    onFeedbackSubmitted: (payload) => {
+      console.log("Feedback submitted:", payload);
+      // You can add analytics tracking here
+    },
+    onFeedbackSkipped: () => {
+      console.log("Feedback skipped");
+      // You can add analytics tracking here
+    },
+  });
+
+  // Start session when video loads
+  useEffect(() => {
+    if (currentVideoId) {
+      startSession();
+      setShouldShowFeedbackOnLeave(true);
+    }
+  }, [currentVideoId, startSession, setShouldShowFeedbackOnLeave]);
+
+  // Track video progress based on session time
+  const startProgressTracking = useCallback(() => {
+    const progressInterval = setInterval(() => {
+      if (sessionStartTime && videoDurationRef.current > 0) {
+        // Calculate progress based on session duration
+        const sessionDuration = Math.floor(
+          (Date.now() - sessionStartTime.getTime()) / 1000
+        );
+        const estimatedProgress = Math.min(
+          100,
+          (sessionDuration / videoDurationRef.current) * 100
+        );
+        updateWatchPercentage(estimatedProgress);
+
+        // Auto-show feedback when video reaches 90%
+        if (estimatedProgress >= 90 && shouldShowFeedbackOnLeave) {
+          openFeedbackModal();
+        }
+      }
+    }, 1000); // Update every second
+
+    return () => clearInterval(progressInterval);
+  }, [
+    sessionStartTime,
+    updateWatchPercentage,
+    shouldShowFeedbackOnLeave,
+    openFeedbackModal,
+  ]);
+
+  // Start progress tracking when session starts
+  useEffect(() => {
+    if (sessionStartTime && shouldShowFeedbackOnLeave) {
+      // Load YouTube Iframe API to get precise duration and currentTime
+      const setup = async () => {
+        // inject API
+        if (!(window.YT && window.YT.Player)) {
+          const existing = document.getElementById("youtube-iframe-api");
+          if (!existing) {
+            const s = document.createElement("script");
+            s.id = "youtube-iframe-api";
+            s.src = "https://www.youtube.com/iframe_api";
+            document.body.appendChild(s);
+          }
+          await new Promise<void>((resolve) => {
+            window.onYouTubeIframeAPIReady = () => resolve();
+          });
+        }
+        try {
+          const player = new window.YT.Player("yt-player-iframe", {
+            events: {
+              onReady: (e: any) => {
+                const dur = e.target.getDuration?.() || 0;
+                if (dur > 0) videoDurationRef.current = dur;
+                // start interval
+                if (progressIntervalRef.current == null) {
+                  progressIntervalRef.current = window.setInterval(() => {
+                    try {
+                      const cur = player.getCurrentTime?.() || 0;
+                      const d =
+                        player.getDuration?.() || videoDurationRef.current || 0;
+                      if (d > 0) {
+                        videoDurationRef.current = d;
+                        const pct = Math.min(100, (cur / d) * 100);
+                        updateWatchPercentage(pct);
+                        if (pct >= 90 && shouldShowFeedbackOnLeave) {
+                          openFeedbackModal();
+                        }
+                      }
+                    } catch {}
+                  }, 1000);
+                }
+              },
+              onStateChange: (e: any) => {
+                if (e?.data === window.YT.PlayerState.ENDED) {
+                  updateWatchPercentage(100);
+                  openFeedbackModal();
+                }
+              },
+            },
+          });
+          ytPlayerRef.current = player;
+        } catch {
+          // fallback default duration to avoid NaN
+          if (!videoDurationRef.current) videoDurationRef.current = 600;
+          const cleanup = startProgressTracking();
+          return cleanup;
+        }
+      };
+      const maybeCleanup = setup();
+      return () => {
+        if (progressIntervalRef.current != null) {
+          clearInterval(progressIntervalRef.current);
+          progressIntervalRef.current = null;
+        }
+        try {
+          ytPlayerRef.current?.destroy?.();
+        } catch {}
+        ytPlayerRef.current = null;
+      };
+    }
+  }, [
+    sessionStartTime,
+    shouldShowFeedbackOnLeave,
+    startProgressTracking,
+    updateWatchPercentage,
+    openFeedbackModal,
+  ]);
+
+  // Page leaving guard
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (
+        shouldShowFeedbackOnLeave &&
+        watchPercentage > 30 &&
+        !isFeedbackModalOpen
+      ) {
+        event.preventDefault();
+        event.returnValue = "";
+
+        // Store state for next visit
+        localStorage.setItem(
+          `feedback_pending_${currentVideoId}`,
+          JSON.stringify({
+            timestamp: Date.now(),
+            watchPercentage,
+            sessionStartTime: sessionStartTime?.toISOString(),
+            videoTitle: videoDetail?.title,
+          })
+        );
+      }
+    };
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (
+        shouldShowFeedbackOnLeave &&
+        watchPercentage > 30 &&
+        !isFeedbackModalOpen
+      ) {
+        // Show feedback modal before navigation
+        openFeedbackModal();
+
+        // Prevent immediate navigation
+        event.preventDefault();
+
+        // Store navigation intent
+        localStorage.setItem(
+          `navigation_pending_${currentVideoId}`,
+          JSON.stringify({
+            timestamp: Date.now(),
+            intendedPath: window.location.pathname,
+            intendedHref: window.location.href,
+          })
+        );
+      }
+    };
+
+    // Listen for navigation attempts
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [
+    shouldShowFeedbackOnLeave,
+    watchPercentage,
+    isFeedbackModalOpen,
+    currentVideoId,
+    sessionStartTime,
+    videoDetail?.title,
+    openFeedbackModal,
+  ]);
+
+  // Handle feedback completion and navigation
+  const handleFeedbackComplete = useCallback(
+    (action: "submit" | "skip" | "dismiss") => {
+      closeFeedbackModal();
+
+      // Check if there was a pending navigation
+      const pendingNavigation = localStorage.getItem(
+        `navigation_pending_${currentVideoId}`
+      );
+      if (pendingNavigation) {
+        try {
+          const data = JSON.parse(pendingNavigation);
+          localStorage.removeItem(`navigation_pending_${currentVideoId}`);
+
+          // Allow navigation to proceed
+          if (
+            data.intendedPath &&
+            data.intendedPath !== window.location.pathname
+          ) {
+            navigate(data.intendedPath);
+          }
+        } catch (error) {
+          console.error("Failed to parse pending navigation:", error);
+        }
+      }
+    },
+    [closeFeedbackModal, currentVideoId, navigate]
+  );
 
   // Fetch video details
   useEffect(() => {
@@ -638,19 +972,43 @@ const VideoPage: React.FC = () => {
     setCurrentMode(mode);
   };
 
+  // Manual feedback trigger (for testing)
+  const handleManualFeedbackTrigger = () => {
+    openFeedbackModal();
+  };
+
+  // Manual video duration setter (for testing)
+  const handleSetVideoDuration = (duration: number) => {
+    videoDurationRef.current = duration;
+    console.log("Video duration set to:", duration, "seconds");
+  };
+
+  // Manual progress trigger (for testing)
+  const handleSetProgress = (percentage: number) => {
+    updateWatchPercentage(percentage);
+    if (percentage >= 90 && shouldShowFeedbackOnLeave) {
+      openFeedbackModal();
+    }
+  };
+
   return (
-    <div className="bg-background text-foreground min-h-screen font-sans text-gray-200">
+    <div className="bg-background text-foreground min-h-screen font-sans">
       <div className="container mx-auto sm:px-4 lg:px-6 sm:py-6">
         <main className="grid grid-cols-1 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
-          <div className={`xl:col-span-3 space-y-4 sm:space-y-6 ${isLeftColumnVisible ? '' : 'hidden'}`}>
+          <div
+            className={`xl:col-span-3 space-y-4 sm:space-y-6 ${
+              isLeftColumnVisible ? "" : "hidden"
+            }`}
+          >
             <Header
               videoDetail={videoDetail}
               isLoading={isLoadingVideo}
               onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
               isVideoVisible={isVideoVisible}
               onShare={() => setIsShareModalOpen(true)}
-
-              onToggleFullScreen={() => setIsLeftColumnVisible(!isLeftColumnVisible)}
+              onToggleFullScreen={() =>
+                setIsLeftColumnVisible(!isLeftColumnVisible)
+              }
               isLeftColumnVisible={isLeftColumnVisible}
             />
 
@@ -666,9 +1024,19 @@ const VideoPage: React.FC = () => {
               isLoadingTranscript={isLoadingTranscript}
               chaptersError={chaptersError}
               transcriptError={transcriptError}
+              videoId={currentVideoId}
+              videoTitle={videoDetail?.title}
+              watchPercentage={watchPercentage}
+              sessionStartTime={sessionStartTime || undefined}
+              onFeedbackSubmit={submitFeedback}
+              onFeedbackSkip={skipFeedback}
             />
           </div>
-          <div className={`${isLeftColumnVisible ? 'xl:col-span-2' : 'xl:col-span-5'}`}>
+          <div
+            className={`${
+              isLeftColumnVisible ? "xl:col-span-2" : "xl:col-span-5"
+            }`}
+          >
             {!isLeftColumnVisible && (
               <Header
                 videoDetail={videoDetail}
@@ -676,11 +1044,11 @@ const VideoPage: React.FC = () => {
                 onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
                 isVideoVisible={isVideoVisible}
                 onShare={() => setIsShareModalOpen(true)}
-
-                onToggleFullScreen={() => setIsLeftColumnVisible(!isLeftColumnVisible)}
+                onToggleFullScreen={() =>
+                  setIsLeftColumnVisible(!isLeftColumnVisible)
+                }
                 isLeftColumnVisible={isLeftColumnVisible}
               />
-
             )}
             <AITutorPanel
               currentMode={currentMode}
@@ -691,17 +1059,70 @@ const VideoPage: React.FC = () => {
               chatError={chatError}
               onSendMessage={handleSendMessage}
               isLeftColumnVisible={isLeftColumnVisible}
-              onToggleFullScreen={() => setIsLeftColumnVisible(!isLeftColumnVisible)}
+              onToggleFullScreen={() =>
+                setIsLeftColumnVisible(!isLeftColumnVisible)
+              }
             />
           </div>
         </main>
       </div>
+
+      {/* Feedback Modal */}
+      <VideoFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => handleFeedbackComplete("dismiss")}
+        videoId={currentVideoId}
+        videoTitle={videoDetail?.title}
+        suggestedChips={feedbackSuggestions}
+        sessionStartTime={sessionStartTime || undefined}
+        watchPercentage={watchPercentage}
+        onSubmit={async (payload) => {
+          await submitFeedback(payload);
+          handleFeedbackComplete("submit");
+        }}
+        onSkip={() => {
+          skipFeedback();
+          handleFeedbackComplete("skip");
+        }}
+        onDismiss={() => handleFeedbackComplete("dismiss")}
+      />
 
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={`https://www.youtube.com`}
       />
+
+      {/* Debug/Test Controls - Remove in production */}
+      {process.env.NODE_ENV === "development" && (
+        <div className="fixed bottom-4 right-4 z-50 space-y-2">
+          <button
+            onClick={handleManualFeedbackTrigger}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
+          >
+            Test Feedback
+          </button>
+          <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
+            Watch: {Math.round(watchPercentage)}%
+          </div>
+          <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
+            Duration: {videoDurationRef.current}s
+          </div>
+          <button
+            onClick={() => handleSetVideoDuration(300)}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+          >
+            Set Duration (300s)
+          </button>
+          <button
+            onClick={() => handleSetProgress(95)}
+            className="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700"
+          >
+            Set Progress (95%)
+          </button>
+        </div>
+      )}
+
       <style>{`
                 /* Simple toggle switch styles */
                 .toggle-checkbox:checked {
