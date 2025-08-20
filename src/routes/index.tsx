@@ -16,7 +16,6 @@ import Layout from "../components/Layout";
 import ProtectedRoute from "../components/ProtectedRoute";
 import RootLayout from "../components/RootLayout";
 
-import TestPage from "@/pages/TestPage";
 import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
 import ExamInformationPage from "../pages/new/ExamInformationPage";
 import ExamReconfirmationPage from "../pages/new/ExamReconfirmationPage";
@@ -199,12 +198,6 @@ export const routes = [
         element: <PaymentSuccessPage />,
         name: "Payment Success",
         description: "Payment success confirmation page",
-      },
-      {
-        path: "test",
-        element: <TestPage />,
-        name: "",
-        description: "",
       },
       // Catch-all route for 404 - must be last
       {
