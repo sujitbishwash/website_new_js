@@ -1,5 +1,6 @@
 import VideoFeedbackModal, {
   CondensedFeedback,
+  VideoFeedbackPayload,
 } from "@/components/feedback/VideoFeedbackModal";
 import Chat from "@/components/learning/Chat";
 import Flashcards from "@/components/learning/Flashcards";
@@ -12,7 +13,23 @@ import { useLocation, useParams } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/routes/constants";
-import { Eye, EyeOff, Facebook, Instagram, Link } from "lucide-react";
+import {
+  Ellipsis,
+  Eye,
+  EyeOff,
+  Facebook,
+  Highlighter,
+  Instagram,
+  Link,
+  MessageCircleQuestion,
+  MessageSquareText,
+  Star,
+  StickyNote,
+  Upload,
+  X,
+} from "lucide-react";
+import Feedback from "@/components/modals/Feedback";
+import VideoFeedback from "@/components/modals/Feedback";
 
 declare global {
   interface Window {
@@ -72,24 +89,6 @@ const Icon: React.FC<IconProps> = ({ path, className = "w-6 h-6" }) => (
   </svg>
 );
 
-const ShareIcon = () => (
-  <Icon
-    path="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M16 6l-4-4-4 4 M12 2v14"
-    className="w-5 h-5"
-  />
-);
-const VideoOnIcon = () => (
-  <Icon
-    path="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
-    className="w-5 h-5"
-  />
-);
-const VideoOffIcon = () => (
-  <Icon
-    path="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24 M1 1l22 22"
-    className="w-5 h-5"
-  />
-);
 const ChaptersIcon = () => (
   <Icon
     path="M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z M22 6s-1.5-2-5-2-5 2-5 2v14s1.5-1 5-1 5 1 5 1V6z"
@@ -126,12 +125,7 @@ const SummaryIcon = () => (
     className="w-5 h-5"
   />
 );
-const CopyIcon = () => (
-  <Icon
-    path="M9.29289 3.29289C9.48043 3.10536 9.73478 3 10 3H14C15.6569 3 17 4.34315 17 6V15C17 16.6569 15.6569 18 14 18H7C5.34315 18 4 16.6569 4 15V9C4 8.73478 4.10536 8.48043 4.29289 8.29289L9.29289 3.29289ZM14 5H11V9C11 9.55228 10.5523 10 10 10H6V15C6 15.5523 6.44772 16 7 16H14C14.5523 16 15 15.5523 15 15V6C15 5.44772 14.5523 5 14 5ZM7.41421 8H9V6.41421L7.41421 8ZM19 5C19.5523 5 20 5.44772 20 6V18C20 19.6569 18.6569 21 17 21H7C6.44772 21 6 20.5523 6 20C6 19.4477 6.44772 19 7 19H17C17.5523 19 18 18.5523 18 18V6C18 5.44772 18.4477 5 19 5Z"
-    className="w-5 h-5"
-  />
-);
+
 const XIcon = () => <Icon path="M18 6L6 18 M6 6l12 12" className="w-5 h-5" />;
 
 const MaximizeIcon = () => (
@@ -169,7 +163,12 @@ interface HeaderProps {
   isLeftColumnVisible: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading, onShare }) => {
+const Header: React.FC<HeaderProps> = ({
+  videoDetail,
+  isLoading,
+  onShare,
+  onToggleFullScreen,
+}) => {
   const navigate = useNavigate();
 
   return (
@@ -185,13 +184,6 @@ const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading, onShare }) => {
       </div>
       <div className="flex items-center gap-2 self-start sm:self-center">
         <button
-          onClick={onShare}
-          title="Share"
-          className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors`}
-        >
-          <ShareIcon />
-        </button>
-        <button
           onClick={() => {
             navigate(ROUTES.PREMIUM);
           }}
@@ -201,13 +193,19 @@ const Header: React.FC<HeaderProps> = ({ videoDetail, isLoading, onShare }) => {
           <span className="hidden sm:inline">Upgrade plan</span>
           <span className="sm:hidden">Upgrade</span>
         </button>
+        <button
+          className="p-2 text-gray-300 hover:bg-gray-700 rounded-full cursor-pointer"
+          onClick={onToggleFullScreen}
+        >
+          <X />
+        </button>
       </div>
     </header>
   );
 };
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => (
-  <div className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg mb-2">
+  <div className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg">
     <iframe
       src={src}
       title="YouTube video player"
@@ -235,12 +233,12 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
-    <div className="bg-background text-foreground rounded-xl border border-gray-700 p-1 hidden sm:block">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center px-3 sm:px-4 pt-3 pb-2 gap-2">
+    <div className="bg-background text-foreground hidden sm:block">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3">
         <div className="flex items-center border border-gray-700 rounded-lg p-1">
           <button
             onClick={() => setActiveTab("chapters")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors cursor-pointer ${
               activeTab === "chapters"
                 ? "bg-gray-900 shadow-sm text-gray-100"
                 : "text-gray-400 hover:bg-gray-700"
@@ -278,7 +276,6 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
               className="toggle-label block overflow-hidden h-5 sm:h-6 rounded-full bg-gray-600 cursor-pointer"
             ></label>
           </div>
-
           {/* Condensed Feedback Component */}
           <CondensedFeedback
             videoId={videoId}
@@ -294,7 +291,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
           />
         </div>
       </div>
-      <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 max-h-[250px] sm:max-h-[100px] overflow-y-auto">
+      <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 rounded-xl border border-gray-700 ">
         {activeTab === "chapters" ? (
           isLoadingChapters ? (
             <div className="text-center py-6 sm:py-8">
@@ -390,10 +387,10 @@ const AITutorPanel: React.FC<{
   onShare,
 }) => {
   const modes: { key: LearningMode; label: string; icon: any }[] = [
-    { key: "chat", label: "Chat", icon: <ChatIcon /> },
-    { key: "flashcards", label: "Flashcards", icon: <FlashcardsIcon /> },
-    { key: "quiz", label: "Quiz", icon: <QuizIcon /> },
-    { key: "summary", label: "Summary", icon: <SummaryIcon /> },
+    { key: "chat", label: "Chat", icon: <MessageSquareText /> },
+    { key: "flashcards", label: "Flashcards", icon: <StickyNote /> },
+    { key: "quiz", label: "Quiz", icon: <MessageCircleQuestion /> },
+    { key: "summary", label: "Summary", icon: <Highlighter /> },
   ];
 
   const components = {
@@ -404,6 +401,7 @@ const AITutorPanel: React.FC<{
         isLoading={isChatLoading}
         error={chatError}
         onSendMessage={onSendMessage}
+        isLeftColumnVisible={isLeftColumnVisible}
       />
     ),
     flashcards: <Flashcards />,
@@ -413,21 +411,19 @@ const AITutorPanel: React.FC<{
 
   return (
     <div
-      className={`rounded-xl border border-gray-700 bg-card flex flex-col h-full sm:max-h-[93vh]`}
+      className={`border border-l-1 bg-card flex flex-col h-full sm:max-h-[100vh]`}
     >
-      <div className="relative border-b border-gray-700 rounded-t-xl p-2">
+      <div className="relative bg-background">
         <div
-          className={`flex items-center  ${
-            isLeftColumnVisible ? "justify-between" : "justify-center"
-          } rounded-lg p-2 w-full overflow-x-auto pb-2 custom-scrollbar pr-12`}
+          className={`flex items-center justify-center rounded-lg p-4 w-full overflow-x-auto`}
         >
           {modes.map(({ key, label, icon }) => (
             <button
               key={key}
               onClick={() => onModeChange(key)}
-              className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-2 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+              className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-2 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors cursor-pointer ${
                 currentMode === key
-                  ? "bg-background shadow-sm text-gray-100"
+                  ? "bg-card shadow-sm text-gray-100"
                   : "text-gray-400 hover:bg-gray-700"
               }`}
             >
@@ -435,19 +431,30 @@ const AITutorPanel: React.FC<{
             </button>
           ))}
         </div>
-        <div className="absolute top-1/2 -translate-y-1/2 right-2 hidden sm:block">
+        <div
+          className={`flex flex-row absolute top-1/2 -translate-y-1/2 right-2 sm:block`}
+        >
+          <button
+            onClick={onShare}
+            title="Share"
+            className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors`}
+          >
+            <Ellipsis />
+          </button>
           <button
             onClick={onToggleFullScreen}
             title={
               isLeftColumnVisible ? "Full Screen Chat" : "Exit Full Screen"
             }
-            className="p-2 text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors"
+            className={`p-2 text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors  ${
+              isLeftColumnVisible ? "hidden" : "sm:block"
+            }`}
           >
             {isLeftColumnVisible ? <MaximizeIcon /> : <MinimizeIcon />}
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-hidden min-h-0 rounded-b-xl">
+      <div className="flex-1 overflow-hidden min-h-0">
         {components[currentMode]}
       </div>
     </div>
@@ -564,7 +571,18 @@ const VideoPage: React.FC = () => {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatInitialized, setChatInitialized] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(true);
 
+  const handleFeedbackSubmit = (payload: VideoFeedbackPayload) => {
+    console.log("Feedback Submitted:", payload);
+    // In a real app, you might hide the component after a delay
+    // setTimeout(() => setShowFeedback(false), 2000);
+  };
+
+  const handleFeedbackSkip = () => {
+    console.log("Feedback Skipped");
+    setShowFeedback(false);
+  };
   // Video player ref for tracking progress
   const videoPlayerRef = useRef<HTMLIFrameElement>(null);
   const videoDurationRef = useRef<number>(0);
@@ -993,10 +1011,10 @@ const VideoPage: React.FC = () => {
 
   return (
     <div className="bg-background text-foreground min-h-screen font-sans">
-      <div className="container mx-auto sm:px-4 lg:px-6 sm:py-6">
-        <main className="grid grid-cols-1 xl:grid-cols-5 gap-4 sm:gap-6 lg:gap-8">
+      <div className="mx-auto hidden w-full h-full sm:block">
+        <main className="grid grid-cols-1 xl:grid-cols-5">
           <div
-            className={`xl:col-span-3 space-y-4 sm:space-y-6 ${
+            className={`p-4 xl:col-span-3 overflow-y-auto h-[100vh] ${
               isLeftColumnVisible ? "" : "hidden"
             }`}
           >
@@ -1011,28 +1029,24 @@ const VideoPage: React.FC = () => {
               }
               isLeftColumnVisible={isLeftColumnVisible}
             />
-            {isVideoVisible && (
-              <div>
-                <VideoPlayer
-                  src={`https://www.youtube.com/embed/${currentVideoId}`}
-                />
-                <ContentTabs
-                  chapters={chapters}
-                  transcript={transcript}
-                  isLoadingChapters={isLoadingChapters}
-                  isLoadingTranscript={isLoadingTranscript}
-                  chaptersError={chaptersError}
-                  transcriptError={transcriptError}
-                  onFeedbackSkip={skipFeedback}
-                  onFeedbackSubmit={submitFeedback}
-                />
-              </div>
-            )}
+            <VideoPlayer
+              src={`https://www.youtube.com/embed/${currentVideoId}`}
+            />
+            <ContentTabs
+              chapters={chapters}
+              transcript={transcript}
+              isLoadingChapters={isLoadingChapters}
+              isLoadingTranscript={isLoadingTranscript}
+              chaptersError={chaptersError}
+              transcriptError={transcriptError}
+              onFeedbackSkip={skipFeedback}
+              onFeedbackSubmit={submitFeedback}
+            />
           </div>
           <div
             className={`${
               isLeftColumnVisible ? "xl:col-span-2" : "xl:col-span-5"
-            }`}
+            } w-full`}
           >
             {" "}
             {isLeftColumnVisible ? (
@@ -1068,6 +1082,70 @@ const VideoPage: React.FC = () => {
             />
           </div>
         </main>
+      </div>
+      <div className="sm:hidden">
+        <div className="flex flex-col h-[100vh]">
+          <header className="flex flex-row mb-2 gap-3 justify-between p-4 items-center ">
+            <div className="flex-1 min-w-0 overflow-ellipsis">
+              <h1 className="text-md text-gray-500 truncate px-14 ">
+                ( videoDetail?.title || "Video Title Not Available" )
+              </h1>
+            </div>
+            <div className="flex items-center gap-2 self-start sm:self-center">
+              {/* Upgrade Button */}
+
+              <style>{`.glow-purple:hover {
+              box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 
+              0 0 20px rgba(168, 85, 247, 0.6), 
+              0 0 30px rgba(168, 85, 247, 0.4);
+            `}</style>
+              {window.innerWidth > 640 ? (
+                <button
+                  onClick={() => {
+                    navigate(ROUTES.PREMIUM);
+                  }}
+                  className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer glow-purple transition-transform transform hover:scale-105 focus:outline-none"
+                >
+                  <SparklesIcon path="" className="h-5 w-5" />
+                  Upgrade plan
+                </button>
+              ) : (
+                <button
+                  onClick={() => {
+                    navigate(ROUTES.PREMIUM);
+                  }}
+                  className="flex items-center gap-1 rounded-full p-2 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer glow-purple transition-transform transform hover:scale-105 focus:outline-none"
+                >
+                  <SparklesIcon path="" className="h-5 w-5" />
+                </button>
+              )}
+            </div>
+          </header>
+          <div className="flex-shrink-0">
+            <VideoPlayer
+              src={`https://www.youtube.com/embed/${currentVideoId}`}
+            />
+          </div>
+
+          <div className="flex-grow overflow-hidden">
+            <AITutorPanel
+              currentMode={currentMode}
+              onModeChange={handleModeChange}
+              videoId={currentVideoId}
+              chatMessages={chatMessages}
+              isChatLoading={isChatLoading}
+              chatError={chatError}
+              onSendMessage={handleSendMessage}
+              isLeftColumnVisible={isLeftColumnVisible}
+              onToggleFullScreen={() =>
+                setIsLeftColumnVisible(!isLeftColumnVisible)
+              }
+              onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
+              isVideoVisible={isVideoVisible}
+              onShare={() => setIsShareModalOpen(true)}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Feedback Modal */}
