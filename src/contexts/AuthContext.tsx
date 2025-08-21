@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ApiResponse, authApi } from "../lib/api-client";
-import { authHelpers } from "../lib/supabase";
 
 interface User {
   id: string;
@@ -37,6 +36,8 @@ interface AuthContextType {
     phoneno?: string;
     type?: string;
     usercode?: string;
+    gender?: string;
+    dateOfBirth?: string;
   } | null> | null>;
   // Force refresh user data (bypass localStorage)
   refreshUserData: () => Promise<ApiResponse<{
@@ -48,6 +49,8 @@ interface AuthContextType {
     phoneno?: string;
     type?: string;
     usercode?: string;
+    gender?: string;
+    dateOfBirth?: string;
   } | null> | null>;
   // Update user data in localStorage
   updateLocalStorageUserData: (userData: any) => void;
@@ -74,6 +77,8 @@ let userDataCache: {
     phoneno?: string;
     type?: string;
     usercode?: string;
+    gender?: string;
+    dateOfBirth?: string;
   } | null;
   timestamp: number;
   isFetching?: boolean;
@@ -334,12 +339,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     localStorage.removeItem("authToken");
     localStorage.removeItem("userData");
 
-    try {
-      // Sign out from Supabase
-      await authHelpers.signOut();
-    } catch (error) {
-      console.error("Error signing out from Supabase:", error);
-    }
+    // No external signout needed; backend tokens are stateless
   };
 
   const signInWithGoogle = async () => {
@@ -437,20 +437,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         };
       }
 
-      // Check if user has a name from localStorage FIRST
-      const hasNameFromStorage =
-        parsedUserData?.name && parsedUserData.name.trim() !== "";
+      // Check if user has gender and dateOfBirth from localStorage FIRST
+      const hasPersonalDetailsFromStorage =
+        parsedUserData?.gender && parsedUserData?.dateOfBirth;
       console.log(
-        "📝 Has name from localStorage:",
-        hasNameFromStorage,
-        "Name value:",
-        parsedUserData?.name
+        "📝 Has personal details from localStorage:",
+        hasPersonalDetailsFromStorage,
+        "Gender:",
+        parsedUserData?.gender,
+        "DateOfBirth:",
+        parsedUserData?.dateOfBirth
       );
 
-      // If user has name in localStorage, we don't need to call the API for name check
-      if (hasNameFromStorage) {
+      // If user has personal details in localStorage, we don't need to call the API for personal details check
+      if (hasPersonalDetailsFromStorage) {
         console.log(
-          "✅ User has name in localStorage, skipping API call for name check"
+          "✅ User has personal details in localStorage, skipping API call for personal details check"
         );
 
         // Only check exam goal if user has name
@@ -484,7 +486,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
         if (hasExamGoal) {
           console.log(
-            "✅ User has both name (from localStorage) and exam goal, going to dashboard"
+            "✅ User has both personal details (from localStorage) and exam goal, going to dashboard"
           );
           return {
             hasName: true,
@@ -493,7 +495,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           };
         } else {
           console.log(
-            "✅ User has name (from localStorage) but no exam goal, going to exam goal"
+            "✅ User has personal details (from localStorage) but no exam goal, going to exam goal"
           );
           return {
             hasName: true,
@@ -503,9 +505,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       }
 
-      // If we reach here, user doesn't have name in localStorage, so we need to call API
+      // If we reach here, user doesn't have personal details in localStorage, so we need to call API
       console.log(
-        "📡 User doesn't have name in localStorage, calling API to check..."
+        "📡 User doesn't have personal details in localStorage, calling API to check..."
       );
       const response = await getUserData();
       console.log("📊 /ums/me API response:", response);
@@ -531,14 +533,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const userDataFromAPI = response.data;
       console.log("📋 User data from API:", userDataFromAPI);
 
-      // Check if user has a name from API
-      const hasNameFromAPI =
-        userDataFromAPI?.name && userDataFromAPI.name.trim() !== "";
+      // Check if user has personal details from API
+      const hasPersonalDetailsFromAPI =
+        userDataFromAPI?.gender && userDataFromAPI?.dateOfBirth;
       console.log(
-        "📝 Has name from API:",
-        hasNameFromAPI,
-        "Name value:",
-        userDataFromAPI?.name
+        "📝 Has personal details from API:",
+        hasPersonalDetailsFromAPI,
+        "Gender:",
+        userDataFromAPI?.gender,
+        "DateOfBirth:",
+        userDataFromAPI?.dateOfBirth
       );
 
       // Check if user has exam goal using dedicated API
@@ -570,18 +574,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         hasExamGoal = false;
       }
 
-      if (hasNameFromAPI && hasExamGoal) {
+      if (hasPersonalDetailsFromAPI && hasExamGoal) {
         console.log(
-          "✅ User has both name (from API) and exam goal, going to dashboard"
+          "✅ User has both personal details (from API) and exam goal, going to dashboard"
         );
         return {
           hasName: true,
           hasExamGoal: true,
           nextStep: "dashboard",
         };
-      } else if (hasNameFromAPI && !hasExamGoal) {
+      } else if (hasPersonalDetailsFromAPI && !hasExamGoal) {
         console.log(
-          "✅ User has name (from API) but no exam goal, going to exam goal"
+          "✅ User has personal details (from API) but no exam goal, going to exam goal"
         );
         return {
           hasName: true,
@@ -626,19 +630,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const response = await getUserData();
       console.log("User details API response:", response);
 
-      const hasName =
+      const hasPersonalDetails =
         response &&
         response.status >= 200 &&
         response.status < 300 &&
-        response.data?.name &&
-        response.data.name.trim() !== "";
+        response.data?.gender &&
+        response.data?.dateOfBirth;
 
-      if (hasName) {
-        console.log("User has name:", response.data?.name);
+      if (hasPersonalDetails) {
+        console.log(
+          "User has personal details:",
+          response.data?.gender,
+          response.data?.dateOfBirth
+        );
         setHasName(true);
         return true;
       } else {
-        console.log("User does not have name");
+        console.log("User does not have personal details");
         setHasName(false);
         return false;
       }

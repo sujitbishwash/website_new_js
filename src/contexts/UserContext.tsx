@@ -17,6 +17,8 @@ export interface UserProfile {
   email: string;
   phone?: string;
   avatar?: string;
+  gender?: string;
+  dateOfBirth?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -208,6 +210,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
           email: userData?.email || "",
           phone: undefined,
           avatar: undefined,
+          gender: userData?.gender || undefined,
+          dateOfBirth: userData?.dateOfBirth || undefined,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -548,7 +552,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
   // Utility methods
   const isProfileComplete = useCallback(() => {
-    return !!(profile?.name && profile?.email);
+    return !!(profile?.gender && profile?.dateOfBirth);
   }, [profile]);
 
   // Sync exam goal data from AuthContext localStorage

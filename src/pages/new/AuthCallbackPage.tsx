@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { supabase } from "../../lib/supabase";
 import { ROUTES } from "../../routes/constants";
 
 const AuthCallbackPage: React.FC = () => {
@@ -49,48 +48,11 @@ const AuthCallbackPage: React.FC = () => {
             return;
           }
         } else {
-          // Fallback to Supabase session if no token in query
-          console.log("🔍 No token in query, checking Supabase session...");
-          const { data, error } = await supabase.auth.getSession();
-
-          if (error) {
-            console.error("Auth callback error:", error);
-            setError("Authentication failed. Please try again.");
-            setTimeout(() => {
-              navigate(ROUTES.LOGIN);
-            }, 3000);
-            return;
-          }
-
-          if (data.session) {
-            // Successfully authenticated via Supabase
-            console.log("User authenticated via Supabase:", data.session.user);
-
-            // Store the token for API calls
-            localStorage.setItem("authToken", data.session.access_token);
-            console.log(
-              "🔑 Token stored from Supabase:",
-              data.session.access_token
-                ? `${data.session.access_token.substring(0, 20)}...`
-                : "null"
-            );
-
-            // Store user data in localStorage for AuthContext
-            const userInfo = {
-              id: data.session.user.id,
-              email: data.session.user.email || "",
-              name: data.session.user.user_metadata?.name || "",
-            };
-            localStorage.setItem("userData", JSON.stringify(userInfo));
-            console.log("👤 User data stored:", userInfo);
-          } else {
-            // No session found
-            setError("No authentication session found.");
-            setTimeout(() => {
-              navigate(ROUTES.LOGIN);
-            }, 3000);
-            return;
-          }
+          // No token present; invalid access to callback
+          console.log("❌ No token in callback query params");
+          setError("Invalid authentication callback.");
+          setTimeout(() => navigate(ROUTES.LOGIN), 2000);
+          return;
         }
 
         // Update AuthContext state

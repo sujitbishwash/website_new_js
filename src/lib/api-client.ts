@@ -122,14 +122,14 @@ export const authApi = {
   // Get authenticated user data (for exam goal check)
   getAuthenticatedUser: async () => {
     console.log("🚨 DIRECT API CALL to getAuthenticatedUser", new Date().toISOString());
-    return apiRequest<{ exam?: string; group_type?: string; name?: string; email?: string; id?: string; otp?: string; password?: string; phoneno?: string; type?: string; usercode?: string }>('GET', '/ums/me');
+    return apiRequest<{ exam?: string; group_type?: string; name?: string; email?: string; id?: string; otp?: string; password?: string; phoneno?: string; type?: string; usercode?: string; gender?: string; dateOfBirth?: string }>('GET', '/ums/me');
   },
 
 
 
   // Update user details
   updateUserDetails: async (userData: { name: string; gender?: string; dateOfBirth?: string }) => {
-    return apiRequest<{ success: boolean; message: string }>('PUT', '/ums/me', userData);
+    return apiRequest<{ success: boolean; message: string }>('PUT', '/ums/user', userData);
   }
 };
 

@@ -14,6 +14,7 @@ import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/Layout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import OnboardingRoute from "../components/OnboardingRoute";
 import RootLayout from "../components/RootLayout";
 
 import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
@@ -151,13 +152,21 @@ export const routes = [
       // Public onboarding pages (accessible without full authentication)
       {
         path: "personal-details",
-        element: <PersonalDetails />,
+        element: (
+          <OnboardingRoute requiredStep="personal-details">
+            <PersonalDetails />
+          </OnboardingRoute>
+        ),
         name: "Personal Details",
         description: "User personal details page",
       },
       {
         path: "exam-goal",
-        element: <ExamGoalPage />,
+        element: (
+          <OnboardingRoute requiredStep="exam-goal">
+            <ExamGoalPage />
+          </OnboardingRoute>
+        ),
         name: "Exam Goal",
         description: "Select Exam Goal",
       },
