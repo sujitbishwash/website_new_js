@@ -51,88 +51,84 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
   const testConfig = location.state?.testConfig;
 
   return (
-    <div className="bg-gray-900 min-h-screen font-sans text-gray-200 p-4 sm:p-6 lg:p-8">
-      <div className="max-w-4xl mx-auto">
-        {" "}
-        {/* Adjusted max-width for a more centered, single-column layout */}
-        {/* Top Header */}
-        <header className="flex justify-between items-center mb-6">
-          <div>
-            <h1 className="text-lg md:text-xl font-semibold text-gray-100">
-              {examDetails.title}
-            </h1>
-            {/* User Profile Info */}
-            {profile && (
-              <div className="mt-2 text-sm text-gray-400">
-                <span className="mr-4">
-                  <span className="text-gray-500">Student:</span>{" "}
-                  {profile.name || "Not set"}
+    // The main container now uses h-screen to take the full viewport height
+    <div className="bg-gray-800 text-gray-100 w-full flex flex-col h-screen overflow-hidden">
+      {/* Top Header */}
+      <header className="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-700">
+        <div>
+          <h1 className="text-lg md:text-xl font-semibold text-white">
+            {examDetails.title}
+          </h1>
+          {/* User Profile Info */}
+          {profile && (
+            <div className="mt-2 text-sm text-gray-400">
+              <span className="mr-4">
+                <span className="text-gray-500">Student:</span>{" "}
+                {profile.name || "Not set"}
+              </span>
+              <span className="mr-4">
+                <span className="text-gray-500">Email:</span> {profile.email}
+              </span>
+              {examGoal && (
+                <span>
+                  <span className="text-gray-500">Exam Goal:</span>{" "}
+                  {examGoal.exam}
                 </span>
-                <span className="mr-4">
-                  <span className="text-gray-500">Email:</span> {profile.email}
-                </span>
-                {examGoal && (
-                  <span>
-                    <span className="text-gray-500">Exam Goal:</span>{" "}
-                    {examGoal.exam}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-          <span className="bg-gray-700 text-sm px-3 py-1 rounded-md">
-            Maximum Marks: {examDetails.maxMarks}
-          </span>
-        </header>
-        {/* Main Content Area */}
-        <div className="grid grid-cols-1 gap-8">
-          {/* Main Instruction Panel */}
-          <main className="bg-gray-800 p-6 sm:p-8 rounded-xl shadow-lg">
-            <div className="mb-6">
-              <p className="text-sm text-gray-400">
-                Duration: {examDetails.duration}
-              </p>
-              <h2 className="text-xl font-bold mt-2 text-white">
-                Read the following instructions carefully.
-              </h2>
-            </div>
-
-            {/* Instructions List */}
-            <ul className="space-y-3 text-gray-300 list-decimal list-inside mb-8">
-              {examDetails.instructions.map(
-                (instruction: string, index: number) => (
-                  <li key={index}>{instruction}</li>
-                )
               )}
-            </ul>
-
-            {/* Language Note */}
-            <div className="bg-pink-900/40 border border-pink-700 text-pink-300 p-4 rounded-lg mb-8">
-              <p>{examDetails.languageNote}</p>
             </div>
-
-            {/* Confirmation Checkbox */}
-            <div className="flex items-start space-x-4">
-              <input
-                type="checkbox"
-                id="confirmation"
-                checked={isConfirmed}
-                onChange={() => setIsConfirmed(!isConfirmed)}
-                className="mt-1 h-5 w-5 bg-gray-700 border-gray-600 rounded text-blue-500 focus:ring-blue-600 cursor-pointer"
-              />
-              <label
-                htmlFor="confirmation"
-                className="text-sm text-gray-400 cursor-pointer"
-              >
-                {examDetails.agreementText}
-              </label>
-            </div>
-          </main>
-
-          {/* The student info section has been removed as requested. */}
+          )}
         </div>
-        {/* Footer Buttons */}
-        <footer className="mt-8 pt-6 border-t border-gray-700 flex justify-between items-center">
+        <span className="bg-gray-700 text-sm px-3 py-1 rounded-md">
+          Maximum Marks: {examDetails.maxMarks}
+        </span>
+      </header>
+      {/* Main Content Area: flex-grow allows this section to fill available space, and overflow-y-auto enables scrolling */}
+      <div className="flex-grow overflow-y-auto">
+        <main className="p-6 sm:p-8">
+          <div className="mb-6">
+            <p className="text-sm text-gray-400">
+              Duration: {examDetails.duration}
+            </p>
+            <h2 className="text-xl font-bold mt-2 text-white">
+              Read the following instructions carefully.
+            </h2>
+          </div>
+
+          {/* Instructions List */}
+          <ul className="space-y-3 text-gray-300 list-decimal list-inside mb-8">
+            {examDetails.instructions.map(
+              (instruction: string, index: number) => (
+                <li key={index}>{instruction}</li>
+              )
+            )}
+          </ul>
+        </main>
+
+        {/* The student info section has been removed as requested. */}
+      </div>
+      {/* Footer Buttons */}
+      <footer className="flex-shrink-0 p-6 border-t border-gray-700 space-y-4">
+        {/* Language Note */}
+        <div className="bg-pink-900/40 border border-pink-700 text-pink-300 p-4 rounded-lg">
+          <p>{examDetails.languageNote}</p>
+        </div>
+        {/* Confirmation Checkbox */}
+        <div className="flex items-start space-x-4 mb-8">
+          <input
+            type="checkbox"
+            id="confirmation"
+            checked={isConfirmed}
+            onChange={() => setIsConfirmed(!isConfirmed)}
+            className="mt-1 h-5 w-5 bg-gray-700 border-gray-600 rounded text-blue-500 focus:ring-blue-600 cursor-pointer"
+          />
+          <label
+            htmlFor="confirmation"
+            className="text-sm text-gray-400 cursor-pointer"
+          >
+            {examDetails.agreementText}
+          </label>
+        </div>
+        <div className=" flex justify-between items-center ">
           <button
             onClick={() => navigate(ROUTES.EXAM_INFO)}
             className="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-6 rounded-lg transition-colors"
@@ -154,8 +150,8 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
           >
             I am ready to begin
           </button>
-        </footer>
-      </div>
+        </div>
+      </footer>
     </div>
   );
 };

@@ -1332,7 +1332,7 @@ const AttemptedTests = () => {
   const { user, tests, availableTests } = analysisData;
 
   return (
-    <div style={styles.app(isMobile)}>
+    <div style={styles.app(isMobile)} className="mt-15 sm:mt-0">
       <GlobalStyles />
       {selectedTest ? (
         <TestDetailView

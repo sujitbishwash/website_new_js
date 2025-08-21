@@ -567,7 +567,7 @@ const BookPage: React.FC = () => {
 
   return (
     <div
-      className="flex flex-col h-screen font-sans items-center justify-center p-4"
+      className="flex flex-col h-screen font-sans items-center justify-center p-4 mt-10"
       style={{ backgroundColor: theme.background }}
     >
       {quizQuestions && (

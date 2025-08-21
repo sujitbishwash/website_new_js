@@ -471,7 +471,6 @@ export default function ExamConfigurationModal({
       width: "100%",
     },
     updateButton: {
-      padding: "0.75rem 1.5rem",
       backgroundColor: theme.accent,
       color: theme.primaryText,
       border: "none",
@@ -563,7 +562,7 @@ export default function ExamConfigurationModal({
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-2xl border border-divider flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-2xl border border-divider flex flex-col max-h-[70vh] sm:max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-5 border-b border-gray-700">
