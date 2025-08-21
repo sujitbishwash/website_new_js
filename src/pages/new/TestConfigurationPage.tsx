@@ -3,8 +3,16 @@ import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { fetchTestSeriesFormData, testSeriesApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
+import { ChevronRight, Pen } from "lucide-react";
 
 // --- Type Definitions ---
+interface ChipProps {
+  value: string;
+  label: string;
+  checked: boolean;
+  onClick: (value: string) => void;
+  disabled?: boolean;
+}
 interface RadioButtonProps {
   id: string;
   name: string;
@@ -27,6 +35,33 @@ interface TestSeriesFormData {
 }
 
 // --- Helper Components for UI elements ---
+// Custom Chip Component
+const Chip: React.FC<ChipProps> = ({
+  value,
+  label,
+  checked,
+  onClick,
+  disabled = false,
+}) => (
+  <button
+    onClick={() => !disabled && onClick(value)}
+    disabled={disabled}
+    className={`py-2 px-3 rounded-lg transition-all duration-300 ease-in-out border text-sm font-medium
+      ${
+        disabled
+          ? "bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed"
+          : "cursor-pointer"
+      }
+      ${
+        checked
+          ? "bg-blue-600 border-blue-500 text-white shadow-lg"
+          : "bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-gray-500"
+      }
+    `}
+  >
+    {label}
+  </button>
+);
 
 // Custom Radio Button Component
 const RadioButton: React.FC<RadioButtonProps> = ({
@@ -51,7 +86,7 @@ const RadioButton: React.FC<RadioButtonProps> = ({
     />
     <label
       htmlFor={id}
-      className={`flex items-center cursor-pointer py-2.5 px-5 rounded-lg transition-all duration-300 ease-in-out border
+      className={`flex items-center cursor-pointer py-2 px-3 rounded-lg transition-all duration-300 ease-in-out border
                 ${
                   disabled
                     ? "bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed"
@@ -59,12 +94,12 @@ const RadioButton: React.FC<RadioButtonProps> = ({
                 }
                 ${
                   checked
-                    ? "bg-blue-600 border-blue-500 text-white shadow-lg ring-2 ring-blue-500/50"
+                    ? "bg-blue-600 border-blue-500 text-white shadow-lg"
                     : "bg-gray-700 hover:bg-gray-600 hover:border-gray-500"
                 }`}
     >
       <span
-        className={`w-4 h-4 inline-block mr-3 rounded-full border-2 transition-all duration-300 ${
+        className={`w-4 h-4 inline-block mr-2 rounded-full border-2 transition-all duration-300 ${
           checked ? "border-white bg-white" : "border-gray-400 bg-gray-700"
         }`}
       ></span>
@@ -188,8 +223,8 @@ const TestConfigurationPageComponent = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-br from-background/10 to-background min-h-screen text-white font-sans p-4 sm:p-6 md:p-8 flex items-center justify-center">
-        <div className="w-full max-w-2xl mx-auto bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-6 sm:p-8 text-center">
+      <div className="bg-gradient-to-br from-background/10 to-background min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
+        <div className="w-full max-w-2xl mx-auto bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-4 sm:p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
           <p className="text-gray-400">Loading Test configuration...</p>
         </div>
@@ -198,54 +233,36 @@ const TestConfigurationPageComponent = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-background/10 to-background min-h-screen text-white font-sans p-4 sm:p-6 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-2xl mx-auto bg-foreground/60 border border-gray-700 rounded-2xl shadow-2xl p-6 sm:p-8 space-y-8">
+    <div className="bg-gradient-to-br from-gray-900 to-black min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
+      <div className="w-full max-w-7xl mx-auto bg-background border border-gray-700 rounded-2xl shadow-2xl p-4 mt-15 sm:mt-0 sm:p-8 space-y-6 ">
         {/* --- Header --- */}
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Configure Your Test
           </h1>
-          <p className="text-gray-400 mt-2">
-            Select your preferences to start a practice test.
-          </p>
+          <p className="mt-2 text-lg text-gray-400">Select your preferences to start a practice test.</p>
+          
         </div>
 
         {/* --- User Profile Section --- */}
-        {profile && (
-          <div className="p-6 bg-blue-900/20 border border-blue-700/50 rounded-xl">
-            <h2 className="text-lg font-semibold text-blue-200 mb-3">
-              Student Information
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <span className="text-gray-400">Name:</span>
-                <span className="ml-2 text-white font-medium">
-                  {profile.name || "Not set"}
-                </span>
-              </div>
-              <div>
-                <span className="text-gray-400">Email:</span>
-                <span className="ml-2 text-white font-medium">
-                  {profile.email}
-                </span>
-              </div>
-              {examGoal && (
-                <>
-                  <div>
-                    <span className="text-gray-400">Exam Goal:</span>
-                    <span className="ml-2 text-white font-medium">
-                      {examGoal.exam}
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-gray-400">Group Type:</span>
-                    <span className="ml-2 text-white font-medium">
-                      {examGoal.groupType}
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
+        {profile && examGoal && (
+          <div className="mt-4 flex justify-start items-center gap-3">
+            <span className="text-xs font-medium px-3 py-1">
+              Exam Goal: {examGoal.exam}
+            </span>
+            <span className="text-xs font-medium px-3 py-1">
+              Group Type: {examGoal.groupType}
+            </span>
+            <button
+              onClick={() => {
+                console.log("🔄 ProfilePage: Manual refresh requested");
+                // This will trigger a re-render when profile changes
+              }}
+              className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
+              title="Refresh profile data"
+            >
+              <Pen className="w-4 h-4" />
+            </button>
           </div>
         )}
 
@@ -257,47 +274,39 @@ const TestConfigurationPageComponent = () => {
         )}
 
         {/* --- Form Sections --- */}
-        <div className="space-y-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* 1. Select Subject */}
-          <div className="p-6 bg-black/20 border border-gray-700/80 rounded-xl">
+          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">
               1. Select Subject
             </h2>
             <div className="flex flex-wrap gap-4">
               {subjects.map((subject) => (
-                <RadioButton
+                <Chip
                   key={subject}
-                  id={`subject-${subject}`}
-                  name="subject"
                   value={subject}
                   label={subject}
                   checked={selectedSubject === subject}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSelectedSubject(e.target.value)
-                  }
+                  onClick={setSelectedSubject}
                 />
               ))}
             </div>
           </div>
 
-          {/* 2. Select Sub-Topic (dynamic) */}
-          <div className="p-6 bg-black/20 border border-gray-700/80 rounded-xl">
+          {/* 2. Select Sub-Topic */}
+          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">
-              2. Select Sub-Topic (Optional)
+              2. Select Topic (Optional)
             </h2>
             <div className="flex flex-wrap gap-4">
               {currentSubTopics.length > 0 ? (
                 currentSubTopics.map((topic: string) => (
-                  <RadioButton
+                  <Chip
                     key={topic}
-                    id={`subtopic-${topic}`}
-                    name="subtopic"
                     value={topic}
                     label={topic}
                     checked={selectedSubTopic === topic}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      setSelectedSubTopic(e.target.value)
-                    }
+                    onClick={setSelectedSubTopic}
                   />
                 ))
               ) : (
@@ -309,44 +318,36 @@ const TestConfigurationPageComponent = () => {
           </div>
 
           {/* 3. Select Difficulty Level */}
-          <div className="p-6 bg-black/20 border border-gray-700/80 rounded-xl">
+          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">
-              3. Select Difficulty Level
+              3. Select Difficulty
             </h2>
             <div className="flex flex-wrap gap-4">
               {difficulties.map((level) => (
-                <RadioButton
+                <Chip
                   key={level}
-                  id={`difficulty-${level}`}
-                  name="difficulty"
                   value={level}
                   label={level}
                   checked={selectedDifficulty === level}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSelectedDifficulty(e.target.value)
-                  }
+                  onClick={setSelectedDifficulty}
                 />
               ))}
             </div>
           </div>
 
           {/* 4. Select Language */}
-          <div className="p-6 bg-black/20 border border-gray-700/80 rounded-xl">
+          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
             <h2 className="text-xl font-semibold text-gray-200 mb-4">
               4. Select Language
             </h2>
             <div className="flex flex-wrap gap-4">
               {languages.map((lang) => (
-                <RadioButton
+                <Chip
                   key={lang}
-                  id={`language-${lang}`}
-                  name="language"
                   value={lang}
                   label={languageMapper(lang)}
                   checked={selectedLanguage === lang}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                    setSelectedLanguage(e.target.value)
-                  }
+                  onClick={setSelectedLanguage}
                 />
               ))}
             </div>
@@ -354,7 +355,7 @@ const TestConfigurationPageComponent = () => {
         </div>
 
         {/* --- Continue Button --- */}
-        <div className="pt-6 flex justify-center">
+        <div className="flex justify-end">
           <button
             onClick={handleContinue}
             disabled={
@@ -363,16 +364,16 @@ const TestConfigurationPageComponent = () => {
               !selectedDifficulty ||
               !selectedLanguage
             }
-            className={`font-bold py-3 px-12 rounded-full text-lg transition-all duration-300 ease-in-out transform focus:outline-none focus:ring-4 focus:ring-blue-500/50 ${
+            className={`px-4 py-2 text-xl font-semibold rounded-lg text-foreground bg-foreground/10 backdrop-blur-sm border border-foreground/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
               isSubmitting ||
               !selectedSubject ||
               !selectedDifficulty ||
               !selectedLanguage
                 ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white hover:scale-105"
+                : "bg-blue-600 hover:bg-blue-700 text-white"
             }`}
           >
-            {isSubmitting ? "Creating Test..." : "Continue"}
+            {isSubmitting ? "Creating Test..." : "Start Test"}
           </button>
         </div>
       </div>

@@ -7,6 +7,7 @@ import LogoutModal from "./LogoutModal";
 import ExamConfigurationModal from "./modals/ExamConfigurationModal";
 import ProfileModal from "./ProfilePage";
 import Sidebar from "./sidebar/Sidebar";
+import AiPadhaiLogo from "../assets/ai_padhai_logo.svg"; // Adjust path as needed
 
 const Layout: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -56,7 +57,7 @@ const Layout: React.FC = () => {
 
   return (
     <>
-      <div className="flex h-screen bg-background text-foreground overflow-hidden">
+      <div className="flex h-screen">
         {!shouldHideSidebar && (
           <Sidebar
             isOpen={isOpen}
@@ -70,12 +71,15 @@ const Layout: React.FC = () => {
           />
         )}
         <div className="flex-1 flex flex-col min-w-0">
+              
           {/* Header with hamburger menu */}
           {!shouldHideSidebar && (
-            <header className="bg-card border-b border-border p-4 lg:hidden flex-shrink-0">
+            
+            <header className="absolute top-0 left-0 right-0 z-10 p-4 lg:hidden flex-shrink-0 flex items-center">
+              
               <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="text-muted-foreground hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-lg p-2"
+                className="text-muted-foreground bg-card border border-gray hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-lg p-2"
               >
                 <Menu size={24} />
               </button>

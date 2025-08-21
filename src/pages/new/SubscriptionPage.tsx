@@ -245,9 +245,9 @@ const SubscriptionPage = () => {
   return (
     <>
       <SubscriptionStyles />
-      <div className="subscription-page">
+      <div className="subscription-page mt-10 sm:mt-0">
         <button
-          className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+          className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer hidden sm:block"
           onClick={handleClose}
           onMouseOver={(e) =>
               (e.currentTarget.style.color = theme.primaryText)
