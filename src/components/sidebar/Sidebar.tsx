@@ -91,7 +91,7 @@ const firstPart = "/" + parts[1];
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
       {
-      firstPart!= ROUTES.VIDEO_LEARNING && (
+      firstPart!= ROUTES.VIDEO_LEARNING && firstPart!= ROUTES.PREMIUM && (
         <button
           onClick={() => {
             navigate(ROUTES.PREMIUM);
@@ -99,7 +99,8 @@ const firstPart = "/" + parts[1];
           className="fixed top-4 right-4 sm:right-8 z-20 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none"
         >
           <SparklesIcon className="h-5 w-5" />
-          <span>Upgrade plan</span>
+          <span className="hidden sm:inline">Upgrade plan</span>
+          <span className="sm:hidden">Upgrade</span>
         </button>
       )}
       {/* Overlay for mobile */}

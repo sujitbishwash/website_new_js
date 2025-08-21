@@ -558,58 +558,100 @@ export default function ExamConfigurationModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4 font-sans"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl mx-4 bg-background rounded-xl shadow-2xl border border-divider flex flex-col max-h-[70vh] sm:max-h-[90vh]"
+        className="relative w-full max-w-2xl bg-[#1d1d1f] text-gray-200 rounded-2xl shadow-2xl border border-white/10 flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="p-5 border-b border-gray-700">
-          <h3 className="text-2xl font-semibold">Exam Configuration</h3>
-
+        {/* Modal Header */}
+        <div className="p-5 border-b border-white/10 flex justify-between items-center">
+          <h3 className="text-xl font-semibold text-white">
+            Exam Configuration
+          </h3>
           <button
-            className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+            className="p-1.5 text-gray-400 rounded-full hover:bg-white/10 hover:text-white transition-colors"
             onClick={onClose}
-            onMouseOver={(e) =>
-              (e.currentTarget.style.color = theme.primaryText)
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.color = theme.secondaryText)
-            }
             aria-label="Close modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
-        <div style={styles.content}>
-          {/* Current Exam Goal Display */}
+
+        {/* Modal Content */}
+        <div className="p-6 space-y-6 overflow-y-auto">
+          {/* Current Goal Display */}
           {examGoal && (
-            <div style={styles.currentGoalInfo}>
-              <strong>Current Exam Goal:</strong> {examGoal.exam} (
-              {examGoal.groupType})
+            <div className="bg-white/5 p-4 rounded-lg text-sm">
+              <span className="font-semibold text-gray-300">Current Goal:</span>{" "}
+              {examGoal.exam} ({examGoal.groupType})
             </div>
           )}
           {/* Messages */}
           {updateMessage && (
-            <div
-              style={{ ...styles.messageContainer, ...styles.successMessage }}
-            >
+            <div className="bg-green-500/20 border border-green-500/30 text-green-300 text-sm p-3 rounded-lg">
               {updateMessage}
             </div>
           )}
           {updateError && (
-            <div style={{ ...styles.messageContainer, ...styles.errorMessage }}>
+            <div className="bg-red-500/20 border border-red-500/30 text-red-300 text-sm p-3 rounded-lg">
               {updateError}
             </div>
           )}
+
           {/* User Errors */}
           {userError && (
             <div style={{ ...styles.messageContainer, ...styles.errorMessage }}>
               {userError}
             </div>
           )}
-          <div
+
+          {/* Controls */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label
+                htmlFor="category-select"
+                className="block text-sm font-medium text-gray-400"
+              >
+                Exam Category
+              </label>
+              <select
+                id="category-select"
+                value={selectedCategoryKey}
+                onChange={handleCategoryChange}
+                className="w-full bg-[#2c2c2e] border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              >
+                {categories.map((category) => (
+                  <option key={category.key} value={category.key}>
+                    {category.displayName}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-2">
+              <label
+                htmlFor="exam-select"
+                className="block text-sm font-medium text-gray-400"
+              >
+                Specific Exam
+              </label>
+              <select
+                id="exam-select"
+                value={selectedExamKey}
+                onChange={handleExamChange}
+                className="w-full bg-[#2c2c2e] border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+              >
+                {currentExams.map((exam) => (
+                  <option key={exam.key} value={exam.key}>
+                    {exam.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/**<div
             style={{
               ...styles.controlsContainer,
               ...{ flexDirection: window.innerWidth < 600 ? "column" : "row" },
@@ -651,9 +693,9 @@ export default function ExamConfigurationModal({
                 ))}
               </select>
             </div>
-          </div>
+          </div>*/}
 
-          {selectedExamDetails && (
+          {/**selectedExamDetails && (
             <div style={styles.detailsCard}>
               <h3 style={styles.detailTitle}>{selectedExamDetails.name}</h3>
 
@@ -682,11 +724,51 @@ export default function ExamConfigurationModal({
                 </ul>
               </div>
             </div>
+          )*/}
+
+          {/* Details Card */}
+          {selectedExamDetails && (
+            <div className="bg-white/5 p-5 rounded-lg space-y-4 border border-white/10 animate-fade-in-fast">
+              <h3 className="text-lg font-semibold text-white">
+                {selectedExamDetails.name}
+              </h3>
+
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-gray-400">
+                  Description
+                </h4>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {selectedExamDetails.description}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-gray-400">
+                  Eligibility
+                </h4>
+                <p className="text-gray-300 text-sm leading-relaxed">
+                  {selectedExamDetails.eligibility}
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="text-sm font-semibold text-gray-400">
+                  Exam Pattern
+                </h4>
+                <ul className="list-disc list-inside space-y-1.5 pl-2">
+                  {selectedExamDetails.pattern.map((step, index) => (
+                    <li key={index} className="text-gray-300 text-sm">
+                      {step}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
           )}
         </div>
 
         {/* Modal Actions (Footer) */}
-        <div className="flex justify-end items-center gap-4 p-5 border-t border-gray-700">
+        {/**<div className="flex justify-end items-center gap-4 p-5 border-t border-gray-700">
           <button
             onClick={onClose}
             className="px-6 py-2 font-medium text-gray-300 bg-transparent rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
@@ -713,6 +795,44 @@ export default function ExamConfigurationModal({
             }}
             className="px-6 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
           >
+            {isUpdating ? "Updating..." : "Update Exam Goal"}
+          </button>
+        </div>*/}
+        {/* Modal Footer */}
+        <div className="flex justify-end items-center gap-4 p-5 border-t border-white/10 bg-[#2c2c2e]/50 rounded-b-2xl">
+          <button
+            onClick={onClose}
+            className="px-5 py-2 text-sm font-semibold text-gray-200 bg-white/10 rounded-lg hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleUpdateExamGoal}
+            disabled={isUpdating}
+            className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1d1d1f] transition-all disabled:bg-blue-600/50 disabled:cursor-not-allowed flex items-center"
+          >
+            {isUpdating && (
+              <svg
+                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+              >
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                ></circle>
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                ></path>
+              </svg>
+            )}
             {isUpdating ? "Updating..." : "Update Exam Goal"}
           </button>
         </div>
