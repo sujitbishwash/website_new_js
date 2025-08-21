@@ -713,8 +713,6 @@ const VideoPage: React.FC = () => {
                   isLoadingTranscript={isLoadingTranscript}
                   chaptersError={chaptersError}
                   transcriptError={transcriptError}
-                  onFeedbackSkip={skipFeedback}
-                  onFeedbackSubmit={submitFeedback}
                 />
               </div>
             )}
