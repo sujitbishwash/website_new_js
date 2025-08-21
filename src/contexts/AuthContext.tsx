@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { ApiResponse } from "../lib/api-client";
+import { ApiResponse, authApi } from "../lib/api-client";
 import { authHelpers } from "../lib/supabase";
 
 interface User {
@@ -343,7 +343,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const signInWithGoogle = async () => {
-    return await authHelpers.signInWithGoogle();
+    try {
+      // This will redirect the user to the backend OAuth endpoint
+      // The backend will handle the Google OAuth flow and redirect back to our callback
+      const response = await authApi.googleLogin();
+
+      // The response won't actually be used since we're redirecting,
+      // but we return it for consistency
+      return { data: response.data, error: null };
+    } catch (error) {
+      console.error("Google sign-in error:", error);
+      return { data: null, error };
+    }
   };
 
   const checkExamGoal = async (): Promise<boolean> => {

@@ -76,5 +76,8 @@ export const ROUTE_NAMES = {
 // Helper function to build video learning route with ID
 export const buildVideoLearningRoute = (videoId: string) => `${ROUTES.VIDEO_LEARNING}/${videoId}`;
 
+// Helper function to build auth callback route with token
+export const buildAuthCallbackRoute = (token: string) => `${ROUTES.AUTH_CALLBACK}?token=${encodeURIComponent(token)}`;
+
 // Type for route values
 export type RouteValue = typeof ROUTES[keyof typeof ROUTES];

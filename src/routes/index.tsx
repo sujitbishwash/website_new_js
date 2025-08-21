@@ -184,7 +184,7 @@ export const routes = [
         path: "auth/callback",
         element: <AuthCallbackPage />,
         name: "Auth Callback",
-        description: "OAuth callback handler",
+        description: "OAuth callback handler with token parameter",
       },
       // Payment pages - accessible without authentication
       {

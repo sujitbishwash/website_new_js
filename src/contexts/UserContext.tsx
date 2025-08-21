@@ -250,7 +250,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         setIsLoading(false);
       }
     },
-    [authLoading]
+    [authLoading, getUserData]
   );
 
   // Individual fetch methods
@@ -381,7 +381,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setIsBackgroundLoading(false);
     }
-  }, [isBackgroundLoading]);
+  }, [isBackgroundLoading, getUserData]);
 
   // Start background sync
   const startBackgroundSync = useCallback(() => {
@@ -413,7 +413,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       },
       CACHE_CONFIG.TTL.USER_PROFILE
     );
-  }, []);
+  }, [performBackgroundSync, getUserData]);
 
   // Stop background sync
   const stopBackgroundSync = useCallback(() => {
@@ -427,14 +427,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     if (!isBackgroundSyncEnabled) {
       startBackgroundSync();
     }
-  }, [isBackgroundSyncEnabled]);
+  }, [isBackgroundSyncEnabled, startBackgroundSync]);
 
   // Disable background sync
   const disableBackgroundSync = useCallback(() => {
     if (isBackgroundSyncEnabled) {
       stopBackgroundSync();
     }
-  }, [isBackgroundSyncEnabled]);
+  }, [isBackgroundSyncEnabled, stopBackgroundSync]);
 
   // Refresh methods
   const refreshProfile = useCallback(async () => {
@@ -614,7 +614,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     return () => {
       stopBackgroundSync();
     };
-  }, [isAuthenticated, authLoading, fetchUserData, fetchExamGoal]);
+  }, [
+    isAuthenticated,
+    authLoading,
+    fetchUserData,
+    fetchExamGoal,
+    startBackgroundSync,
+    stopBackgroundSync,
+  ]);
 
   const value: UserContextType = {
     profile,
