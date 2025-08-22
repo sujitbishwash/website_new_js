@@ -14,9 +14,9 @@ import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/Layout";
 import ProtectedRoute from "../components/ProtectedRoute";
+import OnboardingRoute from "../components/OnboardingRoute";
 import RootLayout from "../components/RootLayout";
 
-import TestPage from "@/pages/TestPage";
 import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
 import ExamInformationPage from "../pages/new/ExamInformationPage";
 import ExamReconfirmationPage from "../pages/new/ExamReconfirmationPage";
@@ -152,13 +152,21 @@ export const routes = [
       // Public onboarding pages (accessible without full authentication)
       {
         path: "personal-details",
-        element: <PersonalDetails />,
+        element: (
+          <OnboardingRoute requiredStep="personal-details">
+            <PersonalDetails />
+          </OnboardingRoute>
+        ),
         name: "Personal Details",
         description: "User personal details page",
       },
       {
         path: "exam-goal",
-        element: <ExamGoalPage />,
+        element: (
+          <OnboardingRoute requiredStep="exam-goal">
+            <ExamGoalPage />
+          </OnboardingRoute>
+        ),
         name: "Exam Goal",
         description: "Select Exam Goal",
       },
@@ -185,7 +193,7 @@ export const routes = [
         path: "auth/callback",
         element: <AuthCallbackPage />,
         name: "Auth Callback",
-        description: "OAuth callback handler",
+        description: "OAuth callback handler with token parameter",
       },
       // Payment pages - accessible without authentication
       {
@@ -199,12 +207,6 @@ export const routes = [
         element: <PaymentSuccessPage />,
         name: "Payment Success",
         description: "Payment success confirmation page",
-      },
-      {
-        path: "test",
-        element: <TestPage />,
-        name: "",
-        description: "",
       },
       // Catch-all route for 404 - must be last
       {

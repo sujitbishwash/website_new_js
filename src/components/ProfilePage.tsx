@@ -33,7 +33,7 @@ interface UserProfile {
   city: string;
   state: string;
   country: string;
-  gender: "Male" | "Female" | "Other" | "Prefer not to say" | "";
+  gender: "Male" | "Female" | "Other" | "Prefer not to say" | "Not set" | "";
   dob: string; // Date of Birth, format YYYY-MM-DD
 }
 
@@ -77,17 +77,53 @@ interface NotificationSettingRowProps {
 }
 
 // --- DYNAMIC USER PROFILE CREATION ---
-const createInitialUserProfile = (profile: any): UserProfile => ({
-  name: profile?.name || "Not set",
-  email: profile?.email || "Not set",
-  mobile: profile?.phone || profile?.phoneno || "Not set",
-  address: profile?.address || "Not set",
-  city: profile?.city || "Not set",
-  state: profile?.state || "Not set",
-  country: profile?.country || "Not set",
-  gender: profile?.gender || "Not set",
-  dob: profile?.dateOfBirth || profile?.dob || "Not set",
-});
+const createInitialUserProfile = (profile: any): UserProfile => {
+  console.log("🔄 ProfilePage: Creating user profile from data:", profile);
+
+  // Handle gender field - convert to proper format if needed
+  let genderValue:
+    | "Male"
+    | "Female"
+    | "Other"
+    | "Prefer not to say"
+    | "Not set"
+    | "" = "Not set";
+  if (profile?.gender) {
+    const genderLower = profile.gender.toLowerCase();
+    if (genderLower === "male") {
+      genderValue = "Male";
+    } else if (genderLower === "female") {
+      genderValue = "Female";
+    } else if (genderLower === "other") {
+      genderValue = "Other";
+    } else {
+      genderValue = "Prefer not to say";
+    }
+  }
+
+  // Handle date of birth field
+  let dobValue = "Not set";
+  if (profile?.date_of_birth) {
+    dobValue = profile.date_of_birth;
+  } else if (profile?.dob) {
+    dobValue = profile.dob;
+  }
+
+  const userProfile = {
+    name: profile?.name || "Not set",
+    email: profile?.email || "Not set",
+    mobile: profile?.phone || profile?.phoneno || "Not set",
+    address: profile?.address || "Not set",
+    city: profile?.city || "Not set",
+    state: profile?.state || "Not set",
+    country: profile?.country || "Not set",
+    gender: genderValue,
+    dob: dobValue,
+  };
+
+  console.log("✅ ProfilePage: Created user profile:", userProfile);
+  return userProfile;
+};
 
 const countries = [
   "United States",
@@ -130,8 +166,9 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
   name,
 }) => (
   <div>
-    
-    <label className="block text-sm font-medium text-secondaryText">{label}</label>
+    <label className="block text-sm font-medium text-secondaryText">
+      {label}
+    </label>
     {isEditing ? (
       <input
         type={type}
@@ -285,7 +322,6 @@ import {
   Bell,
   CircleCheck,
   CircleUserRound,
-  Gauge,
   GaugeCircle,
   KeyRound,
   RefreshCcw,
@@ -314,7 +350,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   useEffect(() => {
     if (profile) {
       console.log("🔄 ProfilePage: Profile updated from UserContext:", profile);
-      setUserProfile(createInitialUserProfile(profile));
+      const newUserProfile = createInitialUserProfile(profile);
+      setUserProfile(newUserProfile);
+      console.log(
+        "✅ ProfilePage: User profile state updated:",
+        newUserProfile
+      );
+    } else {
+      console.log("⚠️ ProfilePage: No profile data available from UserContext");
     }
   }, [profile]);
 
@@ -463,6 +506,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       <CircleCheck className="w-3 h-3" />
                       Data synced from your account
                     </span>
+                    {(profile.gender || profile.date_of_birth) && (
+                      <div className="mt-1 text-xs text-blue-400">
+                        <span className="inline-flex items-center gap-1">
+                          <CircleCheck className="w-3 h-3" />
+                          Personal details loaded from API
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
@@ -854,7 +905,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     }
   };
 
-    return (
+  return (
     <>
       <style>{`
         @keyframes fade-in { 0% { opacity: 0; } 100% { opacity: 1; } }
@@ -863,24 +914,48 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         .animate-slide-in { animation: slide-in 0.3s ease-out; }
       `}</style>
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
-        <div ref={modalRef} className="relative w-full max-w-4xl h-[80vh] max-h-[600px] rounded-2xl shadow-2xl bg-card flex flex-col md:flex-row overflow-hidden animate-slide-in">
+        <div
+          ref={modalRef}
+          className="relative w-full max-w-4xl h-[80vh] max-h-[600px] rounded-2xl shadow-2xl bg-card flex flex-col md:flex-row overflow-hidden animate-slide-in"
+        >
+          <button
+            onClick={handleClose}
+            className="absolute top-3 right-3 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+          >
+            <X />
+          </button>
 
-          <button onClick={handleClose} className="absolute top-3 right-3 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"><X  /></button>
-          
           <nav className="w-full md:w-1/3 lg:w-1/4 bg-background p-4 flex-shrink-0 border-b md:border-b-0 md:border-r border-foreground/20">
-            <h2 className="text-lg font-semibold text-foreground px-2 mt-2 mb-4 hidden md:block">Settings</h2>
+            <h2 className="text-lg font-semibold text-foreground px-2 mt-2 mb-4 hidden md:block">
+              Settings
+            </h2>
             <ul className="flex flex-row flex-wrap md:flex-col gap-2">
               {navItems.map((item) => (
                 <li key={item.name} className="flex-shrink-0">
-                  <a href="#" onClick={(e) => { e.preventDefault(); setActiveTab(item.name); }} className={`flex items-center gap-2 md:gap-3 px-3 py-2 rounded-full md:rounded-md text-sm font-medium transition-colors ${activeTab === item.name ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-accent hover:text-foreground"}`}>
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setActiveTab(item.name);
+                    }}
+                    className={`flex items-center gap-2 md:gap-3 px-3 py-2 rounded-full md:rounded-md text-sm font-medium transition-colors ${
+                      activeTab === item.name
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                    }`}
+                  >
                     <item.icon className="w-5 h-5 flex-shrink-0" />
-                    <span className="whitespace-nowrap md:whitespace-normal">{item.name}</span>
+                    <span className="whitespace-nowrap md:whitespace-normal">
+                      {item.name}
+                    </span>
                   </a>
                 </li>
               ))}
             </ul>
           </nav>
-          <main className="w-full md:w-2/3 lg:w-3/4 p-4 md:p-8 overflow-y-auto flex-grow">{renderContent()}</main>
+          <main className="w-full md:w-2/3 lg:w-3/4 p-4 md:p-8 overflow-y-auto flex-grow">
+            {renderContent()}
+          </main>
         </div>
       </div>
     </>

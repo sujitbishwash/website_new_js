@@ -1,90 +1,71 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { supabase } from "../../lib/supabase";
 import { ROUTES } from "../../routes/constants";
 
 const AuthCallbackPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const { checkUserState, checkAuth, refreshUserData } = useAuth();
 
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the session from the URL hash
-        const { data, error } = await supabase.auth.getSession();
+        // Check for token in query parameters first
+        const tokenFromQuery = searchParams.get("token");
 
-        if (error) {
-          console.error("Auth callback error:", error);
-          setError("Authentication failed. Please try again.");
-          setTimeout(() => {
-            navigate(ROUTES.LOGIN);
-          }, 3000);
+        if (tokenFromQuery) {
+          // Use token from query parameter
+          console.log("🔑 Token found in query parameter");
+          localStorage.setItem("authToken", tokenFromQuery);
+          console.log(
+            "🔑 Token stored from query:",
+            tokenFromQuery ? `${tokenFromQuery.substring(0, 20)}...` : "null"
+          );
+
+          // Store the token and let the API calls fetch real user data
+          console.log("🔄 Proceeding with token from query parameter...");
+        } else {
+          // No token present; invalid access to callback
+          console.log("❌ No token in callback query params");
+          setError("Invalid authentication callback.");
+          setTimeout(() => navigate(ROUTES.LOGIN), 2000);
           return;
         }
 
-        if (data.session) {
-          // Successfully authenticated
-          console.log("User authenticated:", data.session.user);
+        // Update AuthContext state
+        console.log("🔄 Updating AuthContext state...");
+        await checkAuth();
 
-          // Store the token for API calls
-          localStorage.setItem("authToken", data.session.access_token);
-          console.log(
-            "🔑 Token stored:",
-            data.session.access_token
-              ? `${data.session.access_token.substring(0, 20)}...`
-              : "null"
-          );
+        // Small delay to ensure token is properly stored
+        await new Promise((resolve) => setTimeout(resolve, 100));
 
-          // Also store user data in localStorage for AuthContext
-          const userInfo = {
-            id: data.session.user.id,
-            email: data.session.user.email || "",
-            name: data.session.user.user_metadata?.name || "",
-          };
-          localStorage.setItem("userData", JSON.stringify(userInfo));
-          console.log("👤 User data stored:", userInfo);
+        try {
+          // Force refresh user data to ensure we have the latest data
+          console.log("🔄 Force refreshing user data...");
+          await refreshUserData();
 
-          // Update AuthContext state
-          console.log("🔄 Updating AuthContext state...");
-          await checkAuth();
+          // Use the stored user data from AuthContext to determine where to navigate
+          console.log("🔍 About to call checkUserState...");
+          const userState = await checkUserState();
+          console.log("User state:", userState);
 
-          // Small delay to ensure token is properly stored
-          await new Promise((resolve) => setTimeout(resolve, 100));
-
-          try {
-            // Force refresh user data to ensure we have the latest data
-            console.log("🔄 Force refreshing user data...");
-            await refreshUserData();
-
-            // Use the stored user data from AuthContext to determine where to navigate
-            console.log("🔍 About to call checkUserState...");
-            const userState = await checkUserState();
-            console.log("User state:", userState);
-
-            // Navigate based on user state
-            if (userState.nextStep === "dashboard") {
-              console.log("User has exam goal, redirecting to dashboard");
-              navigate(ROUTES.DASHBOARD, { replace: true });
-            } else if (userState.nextStep === "exam-goal") {
-              console.log("Redirecting to exam goal page");
-              navigate(ROUTES.EXAM_GOAL, { replace: true });
-            } else {
-              console.log("Redirecting to personal details page");
-              navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
-            }
-          } catch (error) {
-            console.error("Error checking user state:", error);
-            // Fallback to personal details page if API fails
+          // Navigate based on user state
+          if (userState.nextStep === "dashboard") {
+            console.log("User has exam goal, redirecting to dashboard");
+            navigate(ROUTES.DASHBOARD, { replace: true });
+          } else if (userState.nextStep === "exam-goal") {
+            console.log("Redirecting to exam goal page");
+            navigate(ROUTES.EXAM_GOAL, { replace: true });
+          } else {
+            console.log("Redirecting to personal details page");
             navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
           }
-        } else {
-          // No session found
-          setError("No authentication session found.");
-          setTimeout(() => {
-            navigate(ROUTES.LOGIN);
-          }, 3000);
+        } catch (error) {
+          console.error("Error checking user state:", error);
+          // Fallback to personal details page if API fails
+          navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
       } catch (error) {
         console.error("Auth callback error:", error);
@@ -96,7 +77,7 @@ const AuthCallbackPage: React.FC = () => {
     };
 
     handleAuthCallback();
-  }, [navigate]);
+  }, [navigate, searchParams, checkAuth, refreshUserData, checkUserState]);
 
   return (
     <div

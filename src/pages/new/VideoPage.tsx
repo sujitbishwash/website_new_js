@@ -7,12 +7,8 @@ import Flashcards from "@/components/learning/Flashcards";
 import Quiz from "@/components/learning/Quiz";
 import Summary from "@/components/learning/Summary";
 import { useVideoFeedback } from "@/hooks/useVideoFeedback";
-import { theme } from "@/styles/theme";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useParams } from "react-router-dom";
-import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
-import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/routes/constants";
+import { theme } from "@/styles/theme";
 import {
   BookOpen,
   Ellipsis,
@@ -24,15 +20,13 @@ import {
   Link,
   MessageCircleQuestion,
   MessageSquareText,
-  Pen,
-  Star,
   StickyNote,
   Type,
-  Upload,
   X,
 } from "lucide-react";
-import Feedback from "@/components/modals/Feedback";
-import VideoFeedback from "@/components/modals/Feedback";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
 
 declare global {
   interface Window {

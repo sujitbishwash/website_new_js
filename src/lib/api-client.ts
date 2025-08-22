@@ -105,17 +105,48 @@ export const authApi = {
     });
   },
 
+  // Google OAuth login - initiate OAuth flow
+  googleLogin: async () => {
+    // For OAuth flows, we need to redirect the entire page, not make an AJAX request
+    // This avoids CORS issues with Google's OAuth endpoint
+    const redirectUrl = `${API_CONFIG.baseURL}/ums/auth/login`;
+    window.location.href = redirectUrl;
+
+    // Return a promise that resolves immediately since we're redirecting
+    return Promise.resolve({
+      data: { redirect_url: redirectUrl },
+      status: 200
+    });
+  },
+
   // Get authenticated user data (for exam goal check)
   getAuthenticatedUser: async () => {
     console.log("🚨 DIRECT API CALL to getAuthenticatedUser", new Date().toISOString());
-    return apiRequest<{ exam?: string; group_type?: string; name?: string; email?: string; id?: string; otp?: string; password?: string; phoneno?: string; type?: string; usercode?: string }>('GET', '/ums/me');
+    return apiRequest<{
+      exam?: string;
+      group_type?: string;
+      name?: string;
+      email?: string;
+      id?: string;
+      otp?: string;
+      password?: string;
+      phoneno?: string;
+      type?: string;
+      usercode?: string;
+      gender?: string;
+      date_of_birth?: string;
+      exam_goal?: {
+        exam: string | null;
+        group: string | null;
+      };
+    }>('GET', '/ums/me');
   },
 
 
 
   // Update user details
-  updateUserDetails: async (userData: { name: string; gender?: string; dateOfBirth?: string }) => {
-    return apiRequest<{ success: boolean; message: string }>('PUT', '/ums/me', userData);
+  updateUserDetails: async (userData: { name: string; gender?: string; date_of_birth?: string }) => {
+    return apiRequest<{ message: string }>('PUT', '/ums/user', userData);
   }
 };
 

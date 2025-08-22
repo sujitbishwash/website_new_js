@@ -17,6 +17,8 @@ export interface UserProfile {
   email: string;
   phone?: string;
   avatar?: string;
+  gender?: string;
+  date_of_birth?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -208,6 +210,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
           email: userData?.email || "",
           phone: undefined,
           avatar: undefined,
+          gender: userData?.gender || undefined,
+          date_of_birth: userData?.date_of_birth || undefined,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),
         };
@@ -216,14 +220,35 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         cacheManager.set("profile", profileData, CACHE_CONFIG.TTL.USER_PROFILE);
 
         // Also check if the AuthContext response contains exam goal data
-        if (userData?.exam && userData?.group_type) {
+        if (userData?.exam_goal?.exam && userData?.exam_goal?.group) {
+          const examGoalData: ExamGoal = {
+            exam: userData.exam_goal.exam,
+            groupType: userData.exam_goal.group,
+          };
+
+          console.log(
+            "🎯 UserContext: Found exam goal data in /ums/me response:",
+            examGoalData
+          );
+
+          // Cache the exam goal data
+          cacheManager.set(
+            "examGoal",
+            examGoalData,
+            CACHE_CONFIG.TTL.EXAM_GOAL
+          );
+
+          // Update exam goal state
+          setExamGoal(examGoalData);
+        } else if (userData?.exam && userData?.group_type) {
+          // Fallback for old format (if still supported)
           const examGoalData: ExamGoal = {
             exam: userData.exam,
             groupType: userData.group_type,
           };
 
           console.log(
-            "🎯 UserContext: Found exam goal data in AuthContext response:",
+            "🎯 UserContext: Found exam goal data in legacy format:",
             examGoalData
           );
 
@@ -250,7 +275,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         setIsLoading(false);
       }
     },
-    [authLoading]
+    [authLoading, getUserData]
   );
 
   // Individual fetch methods
@@ -261,61 +286,73 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     [fetchUserData]
   );
 
-  const fetchExamGoal = useCallback(async (forceRefresh = false) => {
-    console.log("🎯 fetchExamGoal called with forceRefresh:", forceRefresh);
+  const fetchExamGoal = useCallback(
+    async (forceRefresh = false) => {
+      console.log("🎯 fetchExamGoal called with forceRefresh:", forceRefresh);
 
-    // Check cache first before making API call
-    const storedExamGoal = cacheManager.getFromCache("examGoal");
-    console.log(
-      "📋 fetchExamGoal: Stored exam goal from cache:",
-      storedExamGoal
-    );
+      // Check cache first before making API call
+      const storedExamGoal = cacheManager.getFromCache("examGoal");
+      console.log(
+        "📋 fetchExamGoal: Stored exam goal from cache:",
+        storedExamGoal
+      );
 
-    if (storedExamGoal && !forceRefresh) {
-      setExamGoal(storedExamGoal as ExamGoal);
-      console.log("📋 Using stored exam goal data in fetchExamGoal");
-      return;
-    }
-
-    try {
-      setIsLoading(true);
-      setError(null);
-
-      console.log("📡 fetchExamGoal: Making API call to getUserExamGoal...");
-      const { examGoalApi } = await import("../lib/api-client");
-      const response = await examGoalApi.getUserExamGoal();
-      console.log("📡 fetchExamGoal: API response received:", response);
-
-      if (response?.data?.success && response.data.data) {
-        const examGoalData: ExamGoal = {
-          exam: response.data.data.exam,
-          groupType: response.data.data.group_type,
-        };
-
-        console.log("🎯 fetchExamGoal: Parsed exam goal data:", examGoalData);
-
-        // Cache the exam goal data
-        cacheManager.set("examGoal", examGoalData, CACHE_CONFIG.TTL.EXAM_GOAL);
-        console.log("💾 fetchExamGoal: Exam goal data cached successfully");
-
-        // Update state
-        setExamGoal(examGoalData);
-        console.log("🎯 Exam goal fetched directly:", examGoalData);
-      } else {
-        // No exam goal found
-        console.log("⚠️ fetchExamGoal: No exam goal found in API response");
-        cacheManager.invalidate("examGoal");
-        setExamGoal(null);
-        console.log("❌ No exam goal found");
+      if (storedExamGoal && !forceRefresh) {
+        setExamGoal(storedExamGoal as ExamGoal);
+        console.log("📋 Using stored exam goal data in fetchExamGoal");
+        return;
       }
-    } catch (err) {
-      setError("Failed to fetch exam goal");
-      console.error("❌ fetchExamGoal: Error fetching exam goal:", err);
-      setExamGoal(null);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+
+      try {
+        setIsLoading(true);
+        setError(null);
+
+        console.log("📡 fetchExamGoal: Getting exam goal from /ums/me API...");
+        const response = await getUserData();
+        const userData = response?.data;
+        console.log(
+          "📡 fetchExamGoal: /ums/me API response received:",
+          userData
+        );
+
+        if (userData?.exam_goal?.exam && userData?.exam_goal?.group) {
+          const examGoalData: ExamGoal = {
+            exam: userData.exam_goal.exam,
+            groupType: userData.exam_goal.group,
+          };
+
+          console.log("🎯 fetchExamGoal: Parsed exam goal data:", examGoalData);
+
+          // Cache the exam goal data
+          cacheManager.set(
+            "examGoal",
+            examGoalData,
+            CACHE_CONFIG.TTL.EXAM_GOAL
+          );
+          console.log("💾 fetchExamGoal: Exam goal data cached successfully");
+
+          // Update state
+          setExamGoal(examGoalData);
+          console.log("🎯 Exam goal fetched from /ums/me:", examGoalData);
+        } else {
+          // No exam goal found
+          console.log(
+            "⚠️ fetchExamGoal: No exam goal found in /ums/me response"
+          );
+          cacheManager.invalidate("examGoal");
+          setExamGoal(null);
+          console.log("❌ No exam goal found");
+        }
+      } catch (err) {
+        setError("Failed to fetch exam goal");
+        console.error("❌ fetchExamGoal: Error fetching exam goal:", err);
+        setExamGoal(null);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [getUserData]
+  );
 
   // Fetch stats from API (when available)
   const fetchStats = useCallback(async (forceRefresh = false) => {
@@ -381,7 +418,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     } finally {
       setIsBackgroundLoading(false);
     }
-  }, [isBackgroundLoading]);
+  }, [isBackgroundLoading, getUserData]);
 
   // Start background sync
   const startBackgroundSync = useCallback(() => {
@@ -413,7 +450,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       },
       CACHE_CONFIG.TTL.USER_PROFILE
     );
-  }, []);
+  }, [performBackgroundSync, getUserData]);
 
   // Stop background sync
   const stopBackgroundSync = useCallback(() => {
@@ -427,14 +464,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     if (!isBackgroundSyncEnabled) {
       startBackgroundSync();
     }
-  }, [isBackgroundSyncEnabled]);
+  }, [isBackgroundSyncEnabled, startBackgroundSync]);
 
   // Disable background sync
   const disableBackgroundSync = useCallback(() => {
     if (isBackgroundSyncEnabled) {
       stopBackgroundSync();
     }
-  }, [isBackgroundSyncEnabled]);
+  }, [isBackgroundSyncEnabled, stopBackgroundSync]);
 
   // Refresh methods
   const refreshProfile = useCallback(async () => {
@@ -548,7 +585,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
   // Utility methods
   const isProfileComplete = useCallback(() => {
-    return !!(profile?.name && profile?.email);
+    return !!(profile?.gender && profile?.date_of_birth);
   }, [profile]);
 
   // Sync exam goal data from AuthContext localStorage
@@ -614,7 +651,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     return () => {
       stopBackgroundSync();
     };
-  }, [isAuthenticated, authLoading, fetchUserData, fetchExamGoal]);
+  }, [
+    isAuthenticated,
+    authLoading,
+    fetchUserData,
+    fetchExamGoal,
+    startBackgroundSync,
+    stopBackgroundSync,
+  ]);
 
   const value: UserContextType = {
     profile,
