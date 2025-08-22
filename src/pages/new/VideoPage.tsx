@@ -1,4 +1,4 @@
-import {
+import VideoFeedbackModal, {
   CondensedFeedback,
   VideoFeedbackPayload,
 } from "@/components/feedback/VideoFeedbackModal";
@@ -6,6 +6,7 @@ import Chat from "@/components/learning/Chat";
 import Flashcards from "@/components/learning/Flashcards";
 import Quiz from "@/components/learning/Quiz";
 import Summary from "@/components/learning/Summary";
+import { useVideoFeedback } from "@/hooks/useVideoFeedback";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import {
@@ -23,9 +24,16 @@ import {
   Type,
   X,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
+
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady?: () => void;
+  }
+}
 
 // Type definitions
 interface IconProps {
@@ -50,6 +58,12 @@ interface ContentTabsProps {
   isLoadingTranscript: boolean;
   chaptersError: string | null;
   transcriptError: string | null;
+  videoId?: string;
+  videoTitle?: string;
+  watchPercentage?: number;
+  sessionStartTime?: Date;
+  onFeedbackSubmit: (payload: any) => void;
+  onFeedbackSkip: () => void;
 }
 
 // Learning mode types
@@ -207,6 +221,12 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   isLoadingTranscript,
   chaptersError,
   transcriptError,
+  videoId,
+  videoTitle,
+  watchPercentage,
+  sessionStartTime,
+  onFeedbackSubmit,
+  onFeedbackSkip,
 }) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
@@ -524,6 +544,7 @@ const ShareModal: React.FC<{
 const VideoPage: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
 
   // State for video data
   const [videoDetail, setVideoDetail] = useState<VideoDetail | null>(null);
@@ -569,6 +590,245 @@ const VideoPage: React.FC = () => {
 
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
+
+  // Feedback functionality
+  const {
+    isFeedbackModalOpen,
+    feedbackSuggestions,
+    isLoadingSuggestions,
+    sessionStartTime,
+    watchPercentage,
+    openFeedbackModal,
+    closeFeedbackModal,
+    submitFeedback,
+    skipFeedback,
+    startSession,
+    updateWatchPercentage,
+    shouldShowFeedbackOnLeave,
+    setShouldShowFeedbackOnLeave,
+  } = useVideoFeedback({
+    videoId: currentVideoId || "",
+    videoTitle: videoDetail?.title,
+    onFeedbackSubmitted: (payload) => {
+      console.log("Feedback submitted:", payload);
+      // You can add analytics tracking here
+    },
+    onFeedbackSkipped: () => {
+      console.log("Feedback skipped");
+      // You can add analytics tracking here
+    },
+  });
+
+  // Start session when video loads
+  useEffect(() => {
+    if (currentVideoId) {
+      startSession();
+      setShouldShowFeedbackOnLeave(true);
+    }
+  }, [currentVideoId, startSession, setShouldShowFeedbackOnLeave]);
+
+  // Track video progress based on session time
+  const startProgressTracking = useCallback(() => {
+    const progressInterval = setInterval(() => {
+      if (sessionStartTime && videoDurationRef.current > 0) {
+        // Calculate progress based on session duration
+        const sessionDuration = Math.floor(
+          (Date.now() - sessionStartTime.getTime()) / 1000
+        );
+        const estimatedProgress = Math.min(
+          100,
+          (sessionDuration / videoDurationRef.current) * 100
+        );
+        updateWatchPercentage(estimatedProgress);
+
+        // Auto-show feedback when video reaches 90%
+        if (estimatedProgress >= 90 && shouldShowFeedbackOnLeave) {
+          openFeedbackModal();
+        }
+      }
+    }, 1000); // Update every second
+
+    return () => clearInterval(progressInterval);
+  }, [
+    sessionStartTime,
+    updateWatchPercentage,
+    shouldShowFeedbackOnLeave,
+    openFeedbackModal,
+  ]);
+
+  // Start progress tracking when session starts
+  useEffect(() => {
+    if (sessionStartTime && shouldShowFeedbackOnLeave) {
+      // Load YouTube Iframe API to get precise duration and currentTime
+      const setup = async () => {
+        // inject API
+        if (!(window.YT && window.YT.Player)) {
+          const existing = document.getElementById("youtube-iframe-api");
+          if (!existing) {
+            const s = document.createElement("script");
+            s.id = "youtube-iframe-api";
+            s.src = "https://www.youtube.com/iframe_api";
+            document.body.appendChild(s);
+          }
+          await new Promise<void>((resolve) => {
+            window.onYouTubeIframeAPIReady = () => resolve();
+          });
+        }
+        try {
+          const player = new window.YT.Player("yt-player-iframe", {
+            events: {
+              onReady: (e: any) => {
+                const dur = e.target.getDuration?.() || 0;
+                if (dur > 0) videoDurationRef.current = dur;
+                // start interval
+                if (progressIntervalRef.current == null) {
+                  progressIntervalRef.current = window.setInterval(() => {
+                    try {
+                      const cur = player.getCurrentTime?.() || 0;
+                      const d =
+                        player.getDuration?.() || videoDurationRef.current || 0;
+                      if (d > 0) {
+                        videoDurationRef.current = d;
+                        const pct = Math.min(100, (cur / d) * 100);
+                        updateWatchPercentage(pct);
+                        if (pct >= 90 && shouldShowFeedbackOnLeave) {
+                          openFeedbackModal();
+                        }
+                      }
+                    } catch {}
+                  }, 1000);
+                }
+              },
+              onStateChange: (e: any) => {
+                if (e?.data === window.YT.PlayerState.ENDED) {
+                  updateWatchPercentage(100);
+                  openFeedbackModal();
+                }
+              },
+            },
+          });
+          ytPlayerRef.current = player;
+        } catch {
+          // fallback default duration to avoid NaN
+          if (!videoDurationRef.current) videoDurationRef.current = 600;
+          const cleanup = startProgressTracking();
+          return cleanup;
+        }
+      };
+      const maybeCleanup = setup();
+      return () => {
+        if (progressIntervalRef.current != null) {
+          clearInterval(progressIntervalRef.current);
+          progressIntervalRef.current = null;
+        }
+        try {
+          ytPlayerRef.current?.destroy?.();
+        } catch {}
+        ytPlayerRef.current = null;
+      };
+    }
+  }, [
+    sessionStartTime,
+    shouldShowFeedbackOnLeave,
+    startProgressTracking,
+    updateWatchPercentage,
+    openFeedbackModal,
+  ]);
+
+  // Page leaving guard
+  useEffect(() => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      if (
+        shouldShowFeedbackOnLeave &&
+        watchPercentage > 30 &&
+        !isFeedbackModalOpen
+      ) {
+        event.preventDefault();
+        event.returnValue = "";
+
+        // Store state for next visit
+        localStorage.setItem(
+          `feedback_pending_${currentVideoId}`,
+          JSON.stringify({
+            timestamp: Date.now(),
+            watchPercentage,
+            sessionStartTime: sessionStartTime?.toISOString(),
+            videoTitle: videoDetail?.title,
+          })
+        );
+      }
+    };
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (
+        shouldShowFeedbackOnLeave &&
+        watchPercentage > 30 &&
+        !isFeedbackModalOpen
+      ) {
+        // Show feedback modal before navigation
+        openFeedbackModal();
+
+        // Prevent immediate navigation
+        event.preventDefault();
+
+        // Store navigation intent
+        localStorage.setItem(
+          `navigation_pending_${currentVideoId}`,
+          JSON.stringify({
+            timestamp: Date.now(),
+            intendedPath: window.location.pathname,
+            intendedHref: window.location.href,
+          })
+        );
+      }
+    };
+
+    // Listen for navigation attempts
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    window.addEventListener("popstate", handlePopState);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [
+    shouldShowFeedbackOnLeave,
+    watchPercentage,
+    isFeedbackModalOpen,
+    currentVideoId,
+    sessionStartTime,
+    videoDetail?.title,
+    openFeedbackModal,
+  ]);
+
+  // Handle feedback completion and navigation
+  const handleFeedbackComplete = useCallback(
+    (action: "submit" | "skip" | "dismiss") => {
+      closeFeedbackModal();
+
+      // Check if there was a pending navigation
+      const pendingNavigation = localStorage.getItem(
+        `navigation_pending_${currentVideoId}`
+      );
+      if (pendingNavigation) {
+        try {
+          const data = JSON.parse(pendingNavigation);
+          localStorage.removeItem(`navigation_pending_${currentVideoId}`);
+
+          // Allow navigation to proceed
+          if (
+            data.intendedPath &&
+            data.intendedPath !== window.location.pathname
+          ) {
+            navigate(data.intendedPath);
+          }
+        } catch (error) {
+          console.error("Failed to parse pending navigation:", error);
+        }
+      }
+    },
+    [closeFeedbackModal, currentVideoId, navigate]
+  );
 
   // Fetch video details
   useEffect(() => {
@@ -728,6 +988,25 @@ const VideoPage: React.FC = () => {
     setCurrentMode(mode);
   };
 
+  // Manual feedback trigger (for testing)
+  const handleManualFeedbackTrigger = () => {
+    openFeedbackModal();
+  };
+
+  // Manual video duration setter (for testing)
+  const handleSetVideoDuration = (duration: number) => {
+    videoDurationRef.current = duration;
+    console.log("Video duration set to:", duration, "seconds");
+  };
+
+  // Manual progress trigger (for testing)
+  const handleSetProgress = (percentage: number) => {
+    updateWatchPercentage(percentage);
+    if (percentage >= 90 && shouldShowFeedbackOnLeave) {
+      openFeedbackModal();
+    }
+  };
+
   return (
     <div className="bg-background text-foreground min-h-screen font-sans">
       <div className="mx-auto hidden w-full h-full sm:block">
@@ -865,6 +1144,26 @@ const VideoPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Feedback Modal */}
+      <VideoFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => handleFeedbackComplete("dismiss")}
+        videoId={currentVideoId}
+        videoTitle={videoDetail?.title}
+        suggestedChips={feedbackSuggestions}
+        sessionStartTime={sessionStartTime || undefined}
+        watchPercentage={watchPercentage}
+        onSubmit={async (payload) => {
+          await submitFeedback(payload);
+          handleFeedbackComplete("submit");
+        }}
+        onSkip={() => {
+          skipFeedback();
+          handleFeedbackComplete("skip");
+        }}
+        onDismiss={() => handleFeedbackComplete("dismiss")}
+      />
 
       <ShareModal
         isOpen={isShareModalOpen}

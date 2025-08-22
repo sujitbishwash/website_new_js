@@ -33,7 +33,7 @@ interface UserProfile {
   city: string;
   state: string;
   country: string;
-  gender: "Male" | "Female" | "Other" | "Prefer not to say" | "";
+  gender: "Male" | "Female" | "Other" | "Prefer not to say" | "Not set" | "";
   dob: string; // Date of Birth, format YYYY-MM-DD
 }
 
@@ -77,17 +77,53 @@ interface NotificationSettingRowProps {
 }
 
 // --- DYNAMIC USER PROFILE CREATION ---
-const createInitialUserProfile = (profile: any): UserProfile => ({
-  name: profile?.name || "Not set",
-  email: profile?.email || "Not set",
-  mobile: profile?.phone || profile?.phoneno || "Not set",
-  address: profile?.address || "Not set",
-  city: profile?.city || "Not set",
-  state: profile?.state || "Not set",
-  country: profile?.country || "Not set",
-  gender: profile?.gender || "Not set",
-  dob: profile?.date_of_birth || profile?.dob || "Not set",
-});
+const createInitialUserProfile = (profile: any): UserProfile => {
+  console.log("🔄 ProfilePage: Creating user profile from data:", profile);
+
+  // Handle gender field - convert to proper format if needed
+  let genderValue:
+    | "Male"
+    | "Female"
+    | "Other"
+    | "Prefer not to say"
+    | "Not set"
+    | "" = "Not set";
+  if (profile?.gender) {
+    const genderLower = profile.gender.toLowerCase();
+    if (genderLower === "male") {
+      genderValue = "Male";
+    } else if (genderLower === "female") {
+      genderValue = "Female";
+    } else if (genderLower === "other") {
+      genderValue = "Other";
+    } else {
+      genderValue = "Prefer not to say";
+    }
+  }
+
+  // Handle date of birth field
+  let dobValue = "Not set";
+  if (profile?.date_of_birth) {
+    dobValue = profile.date_of_birth;
+  } else if (profile?.dob) {
+    dobValue = profile.dob;
+  }
+
+  const userProfile = {
+    name: profile?.name || "Not set",
+    email: profile?.email || "Not set",
+    mobile: profile?.phone || profile?.phoneno || "Not set",
+    address: profile?.address || "Not set",
+    city: profile?.city || "Not set",
+    state: profile?.state || "Not set",
+    country: profile?.country || "Not set",
+    gender: genderValue,
+    dob: dobValue,
+  };
+
+  console.log("✅ ProfilePage: Created user profile:", userProfile);
+  return userProfile;
+};
 
 const countries = [
   "United States",
@@ -314,7 +350,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   useEffect(() => {
     if (profile) {
       console.log("🔄 ProfilePage: Profile updated from UserContext:", profile);
-      setUserProfile(createInitialUserProfile(profile));
+      const newUserProfile = createInitialUserProfile(profile);
+      setUserProfile(newUserProfile);
+      console.log(
+        "✅ ProfilePage: User profile state updated:",
+        newUserProfile
+      );
+    } else {
+      console.log("⚠️ ProfilePage: No profile data available from UserContext");
     }
   }, [profile]);
 
@@ -463,6 +506,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       <CircleCheck className="w-3 h-3" />
                       Data synced from your account
                     </span>
+                    {(profile.gender || profile.date_of_birth) && (
+                      <div className="mt-1 text-xs text-blue-400">
+                        <span className="inline-flex items-center gap-1">
+                          <CircleCheck className="w-3 h-3" />
+                          Personal details loaded from API
+                        </span>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
