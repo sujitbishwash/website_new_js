@@ -238,6 +238,7 @@ const PersonalInfoForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isFormCompleted, setIsFormCompleted] = useState<boolean>(false);
+  const [isLoadingUserData, setIsLoadingUserData] = useState<boolean>(true);
 
   // --- Navigation Guard ---
   useEffect(() => {
@@ -277,6 +278,46 @@ const PersonalInfoForm: React.FC = () => {
       window.removeEventListener("popstate", handlePopState);
     };
   }, [isFormCompleted, formData, location.pathname]);
+
+  // --- Fetch User Data from API ---
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setIsLoadingUserData(true);
+        console.log("🔍 Fetching user data from /ums/me API...");
+
+        const response = await authApi.getAuthenticatedUser();
+
+        if (
+          response &&
+          response.status >= 200 &&
+          response.status < 300 &&
+          response.data
+        ) {
+          const userData = response.data;
+          console.log("📋 User data received:", userData);
+
+          // Populate form with existing user data if available
+          const updatedFormData: FormData = {
+            name: userData.name || "",
+            gender: userData.gender || "",
+            dob: userData.date_of_birth || "",
+          };
+
+          setFormData(updatedFormData);
+          console.log("✅ Form populated with user data:", updatedFormData);
+        } else {
+          console.log("⚠️ No user data found or API error");
+        }
+      } catch (error) {
+        console.error("❌ Error fetching user data:", error);
+      } finally {
+        setIsLoadingUserData(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
 
   // --- Real-time Age Calculation ---
   useEffect(() => {
@@ -339,16 +380,45 @@ const PersonalInfoForm: React.FC = () => {
         const response = await authApi.updateUserDetails({
           name: formData.name,
           gender: formData.gender,
-          dateOfBirth: formData.dob,
+          date_of_birth: formData.dob,
         });
 
-        if (!response.data.success) {
+        if (response.status !== 200) {
           throw new Error(
             response.data.message || "Failed to update user details"
           );
         }
 
         console.log("✅ User details saved successfully");
+
+        // Update localStorage with the new user data to ensure validation passes
+        try {
+          const existingUserData = localStorage.getItem("userData");
+          if (existingUserData) {
+            const parsedUserData = JSON.parse(existingUserData);
+            const updatedUserData = {
+              ...parsedUserData,
+              name: formData.name,
+              gender: formData.gender,
+              date_of_birth: formData.dob,
+            };
+            localStorage.setItem("userData", JSON.stringify(updatedUserData));
+            console.log(
+              "✅ Updated localStorage with new user details:",
+              updatedUserData
+            );
+          }
+        } catch (error) {
+          console.error("❌ Error updating localStorage:", error);
+        }
+
+        // Also update the form data to reflect the saved state
+        setFormData((prevData) => ({
+          ...prevData,
+          name: formData.name,
+          gender: formData.gender,
+          dob: formData.dob,
+        }));
 
         // Mark form as completed to allow navigation
         setIsFormCompleted(true);
@@ -364,6 +434,21 @@ const PersonalInfoForm: React.FC = () => {
     }
   };
 
+  // Show loading state while fetching user data
+  if (isLoadingUserData) {
+    return (
+      <div className="w-full max-w-md space-y-8 rounded-2xl bg-gray-800 p-6 sm:p-8 shadow-2xl transition-all duration-500">
+        <div className="text-center">
+          <LoaderIcon className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Loading Profile...
+          </h2>
+          <p className="text-gray-400">Fetching your existing information</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="w-full max-w-md space-y-8 rounded-2xl bg-gray-800 p-6 sm:p-8 shadow-2xl transition-all duration-500">
       <div>
@@ -374,6 +459,11 @@ const PersonalInfoForm: React.FC = () => {
           Please provide your personal information to continue. This information
           is required.
         </p>
+        {(formData.name || formData.gender || formData.dob) && (
+          <p className="mt-2 text-center text-xs text-blue-400">
+            ✓ Your existing information has been loaded
+          </p>
+        )}
       </div>
 
       {submitError && (
@@ -405,10 +495,9 @@ const PersonalInfoForm: React.FC = () => {
             <option value="" disabled>
               Select your gender
             </option>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-            <option value="Prefer not to say">Prefer not to say</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
           </SelectField>
           <div>
             <InputField

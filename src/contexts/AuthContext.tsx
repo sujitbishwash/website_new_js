@@ -37,7 +37,11 @@ interface AuthContextType {
     type?: string;
     usercode?: string;
     gender?: string;
-    dateOfBirth?: string;
+    date_of_birth?: string;
+    exam_goal?: {
+      exam: string | null;
+      group: string | null;
+    };
   } | null> | null>;
   // Force refresh user data (bypass localStorage)
   refreshUserData: () => Promise<ApiResponse<{
@@ -50,7 +54,11 @@ interface AuthContextType {
     type?: string;
     usercode?: string;
     gender?: string;
-    dateOfBirth?: string;
+    date_of_birth?: string;
+    exam_goal?: {
+      exam: string | null;
+      group: string | null;
+    };
   } | null> | null>;
   // Update user data in localStorage
   updateLocalStorageUserData: (userData: any) => void;
@@ -78,7 +86,11 @@ let userDataCache: {
     type?: string;
     usercode?: string;
     gender?: string;
-    dateOfBirth?: string;
+    date_of_birth?: string;
+    exam_goal?: {
+      exam: string | null;
+      group: string | null;
+    };
   } | null;
   timestamp: number;
   isFetching?: boolean;
@@ -361,23 +373,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       setExamGoalLoading(true);
 
-      // Use dedicated getUserExamGoal API instead of checking /ums/me
-      const { examGoalApi } = await import("../lib/api-client");
-      const response = await examGoalApi.getUserExamGoal();
+      // Get exam goal data from /ums/me API response
+      const response = await getUserData();
+      const userData = response?.data;
 
-      console.log("🎯 Exam goal API response:", response);
+      console.log("🎯 Exam goal check from /ums/me:", userData);
 
-      const hasExamGoal =
-        response &&
-        response.status >= 200 &&
-        response.status < 300 &&
-        response.data?.success &&
-        response.data?.data &&
-        response.data.data.exam &&
-        response.data.data.group_type;
+      const hasExamGoal = !!(
+        userData?.exam_goal?.exam && userData?.exam_goal?.group
+      );
 
       if (hasExamGoal) {
-        console.log("✅ User has exam goal:", response.data.data);
+        console.log("✅ User has exam goal:", userData.exam_goal);
         setHasExamGoal(true);
         return true;
       } else {
@@ -437,16 +444,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         };
       }
 
-      // Check if user has gender and dateOfBirth from localStorage FIRST
+      // Check if user has gender and date_of_birth from localStorage FIRST
       const hasPersonalDetailsFromStorage =
-        parsedUserData?.gender && parsedUserData?.dateOfBirth;
+        parsedUserData?.gender && parsedUserData?.date_of_birth;
       console.log(
         "📝 Has personal details from localStorage:",
         hasPersonalDetailsFromStorage,
         "Gender:",
         parsedUserData?.gender,
         "DateOfBirth:",
-        parsedUserData?.dateOfBirth
+        parsedUserData?.date_of_birth
       );
 
       // If user has personal details in localStorage, we don't need to call the API for personal details check
@@ -455,33 +462,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           "✅ User has personal details in localStorage, skipping API call for personal details check"
         );
 
-        // Only check exam goal if user has name
+        // Check exam goal from localStorage (if available)
         let hasExamGoal: boolean = false;
-        try {
-          const { examGoalApi } = await import("../lib/api-client");
-          const examGoalResponse = await examGoalApi.getUserExamGoal();
-
+        if (parsedUserData?.exam_goal) {
           hasExamGoal = !!(
-            examGoalResponse &&
-            examGoalResponse.status >= 200 &&
-            examGoalResponse.status < 300 &&
-            examGoalResponse.data?.success &&
-            examGoalResponse.data?.data &&
-            examGoalResponse.data.data.exam &&
-            examGoalResponse.data.data.group_type
+            parsedUserData.exam_goal.exam && parsedUserData.exam_goal.group
           );
-
           console.log(
-            "🎯 Exam goal check:",
+            "🎯 Exam goal check from localStorage:",
             hasExamGoal,
             "Exam:",
-            examGoalResponse?.data?.data?.exam,
+            parsedUserData.exam_goal.exam,
             "Group:",
-            examGoalResponse?.data?.data?.group_type
+            parsedUserData.exam_goal.group
           );
-        } catch (examGoalError) {
-          console.error("❌ Error checking exam goal:", examGoalError);
-          hasExamGoal = false;
         }
 
         if (hasExamGoal) {
@@ -535,43 +529,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       // Check if user has personal details from API
       const hasPersonalDetailsFromAPI =
-        userDataFromAPI?.gender && userDataFromAPI?.dateOfBirth;
+        userDataFromAPI?.gender && userDataFromAPI?.date_of_birth;
       console.log(
         "📝 Has personal details from API:",
         hasPersonalDetailsFromAPI,
         "Gender:",
         userDataFromAPI?.gender,
         "DateOfBirth:",
-        userDataFromAPI?.dateOfBirth
+        userDataFromAPI?.date_of_birth
       );
 
-      // Check if user has exam goal using dedicated API
+      // Check if user has exam goal from /ums/me response
       let hasExamGoal: boolean = false;
-      try {
-        const { examGoalApi } = await import("../lib/api-client");
-        const examGoalResponse = await examGoalApi.getUserExamGoal();
-
+      if (userDataFromAPI?.exam_goal) {
         hasExamGoal = !!(
-          examGoalResponse &&
-          examGoalResponse.status >= 200 &&
-          examGoalResponse.status < 300 &&
-          examGoalResponse.data?.success &&
-          examGoalResponse.data?.data &&
-          examGoalResponse.data.data.exam &&
-          examGoalResponse.data.data.group_type
+          userDataFromAPI.exam_goal.exam && userDataFromAPI.exam_goal.group
         );
-
         console.log(
-          "🎯 Exam goal check:",
+          "🎯 Exam goal check from /ums/me:",
           hasExamGoal,
           "Exam:",
-          examGoalResponse?.data?.data?.exam,
+          userDataFromAPI.exam_goal.exam,
           "Group:",
-          examGoalResponse?.data?.data?.group_type
+          userDataFromAPI.exam_goal.group
         );
-      } catch (examGoalError) {
-        console.error("❌ Error checking exam goal:", examGoalError);
-        hasExamGoal = false;
       }
 
       if (hasPersonalDetailsFromAPI && hasExamGoal) {
@@ -635,13 +616,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         response.status >= 200 &&
         response.status < 300 &&
         response.data?.gender &&
-        response.data?.dateOfBirth;
+        response.data?.date_of_birth;
 
       if (hasPersonalDetails) {
         console.log(
           "User has personal details:",
           response.data?.gender,
-          response.data?.dateOfBirth
+          response.data?.date_of_birth
         );
         setHasName(true);
         return true;

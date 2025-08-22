@@ -24,29 +24,8 @@ const AuthCallbackPage: React.FC = () => {
             tokenFromQuery ? `${tokenFromQuery.substring(0, 20)}...` : "null"
           );
 
-          // Try to get user info from the token or create a session
-          try {
-            // You might need to validate the token here or get user info from your backend
-            // For now, we'll proceed with the token and let the API handle validation
-            console.log("🔄 Proceeding with token from query parameter...");
-
-            // Create a minimal user info object for now
-            // In a real implementation, you'd decode the JWT or call your backend to get user info
-            const userInfo = {
-              id: "temp-user-id", // This should come from token validation
-              email: "user@example.com", // This should come from token validation
-              name: "User", // This should come from token validation
-            };
-            localStorage.setItem("userData", JSON.stringify(userInfo));
-            console.log("👤 User data stored:", userInfo);
-          } catch (tokenError) {
-            console.error("Token validation error:", tokenError);
-            setError("Invalid authentication token.");
-            setTimeout(() => {
-              navigate(ROUTES.LOGIN);
-            }, 3000);
-            return;
-          }
+          // Store the token and let the API calls fetch real user data
+          console.log("🔄 Proceeding with token from query parameter...");
         } else {
           // No token present; invalid access to callback
           console.log("❌ No token in callback query params");
