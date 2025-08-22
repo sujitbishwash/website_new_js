@@ -444,17 +444,7 @@ export default function HomePage() {
   };
   return (
     <div className="min-h-full bg-background text-foreground font-sans mt-6 sm:p-6">
-      {/* Upgrade Button */}
-
-      <style>{`.glow-purple:hover {
-              box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 
-              0 0 20px rgba(168, 85, 247, 0.6), 
-              0 0 30px rgba(168, 85, 247, 0.4);
-            `}</style>
-      <button onClick={() => { navigate(ROUTES.PREMIUM); }} className="fixed top-4 right-4 sm:right-8 z-20 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none">
-        <SparklesIcon className="h-5 w-5" />
-        <span>Upgrade plan</span>
-      </button>
+      
       <div className="container mx-auto sm:px-6 lg:px-8 py-12 max-w-5xl">
         {/* Header Card */}
         <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">

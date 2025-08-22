@@ -1,4 +1,4 @@
-import { SendHorizonal } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -18,10 +18,6 @@ const theme = {
 };
 
 // --- Type Definitions ---
-interface IconProps {
-  path: string;
-  className?: string;
-}
 
 interface MessageType {
   text: string;
@@ -34,25 +30,12 @@ interface ChatProps {
   isLoading: boolean;
   error: string | null;
   onSendMessage: (message: string) => void;
+  isLeftColumnVisible: boolean;
 }
 
 // --- SVG Icons ---
 // Using inline SVGs to keep the component self-contained.
 // --- Icon Components (using inline SVG for portability) ---
-const Icon: React.FC<IconProps> = ({ path, className = "w-6 h-6" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth={2}
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d={path} />
-  </svg>
-);
 
 // commented until usage is confirmed
 /*
@@ -81,26 +64,6 @@ const BrainIcon: React.FC = () => (
   </svg>
 );
 */
-
-const PlusIcon = () => <Icon path="M12 5v14 M5 12h14" className="w-5 h-5" />;
-const SettingsIcon = () => (
-  <Icon
-    path="M12.22 2h-0.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 0 2l-.15.08a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.38a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1 0-2l.15-.08a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
-    className="w-5 h-5"
-  />
-);
-const CanvasIcon = () => (
-  <Icon
-    path="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z M12 18H6v-2h6v2zm4-4H6v-2h10v2zm0-4H6V8h10v2z"
-    className="w-5 h-5"
-  />
-);
-const SendIcon = () => (
-  <Icon
-    path="M10.3009 13.6949L20.102 3.89742M10.5795 14.1355L12.8019 18.5804C13.339 19.6545 13.6075 20.1916 13.9458 20.3356C14.2394 20.4606 14.575 20.4379 14.8492 20.2747C15.1651 20.0866 15.3591 19.5183 15.7472 18.3818L19.9463 6.08434C20.2845 5.09409 20.4535 4.59896 20.3378 4.27142C20.2371 3.98648 20.013 3.76234 19.7281 3.66167C19.4005 3.54595 18.9054 3.71502 17.9151 4.05315L5.61763 8.2523C4.48114 8.64037 3.91289 8.83441 3.72478 9.15032C3.56153 9.42447 3.53891 9.76007 3.66389 10.0536C3.80791 10.3919 4.34498 10.6605 5.41912 11.1975L9.86397 13.42C10.041 13.5085 10.1295 13.5527 10.2061 13.6118C10.2742 13.6643 10.3352 13.7253 10.3876 13.7933C10.4468 13.87 10.491 13.9585 10.5795 14.1355Z"
-    className="w-5 h-5"
-  />
-);
 
 // --- Components ---
 
@@ -178,9 +141,9 @@ const Message: React.FC<MessageType> = ({ text, isUser }) => {
     text.toLowerCase().includes("refers to");
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-6`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-center"} mb-6`}>
       <div
-        className={`max-w-xs lg:max-w-md xl:max-w-lg px-5 py-4 rounded-2xl ${
+        className={`px-5 rounded-2xl ${
           isUser
             ? "bg-blue-600 text-white rounded-br-none shadow-lg"
             : hasKeyPoints
@@ -600,7 +563,8 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
 const ChatInput: React.FC<{
   onSendMessage: (text: string) => void;
   isLoading?: boolean;
-}> = ({ onSendMessage, isLoading = false }) => {
+  isLeftColumnVisible: boolean;
+}> = ({ onSendMessage, isLoading = false, isLeftColumnVisible }) => {
   const [inputValue, setInputValue] = useState<string>("");
 
   const handleSend = () => {
@@ -618,8 +582,12 @@ const ChatInput: React.FC<{
   };
 
   return (
-    <div className="p-2 bg-card border-t border-gray-700">
-      <div className="bg-background border border-gray-700 rounded-xl p-2 flex flex-col">
+    <div className={`p-4 w-full flex justify-center`}>
+      <div
+        className={`bg-card border border-gray-700 rounded-2xl p-2 flex flex-col ${
+          isLeftColumnVisible ? "w-full" : "sm:w-[50vw]"
+        }`}
+      >
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -629,18 +597,16 @@ const ChatInput: React.FC<{
           style={{ minHeight: "40px", maxHeight: "200px" }}
           className="w-full bg-gray text-foreground placeholder-gray-400 focus:outline-none p-2 sm:pl-4 sm:pr-4 text-sm sm:text-base min-w-0"
         />
-        <div className="flex items-center justify-between gap-1">
-          <div className="flex items-center justify-between mt-2">
-            {/* Plan Selector - Hidden on very small screens */}
+        <div className="flex items-center justify-end gap-1">
+          {/**<div className="flex items-center justify-between mt-2">
             <div className="hidden sm:block">
               <PlanSelector />
             </div>
 
-            {/* Mode Selector - More compact on small screens */}
             <div className="sm:ml-2">
               <ModeSelector />
             </div>
-          </div>
+          </div>*/}
 
           <div className="flex items-center gap-1">
             {/*
@@ -668,7 +634,7 @@ const ChatInput: React.FC<{
               className="p-2 text-white bg-gray-700 rounded-full hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 cursor-pointer"
               disabled={isLoading}
             >
-              <SendHorizonal />
+              <ArrowUp />
             </button>
           </div>
         </div>
@@ -684,24 +650,37 @@ export default function Chat({
   isLoading,
   error,
   onSendMessage,
+  isLeftColumnVisible,
 }: ChatProps) {
   return (
-    <div className="flex flex-col h-full bg-background text-primaryText">
-      <div className="flex-1 overflow-y-auto space-y-6 pr-2 p-6">
-        {messages.length === 0 && (
-          <div className="flex-1 flex flex-col justify-center items-center p-8 space-y-8">
-            <ChatHeader />
-            <SuggestionChips />
-          </div>
-        )}
-        {messages.length > 0 && <MessageList messages={messages} />}
-        {error && (
-          <div className="text-red-400 text-sm bg-red-900/20 border border-red-600/30 rounded-lg px-4 py-3 text-center">
-            {error}
-          </div>
-        )}
+    <div className="flex flex-col flex-1 h-full bg-background text-primaryText w-full">
+      {/* Wrapper to center content if left column hidden */}
+      <div
+        className={`flex flex-1 overflow-y-auto pr-2 ${
+          !isLeftColumnVisible ? "justify-center " : ""
+        }`}
+      >
+        <div className={`w-full ${!isLeftColumnVisible ? "max-w-[60vw]" : ""}`}>
+          {messages.length === 0 && (
+            <div className="flex flex-col justify-center items-center p-8 space-y-8">
+              <ChatHeader />
+              <SuggestionChips />
+            </div>
+          )}
+          {messages.length > 0 && <MessageList messages={messages} />}
+          {error && (
+            <div className="text-red-400 text-sm bg-red-900/20 border border-red-600/30 rounded-lg px-4 py-3 text-center">
+              {error}
+            </div>
+          )}
+        </div>
       </div>
-      <ChatInput onSendMessage={onSendMessage} isLoading={isLoading} />
+
+      <ChatInput
+        onSendMessage={onSendMessage}
+        isLoading={isLoading}
+        isLeftColumnVisible={isLeftColumnVisible}
+      />
     </div>
   );
 }

@@ -8,13 +8,18 @@ import {
   Home,
   X,
   FileCheck2,
+  History,
 } from "lucide-react";
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState,   } from "react";
+import { Link, useLocation,useNavigate } from "react-router-dom";
 import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg"; // Adjust path as needed
-import { ROUTES } from "../../routes/constants";
+import { ROUTE_NAMES, ROUTES } from "../../routes/constants";
 import MoreOptions from "./MoreOptions";
 
+// --- Type Definitions ---
+interface IconProps {
+  className?: string;
+}
 interface SidebarProps {
   isOpen: boolean;
   isContracted: boolean;
@@ -38,16 +43,19 @@ const Sidebar: React.FC<SidebarProps> = ({
   onExamConfigurationClick,
 }) => {
   const location = useLocation();
+  const navigate=useNavigate();
 
   const [isHovering, setIsHovering] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path;
   };
-
+const str = location.pathname;
+const parts = str.split("/");
+const firstPart = "/" + parts[1];
   const navItems = [
     { path: ROUTES.HOME, icon: Home, label: "Home" },
-    { path: ROUTES.HISTORY, icon: Clock, label: "History" },
+    { path: ROUTES.HISTORY, icon: History, label: "History" },
     { path: ROUTES.BOOKS, icon: LibraryBig, label: "Books" },
     { path: ROUTES.TEST_SERIES, icon: FilePen, label: "Test Series" },
     {
@@ -55,12 +63,46 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: FileClock,
       label: "Previous Year Papers",
     },
-    { path: ROUTES.ATTEMPTED_TESTS, icon: FileCheck2, label: "Attempted Tests" },
+    {
+      path: ROUTES.ATTEMPTED_TESTS,
+      icon: FileCheck2,
+      label: "Attempted Tests",
+    },
     { path: ROUTES.REFER_AND_EARN, icon: Gift, label: "Refer and Earn" },
   ];
-
+  const SparklesIcon: React.FC<IconProps> = ({ className }) => (
+    <svg
+      width="20"
+      height="20"
+      viewBox="0 0 20 20"
+      fill="currentColor"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path>
+    </svg>
+  );
   return (
     <>
+      {/* Upgrade Button */}
+
+      <style>{`.glow-purple:hover {
+              box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 
+              0 0 20px rgba(168, 85, 247, 0.6), 
+              0 0 30px rgba(168, 85, 247, 0.4);
+            `}</style>
+      {
+      firstPart!= ROUTES.VIDEO_LEARNING && firstPart!= ROUTES.PREMIUM && (
+        <button
+          onClick={() => {
+            navigate(ROUTES.PREMIUM);
+          }}
+          className="fixed top-4 right-4 sm:right-8 z-20 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none"
+        >
+          <SparklesIcon className="h-5 w-5" />
+          <span className="hidden sm:inline">Upgrade plan</span>
+          <span className="sm:hidden">Upgrade</span>
+        </button>
+      )}
       {/* Overlay for mobile */}
       {isOpen && (
         <div
@@ -73,7 +115,9 @@ const Sidebar: React.FC<SidebarProps> = ({
       <aside
         className={`fixed top-0 left-0 h-screen bg-card text-foreground border-r border-border flex flex-col z-40 transition-all duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        } lg:translate-x-0 lg:static w-72 ${isContracted ? "lg:w-20" : "lg:w-64"}`}
+        } lg:translate-x-0 lg:static w-72 ${
+          isContracted ? "lg:w-20" : "lg:w-64"
+        }`}
       >
         {/*Header with close button for mobile
         <div className="p-4 border-b border-gray-700 flex items-center justify-between flex-shrink-0">
