@@ -505,7 +505,7 @@ export default function HomePage() {
                 fetchSuggestedVideos();
               }}
               disabled={isLoadingVideos}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <RefreshCcw className="w-4 h-4" />
 
@@ -536,7 +536,7 @@ export default function HomePage() {
                 <div
                   key={video.id}
                   onClick={() => handleSuggestedVideoClick(video)}
-                  className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
+                  className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl  border border-divider hover:-translate-y-1 cursor-pointer"
                 >
                   <div className="relative">
                     <img

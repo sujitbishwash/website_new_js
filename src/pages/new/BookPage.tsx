@@ -367,7 +367,7 @@ const BookPage: React.FC = () => {
         Upload a PDF to get started.
       </p>
       <div
-        className="relative border-4 border-dashed rounded-lg p-10 text-center hover:border-indigo-500 transition-colors max-w-lg mx-auto"
+        className="relative border-4 border-dashed rounded-lg p-10 text-center hover:border-indigo-500 transition-colors max-w-lg mx-auto bg-card"
         style={{ borderColor: theme.divider }}
       >
         <UploadCloud

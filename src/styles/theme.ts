@@ -37,6 +37,22 @@ export const theme: ThemeColors = {
 
 // Available color palettes
 export const palettes: Record<string, ThemeColors> = {
+    default: {
+    background: "#1d1d1f",
+    cardBackground: "#2c2c2e",
+    inputBackground: "#3a3a3c",
+    primaryText: "#FFFFFF",
+    secondaryText: "#8e8e93",
+    mutedText: "#636366",
+    accent: "#0A84FF",
+    accentLight: "rgba(10, 132, 255, 0.10)",
+    buttonGradientFrom: "#007AFF",
+    buttonGradientTo: "#0A84FF",
+    divider: "#38383A",
+    green: "#34C759",
+    yellow: "#FFCC00",
+    red: "#FF3B30",
+},
 slate: {
     background: "#111827",
     cardBackground: "#1F2937",
@@ -180,7 +196,7 @@ export const applyColorTheme = (name: ColorThemeName) => {
             accentLight: palette.accentLight,
             buttonGradientFrom: palette.buttonGradientFrom,
             buttonGradientTo: palette.buttonGradientTo,
-            divider: "#E2E8F0",           // light gray, less harsh than pure gray-200
+            divider: "#CBD5E1",           // light gray, less harsh than pure gray-200
             green: "#22B573",             // balanced success tone
             yellow: "#E2B23A",            // warm but not neon
             red: "#E45858"                 // calm error red

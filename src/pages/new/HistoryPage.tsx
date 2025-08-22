@@ -52,7 +52,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 
   return (
     <div
-      className={`border border-[#30363d] rounded-lg overflow-hidden relative transition-transform duration-300 ease-in-out cursor-pointer hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(88,166,255,0.2)]`}
+      className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => {

@@ -289,7 +289,7 @@ const TestConfigurationPageComponent = () => {
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Configure Your Test
           </h1>
-          <p className="mt-2 text-lg text-gray-400">
+          <p className="mt-2 text-lg text-muted-foreground">
             Select your preferences to start a practice test.
           </p>
         </div>
