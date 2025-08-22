@@ -7,6 +7,7 @@ import {
   Lightbulb,
   Loader,
   Send,
+  Sparkle,
   Sparkles,
   UploadCloud,
   User,
@@ -352,7 +353,7 @@ const BookPage: React.FC = () => {
 
   const UploadView: React.FC = () => (
     <div className="text-center p-8">
-      <Sparkles
+      <Sparkle
         className="mx-auto h-16 w-16 mb-4"
         style={{ color: theme.accent }}
       />
@@ -366,12 +367,11 @@ const BookPage: React.FC = () => {
         Upload a PDF to get started.
       </p>
       <div
-        className="relative border-2 border-dashed rounded-lg p-10 text-center hover:border-indigo-500 transition-colors max-w-lg mx-auto"
+        className="relative border-4 border-dashed rounded-lg p-10 text-center hover:border-indigo-500 transition-colors max-w-lg mx-auto"
         style={{ borderColor: theme.divider }}
       >
         <UploadCloud
-          className="mx-auto h-12 w-12"
-          style={{ color: theme.mutedText }}
+          className="mx-auto h-12 w-12 text-muted-foreground"
         />
         <p className="mt-4 text-sm" style={{ color: theme.secondaryText }}>
           {isPdfJsReady

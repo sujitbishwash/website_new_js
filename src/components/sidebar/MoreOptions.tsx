@@ -187,17 +187,10 @@ const handleLogoutClick = () => {
   return (
     <div ref={menuRef} className="relative font-sans text-foreground">
       <button
-        style={{ backgroundColor: theme.inputBackground }}
         onClick={toggleMenu}
-        className={`flex items-center w-full p-4 transition-colors duration-200 hover:bg-accent/20 cursor-pointer ${
+        className={`flex items-center w-full p-4 transition-colors duration-200 hover:bg-foreground/10 cursor-pointer ${
           isContracted ? "justify-center" : "justify-between"
         }`}
-        onMouseOver={(e) =>
-          (e.currentTarget.style.backgroundColor = theme.divider)
-        }
-        onMouseOut={(e) =>
-          (e.currentTarget.style.backgroundColor = theme.inputBackground)
-        }
       >
         <div
           className={`flex items-center justify-center"
@@ -341,7 +334,6 @@ const Moreoptions = ({
     // Set the background on the main container
     <div
       className="flex flex-col justify-end"
-      style={{ backgroundColor: theme.background }}
     >
       <style>{`
           @keyframes fade-in {
