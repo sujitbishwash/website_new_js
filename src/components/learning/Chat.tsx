@@ -19,7 +19,6 @@ const theme = {
 
 // --- Type Definitions ---
 
-
 interface MessageType {
   text: string;
   isUser: boolean;
@@ -31,13 +30,12 @@ interface ChatProps {
   isLoading: boolean;
   error: string | null;
   onSendMessage: (message: string) => void;
-  isLeftColumnVisible:boolean;
+  isLeftColumnVisible: boolean;
 }
 
 // --- SVG Icons ---
 // Using inline SVGs to keep the component self-contained.
 // --- Icon Components (using inline SVG for portability) ---
-
 
 // commented until usage is confirmed
 /*
@@ -66,7 +64,6 @@ const BrainIcon: React.FC = () => (
   </svg>
 );
 */
-
 
 // --- Components ---
 
@@ -144,9 +141,9 @@ const Message: React.FC<MessageType> = ({ text, isUser }) => {
     text.toLowerCase().includes("refers to");
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"} mb-6`}>
+    <div className={`flex ${isUser ? "justify-end" : "justify-center"} mb-6`}>
       <div
-        className={`max-w-xs lg:max-w-md xl:max-w-lg px-5 py-4 rounded-2xl ${
+        className={`px-5 rounded-2xl ${
           isUser
             ? "bg-blue-600 text-white rounded-br-none shadow-lg"
             : hasKeyPoints
@@ -176,7 +173,7 @@ const MessageList: React.FC<{ messages: MessageType[] }> = ({ messages }) => {
   useEffect(scrollToBottom, [messages]);
 
   return (
-    <div className="flex-1 overflow-y-auto space-y-2 pr-2 py-4 ">
+    <div className="flex-1 overflow-y-auto space-y-2 pr-2 py-4">
       {messages.map((msg, index) => (
         <Message key={index} text={msg.text} isUser={msg.isUser} />
       ))}
@@ -565,7 +562,8 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
 
 const ChatInput: React.FC<{
   onSendMessage: (text: string) => void;
-  isLoading?: boolean;isLeftColumnVisible:boolean
+  isLoading?: boolean;
+  isLeftColumnVisible: boolean;
 }> = ({ onSendMessage, isLoading = false, isLeftColumnVisible }) => {
   const [inputValue, setInputValue] = useState<string>("");
 
@@ -585,7 +583,11 @@ const ChatInput: React.FC<{
 
   return (
     <div className={`p-4 w-full flex justify-center`}>
-      <div className={`bg-card border border-gray-700 rounded-2xl p-2 flex flex-col ${isLeftColumnVisible? "w-full":"sm:w-[50vw]"}`}>
+      <div
+        className={`bg-card border border-gray-700 rounded-2xl p-2 flex flex-col ${
+          isLeftColumnVisible ? "w-full" : "sm:w-[50vw]"
+        }`}
+      >
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
@@ -648,25 +650,37 @@ export default function Chat({
   isLoading,
   error,
   onSendMessage,
-  isLeftColumnVisible
+  isLeftColumnVisible,
 }: ChatProps) {
   return (
-    <div className="flex flex-col h-full bg-background text-primaryText">
-      <div className="flex-1 overflow-y-auto space-y-6 pr-2 p-6 ">
-        {messages.length === 0 && (
-          <div className="flex-1 flex flex-col justify-center items-center p-8 space-y-8">
-            <ChatHeader />
-            <SuggestionChips />
-          </div>
-        )}
-        {messages.length > 0 && <MessageList messages={messages} />}
-        {error && (
-          <div className="text-red-400 text-sm bg-red-900/20 border border-red-600/30 rounded-lg px-4 py-3 text-center">
-            {error}
-          </div>
-        )}
+    <div className="flex flex-col flex-1 h-full bg-background text-primaryText w-full">
+      {/* Wrapper to center content if left column hidden */}
+      <div
+        className={`flex flex-1 overflow-y-auto pr-2 ${
+          !isLeftColumnVisible ? "justify-center " : ""
+        }`}
+      >
+        <div className={`w-full ${!isLeftColumnVisible ? "max-w-[60vw]" : ""}`}>
+          {messages.length === 0 && (
+            <div className="flex flex-col justify-center items-center p-8 space-y-8">
+              <ChatHeader />
+              <SuggestionChips />
+            </div>
+          )}
+          {messages.length > 0 && <MessageList messages={messages} />}
+          {error && (
+            <div className="text-red-400 text-sm bg-red-900/20 border border-red-600/30 rounded-lg px-4 py-3 text-center">
+              {error}
+            </div>
+          )}
+        </div>
       </div>
-      <ChatInput onSendMessage={onSendMessage} isLoading={isLoading} isLeftColumnVisible={isLeftColumnVisible}/>
+
+      <ChatInput
+        onSendMessage={onSendMessage}
+        isLoading={isLoading}
+        isLeftColumnVisible={isLeftColumnVisible}
+      />
     </div>
   );
 }

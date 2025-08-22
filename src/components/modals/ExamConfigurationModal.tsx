@@ -651,81 +651,6 @@ export default function ExamConfigurationModal({
             </div>
           </div>
 
-          {/**<div
-            style={{
-              ...styles.controlsContainer,
-              ...{ flexDirection: window.innerWidth < 600 ? "column" : "row" },
-            }}
-          >
-            <div style={{ ...styles.controlGroup, flex: 1 }}>
-              <label htmlFor="category-select" style={styles.label}>
-                Exam Category
-              </label>
-              <select
-                id="category-select"
-                value={selectedCategoryKey}
-                onChange={handleCategoryChange}
-                style={styles.select}
-                disabled={userLoading}
-              >
-                {categories.map((category) => (
-                  <option key={category.key} value={category.key}>
-                    {category.displayName}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div style={{ ...styles.controlGroup, flex: 1 }}>
-              <label htmlFor="exam-select" style={styles.label}>
-                Specific Exam
-              </label>
-              <select
-                id="exam-select"
-                value={selectedExamKey}
-                onChange={handleExamChange}
-                style={styles.select}
-                disabled={userLoading}
-              >
-                {currentExams.map((exam) => (
-                  <option key={exam.key} value={exam.key}>
-                    {exam.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>*/}
-
-          {/**selectedExamDetails && (
-            <div style={styles.detailsCard}>
-              <h3 style={styles.detailTitle}>{selectedExamDetails.name}</h3>
-
-              <div style={styles.detailSection}>
-                <h4 style={styles.detailHeading}>Description</h4>
-                <p style={styles.detailText}>
-                  {selectedExamDetails.description}
-                </p>
-              </div>
-
-              <div style={styles.detailSection}>
-                <h4 style={styles.detailHeading}>Eligibility</h4>
-                <p style={styles.detailText}>
-                  {selectedExamDetails.eligibility}
-                </p>
-              </div>
-
-              <div style={styles.detailSection}>
-                <h4 style={styles.detailHeading}>Exam Pattern</h4>
-                <ul style={{ ...styles.detailText, ...styles.detailList }}>
-                  {selectedExamDetails.pattern.map((step, index) => (
-                    <li key={index} style={styles.detailListItem}>
-                      {step}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          )*/}
-
           {/* Details Card */}
           {selectedExamDetails && (
             <div className="bg-white/5 p-5 rounded-lg space-y-4 border border-white/10 animate-fade-in-fast">
@@ -766,38 +691,6 @@ export default function ExamConfigurationModal({
             </div>
           )}
         </div>
-
-        {/* Modal Actions (Footer) */}
-        {/**<div className="flex justify-end items-center gap-4 p-5 border-t border-gray-700">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 font-medium text-gray-300 bg-transparent rounded-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600 focus:ring-opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleUpdateExamGoal}
-            disabled={isUpdating || userLoading}
-            style={
-              isUpdating || userLoading
-                ? styles.updateButtonDisabled
-                : styles.updateButton
-            }
-            onMouseOver={(e) => {
-              if (!isUpdating && !userLoading) {
-                e.currentTarget.style.backgroundColor = "#3B82F6";
-              }
-            }}
-            onMouseOut={(e) => {
-              if (!isUpdating && !userLoading) {
-                e.currentTarget.style.backgroundColor = theme.accent;
-              }
-            }}
-            className="px-6 py-2 font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50"
-          >
-            {isUpdating ? "Updating..." : "Update Exam Goal"}
-          </button>
-        </div>*/}
         {/* Modal Footer */}
         <div className="flex justify-end items-center gap-4 p-5 border-t border-white/10 bg-[#2c2c2e]/50 rounded-b-2xl">
           <button

@@ -104,7 +104,7 @@ const navItems = [
   { name: "General", icon: Settings },
   { name: "Account", icon: CircleUserRound },
   { name: "Notifications", icon: Bell },
-  { name: "Personalization", icon: Gauge },
+  { name: "Personalization", icon: GaugeCircle },
   { name: "Plan and Billing", icon: SparklesIcon },
   { name: "Privacy and Security", icon: KeyRound },
   { name: "Development", icon: Wrench },
@@ -130,7 +130,8 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
   name,
 }) => (
   <div>
-    <label className="block text-sm font-medium text-foreground">{label}</label>
+    
+    <label className="block text-sm font-medium text-secondaryText">{label}</label>
     {isEditing ? (
       <input
         type={type}
@@ -285,10 +286,12 @@ import {
   CircleCheck,
   CircleUserRound,
   Gauge,
+  GaugeCircle,
   KeyRound,
   RefreshCcw,
   Settings,
   Wrench,
+  X,
 } from "lucide-react";
 import { AccentToggle } from "./Accent-toggle";
 import { ModeToggle } from "./mode-toggle";
@@ -860,10 +863,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         .animate-slide-in { animation: slide-in 0.3s ease-out; }
       `}</style>
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
-        <div ref={modalRef} className="relative w-full max-w-4xl h-[90vh] max-h-[620px] rounded-xl shadow-2xl bg-card flex flex-col md:flex-row overflow-hidden animate-slide-in">
-          <button onClick={handleClose} className="absolute top-3 right-3 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+        <div ref={modalRef} className="relative w-full max-w-4xl h-[80vh] max-h-[600px] rounded-2xl shadow-2xl bg-card flex flex-col md:flex-row overflow-hidden animate-slide-in">
+
+          <button onClick={handleClose} className="absolute top-3 right-3 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"><X  /></button>
+          
           <nav className="w-full md:w-1/3 lg:w-1/4 bg-background p-4 flex-shrink-0 border-b md:border-b-0 md:border-r border-foreground/20">
-            <h2 className="text-xl text-muted-foreground/70 ml-4 mt-2 mb-4 hidden md:block">Settings</h2>
+            <h2 className="text-lg font-semibold text-foreground px-2 mt-2 mb-4 hidden md:block">Settings</h2>
             <ul className="flex flex-row flex-wrap md:flex-col gap-2">
               {navItems.map((item) => (
                 <li key={item.name} className="flex-shrink-0">

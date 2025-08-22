@@ -33,6 +33,55 @@ interface TestSeriesFormData {
   level: string[];
   language: string[];
 }
+interface SelectionPanelProps {
+  title: string;
+  options: string[];
+  selectedValue: string | null;
+  onSelect: (value: string) => void;
+  optionalLabel?: string;
+  emptyMessage?: string;
+  mapper?: (value: string) => string;
+}
+
+const SelectionPanel: React.FC<SelectionPanelProps> = ({
+  title,
+  options,
+  selectedValue,
+  onSelect,
+  optionalLabel,
+  emptyMessage,
+  mapper,
+}) => {
+  return (
+    <div className="p-4 bg-white dark:bg-black/20 border border-divider rounded-xl mb-4">
+      <h2 className="text-xl font-semibold text-card-foreground dark:text-gray-200 mb-4">
+        {title}{" "}
+        {optionalLabel && (
+          <span className="text-base font-normal text-secondaryText">
+            ({optionalLabel})
+          </span>
+        )}
+      </h2>
+      <div className="flex flex-wrap gap-4 text-white">
+        {options.length > 0 ? (
+          options.map((option) => (
+            <Chip
+              key={option}
+              value={option}
+              label={mapper ? mapper(option) : option}
+              checked={selectedValue === option}
+              onClick={onSelect}
+            />
+          ))
+        ) : (
+          <p className="text-gray-500">
+            {emptyMessage || "No options available."}
+          </p>
+        )}
+      </div>
+    </div>
+  );
+};
 
 // --- Helper Components for UI elements ---
 // Custom Chip Component
@@ -233,15 +282,16 @@ const TestConfigurationPageComponent = () => {
   }
 
   return (
-    <div className="bg-gradient-to-br from-gray-900 to-black min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-7xl mx-auto bg-background border border-gray-700 rounded-2xl shadow-2xl p-4 mt-15 sm:mt-0 sm:p-8 space-y-6 ">
+    <div className="bg-background text-foreground min-h-screen font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
+      <div className="w-full max-w-7xl mx-auto bg-card border border-divider rounded-2xl shadow-2xl p-4 mt-15 sm:mt-0 sm:p-8 space-y-6 ">
         {/* --- Header --- */}
         <div className="text-center">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Configure Your Test
           </h1>
-          <p className="mt-2 text-lg text-gray-400">Select your preferences to start a practice test.</p>
-          
+          <p className="mt-2 text-lg text-gray-400">
+            Select your preferences to start a practice test.
+          </p>
         </div>
 
         {/* --- User Profile Section --- */}
@@ -250,9 +300,9 @@ const TestConfigurationPageComponent = () => {
             <span className="text-xs font-medium px-3 py-1">
               Exam Goal: {examGoal.exam}
             </span>
-            <span className="text-xs font-medium px-3 py-1">
+            {/*<span className="text-xs font-medium px-3 py-1">
               Group Type: {examGoal.groupType}
-            </span>
+            </span>*/}
             <button
               onClick={() => {
                 console.log("🔄 ProfilePage: Manual refresh requested");
@@ -275,83 +325,36 @@ const TestConfigurationPageComponent = () => {
 
         {/* --- Form Sections --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {/* 1. Select Subject */}
-          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
-            <h2 className="text-xl font-semibold text-gray-200 mb-4">
-              1. Select Subject
-            </h2>
-            <div className="flex flex-wrap gap-4">
-              {subjects.map((subject) => (
-                <Chip
-                  key={subject}
-                  value={subject}
-                  label={subject}
-                  checked={selectedSubject === subject}
-                  onClick={setSelectedSubject}
-                />
-              ))}
-            </div>
-          </div>
+          <SelectionPanel
+            title="1. Select Subject"
+            options={subjects}
+            selectedValue={selectedSubject}
+            onSelect={setSelectedSubject}
+          />
 
-          {/* 2. Select Sub-Topic */}
-          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
-            <h2 className="text-xl font-semibold text-gray-200 mb-4">
-              2. Select Topic (Optional)
-            </h2>
-            <div className="flex flex-wrap gap-4">
-              {currentSubTopics.length > 0 ? (
-                currentSubTopics.map((topic: string) => (
-                  <Chip
-                    key={topic}
-                    value={topic}
-                    label={topic}
-                    checked={selectedSubTopic === topic}
-                    onClick={setSelectedSubTopic}
-                  />
-                ))
-              ) : (
-                <p className="text-gray-500">
-                  No sub-topics available for this subject.
-                </p>
-              )}
-            </div>
-          </div>
+          <SelectionPanel
+            title="2. Select Topic"
+            options={currentSubTopics}
+            selectedValue={selectedSubTopic}
+            onSelect={setSelectedSubTopic}
+            optionalLabel="Optional"
+            emptyMessage="No sub-topics available for this subject."
+          />
 
-          {/* 3. Select Difficulty Level */}
-          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
-            <h2 className="text-xl font-semibold text-gray-200 mb-4">
-              3. Select Difficulty
-            </h2>
-            <div className="flex flex-wrap gap-4">
-              {difficulties.map((level) => (
-                <Chip
-                  key={level}
-                  value={level}
-                  label={level}
-                  checked={selectedDifficulty === level}
-                  onClick={setSelectedDifficulty}
-                />
-              ))}
-            </div>
-          </div>
+          <SelectionPanel
+            title="3. Select Difficulty"
+            options={difficulties}
+            selectedValue={selectedDifficulty}
+            onSelect={setSelectedDifficulty}
+          />
 
-          {/* 4. Select Language */}
-          <div className="p-4 bg-black/20 border border-gray-700/80 rounded-xl">
-            <h2 className="text-xl font-semibold text-gray-200 mb-4">
-              4. Select Language
-            </h2>
-            <div className="flex flex-wrap gap-4">
-              {languages.map((lang) => (
-                <Chip
-                  key={lang}
-                  value={lang}
-                  label={languageMapper(lang)}
-                  checked={selectedLanguage === lang}
-                  onClick={setSelectedLanguage}
-                />
-              ))}
-            </div>
-          </div>
+          <SelectionPanel
+            title="4. Select Language"
+            options={languages}
+            selectedValue={selectedLanguage}
+            onSelect={setSelectedLanguage}
+            mapper={languageMapper}
+          />
         </div>
 
         {/* --- Continue Button --- */}
@@ -370,7 +373,7 @@ const TestConfigurationPageComponent = () => {
               !selectedDifficulty ||
               !selectedLanguage
                 ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-white"
+                : "bg-blue-600 hover:bg-blue-700 text-foreground"
             }`}
           >
             {isSubmitting ? "Creating Test..." : "Start Test"}

@@ -14,6 +14,7 @@ import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/routes/constants";
 import {
+  BookOpen,
   Ellipsis,
   Eye,
   EyeOff,
@@ -23,8 +24,10 @@ import {
   Link,
   MessageCircleQuestion,
   MessageSquareText,
+  Pen,
   Star,
   StickyNote,
+  Type,
   Upload,
   X,
 } from "lucide-react";
@@ -235,26 +238,26 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   return (
     <div className="bg-background text-foreground hidden sm:block">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3">
-        <div className="flex items-center border border-gray-700 rounded-lg p-1">
+        <div className="flex items-center border border-gray-700 rounded-xl p-1 gap-2">
           <button
             onClick={() => setActiveTab("chapters")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors cursor-pointer ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors  cursor-pointer ${
               activeTab === "chapters"
-                ? "bg-gray-900 shadow-sm text-gray-100"
-                : "text-gray-400 hover:bg-gray-700"
+                ? "bg-foreground/20 shadow-sm text-gray-100"
+                : "text-gray-400 hover:bg-foreground/10"
             }`}
           >
-            <ChaptersIcon /> Chapters
+            <BookOpen /> Chapters
           </button>
           <button
             onClick={() => setActiveTab("transcripts")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors ${
+            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
               activeTab === "transcripts"
-                ? "bg-gray-900 shadow-sm text-gray-100"
-                : "text-gray-400 hover:bg-gray-700"
+                ? "bg-foreground/20 shadow-sm text-gray-100"
+                : "text-gray-400 hover:bg-foreground/10"
             }`}
           >
-            <TranscriptIcon /> Transcripts
+            <Type /> Transcripts
           </button>
         </div>
         <div className="flex items-center space-x-2 self-end sm:self-center">
@@ -410,18 +413,20 @@ const AITutorPanel: React.FC<{
   };
 
   return (
-    <div
-      className={`border border-l-1 bg-card flex flex-col h-full sm:max-h-[100vh]`}
-    >
+    <div className={`bg-card flex flex-col h-full sm:max-h-[100vh]`}>
       <div className="relative bg-background">
         <div
-          className={`flex items-center justify-center rounded-lg p-4 w-full overflow-x-auto`}
+          className={`flex items-center ${
+            isLeftColumnVisible ? "justify-start" : "justify-center gap-2"
+          } rounded-lg p-4 w-full overflow-x-auto`}
         >
           {modes.map(({ key, label, icon }) => (
             <button
               key={key}
               onClick={() => onModeChange(key)}
-              className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-2 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors cursor-pointer ${
+              className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-2 ${
+                isLeftColumnVisible ? "sm:px-2" : "sm:px-4"
+              } py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors cursor-pointer ${
                 currentMode === key
                   ? "bg-card shadow-sm text-gray-100"
                   : "text-gray-400 hover:bg-gray-700"
@@ -431,26 +436,25 @@ const AITutorPanel: React.FC<{
             </button>
           ))}
         </div>
-        <div
-          className={`flex flex-row absolute top-1/2 -translate-y-1/2 right-2 sm:block`}
-        >
+        <div className="flex flex-row items-center absolute top-1/2 -translate-y-1/2 right-2 space-x-2">
           <button
             onClick={onShare}
             title="Share"
-            className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors`}
+            className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors"
           >
             <Ellipsis />
           </button>
+
           <button
             onClick={onToggleFullScreen}
             title={
               isLeftColumnVisible ? "Full Screen Chat" : "Exit Full Screen"
             }
-            className={`p-2 text-gray-300 bg-gray-800 hover:bg-gray-700 rounded-full transition-colors  ${
+            className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors ${
               isLeftColumnVisible ? "hidden" : "sm:block"
             }`}
           >
-            {isLeftColumnVisible ? <MaximizeIcon /> : <MinimizeIcon />}
+            <MinimizeIcon />
           </button>
         </div>
       </div>
@@ -1046,24 +1050,8 @@ const VideoPage: React.FC = () => {
           <div
             className={`${
               isLeftColumnVisible ? "xl:col-span-2" : "xl:col-span-5"
-            } w-full`}
+            } w-full h-[100vh]`}
           >
-            {" "}
-            {isLeftColumnVisible ? (
-              <div className="sm:hidden mb-3">
-                <button
-                  onClick={() => setIsVideoVisible(!isVideoVisible)}
-                  className="flex w-full items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white hover:bg-gray-700 transition-colors shadow-sm"
-                >
-                  {isVideoVisible ? (
-                    <EyeOff className="w-4 h-4" />
-                  ) : (
-                    <Eye className="w-4 h-4" />
-                  )}
-                  <span>{isVideoVisible ? "Hide" : "Show"} Video</span>
-                </button>
-              </div>
-            ) : null}
             <AITutorPanel
               currentMode={currentMode}
               onModeChange={handleModeChange}
@@ -1127,6 +1115,21 @@ const VideoPage: React.FC = () => {
             />
           </div>
 
+          {isLeftColumnVisible ? (
+            <div className="sm:hidden mb-3">
+              <button
+                onClick={() => setIsVideoVisible(!isVideoVisible)}
+                className="flex w-full items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white hover:bg-gray-700 transition-colors shadow-sm"
+              >
+                {isVideoVisible ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+                <span>{isVideoVisible ? "Hide" : "Show"} Video</span>
+              </button>
+            </div>
+          ) : null}
           <div className="flex-grow overflow-hidden">
             <AITutorPanel
               currentMode={currentMode}
