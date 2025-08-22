@@ -191,7 +191,7 @@ const Header: React.FC<HeaderProps> = ({
           <span className="sm:hidden">Upgrade</span>
         </button>
         <button
-          className="p-2 text-gray-300 hover:bg-gray-700 rounded-full cursor-pointer"
+          className="p-2 text-muted-foreground hover:bg-foreground/10 rounded-full cursor-pointer"
           onClick={onToggleFullScreen}
         >
           <X />
@@ -233,13 +233,13 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   return (
     <div className="bg-background text-foreground hidden sm:block">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3">
-        <div className="flex items-center border border-gray-700 rounded-xl p-1 gap-2">
+        <div className="flex items-center border border-border rounded-xl p-1 gap-2">
           <button
             onClick={() => setActiveTab("chapters")}
             className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors  cursor-pointer ${
               activeTab === "chapters"
-                ? "bg-foreground/20 shadow-sm text-gray-100"
-                : "text-gray-400 hover:bg-foreground/10"
+                ? "bg-foreground/20 shadow-sm text-foreground"
+                : "text-muted-foreground hover:bg-foreground/10"
             }`}
           >
             <BookOpen /> Chapters
@@ -248,8 +248,8 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
             onClick={() => setActiveTab("transcripts")}
             className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
               activeTab === "transcripts"
-                ? "bg-foreground/20 shadow-sm text-gray-100"
-                : "text-gray-400 hover:bg-foreground/10"
+                ? "bg-foreground/20 shadow-sm text-foreground"
+                : "text-muted-foreground hover:bg-foreground/10"
             }`}
           >
             <Type /> Transcripts
@@ -258,7 +258,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
         <div className="flex items-center space-x-2 self-end sm:self-center">
           <label
             htmlFor="auto-scroll"
-            className="text-xs sm:text-sm font-medium text-gray-400 cursor-pointer"
+            className="text-xs sm:text-sm font-medium text-muted-foreground cursor-pointer"
           >
             Auto Scroll
           </label>
@@ -267,11 +267,11 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
               type="checkbox"
               name="auto-scroll"
               id="auto-scroll"
-              className="toggle-checkbox absolute block w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-gray-800 border-4 border-gray-600 appearance-none cursor-pointer"
+              className="toggle-checkbox absolute block w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-card border-4 border-border appearance-none cursor-pointer"
             />
             <label
               htmlFor="auto-scroll"
-              className="toggle-label block overflow-hidden h-5 sm:h-6 rounded-full bg-gray-600 cursor-pointer"
+              className="toggle-label block overflow-hidden h-5 sm:h-6 rounded-full bg-border-medium cursor-pointer"
             ></label>
           </div>
           {/* Condensed Feedback Component */}
@@ -289,7 +289,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
           />
         </div>
       </div>
-      <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 rounded-xl border border-gray-700 ">
+      <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 rounded-xl border border-border ">
         {activeTab === "chapters" ? (
           isLoadingChapters ? (
             <div className="text-center py-6 sm:py-8">
@@ -421,10 +421,10 @@ const AITutorPanel: React.FC<{
               onClick={() => onModeChange(key)}
               className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-2 ${
                 isLeftColumnVisible ? "sm:px-2" : "sm:px-4"
-              } py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors cursor-pointer ${
+              } py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
                 currentMode === key
-                  ? "bg-card shadow-sm text-gray-100"
-                  : "text-gray-400 hover:bg-gray-700"
+                  ? "bg-card text-foreground"
+                  : "text-muted-foreground hover:bg-foreground/10"
               }`}
             >
               {icon} {label}
@@ -435,7 +435,7 @@ const AITutorPanel: React.FC<{
           <button
             onClick={onShare}
             title="Share"
-            className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors"
+            className="p-2 text-foreground hover:bg-foreground/10 rounded-full transition-colors"
           >
             <Ellipsis />
           </button>
@@ -445,7 +445,7 @@ const AITutorPanel: React.FC<{
             title={
               isLeftColumnVisible ? "Full Screen Chat" : "Exit Full Screen"
             }
-            className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors ${
+            className={`p-2 text-foreground hover:bg-foreground/10 rounded-full transition-colors ${
               isLeftColumnVisible ? "hidden" : "sm:block"
             }`}
           >

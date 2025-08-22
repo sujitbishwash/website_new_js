@@ -199,7 +199,7 @@ const firstPart = "/" + parts[1];
                       isContracted ? "lg:justify-center" : ""
                     } ${
                       isActive(item.path)
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-white"
                         : "text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
                     }`}
                   >
@@ -207,7 +207,7 @@ const firstPart = "/" + parts[1];
                       size={20}
                       className={`flex-shrink-0 ${
                         isActive(item.path)
-                          ? "text-primary-foreground"
+                          ? "text-white"
                           : "text-muted-foreground group-hover:text-foreground"
                       }`}
                     />

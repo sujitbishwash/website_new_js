@@ -455,7 +455,7 @@ export default function HomePage() {
             Start by uploading a file or pasting a video link.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border hover:border-accent">
+            <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border-medium hover:border-accent">
               <FileUp className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
               <div>
                 <h2 className="font-semibold text-foreground">Upload File</h2>
@@ -464,7 +464,7 @@ export default function HomePage() {
             </div>
             <div
               onClick={() => setIsYouTubeModalOpen(true)}
-              className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-foreground/20 transition-all duration-300 cursor-pointer border border-border hover:border-accent"
+              className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-foreground/20 transition-all duration-300 cursor-pointer border border-border-medium hover:border-accent"
             >
               <Clipboard className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
               <div>

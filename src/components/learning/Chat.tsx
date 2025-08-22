@@ -145,7 +145,7 @@ const Message: React.FC<MessageType> = ({ text, isUser }) => {
       <div
         className={`px-5 rounded-2xl ${
           isUser
-            ? "bg-blue-600 text-white rounded-br-none shadow-lg"
+            ? "bg-primary text-white rounded-br-none"
             : hasKeyPoints
             ? "bg-transparent text-yellow-100 rounded-bl-none"
             : hasExamples
@@ -584,7 +584,7 @@ const ChatInput: React.FC<{
   return (
     <div className={`p-4 w-full flex justify-center`}>
       <div
-        className={`bg-card border border-gray-700 rounded-2xl p-2 flex flex-col ${
+        className={`bg-card border border-border rounded-2xl p-2 flex flex-col ${
           isLeftColumnVisible ? "w-full" : "sm:w-[50vw]"
         }`}
       >

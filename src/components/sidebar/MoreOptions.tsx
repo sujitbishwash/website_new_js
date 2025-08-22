@@ -230,7 +230,7 @@ const handleLogoutClick = () => {
       </button>
 
       {isMenuOpen && (
-        <div className="absolute bottom-full left-2 mb-2 w-60 p-2 rounded-lg shadow-2xl z-20 border border-muted-foreground animate-fade-in-up text-foreground bg-card">
+        <div className="absolute bottom-full left-2 mb-2 w-60 p-2 rounded-lg shadow-2xl z-20 border border-border animate-fade-in-up text-foreground bg-card">
           <div className="space-y-1">
             {menuOptions.map((item) =>
               item.isDivider ? (
@@ -276,7 +276,7 @@ const handleLogoutClick = () => {
                   </button>
 
                   {item.children && activeSubMenu === item.label && (
-                    <div className="border border-muted-foreground absolute bg-card left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 animate-fade-in-up">
+                    <div className="border border-border absolute bg-card left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 animate-fade-in-up">
                       <div className="space-y-1">
                         {item.children.map((child) => (
                           <button
@@ -286,7 +286,7 @@ const handleLogoutClick = () => {
                               setMenuOpen(false);
                             }}
                             style={{ color: theme.primaryText }}
-                            className="w-full flex items-center space-x-3 p-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground text-gray-300 hover:text-white rounded-md transition-colors duration-200 cursor-pointer"
+                            className="w-full flex items-center space-x-3 p-2 text-left text-sm text-muted-foreground hover:bg-foreground/10 hover:text-accent-foreground rounded-md transition-colors duration-200 cursor-pointer"
                             onMouseOver={(e) => {
                               e.currentTarget.style.backgroundColor =
                                 theme.divider;

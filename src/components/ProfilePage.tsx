@@ -925,7 +925,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
             <X />
           </button>
 
-          <nav className="w-full md:w-1/3 lg:w-1/4 bg-background p-4 flex-shrink-0 border-b md:border-b-0 md:border-r border-foreground/20">
+          <nav className="w-full md:w-1/3 lg:w-1/4 bg-background p-4 flex-shrink-0 border-b md:border-b-0 md:border-r border-border">
             <h2 className="text-lg font-semibold text-foreground px-2 mt-2 mb-4 hidden md:block">
               Settings
             </h2>
@@ -940,7 +940,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     }}
                     className={`flex items-center gap-2 md:gap-3 px-3 py-2 rounded-full md:rounded-md text-sm font-medium transition-colors ${
                       activeTab === item.name
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-white"
                         : "text-muted-foreground hover:bg-accent hover:text-foreground"
                     }`}
                   >
