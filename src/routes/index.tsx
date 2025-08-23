@@ -28,6 +28,7 @@ import SubscriptionPage from "../pages/new/SubscriptionPage";
 import TestConfigurationPage from "../pages/new/TestConfigurationPage";
 import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
+import Stats  from "../pages/new/Stats";
 
 // Route configuration object for easy maintenance
 export const routes = [
@@ -146,6 +147,12 @@ export const routes = [
             element: <AttemptedTests />,
             name: "Attempted Tests",
             description: "Attempted Tests",
+          },
+          {
+            path: "stats",
+            element: <Stats />,
+            name: "Stats",
+            description: "Stats",
           },
         ],
       },

@@ -166,8 +166,13 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
   name,
 }) => (
   <div>
-    <label className="block text-sm font-medium text-secondaryText">
+    <label className="text-sm font-medium text-muted-foreground flex items-center flex-row gap-2">
       {label}
+      {value == "Not set" ? (
+        <CircleAlert className="text-destructive w-3 h-3" />
+      ) : (
+        ""
+      )}
     </label>
     {isEditing ? (
       <input
@@ -187,22 +192,6 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
         >
           {value}
         </p>
-        {value !== "Not set" && (
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-900 text-green-300">
-            <svg
-              className="w-3 h-3 mr-1"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-            >
-              <path
-                fillRule="evenodd"
-                d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-            Set
-          </span>
-        )}
       </div>
     )}
   </div>
@@ -217,7 +206,14 @@ const SelectField: React.FC<SelectFieldProps> = ({
   options,
 }) => (
   <div>
-    <label className="block text-sm font-medium text-foreground">{label}</label>
+    <label className="text-sm font-medium text-muted-foreground flex items-center flex-row gap-2">
+      {label}
+      {value == "Not set" ? (
+        <CircleAlert className="text-destructive w-3 h-3" />
+      ) : (
+        ""
+      )}
+    </label>
     {isEditing ? (
       <select
         name={name}
@@ -235,7 +231,13 @@ const SelectField: React.FC<SelectFieldProps> = ({
         ))}
       </select>
     ) : (
-      <p className="mt-1 text-base text-foreground">{value}</p>
+      <p
+        className={`mt-1 text-base ${
+          value === "Not set" ? "text-foreground italic" : "text-foreground"
+        }`}
+      >
+        {value}
+      </p>
     )}
   </div>
 );
@@ -248,7 +250,14 @@ const DateField: React.FC<{
   name: "dob";
 }> = ({ label, value, isEditing, onChange, name }) => (
   <div>
-    <label className="block text-sm font-medium text-foreground">{label}</label>
+    <label className="text-sm font-medium text-muted-foreground flex items-center flex-row gap-2">
+      {label}
+      {value == "Not set" ? (
+        <CircleAlert className="text-destructive w-3 h-3" />
+      ) : (
+        ""
+      )}
+    </label>
     {isEditing ? (
       <input
         type="date"
@@ -258,7 +267,13 @@ const DateField: React.FC<{
         className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
     ) : (
-      <p className="mt-1 text-base text-foreground">{value}</p>
+      <p
+        className={`mt-1 text-base ${
+          value === "Not set" ? "text-foreground italic" : "text-foreground"
+        }`}
+      >
+        {value}
+      </p>
     )}
   </div>
 );
@@ -269,7 +284,7 @@ const SettingRow: React.FC<SettingRowProps> = ({
   description,
   children,
 }) => (
-  <div className="py-4 flex justify-between items-center border-b border-foreground/20">
+  <div className="py-4 flex justify-between items-center border-b border-border-medium">
     <div>
       <h3 className="text-base text-foreground">{title}</h3>
       {description && (
@@ -289,7 +304,7 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
   options,
   manageLink,
 }) => (
-  <div className="py-4 flex justify-between items-center border-b border-foreground/20">
+  <div className="py-4 flex justify-between items-center border-b border-border-medium">
     <div>
       <h3 className="text-base font-semibold text-white">{title}</h3>
       <p className="text-sm text-foreground max-w-md">{description}</p>
@@ -320,6 +335,7 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
 import { useAuth } from "@/contexts/AuthContext";
 import {
   Bell,
+  CircleAlert,
   CircleCheck,
   CircleUserRound,
   GaugeCircle,
@@ -458,7 +474,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-40 pl-3 pr-10 py-2 rounded-lg shadow-sm bg-background text-foreground border border-foreground/10 focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="w-40 pl-3 pr-10 py-2 rounded-lg shadow-sm bg-background text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
                 <option>English</option>
                 <option>Hindi</option>
@@ -494,13 +510,13 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Account":
         return (
           <div>
-            <div className="items-end mb-6 pb-4 flex justify-between items-center border-b border-foreground/20">
+            <div className="items-end mb-6 pb-4 flex justify-between items-center border-b border-border-medium">
               <div>
                 <h1 className="text-3xl  text-foreground">Your Account</h1>
                 <p className="mt-1 text-muted-foreground">
                   View and edit your personal information.
                 </p>
-                {profile && (
+                {/**profile && (
                   <div className="mt-2 text-xs text-gray-500">
                     <span className="inline-flex items-center gap-1">
                       <CircleCheck className="w-3 h-3" />
@@ -515,7 +531,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                       </div>
                     )}
                   </div>
-                )}
+                )*/}
               </div>
               <div className="flex gap-3">
                 <button
@@ -530,7 +546,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 </button>
                 <button
                   onClick={toggleEditMode}
-                  className="px-5 py-2 rounded-lg text-sm font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform hover:scale-105 focus:outline-none focus:shadow-sm cursor-pointer"
+                  className="px-5 py-2 rounded-lg text-sm font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer"
                 >
                   {isEditing ? "Save Changes" : "Edit Profile"}
                 </button>
@@ -669,7 +685,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               0 0 20px rgba(168, 85, 247, 0.6), 
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
-            <div className="flex justify-between items-end border-b border-foreground/20 pb-4">
+            <div className="flex justify-between items-end border-b border-border-medium pb-4">
               <div>
                 <h1 className="text-3xl  text-foreground">Upgrade</h1>
                 <p className="mt-1 text-muted-foreground">

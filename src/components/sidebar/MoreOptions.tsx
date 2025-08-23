@@ -214,12 +214,12 @@ const handleLogoutClick = () => {
                 ? "Free Plan"
                 : "Free Plan"}
             </p>
-            {isBackgroundLoading && (
+            {/**isBackgroundLoading && (
               <div className="flex items-center space-x-1 mt-1">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                 <span className="text-xs text-blue-400">Syncing...</span>
               </div>
-            )}
+            )*/}
           </div>
         </div>
         <Ellipsis

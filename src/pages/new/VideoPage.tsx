@@ -318,10 +318,10 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
                   {chapter.time}
                 </div>
                 <div className="border-l-2 border-gray-600 pl-2 sm:pl-4 group-hover:border-blue-500 transition-colors">
-                  <h3 className="font-semibold text-gray-200 text-sm sm:text-base">
+                  <h3 className="font-semibold text-foreground text-sm sm:text-base">
                     {chapter.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     {chapter.content}
                   </p>
                 </div>
