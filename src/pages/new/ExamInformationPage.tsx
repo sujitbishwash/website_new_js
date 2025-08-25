@@ -86,13 +86,13 @@ export default function ExamInformationPage() {
   return (
       <div className="bg-card overflow-hidden w-full flex flex-col max-h-[100vh]">
         {/* Header Section - This part will not scroll */}
-        <header className="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-700">
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">
+        <header className="flex-shrink-0 flex justify-between items-center p-6 border-b border-border">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">
             Exam Instructions
           </h1>
           <div className="flex items-center space-x-4">
             <div className="text-right hidden sm:block">
-              <p className="font-semibold text-white">
+              <p className="font-semibold text-foreground">
                 {profile?.name || "Student Name"}
               </p>
               <p className="text-xs text-gray-400">
@@ -116,10 +116,10 @@ export default function ExamInformationPage() {
         <main className="flex-grow overflow-y-auto p-6 sm:p-8 space-y-8">
           {/* General Instructions */}
           <section>
-            <h2 className="text-xl font-semibold text-indigo-400 mb-4">
+            <h2 className="text-xl font-semibold text-foreground mb-4">
               General Instructions
             </h2>
-            <div className="space-y-3 text-gray-300">
+            <div className="space-y-3 text-foreground">
               <p>{instructions.general[0]}</p>
               <p>{instructions.general[1]}</p>
               <ul className="space-y-3 pl-6 pt-2">
@@ -132,7 +132,7 @@ export default function ExamInformationPage() {
                   </li>
                 ))}
               </ul>
-              <p className="pt-2 italic text-gray-400">
+              <p className="pt-2 italic text-foreground">
                 {instructions.markedForReviewNote}
               </p>
             </div>
@@ -140,21 +140,21 @@ export default function ExamInformationPage() {
 
           {/* Navigating to a Question */}
           <section>
-            <h2 className="text-xl font-semibold text-indigo-400 mb-4">
+            <h2 className="text-xl font-semibold text-foreground mb-4">
               Navigating to a Question
             </h2>
-            <div className="space-y-3 text-gray-300">
+            <div className="space-y-3 text-foreground">
               <p>{instructions.navigating[0]}</p>
               <ul className="space-y-3 pl-6">
                 <li>{instructions.navigating[1]}</li>
                 <li>{instructions.navigating[2]}</li>
                 <li>{instructions.navigating[3]}</li>
               </ul>
-              <p className="font-semibold text-amber-400">
+              <p className="font-semibold text-destructive">
                 {instructions.navigating[4]}
               </p>
-              <div className="p-4 bg-gray-700/50 border border-gray-600 rounded-lg mt-2">
-                <p className="text-gray-400">
+              <div className="p-4 bg-accent0 border border-border-medium rounded-lg mt-2">
+                <p className="text-foreground">
                   You can shuffle between sections and questions anytime during
                   the examination as per your convenience.
                 </p>
@@ -164,10 +164,10 @@ export default function ExamInformationPage() {
 
           {/* Answering a Question */}
           <section>
-            <h2 className="text-xl font-semibold text-indigo-400 mb-4">
+            <h2 className="text-xl font-semibold text-foreground mb-4">
               Answering a Question
             </h2>
-            <div className="space-y-3 text-gray-300">
+            <div className="space-y-3 text-foreground">
               <p>{instructions.answering[0]}</p>
               <ul className="space-y-3 pl-6">
                 <li>{instructions.answering[1]}</li>
@@ -181,7 +181,7 @@ export default function ExamInformationPage() {
         </main>
 
         {/* Footer with Navigation Buttons - This part will not scroll */}
-        <footer className="flex-shrink-0 flex justify-between items-center p-6 border-t border-gray-700">
+        <footer className="flex-shrink-0 flex justify-between items-center p-6 border-t border-border">
           <button
             onClick={() =>
               navigate(ROUTES.TEST_SERIES, {
@@ -191,7 +191,7 @@ export default function ExamInformationPage() {
                 },
               })
             }
-            className="px-6 py-2 font-semibold text-white bg-gray-600 hover:bg-gray-500 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
+            className="px-6 py-2 font-semibold text-white bg-border-high hover:bg-border-medium rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-border-medium"
           >
             Previous
           </button>
@@ -201,7 +201,7 @@ export default function ExamInformationPage() {
                 state: { testId: testId, testConfig: testConfig },
               })
             }
-            className="px-8 py-2 font-bold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-indigo-400 shadow-lg shadow-indigo-500/30"
+            className="px-8 py-2 font-bold text-white bg-primary hover:bg-primary/80 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary shadow-lg shadow-indigo-500/30"
           >
             Next
           </button>
