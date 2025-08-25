@@ -6,6 +6,7 @@ import { ROUTES } from "../../routes/constants";
 // --- Type Definitions ---
 interface ExamDetails {
   title: string;
+  totalQuestions: string;
   duration: string;
   maxMarks: string;
   instructions: string[];
@@ -20,6 +21,7 @@ export default function ExamReconfirmationPage() {
   const examData = {
     title:
       "CISF Constable (Fireman): General Awareness - सामान्य जागरूकता - Quiz",
+    totalQuestions: "5 Questions",
     duration: "5 Mins",
     maxMarks: "5",
     instructions: [
@@ -52,50 +54,48 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
 
   return (
     // The main container now uses h-screen to take the full viewport height
-    
-    <div className="bg-card text-foreground w-full flex flex-col h-screen overflow-hidden">
-      
-      {/* Top Header */}
+
+    <div className="bg-card text-foreground w-full flex flex-col h-screen overflow-hidden" style={{ fontFamily: "Arial, sans-serif" }}>
+      {/* Header Section - This part will not scroll */}
       <header className="flex-shrink-0 flex justify-between items-center p-6 border-b border-border">
-        <div>
-          <h1 className="text-lg md:text-xl font-semibold text-foreground">
-            {examDetails.title}
-          </h1>
-          {/* User Profile Info */}
-          {profile && (
-            <div className="mt-2 text-sm text-foreground">
-              <span className="mr-4">
-                <span className="text-foreground">Student:</span>{" "}
-                {profile.name || "Not set"}
-              </span>
-              <span className="mr-4">
-                <span className="text-foreground">Email:</span> {profile.email}
-              </span>
-              {examGoal && (
-                <span>
-                  <span className="text-foreground">Exam Goal:</span>{" "}
-                  {examGoal.exam}
-                </span>
-              )}
-            </div>
-          )}
+        <h4 className="text-2xl sm:text-3xl font-bold text-foreground">
+          {examDetails.title}
+        </h4>
+        
+        <div className=" items-center space-x-4 hidden sm:flex">
+          <div className="text-right">
+            <p className="font-semibold">
+              {profile?.name || "Student Name"}
+            </p>
+          </div>
+          <img
+            src={`https://placehold.co/48x48/6366F1/FFFFFF?text=${profile?.name[0]}`}
+            alt="Student avatar"
+            className="w-12 h-12 rounded-full border-2 border-indigo-500"
+          />
         </div>
-        <span className="bg-gray-700 text-sm px-3 py-1 rounded-md">
-          Maximum Marks: {examDetails.maxMarks}
-        </span>
       </header>
       {/* Main Content Area: flex-grow allows this section to fill available space, and overflow-y-auto enables scrolling */}
       <div className="flex-grow overflow-y-auto">
         <main className="p-6 sm:p-8">
           <div className="mb-6">
-            <p className="text-sm text-foreground">
-              Duration: {examDetails.duration}
-            </p>
-            <h2 className="text-xl font-bold mt-2 text-foreground">
-              Read the following instructions carefully.
-            </h2>
+            <div className="flex flex-row gap-8">
+              
+              <p className="text-sm text-foreground">
+                Total Questions: {examDetails.totalQuestions}
+              </p>
+              <p className="text-sm text-foreground">
+                Maximum Marks: {examDetails.maxMarks}
+              </p>
+              <p className="text-sm text-foreground">
+                Duration: {examDetails.duration}
+              </p>
+            </div>
           </div>
 
+            <h2 className="text-xl font-bold mt-2 text-foreground mb-4">
+              Read the following instructions carefully.
+            </h2>
           {/* Instructions List */}
           <ul className="space-y-3 text-foreground list-decimal list-inside mb-8">
             {examDetails.instructions.map(

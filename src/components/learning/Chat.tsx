@@ -1,4 +1,4 @@
-import { ArrowUp } from "lucide-react";
+import { ArrowUp, MessageCircle } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -70,19 +70,7 @@ const BrainIcon: React.FC = () => (
 const ChatHeader: React.FC = () => (
   <div className="text-center p-6 md:p-8">
     <div className="inline-block p-6 bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-full mb-6 border border-blue-600/30 shadow-lg backdrop-blur-sm">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="48"
-        height="48"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={theme.secondaryText}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-      </svg>
+      <MessageCircle height={48} width={48}/>
     </div>
     {/* Changed title from "AI Tutor" to "AI Padhai" */}
     <h1

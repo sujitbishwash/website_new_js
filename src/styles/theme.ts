@@ -38,7 +38,24 @@ export const theme: ThemeColors = {
   yellow: v("yellow"),
   red: v("red"),
 };
-
+/**  slate: {
+     background: "#111827",
+    cardBackground: "#1F2937",
+    inputBackground: "#374151",
+    primaryText: "#FFFFFF",
+    secondaryText: "#9CA3AF",
+    mutedText: "#6B7280",
+    accent: "#4A84C8",
+    accentLight: "rgba(74, 132, 200, 0.08)",
+    buttonGradientFrom: "#3B82F6",
+    buttonGradientTo: "#2563EB",
+    divider: "#4B5563",
+    dividerMedium: "#2C2C2E",
+    dividerHigh: "#1F1F20",
+    green: "#34D399",
+    yellow: "#FBBF24",
+    red: "#F87171",
+  },*/
 // Available color palettes
 export const palettes: Record<string, ThemeColors> = {
   default: {
@@ -58,24 +75,6 @@ export const palettes: Record<string, ThemeColors> = {
     green: "#34C759",
     yellow: "#FFCC00",
     red: "#FF3B30",
-  },
-  slate: {
-    background: "#111827",
-    cardBackground: "#1F2937",
-    inputBackground: "#374151",
-    primaryText: "#FFFFFF",
-    secondaryText: "#9CA3AF",
-    mutedText: "#6B7280",
-    accent: "#4A84C8",
-    accentLight: "rgba(74, 132, 200, 0.08)",
-    buttonGradientFrom: "#3B82F6",
-    buttonGradientTo: "#2563EB",
-    divider: "#4B5563",
-    dividerMedium: "#2C2C2E",
-    dividerHigh: "#1F1F20",
-    green: "#34D399",
-    yellow: "#FBBF24",
-    red: "#F87171",
   },
   ocean: {
     background: "#0B1220",
@@ -193,7 +192,7 @@ export const getAvailableColorThemes = (): ColorThemeName[] =>
   Object.keys(palettes) as ColorThemeName[];
 
 export const applyColorTheme = (name: ColorThemeName) => {
-  const palette = palettes[name] || palettes.slate;
+  const palette = palettes[name] || palettes.default;
   const root = document.documentElement;
   const isDark = root.classList.contains("dark");
 

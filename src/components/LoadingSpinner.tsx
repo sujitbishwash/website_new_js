@@ -20,9 +20,9 @@ const LoadingSpinner: React.FC<LoadingSpinnerProps> = ({
   return (
     <div className={`flex flex-col items-center justify-center ${className}`}>
       <div
-        className={`animate-spin rounded-full border-b-2 border-blue-400 mb-6 ${sizeClasses[size]}`}
+        className={`animate-spin rounded-full border-b-2 border-primary mb-6 ${sizeClasses[size]}`}
       ></div>
-      {text && <p className="mt-2 text-sm text-gray-400">{text}</p>}
+      {text && <p className="mt-2 text-sm text-muted-foreground">{text}</p>}
     </div>
   );
 };

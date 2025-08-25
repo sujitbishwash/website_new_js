@@ -569,7 +569,7 @@ export default function ExamConfigurationModal({
           </h3>
           <button
             onClick={onClose}
-            className="absolute top-3 right-3 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+            className="absolute top-3 right-3 p-2 text-foreground rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
           >
             <X />
           </button>
@@ -580,7 +580,7 @@ export default function ExamConfigurationModal({
           {/* Current Goal Display */}
           {examGoal && (
             <div className="bg-background p-4 rounded-lg text-sm">
-              <span className="font-semibold text-gray-300">Current Goal:</span>{" "}
+              <span className="font-semibold text-foreground">Current Goal:</span>{" "}
               {examGoal.exam} ({examGoal.groupType})
             </div>
           )}
@@ -628,7 +628,7 @@ export default function ExamConfigurationModal({
             <div className="space-y-2">
               <label
                 htmlFor="exam-select"
-                className="block text-sm font-medium text-gray-400"
+                className="block text-sm font-medium text-foreground"
               >
                 Specific Exam
               </label>
@@ -658,7 +658,7 @@ export default function ExamConfigurationModal({
                 <h4 className="text-sm font-semibold text-muted-foreground">
                   Description
                 </h4>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-foreground text-sm leading-relaxed">
                   {selectedExamDetails.description}
                 </p>
               </div>
@@ -667,7 +667,7 @@ export default function ExamConfigurationModal({
                 <h4 className="text-sm font-semibold text-muted-foreground">
                   Eligibility
                 </h4>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-foreground text-sm leading-relaxed">
                   {selectedExamDetails.eligibility}
                 </p>
               </div>
@@ -678,7 +678,7 @@ export default function ExamConfigurationModal({
                 </h4>
                 <ul className="list-disc list-inside space-y-1.5 pl-2">
                   {selectedExamDetails.pattern.map((step, index) => (
-                    <li key={index} className="text-gray-300 text-sm">
+                    <li key={index} className="text-foreground text-sm">
                       {step}
                     </li>
                   ))}

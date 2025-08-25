@@ -20,6 +20,7 @@ import {
   Highlighter,
   Instagram,
   Link,
+  Linkedin,
   MessageCircle,
   MessageCircleQuestion,
   MessageSquareText,
@@ -90,51 +91,8 @@ const Icon: React.FC<IconProps> = ({ path, className = "w-6 h-6" }) => (
   </svg>
 );
 
-const ChaptersIcon = () => (
-  <Icon
-    path="M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z M22 6s-1.5-2-5-2-5 2-5 2v14s1.5-1 5-1 5 1 5 1V6z"
-    className="w-5 h-5"
-  />
-);
-const TranscriptIcon = () => (
-  <Icon
-    path="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
-    className="w-5 h-5"
-  />
-);
-const ChatIcon = () => (
-  <Icon
-    path="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-    className="w-5 h-5"
-  />
-);
-const FlashcardsIcon = () => (
-  <Icon
-    path="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 17h-6a4 4 0 0 0-4-4V3a3 3 0 0 1 3-3h7z"
-    className="w-5 h-5"
-  />
-);
-const QuizIcon = () => (
-  <Icon
-    path="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-    className="w-5 h-5"
-  />
-);
-const SummaryIcon = () => (
-  <Icon
-    path="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z M13 2v7h7"
-    className="w-5 h-5"
-  />
-);
-
 const XIcon = () => <Icon path="M18 6L6 18 M6 6l12 12" className="w-5 h-5" />;
 
-const MaximizeIcon = () => (
-  <Icon
-    path="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"
-    className="w-5 h-5"
-  />
-);
 const MinimizeIcon = () => (
   <Icon
     path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"
@@ -494,49 +452,48 @@ const ShareModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center text-foreground bg-black/20 backdrop-blur-sm animate-fade-in p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-md m-4 border border-gray-700">
-        <div className="flex justify-between items-center mb-4">
+      <div className="relative bg-card rounded-xl shadow-lg p-6 w-full max-w-md m-4 border border-border">
+        <div className=" flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Share Public Link</h2>
+
           <button
             onClick={onClose}
-            className="p-1 rounded-full text-gray-400 hover:bg-gray-700"
+            className="absolute top-3 right-3 p-2 text-foreground rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
           >
-            <XIcon />
+            <X />
           </button>
         </div>
         <div className="space-y-4">
-          <div className="flex items-center space-x-2 bg-background border border-gray-700 rounded-lg p-2">
+          <div className="flex items-center space-x-2 bg-background border border-border rounded-lg p-2">
             <input
               type="text"
               readOnly
               value={url}
-              className="flex-1 bg-transparent text-gray-300 focus:outline-none"
+              className="flex-1 bg-transparent text-muted-foreground focus:outline-none"
             />
             <button
               onClick={copyToClipboard}
               className="flex items-center gap-2 bg-primary p-2 rounded-md text-sm font-semibold hover:bg-primary/70"
             >
-              <Clipboard /> 
+              <Clipboard className="text-white" />
             </button>
           </div>
-          <div className="text-center text-gray-400 text-sm">
+          <div className="text-center text-muted-foreground text-sm">
             Or share on social media
           </div>
           <div className="flex justify-center gap-4">
             {/* Add your social media icons here */}
-            <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
-              <Facebook className="w-6 h-6" />
+            <button className="p-3 border border-border rounded-full hover:bg-blue-300 cursor-pointer">
+              <Facebook className="w-6 h-6 text-foreground" />
             </button>
-            <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.223.085c.645 1.956 2.52 3.375 4.738 3.414A9.87 9.87 0 010 17.54a13.94 13.94 0 007.548 2.212c9.142 0 14.307-7.477 14.307-14.055 0-.213-.005-.426-.015-.637.96-.695 1.795-1.56 2.457-2.54z" />
-              </svg>
+            <button className="p-3 border border-border rounded-full hover:bg-blue-200 cursor-pointer">
+              <Linkedin className="w-6 h-6 text-foreground" />
             </button>
-            <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
-              <Instagram className="w-6 h-6" />
+            <button className="p-3 border border-border rounded-full hover:bg-pink-200 cursor-pointer">
+              <Instagram className="w-6 h-6 text-foreground" />
             </button>
           </div>
         </div>
@@ -599,14 +556,18 @@ const VideoPage: React.FC = () => {
   });
 
   // Update feedback state when feedback is shown
-  const updateFeedbackState = useCallback((action: 'shown' | 'submitted' | 'skipped') => {
-    setFeedbackState(prev => ({
-      ...prev,
-      hasShownFeedback: true,
-      lastFeedbackTime: Date.now(),
-      feedbackCount: action === 'submitted' ? prev.feedbackCount + 1 : prev.feedbackCount,
-    }));
-  }, []);
+  const updateFeedbackState = useCallback(
+    (action: "shown" | "submitted" | "skipped") => {
+      setFeedbackState((prev) => ({
+        ...prev,
+        hasShownFeedback: true,
+        lastFeedbackTime: Date.now(),
+        feedbackCount:
+          action === "submitted" ? prev.feedbackCount + 1 : prev.feedbackCount,
+      }));
+    },
+    []
+  );
   // Video player ref for tracking progress
   const videoPlayerRef = useRef<HTMLIFrameElement>(null);
   const videoDurationRef = useRef<number>(0);
@@ -650,20 +611,20 @@ const VideoPage: React.FC = () => {
     if (currentVideoId) {
       startSession();
       setShouldShowFeedbackOnLeave(true);
-      
+
       // Reset feedback state for new video
       setFeedbackState({
         hasShownFeedback: false,
         lastFeedbackTime: null,
         feedbackCount: 0,
       });
-      
+
       // Reset video progress tracking
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
-      
+
       // Reset YouTube player reference
       if (ytPlayerRef.current) {
         try {
@@ -689,9 +650,13 @@ const VideoPage: React.FC = () => {
         updateWatchPercentage(estimatedProgress);
 
         // Auto-show feedback when video reaches 90%
-        if (estimatedProgress >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
+        if (
+          estimatedProgress >= 90 &&
+          shouldShowFeedbackOnLeave &&
+          !feedbackState.hasShownFeedback
+        ) {
           openFeedbackModal();
-          updateFeedbackState('shown');
+          updateFeedbackState("shown");
         }
       }
     }, 1000); // Update every second
@@ -712,23 +677,34 @@ const VideoPage: React.FC = () => {
     if (ytPlayerRef.current && videoDurationRef.current > 0) {
       try {
         const currentTime = ytPlayerRef.current.getCurrentTime?.() || 0;
-        const duration = ytPlayerRef.current.getDuration?.() || videoDurationRef.current;
-        
+        const duration =
+          ytPlayerRef.current.getDuration?.() || videoDurationRef.current;
+
         if (duration > 0) {
           const percentage = Math.min(100, (currentTime / duration) * 100);
           updateWatchPercentage(percentage);
-          
+
           // Show feedback if user has watched 90% or more
-          if (percentage >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
+          if (
+            percentage >= 90 &&
+            shouldShowFeedbackOnLeave &&
+            !feedbackState.hasShownFeedback
+          ) {
             openFeedbackModal();
-            updateFeedbackState('shown');
+            updateFeedbackState("shown");
           }
         }
       } catch (error) {
         console.warn("Error tracking user activity:", error);
       }
     }
-  }, [updateWatchPercentage, shouldShowFeedbackOnLeave, openFeedbackModal, updateFeedbackState, feedbackState.hasShownFeedback]);
+  }, [
+    updateWatchPercentage,
+    shouldShowFeedbackOnLeave,
+    openFeedbackModal,
+    updateFeedbackState,
+    feedbackState.hasShownFeedback,
+  ]);
 
   // Periodic activity tracking to catch all progress changes
   useEffect(() => {
@@ -753,19 +729,17 @@ const VideoPage: React.FC = () => {
       };
 
       // Add event listeners for user interactions
-      document.addEventListener('keydown', handleUserInteraction);
-      document.addEventListener('click', handleUserInteraction);
-      document.addEventListener('scroll', handleUserInteraction);
+      document.addEventListener("keydown", handleUserInteraction);
+      document.addEventListener("click", handleUserInteraction);
+      document.addEventListener("scroll", handleUserInteraction);
 
       return () => {
-        document.removeEventListener('keydown', handleUserInteraction);
-        document.removeEventListener('click', handleUserInteraction);
-        document.removeEventListener('scroll', handleUserInteraction);
+        document.removeEventListener("keydown", handleUserInteraction);
+        document.removeEventListener("click", handleUserInteraction);
+        document.removeEventListener("scroll", handleUserInteraction);
       };
     }
   }, [sessionStartTime, shouldShowFeedbackOnLeave, trackUserActivity]);
-
-
 
   // Start progress tracking when session starts
   useEffect(() => {
@@ -785,30 +759,35 @@ const VideoPage: React.FC = () => {
             window.onYouTubeIframeAPIReady = () => resolve();
           });
         }
-        
+
         try {
           const player = new window.YT.Player("yt-player-iframe", {
             events: {
               onReady: (e: any) => {
                 const dur = e.target.getDuration?.() || 0;
                 if (dur > 0) videoDurationRef.current = dur;
-                
+
                 // Start progress tracking interval
                 if (progressIntervalRef.current == null) {
                   progressIntervalRef.current = window.setInterval(() => {
                     try {
                       const cur = player.getCurrentTime?.() || 0;
-                      const d = player.getDuration?.() || videoDurationRef.current || 0;
-                      
+                      const d =
+                        player.getDuration?.() || videoDurationRef.current || 0;
+
                       if (d > 0) {
                         videoDurationRef.current = d;
                         const pct = Math.min(100, (cur / d) * 100);
                         updateWatchPercentage(pct);
-                        
+
                         // Auto-show feedback when video reaches 90%
-                        if (pct >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
+                        if (
+                          pct >= 90 &&
+                          shouldShowFeedbackOnLeave &&
+                          !feedbackState.hasShownFeedback
+                        ) {
                           openFeedbackModal();
-                          updateFeedbackState('shown');
+                          updateFeedbackState("shown");
                         }
                       }
                     } catch (error) {
@@ -849,7 +828,7 @@ const VideoPage: React.FC = () => {
           return cleanup;
         }
       };
-      
+
       const maybeCleanup = setup();
       return () => {
         if (progressIntervalRef.current != null) {
@@ -882,7 +861,8 @@ const VideoPage: React.FC = () => {
         !isFeedbackModalOpen
       ) {
         event.preventDefault();
-        event.returnValue = "You have watched most of this video. Would you like to provide feedback before leaving?";
+        event.returnValue =
+          "You have watched most of this video. Would you like to provide feedback before leaving?";
 
         // Store state for next visit
         localStorage.setItem(
@@ -967,7 +947,7 @@ const VideoPage: React.FC = () => {
 
       // Clear any pending feedback state
       localStorage.removeItem(`feedback_pending_${currentVideoId}`);
-      
+
       // Log feedback action for analytics
       console.log(`Feedback ${action} for video:`, currentVideoId);
     },
@@ -1061,7 +1041,7 @@ const VideoPage: React.FC = () => {
     setChatInitialized(false);
     setChatMessages([]);
     setChatError(null);
-    
+
     // Reset feedback state when video changes
     setFeedbackState({
       hasShownFeedback: false,
@@ -1111,29 +1091,32 @@ const VideoPage: React.FC = () => {
     }
   };
 
-  const handleSendMessage = useCallback(async (message: string) => {
-    if (!message.trim() || !currentVideoId) return;
+  const handleSendMessage = useCallback(
+    async (message: string) => {
+      if (!message.trim() || !currentVideoId) return;
 
-    // Add user message immediately
-    const userMessage = { text: message, isUser: true };
-    setChatMessages((prev) => [...prev, userMessage]);
+      // Add user message immediately
+      const userMessage = { text: message, isUser: true };
+      setChatMessages((prev) => [...prev, userMessage]);
 
-    setIsChatLoading(true);
-    setChatError(null);
+      setIsChatLoading(true);
+      setChatError(null);
 
-    try {
-      const response = await chatApi.sendMessage(currentVideoId, message);
-      const assistantMessage = { text: response.content, isUser: false };
-      setChatMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error("Failed to send message:", err);
-      setChatError("Failed to send message. Please try again.");
-      // Remove the user message if sending failed
-      setChatMessages((prev) => prev.slice(0, -1));
-    } finally {
-      setIsChatLoading(false);
-    }
-  }, [currentVideoId]);
+      try {
+        const response = await chatApi.sendMessage(currentVideoId, message);
+        const assistantMessage = { text: response.content, isUser: false };
+        setChatMessages((prev) => [...prev, assistantMessage]);
+      } catch (err) {
+        console.error("Failed to send message:", err);
+        setChatError("Failed to send message. Please try again.");
+        // Remove the user message if sending failed
+        setChatMessages((prev) => prev.slice(0, -1));
+      } finally {
+        setIsChatLoading(false);
+      }
+    },
+    [currentVideoId]
+  );
 
   const handleShare = useCallback(() => {
     setIsShareModalOpen(true);
@@ -1167,13 +1150,26 @@ const VideoPage: React.FC = () => {
   }, []);
 
   // Manual progress trigger (for testing)
-  const handleSetProgress = useCallback((percentage: number) => {
-    updateWatchPercentage(percentage);
-    if (percentage >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
-      openFeedbackModal();
-      updateFeedbackState('shown');
-    }
-  }, [updateWatchPercentage, shouldShowFeedbackOnLeave, openFeedbackModal, updateFeedbackState, feedbackState.hasShownFeedback]);
+  const handleSetProgress = useCallback(
+    (percentage: number) => {
+      updateWatchPercentage(percentage);
+      if (
+        percentage >= 90 &&
+        shouldShowFeedbackOnLeave &&
+        !feedbackState.hasShownFeedback
+      ) {
+        openFeedbackModal();
+        updateFeedbackState("shown");
+      }
+    },
+    [
+      updateWatchPercentage,
+      shouldShowFeedbackOnLeave,
+      openFeedbackModal,
+      updateFeedbackState,
+      feedbackState.hasShownFeedback,
+    ]
+  );
 
   // Enhanced video progress tracking with user interaction detection
   const handleVideoInteraction = useCallback(() => {
@@ -1182,20 +1178,31 @@ const VideoPage: React.FC = () => {
     if (ytPlayerRef.current && videoDurationRef.current > 0) {
       try {
         const currentTime = ytPlayerRef.current.getCurrentTime?.() || 0;
-        const duration = ytPlayerRef.current.getDuration?.() || videoDurationRef.current;
+        const duration =
+          ytPlayerRef.current.getDuration?.() || videoDurationRef.current;
         const percentage = Math.min(100, (currentTime / duration) * 100);
         updateWatchPercentage(percentage);
-        
+
         // Show feedback if user has watched 90% or more
-        if (percentage >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
+        if (
+          percentage >= 90 &&
+          shouldShowFeedbackOnLeave &&
+          !feedbackState.hasShownFeedback
+        ) {
           openFeedbackModal();
-          updateFeedbackState('shown');
+          updateFeedbackState("shown");
         }
       } catch (error) {
         console.warn("Error getting video progress on interaction:", error);
       }
     }
-  }, [updateWatchPercentage, shouldShowFeedbackOnLeave, openFeedbackModal, updateFeedbackState, feedbackState.hasShownFeedback]);
+  }, [
+    updateWatchPercentage,
+    shouldShowFeedbackOnLeave,
+    openFeedbackModal,
+    updateFeedbackState,
+    feedbackState.hasShownFeedback,
+  ]);
 
   // Listen for video player events to catch user interactions
   useEffect(() => {
@@ -1207,12 +1214,12 @@ const VideoPage: React.FC = () => {
     // Add event listeners to video iframe
     const videoIframe = document.querySelector('iframe[src*="youtube.com"]');
     if (videoIframe) {
-      videoIframe.addEventListener('load', handleVideoEvents);
-      videoIframe.addEventListener('click', handleVideoEvents);
-      
+      videoIframe.addEventListener("load", handleVideoEvents);
+      videoIframe.addEventListener("click", handleVideoEvents);
+
       return () => {
-        videoIframe.removeEventListener('load', handleVideoEvents);
-        videoIframe.removeEventListener('click', handleVideoEvents);
+        videoIframe.removeEventListener("load", handleVideoEvents);
+        videoIframe.removeEventListener("click", handleVideoEvents);
       };
     }
   }, [handleVideoInteraction]);
@@ -1313,7 +1320,7 @@ const VideoPage: React.FC = () => {
               )}
             </div>
           </header>
-          <div className={`flex-shrink-0 ${isVideoVisible?"":"hidden"}`}>
+          <div className={`flex-shrink-0 ${isVideoVisible ? "" : "hidden"}`}>
             <VideoPlayer
               src={`https://www.youtube.com/embed/${currentVideoId}`}
             />
@@ -1367,7 +1374,7 @@ const VideoPage: React.FC = () => {
         onSubmit={async (payload) => {
           try {
             await submitFeedback(payload);
-            updateFeedbackState('submitted');
+            updateFeedbackState("submitted");
             handleFeedbackComplete("submit");
           } catch (error) {
             console.error("Failed to submit feedback:", error);
@@ -1376,7 +1383,7 @@ const VideoPage: React.FC = () => {
         }}
         onSkip={() => {
           skipFeedback();
-          updateFeedbackState('skipped');
+          updateFeedbackState("skipped");
           handleFeedbackComplete("skip");
         }}
         onDismiss={() => handleFeedbackComplete("dismiss")}
@@ -1458,4 +1465,3 @@ const VideoPage: React.FC = () => {
 };
 
 export default VideoPage;
-

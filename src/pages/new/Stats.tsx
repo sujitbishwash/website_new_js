@@ -17,6 +17,9 @@ import {
   TrendingUp,
   BrainCircuit,
   TargetIcon,
+  CalendarClock,
+  Sparkle,
+  GaugeCircle,
 } from "lucide-react";
 
 // --- Dark Mode Color Palette ---
@@ -84,8 +87,7 @@ const dashboardData = {
   performanceMetrics: {
     attemptPercentage: 85,
     accuracyPercentage: 92,
-
-    speed: { goal: 45, achieved: 50 },
+    speedPercentage: 90,
   },
   leaderboard: { rank: 10500, totalStudents: 15000 },
   todayStep: {
@@ -112,11 +114,9 @@ const Card = ({ children, className = "", tooltipText }) => (
     <div className="absolute inset-0 border border-transparent rounded-xl group-hover:border-white/20 transition-all duration-300 pointer-events-none"></div>
     {tooltipText && (
       <div className="absolute top-4 right-4 group/info">
-        <Info
-          className="w-4 h-4 transition-colors text-muted-foreground"
-        />
+        <Info className="w-4 h-4 transition-colors text-muted-foreground" />
 
-          <div className="border border-border absolute bg-background right-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg animate-fade-in-up opacity-0 group-hover/info:opacity-100 transition-opacity pointer-events-none z-10 shadow-lg">
+        <div className="border border-border absolute bg-background right-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg animate-fade-in-up scale-0 group-hover/info:scale-100 transition-scale pointer-events-none z-10 shadow-lg">
           {tooltipText}
         </div>
       </div>
@@ -138,25 +138,31 @@ const Button = ({ children, className = "", ...props }) => (
   </button>
 );
 
-
 // --- Existing Components ---
 const StreakTracker = ({ history, streak }) => {
-  const days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  const days = ["S", "M", "T", "W", "T", "F", "S"];
   return (
     <div className="flex flex-col items-center justify-center h-full">
-        <div className="flex items-center space-x-2 bg-black bg-opacity-20 px-3 py-1.5 rounded-full mb-4">
-            <Flame className="w-5 h-5 text-yellow-300" />
-            <span className="font-bold text-md" style={{color: colors.primaryText}}>{streak} Day Streak</span>
-        </div>
-        <div className="flex justify-center items-center gap-2">
-            {days.map((day, index) => (
-                <div key={index} className="flex flex-col items-center space-y-1">
-                    <div className={`w-7 h-7 rounded-full flex items-center justify-center ${history[index] ? 'bg-white/20' : 'bg-black/20'}`}>
-                        {history[index] && <CheckCircle className="w-5 h-5" style={{color: colors.green}} />}
-                    </div>
-                </div>
-            ))}
-        </div>
+
+      <div className="flex justify-center items-center gap-4">
+        {days.map((day, index) => (
+          <div key={index} className="flex flex-col items-center space-y-1">
+            <div
+              className={`w-7 h-7 rounded-full flex items-center justify-center ${
+                history[index] ? "" : "bg-border-medium"
+              }`}
+            >
+              {history[index] && (
+                <CheckCircle
+                  className="w-10 h-10"
+                  style={{ color: colors.green }}
+                />
+              )}
+            </div>
+            <span>{day}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
@@ -167,20 +173,14 @@ const SectionalProgress = ({ sections }) => (
       return (
         <div key={section.subject}>
           <div className="flex justify-between items-center mb-1">
-            <p
-              className="text-sm font-medium text-foreground"
-            >
+            <p className="text-sm font-medium text-foreground">
               {section.subject}
             </p>
-            <p
-              className="text-sm font-bold text-muted-foreground"
-            >
+            <p className="text-sm font-bold text-muted-foreground">
               {percentage}%
             </p>
           </div>
-          <div
-            className="w-full rounded-full h-2.5 bg-background"
-          >
+          <div className="w-full rounded-full h-2.5 bg-background">
             <div
               className="h-2.5 rounded-full"
               style={{ width: `${percentage}%`, backgroundColor: colors.green }}
@@ -223,8 +223,7 @@ const InteractiveGraph = ({
 
   return (
     <div
-      className="h-48 rounded-lg p-4 relative"
-      style={{ backgroundColor: colors.background }}
+      className="h-48 rounded-lg p-4 relative bg-accent"
       onMouseLeave={() => setTooltip(null)}
     >
       <svg
@@ -306,7 +305,7 @@ const InteractiveGraph = ({
 // --- UPDATED & NEW COMPONENTS ---
 
 const ExamCalendar = ({ exams }) => {
-  const [view, setView] = useState('month');
+  const [view, setView] = useState("month");
   const [currentDate, setCurrentDate] = useState(new Date());
   const today = new Date();
 
@@ -332,9 +331,7 @@ const ExamCalendar = ({ exams }) => {
           borderLeft: `1px solid ${colors.divider}`,
         }}
       >
-        <div
-          className="grid grid-cols-7 text-center text-xs font-semibold text-muted-foreground"
-        >
+        <div className="grid grid-cols-7 text-center text-xs font-semibold text-muted-foreground">
           {days.map((d, index) => (
             <div
               key={`${d}-${index}`}
@@ -360,10 +357,6 @@ const ExamCalendar = ({ exams }) => {
             ></div>
           ))}
           {dates.map((date) => {
-            const isToday =
-              today.getDate() === date &&
-              today.getMonth() === month &&
-              today.getFullYear() === year;
             const examOnThisDay = exams.find(
               (e) =>
                 e.date.getDate() === date &&
@@ -371,19 +364,12 @@ const ExamCalendar = ({ exams }) => {
                 e.date.getFullYear() === year
             );
 
-            const dayStyle = { color: colors.primaryText };
-            if (examOnThisDay) {
-              dayStyle.backgroundColor = colors.accent;
-              dayStyle.color = colors.primaryText;
-            } else if (isToday) {
-              dayStyle.backgroundColor = colors.accentLight;
-              dayStyle.color = colors.accent;
-            }
-
             return (
               <div
                 key={date}
-                className="flex justify-center items-center py-2"
+                className={`flex justify-center items-center py-2 ${
+                  examOnThisDay ? "bg-primary" : ""
+                }`}
                 style={{
                   borderRight: `1px solid ${colors.divider}`,
                   borderBottom: `1px solid ${colors.divider}`,
@@ -391,8 +377,8 @@ const ExamCalendar = ({ exams }) => {
                 title={examOnThisDay?.name}
               >
                 <span
-                  className="w-9 h-9 flex items-center justify-center rounded-full transition-colors text-foreground"
-                  style={dayStyle}
+                  className={`w-9 h-9 flex items-center justify-center rounded-full transition-colors 
+                    ${examOnThisDay ? "text-white" : "text-foreground"}`}
                 >
                   {date}
                 </span>
@@ -404,21 +390,42 @@ const ExamCalendar = ({ exams }) => {
     );
   };
   const renderYearView = () => {
-    const months = Array.from({ length: 12 }, (_, i) => new Date(currentDate.getFullYear(), i).toLocaleString('default', { month: 'short' }));
+    const months = Array.from({ length: 12 }, (_, i) =>
+      new Date(currentDate.getFullYear(), i).toLocaleString("default", {
+        month: "short",
+      })
+    );
     return (
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-        {months.map((month, index) => (
-          <button 
-            key={month} 
-            className="p-2 text-center rounded-lg hover:bg-indigo-100 transition-colors"
-            onClick={() => {
-              setCurrentDate(new Date(currentDate.getFullYear(), index));
-              setView('month');
-            }}
-          >
-            {month}
-          </button>
-        ))}
+      <div className="grid grid-cols-3 sm:grid-cols-4"
+      
+        style={{
+          borderTop: `1px solid ${colors.divider}`,
+          borderLeft: `1px solid ${colors.divider}`,
+        }}>
+        {months.map((month, index) => {
+          const examOnThisMonth = exams.find(
+            (e) => e.date.getMonth() === index
+          );
+
+          return (
+            <button
+              key={month}
+              className={`p-2 text-center hover:bg-accent transition-colors ${
+                examOnThisMonth ? "bg-primary text-white" : ""
+              }`}
+              style={{
+                borderRight: `1px solid ${colors.divider}`,
+                borderBottom: `1px solid ${colors.divider}`,
+              }}
+              onClick={() => {
+                setCurrentDate(new Date(currentDate.getFullYear(), index));
+                setView("month");
+              }}
+            >
+              {month}
+            </button>
+          );
+        })}
       </div>
     );
   };
@@ -426,17 +433,37 @@ const ExamCalendar = ({ exams }) => {
     <div>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
-          <button onClick={() => view === 'month' ? changeMonth(-1) : changeYear(-1)} className="p-1 rounded-md hover:bg-gray-100"><ChevronLeft className="w-5 h-5" /></button>
+          <button
+            onClick={() =>
+              view === "month" ? changeMonth(-1) : changeYear(-1)
+            }
+            className="p-1 rounded-md hover:bg-gray-100"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
           <h4 className="font-semibold text-center w-32">
-            {view === 'month' ? currentDate.toLocaleString('default', { month: 'long', year: 'numeric' }) : currentDate.getFullYear()}
+            {view === "month"
+              ? currentDate.toLocaleString("default", {
+                  month: "long",
+                  year: "numeric",
+                })
+              : currentDate.getFullYear()}
           </h4>
-          <button onClick={() => view === 'month' ? changeMonth(1) : changeYear(1)} className="p-1 rounded-md hover:bg-gray-100"><ChevronRight className="w-5 h-5" /></button>
+          <button
+            onClick={() => (view === "month" ? changeMonth(1) : changeYear(1))}
+            className="p-1 rounded-md hover:bg-gray-100"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
         </div>
-        <button onClick={() => setView(v => v === 'month' ? 'year' : 'month')} className="text-sm text-indigo-600 font-semibold">
-          {view === 'month' ? 'Zoom Out' : 'Zoom In'}
+        <button
+          onClick={() => setView((v) => (v === "month" ? "year" : "month"))}
+          className="text-sm text-indigo-600 font-semibold"
+        >
+          {view === "month" ? "Zoom Out" : "Zoom In"}
         </button>
       </div>
-      {view === 'month' ? renderMonthView() : renderYearView()}
+      {view === "month" ? renderMonthView() : renderYearView()}
     </div>
   );
 };
@@ -487,11 +514,7 @@ const CircularProgressChart = ({ percentage, label, color, text, icon }) => {
       </div>
       <div className="flex items-center gap-1.5">
         <Icon className="w-4 h-4" style={{ color }} />
-        <p
-          className="text-sm font-medium text-muted-foreground"
-        >
-          {label}
-        </p>
+        <p className="text-sm font-medium text-muted-foreground">{label}</p>
       </div>
     </div>
   );
@@ -511,8 +534,7 @@ const LeaderboardPosition = ({ rank, totalStudents }) => {
         of all aspirants. Keep pushing!
       </p>
       <div
-        className="w-full rounded-full h-4 relative"
-        style={{ backgroundColor: colors.divider }}
+        className="w-full rounded-full h-4 relative bg-border"
       >
         <div
           className="h-4 rounded-full"
@@ -559,16 +581,11 @@ function Stats() {
       .score;
   const { performanceMetrics } = dashboardData;
 
-  const speedScore = Math.round(
-    (performanceMetrics.speed.goal / performanceMetrics.speed.achieved) * 100
-  );
   return (
     <div className="p-4 sm:p-6 bg-background min-h-screen font-sans">
       <div className="max-w-7xl mx-auto mb-8 text-center">
-        <h1
-          className="text-3xl font-bold text-foreground"
-        >
-          Welcome back, {dashboardData.user.name}
+        <h1 className="text-3xl font-semibold text-foreground">
+          All Your Key Stats
         </h1>
       </div>
       <div className="max-w-7xl mx-auto space-y-6 md:space-y-0 md:grid md:grid-cols-4 md:gap-6">
@@ -579,22 +596,23 @@ function Stats() {
         >
           <CardContent>
             <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold">
-                  Welcome back, {dashboardData.user.name} 👋
-                </h2>
-                <p className="opacity-90 mt-1">
-                  You’ve been consistent for {dashboardData.user.streak} days.
-                </p>
-              </div>
+              
               <div className="flex items-center space-x-2 bg-background bg-opacity-20 px-3 py-1.5 rounded-full">
                 <Flame className="w-5 h-5 text-yellow-300" />
                 <span className="font-bold text-md">
                   {dashboardData.user.streak} Day Streak
                 </span>
               </div>
+              <div>
+                <p className="opacity-90 mt-1">
+                  You’ve been consistent for {dashboardData.user.streak} days.
+                </p>
+              </div>
             </div>
-                <StreakTracker history={dashboardData.user.streakHistory} streak={dashboardData.user.streak} />
+            <StreakTracker
+              history={dashboardData.user.streakHistory}
+              streak={dashboardData.user.streak}
+            />
           </CardContent>
         </Card>
 
@@ -605,9 +623,7 @@ function Stats() {
         >
           <CardContent>
             <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
-              <BookOpen
-                className="w-5 h-5 mr-2 text-primary"
-              />
+              <BookOpen className="w-5 h-5 mr-2 text-primary" />
               Sectional Progress
             </h3>
             <SectionalProgress sections={dashboardData.progress} />
@@ -615,13 +631,14 @@ function Stats() {
         </Card>
 
         {/* Performance Analytics */}
-        
-        <Card className="md:col-span-2 md:row-span-1" tooltipText="Attempt %: Questions you tried. Accuracy %: Correct answers from your attempts. Speed: How fast you answer compared to the ideal time.">
-            <CardContent>
+
+        <Card
+          className="md:col-span-2 md:row-span-1"
+          tooltipText="Attempt %: Questions you tried. Accuracy %: Correct answers from your attempts. Speed %: How fast you answer compared to the ideal time."
+        >
+          <CardContent>
             <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
-              <TrendingUp
-                className="w-5 h-5 mr-2 text-primary"
-              />
+              <GaugeCircle className="w-5 h-5 mr-2 text-primary" />
               Performance Analytics
             </h3>
             <div className="flex flex-wrap justify-around items-center gap-4">
@@ -638,8 +655,7 @@ function Stats() {
                 icon={TargetIcon}
               />
               <CircularProgressChart
-                percentage={speedScore > 100 ? 100 : speedScore}
-                text={`${speedScore}`}
+                percentage={performanceMetrics.speedPercentage}
                 label="Speed"
                 color={colors.orange}
                 icon={Zap}
@@ -654,10 +670,8 @@ function Stats() {
         >
           <CardContent>
             <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
-              <BarChart
-                className="w-5 h-5 mr-2"
-                style={{ color: colors.accent }}
-              />
+              <TrendingUp
+                className="w-5 h-5 mr-2 text-primary" />
               Score Improvement
             </h3>
             <p className="text-sm mb-4" style={{ color: colors.secondaryText }}>
@@ -686,9 +700,7 @@ function Stats() {
           <CardContent>
             <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
               <Clock
-                className="w-5 h-5 mr-2"
-                style={{ color: colors.accent }}
-              />
+                className="w-5 h-5 mr-2 text-primary" />
               Time Invested
             </h3>
             <p className="text-sm mb-4" style={{ color: colors.secondaryText }}>
@@ -716,10 +728,8 @@ function Stats() {
             <div className="flex justify-between items-start mb-4">
               <div>
                 <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
-                  <Target
-                    className="w-5 h-5 mr-2"
-                    style={{ color: colors.accent }}
-                  />
+                  <CalendarClock
+                    className="w-5 h-5 mr-2 text-primary" />
                   Upcoming Exams
                 </h3>
                 <p className="text-sm" style={{ color: colors.secondaryText }}>
@@ -740,9 +750,7 @@ function Stats() {
           <CardContent>
             <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
               <Trophy
-                className="w-5 h-5 mr-2"
-                style={{ color: colors.accent }}
-              />
+                className="w-5 h-5 mr-2 text-primary" />
               Your Position
             </h3>
             <LeaderboardPosition
@@ -759,7 +767,8 @@ function Stats() {
         >
           <CardContent>
             <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
-              <BrainCircuit className="w-5 h-5 mr-2 text-primary" /> AI-Powered Remark
+              <Sparkle className="w-5 h-5 mr-2 text-primary" /> AI-Powered
+              Remark
             </h3>
             <p style={{ color: colors.secondaryText }}>
               {dashboardData.aiRemark}
@@ -780,13 +789,13 @@ function Stats() {
               Tackle {dashboardData.todayStep.questions}{" "}
               {dashboardData.todayStep.topic} questions.
             </p>
-            <button className="bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors items-center">
-              Start Challenge<ArrowRight className="w-4 h-4" />
+            <button className="flex items-center justify-center gap-1 bg-primary text-white font-semibold py-2 px-4 rounded-lg hover:bg-primary/80 transition-colors cursor-pointer">
+              <span className="">Start Challenge</span>
+              <ArrowRight className="w-4 h-4" />
             </button>
           </CardContent>
         </Card>
 
-        {/* Combined Challenge & Badge Card */}
         <Card
           className="md:col-span-1 md:row-span-1"
           style={{
@@ -797,9 +806,7 @@ function Stats() {
         >
           <CardContent className="flex flex-col items-center justify-center text-center h-full">
             <Unlock className="w-12 h-12" style={{ color: colors.green }} />
-            <h3
-              className="text-lg font-semibold mt-2 text-foreground"
-            >
+            <h3 className="text-lg font-semibold mt-2 text-foreground">
               {dashboardData.appFilterReward.title}
             </h3>
             <p className="text-sm" style={{ color: colors.secondaryText }}>

@@ -92,29 +92,33 @@ const Sidebar: React.FC<SidebarProps> = ({
               0 0 20px rgba(168, 85, 247, 0.6), 
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
-      {firstPart != ROUTES.VIDEO_LEARNING && firstPart != ROUTES.PREMIUM && (
-        <button
-          onClick={() => {
-            navigate(ROUTES.PREMIUM);
-          }}
-          className="
-  fixed top-4 right-4 sm:right-8 z-20 flex items-center gap-1 rounded-full 
-  py-2 ps-2.5 pe-3 text-sm font-semibold
-  bg-gray-200/50 dark:bg-[#373669]/50 backdrop-blur-md
-  text-gray 
-  hover:text-white 
-  hover:bg-[#E4E4F6] dark:hover:bg-[#414071] 
-  hover:bg-gradient-to-r from-blue-600 to-purple-700 
-  hover:backdrop-blur-0 hover:bg-opacity-100
-  cursor-pointer transition-all duration-300
-  glow-purple transform hover:scale-105 focus:outline-none
-"
-        >
-          <SparklesIcon className="h-5 w-5" />
-          <span className="hidden sm:inline">Upgrade plan</span>
-          <span className="sm:hidden">Upgrade</span>
-        </button>
-      )}
+      {firstPart != ROUTES.VIDEO_LEARNING &&
+        firstPart != ROUTES.PREMIUM &&
+        firstPart != ROUTES.TEST_SERIES &&
+        firstPart != ROUTES.EXAM_INFO &&
+        firstPart != ROUTES.EXAM_RECONFIRM && (
+          <button
+            onClick={() => {
+              navigate(ROUTES.PREMIUM);
+            }}
+            className="
+            fixed top-4 right-4 sm:right-8 z-20 flex items-center gap-1 rounded-full 
+            py-2 ps-2.5 pe-3 text-sm font-semibold
+            bg-gray-200/50 dark:bg-[#373669]/50 backdrop-blur-md
+            text-gray 
+            hover:text-white 
+            hover:bg-[#E4E4F6] dark:hover:bg-[#414071] 
+            hover:bg-gradient-to-r from-blue-600 to-purple-700 
+            hover:backdrop-blur-0 hover:bg-opacity-100
+            cursor-pointer transition-all duration-300
+            glow-purple transform hover:scale-105 focus:outline-none
+          "
+          >
+            <SparklesIcon className="h-5 w-5" />
+            <span className="hidden sm:inline">Upgrade plan</span>
+            <span className="sm:hidden">Upgrade</span>
+          </button>
+        )}
       {/* Overlay for mobile */}
       {isOpen && (
         <div

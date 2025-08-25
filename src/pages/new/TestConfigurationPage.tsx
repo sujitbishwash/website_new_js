@@ -53,7 +53,7 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   mapper,
 }) => {
   return (
-    <div className="p-4 bg-white dark:bg-black/20 border border-divider rounded-xl mb-4">
+    <div className="p-4 bg-background border border-divider rounded-xl mb-4">
       <h2 className="text-xl font-semibold text-card-foreground dark:text-gray-200 mb-4">
         {title}{" "}
         {optionalLabel && (
@@ -103,7 +103,7 @@ const Chip: React.FC<ChipProps> = ({
       }
       ${
         checked
-          ? "bg-blue-600 border-blue-500 text-white shadow-lg"
+          ? "bg-blue-600 border-blue-500 text-white"
           : "bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-gray-500"
       }
     `}

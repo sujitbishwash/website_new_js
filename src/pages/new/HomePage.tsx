@@ -455,7 +455,7 @@ export default function HomePage() {
             Start by uploading a file or pasting a video link.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg transition-all duration-300 cursor-pointer border border-border">
+            <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg transition-all duration-300 cursor-not-allowed border border-border">
               <FileUp className="h-8 w-8 text-gray transition-transform text-muted-foreground" />
               <div>
                 <h2 className="font-semibold text-muted-foreground">Upload File</h2>
