@@ -81,7 +81,7 @@ const RootLayout: React.FC = () => {
   // Show loading spinner while checking authentication
   if (isLoading && location.pathname === "/") {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <LoadingSpinner size="lg" text="Checking authentication..." />
       </div>
     );

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import OutOfSyllabus from "./OutOfSyllabus";
+import { X } from "lucide-react";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -257,30 +258,33 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   return (
     // Backdrop
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 backdrop-blur-sm p-4 font-sans">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
       {/* Modal Panel */}
       <div
         ref={modalRef}
-        className="w-full max-w-lg transform rounded-xl bg-[#202123] text-gray-200 shadow-2xl transition-all"
-      >
+          className="relative w-full max-w-lg rounded-2xl shadow-2xl bg-card flex flex-col md:flex-row overflow-hidden animate-slide-in"
+        >
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-2 text-border-high rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+        >
+          <X />
+        </button>
         <div className="p-6 sm:p-8">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <h2 className="flex items-center text-lg font-semibold text-white">
-              <LinkIcon className="mr-3 h-5 w-5 text-gray-400" />
+            <h2 className="flex items-center text-lg font-semibold text-foreground">
+              <LinkIcon className="mr-3 h-5 w-5 text-muted-foreground" />
               YouTube, Website, Etc.
             </h2>
-            <button
-              onClick={onClose}
-              className="rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-gray-500"
-            >
-              <XIcon className="h-6 w-6" />
-            </button>
           </div>
           {/* Body */}
 
           <div className="mt-6">
-            <label htmlFor="url-input" className="text-sm text-gray-400">
+            <label
+              htmlFor="url-input"
+              className="text-sm text-muted-foreground"
+            >
               Enter a YouTube Link, Website URL, Doc, ArXiv, Etc.
             </label>
             <input
@@ -289,7 +293,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               value={url}
               onChange={handleUrlChange}
               placeholder="https://youtu.be/example"
-              className="mt-2 w-full rounded-lg border border-gray-600 bg-[#2f3032] px-4 py-2.5 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="mt-2 w-full rounded-lg border border-border bg-input px-4 py-2.5 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none focus:ring-2"
               disabled={isLoading}
             />
 
@@ -298,21 +302,23 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
             {/* Separator */}
             <div className="my-6 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-gray-700" />
-              <div className="px-3 text-sm font-medium text-gray-500">or</div>
-              <div className="w-full border-t border-gray-700" />
+              <div className="w-full border-t border-border-high" />
+              <div className="px-3 text-sm font-medium text-muted-foreground">
+                OR
+              </div>
+              <div className="w-full border-t border-border-high" />
             </div>
 
             {/* Video Suggestions */}
             <div>
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-gray-400">
+                <h3 className="text-sm font-medium text-muted-foreground">
                   Suggested Videos
                 </h3>
                 <button
                   onClick={fetchSuggestedVideos}
                   disabled={isLoadingSuggestions}
-                  className="text-xs text-blue-400 hover:text-blue-300 disabled:opacity-50"
+                  className="text-xs text-primary hover:text-primary/80 disabled:opacity-50"
                 >
                   Refresh
                 </button>
@@ -347,7 +353,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                     <div
                       key={video.id}
                       onClick={() => handleSuggestedVideoClick(video)}
-                      className="group cursor-pointer overflow-hidden rounded-lg bg-gray-700/50 transition-all hover:bg-gray-700 hover:shadow-lg"
+                      className="group cursor-pointer overflow-hidden rounded-lg border border-border bg-none transition-all hover:bg-accent hover:shadow-lg hover:border-primary"
                     >
                       <img
                         src={video.thumbnailUrl}
@@ -361,10 +367,12 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                         }}
                       />
                       <div className="p-3">
-                        <p className="truncate font-semibold text-white">
+                        <p className="truncate font-semibold text-foreground">
                           {video.title}
                         </p>
-                        <p className="text-xs text-gray-400">{video.topic}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {video.topic}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -377,14 +385,14 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <div className="mt-8 flex justify-end space-x-4">
             <button
               onClick={navigateToHome}
-              className="rounded-lg bg-gray-600 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-400"
+              className="rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border, focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer"
             >
               Go to Home
             </button>
             <button
               onClick={handleAdd}
               disabled={!url.trim() || isLoading}
-              className="rounded-lg bg-[#343541] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-500 disabled:bg-gray-600 disabled:cursor-not-allowed"
+              className="rounded-lg bg-border-medium px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border-medium focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer disabled:bg-border-border disabled:cursor-not-allowed"
             >
               {isLoading ? "Adding..." : "Add"}
             </button>
@@ -425,10 +433,10 @@ export default function YouTubeSourceDialog() {
   };
 
   return (
-    <div className="flex h-screen w-full items-center justify-center bg-gray-900">
+    <div className="flex h-screen w-full items-center justify-center bg-background">
       <button
         onClick={() => setIsModalOpen(true)}
-        className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition-transform hover:scale-105 active:scale-95"
+        className="rounded-lg bg-primary px-6 py-3 font-semibold text-foreground transition-transform hover:scale-105 active:scale-95"
       >
         Open Source Adder
       </button>

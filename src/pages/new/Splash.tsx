@@ -106,9 +106,8 @@ const AnimatedTitle: React.FC<{
 }> = ({ text, isActive, className }) => {
   return (
     <h2
-      className={`text-4xl md:text-6xl font-bold ${className}`}
+      className={`text-4xl md:text-6xl text-foreground font-bold ${className}`}
 
-      style={{ color: theme.primaryText }}
     >
       {text.split("").map((char, index) => (
         <span
@@ -138,9 +137,8 @@ const WelcomeSlide: React.FC<{
     >
       <AnimatedTitle text={title} isActive={isActive} />
       <p
-        className={`max-w-2xl mt-4 text-lg md:text-xl transition-all duration-700 ease-out delay-300 ${isActive ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
+        className={`max-w-2xl mt-4 text-lg md:text-xl transition-all duration-700 ease-out delay-300 text-muted-foreground ${isActive ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
           }`}
-        style={{ color: theme.secondaryText }}
       >
         {description}
       </p>

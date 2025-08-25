@@ -5,6 +5,7 @@ export const navigationCategories = {
   main: [
     { path: '/', name: 'Dashboard' },
     { path: '/history', name: 'Learning History' },
+    { path: '/stats', name: 'Stats' },
   ],
   test: [
     { path: '/test-config', name: 'Test Configuration' },

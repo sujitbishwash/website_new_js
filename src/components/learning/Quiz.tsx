@@ -1,3 +1,4 @@
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
 // --- Setup ---
@@ -84,26 +85,12 @@ const ProgressBar: React.FC<{ current: number; total: number }> = ({
   total,
 }) => {
   const progressPercentage = (current / total) * 100;
-  const styles = {
-    container: {
-      width: "100%",
-      backgroundColor: theme.inputBackground,
-      borderRadius: "10px",
-      height: "10px",
-      marginBottom: "24px",
-      overflow: "hidden",
-    },
-    filler: {
-      height: "100%",
-      width: `${progressPercentage}%`,
-      backgroundColor: theme.accent,
-      borderRadius: "10px",
-      transition: "width 0.5s ease-in-out",
-    },
-  };
   return (
-    <div style={styles.container}>
-      <div style={styles.filler}></div>
+    <div className="w-full bg-border rounded-full h-2 mb-6">
+      <div
+        className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
+        style={{ width: `${progressPercentage}%` }}
+      ></div>
     </div>
   );
 };
@@ -113,55 +100,15 @@ const ScoreView: React.FC<{
   totalQuestions: number;
   restartQuiz: () => void;
 }> = ({ score, totalQuestions, restartQuiz }) => {
-  const styles = {
-    scoreSection: {
-      display: "flex",
-      flexDirection: "column" as "column",
-      alignItems: "center",
-      justifyContent: "center",
-      textAlign: "center" as "center",
-    },
-    scoreText: {
-      fontSize: "24px",
-      fontWeight: "600" as "600",
-      color: theme.secondaryText,
-    },
-    scoreValue: {
-      fontSize: "48px",
-      fontWeight: "700" as "700",
-      color: theme.primaryText,
-      margin: "8px 0 24px 0",
-    },
-    restartButton: {
-      background: `linear-gradient(45deg, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
-      border: "none",
-      padding: "12px 24px",
-      borderRadius: "12px",
-      color: theme.primaryText,
-      fontSize: "18px",
-      fontWeight: "600" as "600",
-      cursor: "pointer",
-      transition: "transform 0.2s ease, box-shadow 0.2s ease",
-      boxShadow: "0 4px 15px rgba(0, 0, 0, 0.2)",
-    },
-  };
   return (
-    <div style={styles.scoreSection}>
-      <div style={styles.scoreText}>Your Score</div>
-      <div style={styles.scoreValue}>
+    <div className="flex flex-col items-center justify-center text-center">
+      <div className="text-2xl font-semibold text-neutral-400">Your Score</div>
+      <div className="text-5xl font-bold text-neutral-100 my-4">
         {score} / {totalQuestions}
       </div>
       <button
-        style={styles.restartButton}
         onClick={restartQuiz}
-        onMouseOver={(e) => {
-          e.currentTarget.style.transform = "scale(1.05)";
-          e.currentTarget.style.boxShadow = "0 6px 20px rgba(0, 0, 0, 0.3)";
-        }}
-        onMouseOut={(e) => {
-          e.currentTarget.style.transform = "scale(1)";
-          e.currentTarget.style.boxShadow = "0 4px 15px rgba(0, 0, 0, 0.2)";
-        }}
+        className="bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 ease-in-out transform hover:scale-105 hover:bg-blue-500"
       >
         Try Again
       </button>
@@ -175,70 +122,21 @@ const Navigation: React.FC<{
   currentQuestion: number;
   isAnswered: boolean;
 }> = ({ handlePrev, handleNext, currentQuestion, isAnswered }) => {
-  const styles = {
-    navigationContainer: {
-      display: "flex",
-      justifyContent: "flex-end",
-      alignItems: "center",
-      marginTop: "24px",
-      gap: "12px",
-    },
-    arrowButton: {
-      backgroundColor: theme.inputBackground,
-      border: "none",
-      color: theme.primaryText,
-      width: "44px",
-      height: "44px",
-      borderRadius: "12px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      fontSize: "20px",
-      fontWeight: "bold" as "bold",
-      cursor: "pointer",
-      transition: "all 0.2s ease-in-out",
-    },
-  };
   return (
-    <div style={styles.navigationContainer}>
+    <div className="grid grid-cols-2 mt-6">
       <button
-        style={{
-          ...styles.arrowButton,
-          ...((currentQuestion === 0 || isAnswered) && {
-            opacity: 0.4,
-            cursor: "not-allowed",
-          }),
-        }}
         onClick={handlePrev}
         disabled={currentQuestion === 0 || isAnswered}
-        onMouseOver={(e) => {
-          if (!(currentQuestion === 0 || isAnswered))
-            e.currentTarget.style.backgroundColor = theme.divider;
-        }}
-        onMouseOut={(e) => {
-          if (!(currentQuestion === 0 || isAnswered))
-            e.currentTarget.style.backgroundColor = theme.inputBackground;
-        }}
+        className="justify-self-start bg-background text-foreground w-10 h-10 rounded-full flex items-center justify-center text-lg font-medium transition-colors duration-200 ease-in-out hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border border-border cursor-pointer"
       >
-        {"<"}
+        <ArrowLeft/>
       </button>
       <button
-        style={{
-          ...styles.arrowButton,
-          ...(isAnswered && { opacity: 0.4, cursor: "not-allowed" }),
-        }}
         onClick={handleNext}
         disabled={isAnswered}
-        onMouseOver={(e) => {
-          if (!isAnswered)
-            e.currentTarget.style.backgroundColor = theme.divider;
-        }}
-        onMouseOut={(e) => {
-          if (!isAnswered)
-            e.currentTarget.style.backgroundColor = theme.inputBackground;
-        }}
+        className="justify-self-end bg-background text-foreground w-10 h-10 rounded-full flex items-center justify-center text-lg font-medium transition-colors duration-200 ease-in-out hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border border-border cursor-pointer"
       >
-        {">"}
+        <ArrowRight/>
       </button>
     </div>
   );
@@ -263,102 +161,48 @@ const QuestionView: React.FC<{
   handlePrev,
   handleNext,
 }) => {
-  const getButtonStyles = (
+  const getButtonClasses = (
     answerOption: AnswerOption,
     index: number
-  ): React.CSSProperties => {
-    const baseStyle: React.CSSProperties = {
-      width: "100%",
-      fontSize: "16px",
-      fontWeight: "600",
-      color: theme.secondaryText,
-      backgroundColor: theme.inputBackground,
-      borderRadius: "12px",
-      // FIX: Use longhand properties to avoid conflicts
-      borderWidth: "2px",
-      borderStyle: "solid",
-      borderColor: "transparent",
-      padding: "14px",
-      cursor: "pointer",
-      textAlign: "left",
-      transition: "all 0.2s ease",
-    };
+  ): string => {
+    const baseClasses =
+      "w-full text-left p-4 rounded-xl transition-all duration-200 ease-in-out font-semibold border-2";
 
     if (isAnswered) {
       const isCorrectAnswer = answerOption.isCorrect;
       const isSelectedAnswer = index === selectedAnswerIndex;
 
       if (isCorrectAnswer) {
-        return {
-          ...baseStyle,
-          color: theme.primaryText,
-          backgroundColor: theme.correct,
-          borderColor: theme.correct,
-          cursor: "not-allowed",
-        };
+        return `${baseClasses} bg-green-500/90 border-green-500 text-neutral-100 cursor-not-allowed`;
       }
       if (isSelectedAnswer && !isCorrectAnswer) {
-        return {
-          ...baseStyle,
-          color: theme.primaryText,
-          backgroundColor: theme.incorrect,
-          borderColor: theme.incorrect,
-          cursor: "not-allowed",
-        };
+        return `${baseClasses} bg-destructive/90 border-destructive text-white cursor-not-allowed`;
       }
-      return { ...baseStyle, cursor: "not-allowed", opacity: 0.6 };
+      return `${baseClasses} bg-card border-border text-foreground cursor-not-allowed opacity-60`;
     }
 
-    return baseStyle;
-  };
-
-  const styles = {
-    questionSection: { width: "100%", position: "relative" as "relative" },
-    questionCount: {
-      marginBottom: "8px",
-      fontSize: "16px",
-      fontWeight: "600",
-      color: theme.accent,
-    },
-    questionText: {
-      marginBottom: "24px",
-      fontSize: "22px",
-      fontWeight: "600",
-      color: theme.primaryText,
-    },
-    answerSection: {
-      width: "100%",
-      display: "flex",
-      flexDirection: "column" as "column",
-      gap: "12px",
-    },
+    return `${baseClasses} bg-card border-border text-foreground hover:border-primary hover:bg-accent cursor-pointer`;
   };
 
   return (
     <>
       <div>
         <ProgressBar current={questionNumber} total={totalQuestions} />
-        <div style={styles.questionSection}>
-          <div style={styles.questionCount}>
+        <div className="w-full relative">
+          <div className="mb-2 text-base font-semibold text-primary">
             Question {questionNumber} of {totalQuestions}
           </div>
-          <div style={styles.questionText}>{question.questionText}</div>
+          <div className="mb-6 text-2xl font-semibold text-foreground">
+            {question.questionText}
+          </div>
         </div>
-        <div style={styles.answerSection}>
+        <div className="w-full flex flex-col gap-3">
           {question.answerOptions.map((answerOption, index) => (
             <button
               key={index}
-              style={getButtonStyles(answerOption, index)}
+              className={getButtonClasses(answerOption, index)}
               onClick={() => onAnswerClick(answerOption.isCorrect, index)}
               disabled={isAnswered}
-              onMouseOver={(e) => {
-                if (!isAnswered)
-                  e.currentTarget.style.borderColor = theme.accent;
-              }}
-              onMouseOut={(e) => {
-                if (!isAnswered)
-                  e.currentTarget.style.borderColor = "transparent";
-              }}
             >
               {answerOption.answerText}
             </button>
@@ -460,12 +304,10 @@ const Quiz: React.FC = () => {
   };
 
   return (
-    <div style={styles.app}>
-      <div
-        style={styles.quizCard}
-        onMouseOver={(e) => (e.currentTarget.style.transform = "scale(1.02)")}
-        onMouseOut={(e) => (e.currentTarget.style.transform = "scale(1)")}
-      >
+    <div
+      className="bg-background flex flex-col items-center justify-start p-4 text-neutral-100"
+    >
+      <div className="w-full max-w-2xl min-h-[400px] text-left flex flex-col justify-center transition-transform duration-300 ease-in-out ">
         {showScore ? (
           <ScoreView
             score={score}

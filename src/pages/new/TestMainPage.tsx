@@ -3,8 +3,8 @@ import {
   SubmitTestRequest,
   SubmitTestResponse,
 } from "@/lib/api-client";
-import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState, } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
 import TestResultDialog from "../../components/TestResultDialog";
 import { useUser } from "../../contexts/UserContext";
@@ -86,7 +86,7 @@ const TestMainPage = () => {
   const [language, setLanguage] = useState("English");
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
-  const [showTestResultDialog, setShowTestResultDialog] = useState(false);
+  const [showTestResultDialog, setShowTesstResultDialog] = useState(false);
   const [isTimeLow, setIsTimeLow] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

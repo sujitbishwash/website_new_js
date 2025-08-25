@@ -4,7 +4,6 @@ import React, {
   useState,
   useEffect,
   KeyboardEvent,
-  ClipboardEvent,
 } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
@@ -12,200 +11,6 @@ import { ROUTES } from "../../routes/constants";
 import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg"; // Adjust path as needed
 // --- Style Objects ---
 // This approach uses 100% inline styles to avoid dependency on any CSS framework.
-const styles = {
-  appContainer: {
-    backgroundColor: theme.background,
-    minHeight: "100vh",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontFamily: "sans-serif",
-    padding: "1rem",
-  },
-  loginCard: {
-    backgroundColor: theme.cardBackground,
-    color: theme.primaryText,
-    borderRadius: "1rem",
-    boxShadow:
-      "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)",
-    padding: "2rem",
-    maxWidth: "28rem",
-    width: "100%",
-    boxSizing: "border-box" as const,
-  },
-  headerContainer: {
-    textAlign: "center" as const,
-  },
-  headerTitle: {
-    color: theme.accent,
-    fontSize: "2.25rem",
-    lineHeight: "2.5rem",
-    fontWeight: "bold",
-  },
-  headerSubtitle: {
-    color: theme.secondaryText,
-    marginTop: "0.5rem",
-  },
-  formContainer: {
-    marginTop: "2rem",
-  },
-  googleButton: {
-    backgroundColor: theme.inputBackground,
-    color: theme.primaryText,
-    width: "100%",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    fontWeight: "600",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: "none",
-    cursor: "pointer",
-    transition: "background-color 0.3s",
-  },
-  dividerContainer: {
-    display: "flex",
-    alignItems: "center",
-    margin: "1.5rem 0",
-  },
-  hr: {
-    width: "100%",
-    border: "none",
-    borderTop: `1px solid ${theme.divider}`,
-  },
-  dividerText: {
-    color: theme.mutedText,
-    padding: "0 1rem",
-  },
-  inputField: {
-    backgroundColor: theme.inputBackground,
-    color: theme.primaryText,
-    width: "100%",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: "none",
-    boxSizing: "border-box" as const,
-    marginBottom: "1.5rem",
-  },
-  otpInfoContainer: {
-    textAlign: "center" as const,
-    marginBottom: "1rem",
-  },
-  otpInfoText: {
-    color: theme.secondaryText,
-    fontSize: "0.875rem",
-  },
-  changeEmailButton: {
-    color: theme.accent,
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    textDecoration: "underline",
-    marginLeft: "0.5rem",
-    fontSize: "0.875rem",
-  },
-  otpInputContainer: {
-    display: "flex",
-    justifyContent: "space-between",
-    gap: "0.5rem",
-    marginBottom: "1.5rem",
-  },
-  otpInputBox: {
-    backgroundColor: theme.inputBackground,
-    color: theme.primaryText,
-    width: "3rem",
-    height: "3.5rem",
-    borderRadius: "0.5rem",
-    border: "1px solid transparent",
-    textAlign: "center" as const,
-    fontSize: "1.5rem",
-    fontWeight: "bold",
-    transition: "border-color 0.3s, box-shadow 0.3s",
-  },
-  actionButton: {
-    width: "100%",
-    background: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
-    color: theme.primaryText,
-    fontWeight: "bold",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: "none",
-    cursor: "pointer",
-    boxShadow:
-      "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
-    transition: "all 0.3s",
-  },
-  privacyPolicy: {
-    color: theme.mutedText,
-    textAlign: "center" as const,
-    fontSize: "0.875rem",
-    lineHeight: "1.25rem",
-    marginTop: "2rem",
-  },
-  privacyLink: {
-    color: theme.accent,
-    textDecoration: "none",
-  },
-  errorMessage: {
-    color: theme.red,
-    fontSize: "0.875rem",
-    marginTop: "0.5rem",
-    textAlign: "center" as const,
-  },
-  successMessage: {
-    color: theme.green,
-    fontSize: "0.875rem",
-    marginTop: "0.5rem",
-    textAlign: "center" as const,
-  },
-  inputFieldError: {
-    backgroundColor: theme.inputBackground,
-    color: theme.primaryText,
-    width: "100%",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: `1px solid ${theme.red}`,
-    boxSizing: "border-box" as const,
-    marginBottom: "0.5rem", // reduced margin to make room for error
-  },
-  actionButtonDisabled: {
-    width: "100%",
-    background: theme.mutedText,
-    color: theme.secondaryText,
-    fontWeight: "bold",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: "none",
-    cursor: "not-allowed",
-    opacity: 0.6,
-    transition: "all 0.3s",
-  },
-  actionButtonLoading: {
-    width: "100%",
-    background: theme.mutedText,
-    color: theme.secondaryText,
-    fontWeight: "bold",
-    padding: "0.75rem 1rem",
-    borderRadius: "0.5rem",
-    border: "none",
-    cursor: "not-allowed",
-    opacity: 0.8,
-    transition: "all 0.3s",
-  },
-  // New style for the button that reveals the email input
-  emailLoginButton: {
-    background: "none",
-    border: "none",
-    color: theme.accent,
-    cursor: "pointer",
-    display: "block",
-    width: "100%",
-    textAlign: "center" as const,
-    padding: "0.5rem",
-    fontSize: "0.875rem",
-    fontWeight: "600",
-  },
-};
 
 // --- Main App Component ---
 
@@ -253,11 +58,9 @@ const LoginPage: React.FC = () => {
   // Show loading spinner while checking authentication
   if (isLoading) {
     return (
-      <div style={styles.appContainer}>
-        <div style={{ ...styles.loginCard, textAlign: "center" }}>
-          <div style={{ fontSize: "1.5rem", marginBottom: "1rem" }}>
-            Loading...
-          </div>
+      <div className="bg-gray-900 min-h-screen flex items-center justify-center font-sans p-4">
+        <div className="bg-gray-800 text-white rounded-2xl p-8 max-w-md w-full text-center shadow-2xl">
+          <div className="text-2xl mb-4">Loading...</div>
         </div>
       </div>
     );
@@ -285,7 +88,7 @@ const LoginPage: React.FC = () => {
           }
         `}
       </style>
-      <div className="bg-gradient-to-br from-gray-900 to-black min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-background to-foreground min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
         <LoginCard />
       </div>
     </>
@@ -313,13 +116,17 @@ const EmailInput: React.FC<EmailInputProps> = ({
       onHitEnter();
     }
   };
+
+  const errorClasses = "border border-red-500 mb-2";
+  const normalClasses = "border border-border mb-6";
+
   return (
     <input
       type="email"
       value={email}
       onChange={(e) => setEmail(e.target.value)}
       placeholder="Enter your email"
-      style={hasError ? styles.inputFieldError : styles.inputField}
+      className={`bg-card text-foreground w-full py-3 px-4 rounded-lg box-border focus:outline-none focus:ring-2 focus:ring-primary ${hasError ? errorClasses : normalClasses}`}
       onKeyDown={handleKeyDown}
     />
   );
@@ -375,12 +182,14 @@ const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp, onOtpComplete }) => {
     }
   };
 
-  return (
-    <div style={styles.otpInputContainer}>
+    return (
+    <div className="flex justify-between gap-2 mb-6">
       {otp.map((data, index) => (
         <input
           key={index}
-          className="otp-input-box"
+          className={`otp-input-box bg-background text-foreground w-12 h-14 rounded-lg border text-center text-2xl font-bold transition-all ${
+            data ? "border-primary" : "border-border-medium"
+          }`}
           type="text"
           name="otp"
           maxLength={1}
@@ -389,10 +198,6 @@ const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp, onOtpComplete }) => {
           onKeyDown={(e) => handleKeyDown(e, index)}
           onFocus={(e) => e.currentTarget.select()}
           onPaste={index === 0 ? handlePaste : (e) => e.preventDefault()}
-          style={{
-            ...styles.otpInputBox,
-            ...(data ? { borderColor: theme.accent } : {}),
-          }}
         />
       ))}
     </div>
@@ -413,21 +218,29 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   onClick,
   disabled = false,
   loading = false,
-}) => (
-  <button
-    onClick={onClick}
-    style={
-      loading
-        ? styles.actionButtonLoading
-        : disabled
-        ? styles.actionButtonDisabled
-        : styles.actionButton
+}) => {
+    const baseClasses = "w-full font-bold py-3 px-4 rounded-lg border-none transition-all";
+    
+    const getButtonClasses = () => {
+        if (loading) {
+            return `${baseClasses} bg-gray-600 text-foreground cursor-not-allowed opacity-80`;
+        }
+        if (disabled) {
+            return `${baseClasses} bg-gray-600 text-foreground cursor-not-allowed opacity-60`;
+        }
+        return `${baseClasses} bg-primary hover:bg-primary/80 text-white cursor-pointer`;
     }
-    disabled={disabled || loading}
-  >
-    {loading ? loadingText : text}
-  </button>
-);
+
+    return (
+      <button
+        onClick={onClick}
+        className={getButtonClasses()}
+        disabled={disabled || loading}
+      >
+        {loading ? loadingText : text}
+      </button>
+    );
+};
 
 const LoginCard: React.FC = () => {
   const navigate = useNavigate();
@@ -551,8 +364,8 @@ const LoginCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-background text-foreground rounded-[1.25rem] shadow-lg p-10 max-w-[26rem] w-full border border-gray-700 box-border">
-      <Header />
+    <div className="bg-background text-foreground rounded-[1.25rem] shadow-lg p-10 max-w-[26rem] w-full border border-border box-border">
+   <Header />
       <div className="mt-8">
         <GoogleSignInButton />
         <OrDivider />
@@ -568,7 +381,7 @@ const LoginCard: React.FC = () => {
                 onHitEnter={handleSendOtp}
               />
               {error && (
-                <div className="text-[#d93025] text-sm mt-2 text-center">
+                <div className="text-[#d93025] text-sm mt-2 mb-2 text-center">
                   {error}
                 </div>
               )}
@@ -582,7 +395,7 @@ const LoginCard: React.FC = () => {
             </>
           ) : (
             <button
-              className="bg-transparent border-none text-[#007aff] cursor-pointer block w-full text-center p-2 text-base font-medium"
+              className="bg-transparent border-none text-primary cursor-pointer block w-full text-center p-2 text-base font-medium"
               onClick={() => setShowEmailLogin(true)}
             >
               Continue with Email
@@ -591,12 +404,12 @@ const LoginCard: React.FC = () => {
         ) : (
           <>
             <div className="text-center mb-4">
-              <span className="text-[#6e6e73] text-sm">
+              <span className="text-muted-foreground text-sm">
                 Enter the code sent to <strong>{email}</strong>
               </span>
               <button
                 onClick={handleChangeEmail}
-                className="text-[#007aff] bg-none border-none cursor-pointer no-underline ml-2 text-sm font-medium"
+                className="text-accent bg-none border-none cursor-pointer no-underline ml-2 text-sm font-medium"
               >
                 Change
               </button>
@@ -607,12 +420,12 @@ const LoginCard: React.FC = () => {
               onOtpComplete={handleVerifyOtp}
             />
             {error && (
-              <div className="text-[#d93025] text-sm mt-2 text-center">
+              <div className="text-[#d93025] text-sm mt-2 mb-2 text-center">
                 {error}
               </div>
             )}
             {success && !error && (
-              <div className="text-[#34c759] text-sm mt-2 text-center">
+              <div className="text-[#34c759] text-sm mt-2 mb-2 text-center">
                 {success}
               </div>
             )}
@@ -633,7 +446,7 @@ const LoginCard: React.FC = () => {
 
 const Header: React.FC = () => (
   <div className="text-center mb-8">
-    <div className="flex w-full bg-orange justify-center items-center">
+    <div className="flex w-full justify-center items-center">
       <img
         src={AiPadhaiLogo}
         alt="Logo"
@@ -644,7 +457,7 @@ const Header: React.FC = () => (
     <h1 className="text-foreground text-3xl font-semibold tracking-wide">
       Welcome Back
     </h1>
-    <p className="text-[#6e6e73] mt-2 text-base">
+    <p className="text-muted-foreground mt-2 text-base">
       Sign in to continue your AI Padhai journey
     </p>
   </div>
@@ -694,22 +507,22 @@ const GoogleSignInButton: React.FC = () => {
 
 const OrDivider: React.FC = () => (
   <div className="flex items-center my-6">
-    <hr className="flex-grow border-t border-[#d2d2d7]" />
-    <span className="text-[#86868b] px-4 text-xs font-medium uppercase">
+    <hr className="flex-grow border-t border-border" />
+    <span className="text-muted-foreground  px-4 text-xs font-medium uppercase">
       OR
     </span>
-    <hr className="flex-grow border-t border-[#d2d2d7]" />
+    <hr className="flex-grow border-t border-border" />
   </div>
 );
 
 const PrivacyPolicyLink: React.FC = () => (
-  <p className="text-[#86868b] text-center text-xs leading-relaxed mt-8">
+  <p className="text-muted-foreground text-center text-xs leading-relaxed mt-8">
     By continuing, you agree to our{" "}
     <a
       href={ROUTES.PRIVACY_POLICY}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-[#007aff] no-underline"
+      className="text-primary no-underline"
     >
       Privacy Policy
     </a>

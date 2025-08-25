@@ -1,3 +1,4 @@
+import { ArrowLeft, ArrowRight, Shuffle } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
 
 // Centralized theme colors for a more refined design
@@ -73,215 +74,18 @@ const initialCards: Card[] = [
   },
 ];
 
-// --- STYLES ---
-const GlobalStyles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-    .flashcard-app-container {
-      width: 100%;
-      max-width: 100%;
-      padding: 1rem; /* add some padding for navigation and progress bar */
-      box-sizing: border-box;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    /* --- Flashcard Animation --- */
-    @keyframes slideInFromRight {
-      from { transform: translateX(100%) rotate(5deg); opacity: 0; }
-      to { transform: translateX(0) rotate(0deg); opacity: 1; }
-    }
-    @keyframes slideInFromLeft {
-      from { transform: translateX(-100%) rotate(-5deg); opacity: 0; }
-      to { transform: translateX(0) rotate(0deg); opacity: 1; }
-    }
-
-    .slide-in-right {
-      animation: slideInFromRight 0.5s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    .slide-in-left {
-      animation: slideInFromLeft 0.5s forwards cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-
-    /* --- Flashcard Component --- */
-    .flashcard-scene {
-      width: 100%;
-      height: 420px; /* Increased height for better aspect ratio */
-      perspective: 1200px;
-    }
-
-    .flashcard {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
-      cursor: pointer;
-      border-radius: 1.5rem; /* More rounded corners */
-      box-shadow: 0 0 0 1px ${theme.divider}, 0 25px 50px -12px rgba(0,0,0,0.25);
-    }
-    
-    .flashcard.is-flipped {
-      transform: rotateY(180deg);
-    }
-
-    .flashcard-face {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 2.5rem;
-      box-sizing: border-box;
-      background: linear-gradient(145deg, ${theme.cardBackground}, #273449);
-      border-radius: 1.5rem;
-    }
-
-    .flashcard-face--back {
-      transform: rotateY(180deg);
-      background: linear-gradient(145deg, #2A3B52, ${theme.cardBackground});
-    }
-    
-    .card-label {
-        position: absolute;
-        top: 1.5rem;
-        left: 2rem;
-        font-size: 0.875rem;
-        font-weight: 600;
-        color: ${theme.accent};
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-    }
-
-    .card-content {
-      /* Dynamic font size using clamp() - adjusted to be smaller */
-      /* min: 1.25rem, preferred: 3vw, max: 2.5rem */
-      font-size: clamp(1.25rem, 3vw, 2.5rem);
-      font-weight: 700;
-      text-align: center;
-      color: ${theme.primaryText};
-      line-height: 1.3;
-    }
-    
-    .card-hint {
-        position: absolute;
-        bottom: 1.5rem;
-        font-size: 0.875rem;
-        color: ${theme.secondaryText};
-        font-weight: 500;
-    }
-
-    /* --- Progress Bar --- */
-    .progress-bar-container {
-        width: 100%;
-        height: 8px;
-        background-color: ${theme.progressBarBackground};
-        border-radius: 4px;
-        overflow: hidden;
-    }
-    .progress-bar-fill {
-        height: 100%;
-        background-color: ${theme.accent};
-        border-radius: 4px;
-        transition: width 0.4s ease-out;
-    }
-
-    /* --- Navigation Component --- */
-    .navigation-container {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr); /* Use 3 equal columns for balanced alignment */
-      align-items: center;
-      gap: 1rem;
-    }
-
-    .nav-button {
-      background-color: ${theme.cardBackground};
-      color: ${theme.secondaryText};
-      border: 1px solid ${theme.divider};
-      padding: 1rem;
-      border-radius: 50%;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 64px;
-      height: 64px;
-      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
-    }
-    
-    /* Align the first button to the start of its grid cell */
-    .navigation-container > .nav-button:first-of-type {
-      justify-self: start;
-    }
-
-    /* Align the last button to the end of its grid cell */
-    .navigation-container > .nav-button:last-of-type {
-      justify-self: end;
-    }
-
-    .nav-button:hover:not(:disabled) {
-      background-color: ${theme.divider};
-      color: ${theme.primaryText};
-      transform: translateY(-2px);
-    }
-    
-    .nav-button:active:not(:disabled) {
-        transform: translateY(0);
-    }
-
-    .nav-button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    
-    .shuffle-button {
-        background: none;
-        border: none;
-        cursor: pointer;
-        padding: 0.5rem;
-        color: ${theme.shuffleIcon};
-        transition: color 0.2s, transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    }
-    
-    .shuffle-button:hover {
-        color: ${theme.accent};
-        transform: rotate(360deg) scale(1.1);
-    }
-
-    .card-counter-container {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        justify-self: center; /* Center this container in its grid cell */
-    }
-
-    .card-counter {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: ${theme.primaryText};
-    }
-  `}</style>
-);
-
 // --- MODULAR COMPONENTS ---
 
-const ProgressBar: React.FC<ProgressBarProps> = ({ current, total }) => {
-  const progress = total > 0 ? ((current + 1) / total) * 100 : 0;
+const ProgressBar: React.FC<{ current: number; total: number }> = ({
+  current,
+  total,
+}) => {
+  const progressPercentage = (current / total) * 100;
   return (
-    <div className="progress-bar-container">
+    <div className="w-full bg-border rounded-full h-2 mb-6">
       <div
-        className="progress-bar-fill"
-        style={{ width: `${progress}%` }}
+        className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
+        style={{ width: `${progressPercentage}%` }}
       ></div>
     </div>
   );
@@ -295,23 +99,54 @@ const Flashcard: React.FC<FlashcardProps> = ({
 }) => {
   const animationClass =
     animationDirection === "right"
-      ? "slide-in-right"
+      ? "animate-in slide-in-from-right duration-500"
       : animationDirection === "left"
-      ? "slide-in-left"
+      ? "animate-in slide-in-from-left duration-500"
       : "";
 
+  const baseFaceClass =
+    "absolute w-full h-full flex flex-col justify-center items-center p-10 box-border bg-card rounded-[1.25rem] [backface-visibility:hidden]";
+
   return (
-    <div className={`flashcard-scene ${animationClass}`} onClick={onFlip}>
-      <div className={`flashcard ${isFlipped ? "is-flipped" : ""}`}>
-        <div className="flashcard-face flashcard-face--front">
-          <span className="card-label">Question</span>
-          <p className="card-content">{card.question}</p>
-          <span className="card-hint">Click or press Spacebar to flip</span>
+    <div
+      className={`w-full h-[320px] [perspective:1200px] ${animationClass}`}
+      onClick={onFlip}
+    >
+      <div
+        className={`w-full h-full relative [transform-style:preserve-3d] transition-transform duration-700 cursor-pointer rounded-[1.25rem] shadow-[0_1px_1px_rgba(0,0,0,0.1),_0_2px_2px_rgba(0,0,0,0.1),_0_4px_4px_rgba(0,0,0,0.1),_0_8px_8px_rgba(0,0,0,0.1),_0_16px_16px_rgba(0,0,0,0.1)] border border-border ${
+          isFlipped ? "[transform:rotateY(180deg)]" : ""
+        }`}
+      >
+        {/* Front Face */}
+        <div className={baseFaceClass}>
+          <span className="absolute top-6 left-8 text-sm font-semibold text-primary uppercase tracking-wider">
+            Question
+          </span>
+          <p
+            className="text-[clamp(1.25rem,2.5vw,2rem)]
+ font-bold text-center text-foreground leading-tight"
+          >
+            {card.question}
+          </p>
+          <span className="absolute bottom-6 text-sm text-muted-foreground font-medium">
+            Tap or press Spacebar to flip
+          </span>
         </div>
-        <div className="flashcard-face flashcard-face--back">
-          <span className="card-label">Answer</span>
-          <p className="card-content">{card.answer}</p>
-          <span className="card-hint">Click or press Spacebar to flip</span>
+
+        {/* Back Face */}
+        <div className={`${baseFaceClass} [transform:rotateY(180deg)]`}>
+          <span className="absolute top-6 left-8 text-sm font-semibold text-primary uppercase tracking-wider">
+            Answer
+          </span>
+          <p
+            className="text-[clamp(1.25rem,2.5vw,2rem)]
+ font-bold text-center text-foreground leading-tight"
+          >
+            {card.answer}
+          </p>
+          <span className="absolute bottom-6 text-sm text-muted-foreground font-medium">
+            Tap or press Spacebar to flip
+          </span>
         </div>
       </div>
     </div>
@@ -325,77 +160,39 @@ const Navigation: React.FC<NavigationProps> = ({
   onShuffle,
 }) => {
   return (
-    <div className="navigation-container">
-      <button
-        className="nav-button"
-        onClick={() => onNavigate("prev")}
-        disabled={currentIndex === 0}
-        aria-label="Previous card"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="19" y1="12" x2="5" y2="12"></line>
-          <polyline points="12 19 5 12 12 5"></polyline>
-        </svg>
-      </button>
-      <div className="card-counter-container">
-        <span className="card-counter">
+    <div className="items-center mt-6">
+      <div className="items-center justify-self-center">
+        <span className="text-sm font-semibold text-primary">
           {currentIndex + 1} / {totalCards}
         </span>
+      </div>
+      <div className="grid grid-cols-3 items-center gap-4 mt-2">
         <button
-          onClick={onShuffle}
-          className="shuffle-button"
-          aria-label="Shuffle deck"
+          className="justify-self-start g-background text-foreground w-10 h-10 rounded-full flex items-center justify-center text-lg font-medium transition-colors duration-200 ease-in-out hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border border-border cursor-pointer"
+          onClick={() => onNavigate("prev")}
+          disabled={currentIndex === 0}
+          aria-label="Previous card"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+          <ArrowLeft />
+        </button>
+        <div className="flex flex-col items-center gap-2 justify-self-center">
+          <button
+            onClick={onShuffle}
+            className="bg-transparent border-none cursor-pointer p-2 text-[#8D8D92] transition-all duration-300 ease-[cubic-bezier(0.25,0.46,0.45,0.94)] hover:text-[#0A84FF] hover:rotate-180 hover:scale-110"
+            aria-label="Shuffle deck"
           >
-            <polyline points="16 3 21 3 21 8"></polyline>
-            <line x1="4" y1="20" x2="21" y2="3"></line>
-            <polyline points="21 16 21 21 16 21"></polyline>
-            <line x1="15" y1="15" x2="21" y2="21"></line>
-            <line x1="4" y1="4" x2="9" y2="9"></line>
-          </svg>
+            <Shuffle />
+          </button>
+        </div>
+        <button
+          onClick={() => onNavigate("next")}
+          disabled={currentIndex === totalCards - 1}
+          aria-label="Next card"
+          className="justify-self-end bg-background text-foreground w-10 h-10 rounded-full flex items-center justify-center text-lg font-medium transition-colors duration-200 ease-in-out hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border border-border cursor-pointer"
+        >
+          <ArrowRight />
         </button>
       </div>
-      <button
-        className="nav-button"
-        onClick={() => onNavigate("next")}
-        disabled={currentIndex === totalCards - 1}
-        aria-label="Next card"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2.5"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <line x1="5" y1="12" x2="19" y2="12"></line>
-          <polyline points="12 5 19 12 12 19"></polyline>
-        </svg>
-      </button>
     </div>
   );
 };
@@ -469,11 +266,11 @@ const Flashcards: React.FC = () => {
   }, [handleNavigate]);
 
   return (
-    <>
-      <GlobalStyles />
-      <div className="flashcard-app-container">
+    <div className="bg-background font-sans text-foreground w-full max-w-full p-4 border-border box-border flex flex-col gap-5 justify-start items-center">
+      <div className="w-full max-w-2xl">
         {cards.length > 0 ? (
-          <>
+          <div className="flex flex-col ">
+            <ProgressBar current={currentIndex} total={cards.length} />
             <Flashcard
               key={cards[currentIndex].id}
               card={cards[currentIndex]}
@@ -481,21 +278,21 @@ const Flashcards: React.FC = () => {
               onFlip={handleFlip}
               animationDirection={animationDirection}
             />
-            <ProgressBar current={currentIndex} total={cards.length} />
+
             <Navigation
               currentIndex={currentIndex}
               totalCards={cards.length}
               onNavigate={handleNavigate}
               onShuffle={handleShuffle}
             />
-          </>
+          </div>
         ) : (
           <div className="no-cards-message">
             <p>No flashcards in this deck!</p>
           </div>
         )}
       </div>
-    </>
+    </div>
   );
 };
 

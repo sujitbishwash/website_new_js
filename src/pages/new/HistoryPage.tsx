@@ -52,7 +52,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
 
   return (
     <div
-      className={`bg-background border border-[#30363d] rounded-lg overflow-hidden relative transition-transform duration-300 ease-in-out cursor-pointer hover:-translate-y-1 hover:shadow-[0_8px_30px_rgba(88,166,255,0.2)]`}
+      className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => {
@@ -60,10 +60,10 @@ const CourseCard: React.FC<CourseCardProps> = ({
       }}
     >
       <div
-        className="h-[150px] bg-cover bg-center border-b border-[#30363d]"
+        className="h-[150px] bg-cover bg-center border-b border-divider bg-background "
         style={{ backgroundImage: `url(${imageUrl})` }}
       ></div>
-      <div className="p-5">
+      <div className="p-5 bg-card">
         <h3 className="mt-0 text-[1.2rem] text-foreground">{title}</h3>
         <p className="text-sm text-muted-foreground leading-[1.5]">
           {description}
@@ -142,7 +142,7 @@ const HistoryPage = () => {
   return (
     <div className="min-h-screen p-10 font-sans text-foreground bg-background mt-10 sm:mt-4">
       <h1 className="text-center sm:text-left text-3xl mb-10">Your Learning History</h1>
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8 max-w-[1200px] mx-auto">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8 mx-auto">
         {learningHistoryData.map((item) => (
           <CourseCard
             key={item.id}

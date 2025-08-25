@@ -455,18 +455,18 @@ export default function HomePage() {
             Start by uploading a file or pasting a video link.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/10 transition-all duration-300 cursor-pointer border border-border hover:border-accent">
-              <FileUp className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
+            <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg transition-all duration-300 cursor-not-allowed border border-border">
+              <FileUp className="h-8 w-8 text-gray transition-transform text-muted-foreground" />
               <div>
-                <h2 className="font-semibold text-foreground">Upload File</h2>
+                <h2 className="font-semibold text-muted-foreground">Upload File</h2>
                 <p className="text-xs text-muted-foreground">PDF, DOC, TXT</p>
               </div>
             </div>
             <div
               onClick={() => setIsYouTubeModalOpen(true)}
-              className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-foreground/20 transition-all duration-300 cursor-pointer border border-border hover:border-accent"
+              className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg hover:bg-accent/20 transition-all duration-300 cursor-pointer border border-border-medium hover:border-primary group-hover:scale-110"
             >
-              <Clipboard className="h-8 w-8 text-gray transition-transform group-hover:scale-110" />
+              <Clipboard className="h-8 w-8 text-gray transition-transform" />
               <div>
                 <h2 className="font-semibold text-foreground">Paste Link</h2>
                 <p className="text-xs text-muted-foreground">
@@ -505,7 +505,7 @@ export default function HomePage() {
                 fetchSuggestedVideos();
               }}
               disabled={isLoadingVideos}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <RefreshCcw className="w-4 h-4" />
 
@@ -536,7 +536,7 @@ export default function HomePage() {
                 <div
                   key={video.id}
                   onClick={() => handleSuggestedVideoClick(video)}
-                  className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
+                  className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl border border-divider hover:border-primary hover:-translate-y-1 cursor-pointer"
                 >
                   <div className="relative">
                     <img
@@ -575,7 +575,7 @@ export default function HomePage() {
             {suggestedReadings.map((item) => (
               <div
                 key={item.id}
-                className="group flex items-center space-x-4 bg-card/80 p-3 rounded-lg border border-border hover:border-accent transition-all duration-300 hover:bg-accent/10"
+                className="group flex items-center space-x-4 bg-card/80 p-3 rounded-lg border border-border-medium hover:border-primary transition-all duration-300 hover:shadow-xl hover:bg-accent/10"
               >
                 <div className="flex-shrink-0 bg-muted w-16 h-16 rounded-lg flex items-center justify-center">
                   <BookOpen className="h-8 w-8 text-gray" />
@@ -586,7 +586,7 @@ export default function HomePage() {
                   </h4>
                   <p className="text-xs text-muted-foreground">{item.topic}</p>
                 </div>
-                <button className="px-3 py-1.5 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors">
+                <button className="px-3 py-1.5 text-sm font-semibold bg-primary text-white rounded-md hover:bg-primary/90 transition-colors cursor-pointer">
                   Read
                 </button>
               </div>
@@ -603,7 +603,7 @@ export default function HomePage() {
             {suggestedTests.map((test) => (
               <div
                 key={test.id}
-                className="group flex items-center space-x-4 bg-card/80 p-3 rounded-lg border border-border hover:border-accent transition-all duration-300 hover:bg-accent/10"
+                className="group flex items-center space-x-4 bg-card/80 p-3 rounded-lg border border-border-medium hover:border-primary transition-all duration-300   hover:shadow-xl hover:bg-accent/10"
               >
                 <div className="flex-shrink-0 bg-muted w-16 h-16 rounded-lg flex items-center justify-center">
                   <ClipboardList className="h-8 w-8 text-gray" />
@@ -616,7 +616,7 @@ export default function HomePage() {
                 </div>
                 <button
                   onClick={() => navigate(ROUTES.EXAM_INFO)}
-                  className="px-3 py-1.5 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  className="px-3 py-1.5 text-sm font-semibold bg-primary text-white rounded-md hover:bg-primary/90 transition-colors cursor-pointer"
                 >
                   Start
                 </button>
@@ -640,7 +640,7 @@ export default function HomePage() {
             {learningItems.map((item) => (
               <div
                 key={item.id}
-                className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1"
+                className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1"
               >
                 <img
                   src={item.thumbnailUrl}
@@ -673,7 +673,7 @@ export default function HomePage() {
                 </div>
                 <button
                   onClick={() => handleRemoveRecord(item.id, "learning")}
-                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent hover:text-accent-foreground"
+                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent hover:text-accent-foreground"
                 >
                   <TrashIcon className="h-4 w-4" />
                 </button>
@@ -697,7 +697,7 @@ export default function HomePage() {
             {attemptedTests.map((test) => (
               <div
                 key={test.id}
-                className="group relative bg-card/80 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 transition-all duration-300 hover:shadow-xl hover:bg-accent/10 border border-border hover:border-accent"
+                className="group relative bg-card/80 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 transition-all duration-300 hover:shadow-xl hover:bg-accent/10 border border-border-medium hover:border-primary"
               >
                 <div className="flex-shrink-0 text-center w-24">
                   <p
@@ -730,7 +730,7 @@ export default function HomePage() {
                 </div>
                 <button
                   onClick={() => navigate(ROUTES.ANALYSIS)}
-                  className="px-4 py-2 text-sm font-semibold bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors w-full sm:w-auto"
+                  className="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-md hover:bg-primary/90 transition-colors w-full sm:w-auto cursor-pointer"
                 >
                   Review Test
                 </button>

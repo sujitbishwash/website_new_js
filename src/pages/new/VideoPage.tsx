@@ -12,16 +12,21 @@ import { theme } from "@/styles/theme";
 import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
 import {
   BookOpen,
+  Clipboard,
   Ellipsis,
   Eye,
   EyeOff,
   Facebook,
+  FileStack,
   Highlighter,
   Instagram,
   Link,
+  Linkedin,
+  MessageCircle,
   MessageCircleQuestion,
   MessageSquareText,
   StickyNote,
+  Text,
   Type,
   X,
 } from "lucide-react";
@@ -87,51 +92,8 @@ const Icon: React.FC<IconProps> = ({ path, className = "w-6 h-6" }) => (
   </svg>
 );
 
-const ChaptersIcon = () => (
-  <Icon
-    path="M2 6s1.5-2 5-2 5 2 5 2v14s-1.5-1-5-1-5 1-5 1V6z M22 6s-1.5-2-5-2-5 2-5 2v14s1.5-1 5-1 5 1 5 1V6z"
-    className="w-5 h-5"
-  />
-);
-const TranscriptIcon = () => (
-  <Icon
-    path="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
-    className="w-5 h-5"
-  />
-);
-const ChatIcon = () => (
-  <Icon
-    path="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"
-    className="w-5 h-5"
-  />
-);
-const FlashcardsIcon = () => (
-  <Icon
-    path="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z M22 17h-6a4 4 0 0 0-4-4V3a3 3 0 0 1 3-3h7z"
-    className="w-5 h-5"
-  />
-);
-const QuizIcon = () => (
-  <Icon
-    path="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
-    className="w-5 h-5"
-  />
-);
-const SummaryIcon = () => (
-  <Icon
-    path="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z M13 2v7h7"
-    className="w-5 h-5"
-  />
-);
-
 const XIcon = () => <Icon path="M18 6L6 18 M6 6l12 12" className="w-5 h-5" />;
 
-const MaximizeIcon = () => (
-  <Icon
-    path="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"
-    className="w-5 h-5"
-  />
-);
 const MinimizeIcon = () => (
   <Icon
     path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"
@@ -282,7 +244,7 @@ const Header: React.FC<HeaderProps> = ({
           <span className="sm:hidden">Upgrade</span>
         </button>
         <button
-          className="p-2 text-gray-300 hover:bg-gray-700 rounded-full cursor-pointer"
+          className="p-2 text-muted-foreground hover:bg-foreground/10 rounded-full cursor-pointer"
           onClick={onToggleFullScreen}
         >
           <X />
@@ -329,13 +291,13 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   return (
     <div className="bg-background text-foreground hidden sm:block">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3">
-        <div className="flex items-center border border-gray-700 rounded-xl p-1 gap-2">
+        <div className="flex items-center border border-border rounded-xl p-1 gap-2">
           <button
             onClick={() => setActiveTab("chapters")}
             className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors  cursor-pointer ${
               activeTab === "chapters"
-                ? "bg-foreground/20 shadow-sm text-gray-100"
-                : "text-gray-400 hover:bg-foreground/10"
+                ? "bg-foreground/20 shadow-sm text-foreground"
+                : "text-muted-foreground hover:bg-foreground/10"
             }`}
           >
             <BookOpen /> Chapters
@@ -344,8 +306,8 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
             onClick={() => setActiveTab("transcripts")}
             className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
               activeTab === "transcripts"
-                ? "bg-foreground/20 shadow-sm text-gray-100"
-                : "text-gray-400 hover:bg-foreground/10"
+                ? "bg-foreground/20 shadow-sm text-foreground"
+                : "text-muted-foreground hover:bg-foreground/10"
             }`}
           >
             <Type /> Transcripts
@@ -354,7 +316,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
         <div className="flex items-center space-x-2 self-end sm:self-center">
           <label
             htmlFor="auto-scroll"
-            className="text-xs sm:text-sm font-medium text-gray-400 cursor-pointer"
+            className="text-xs sm:text-sm font-medium text-muted-foreground cursor-pointer"
           >
             Auto Scroll
           </label>
@@ -363,11 +325,11 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
               type="checkbox"
               name="auto-scroll"
               id="auto-scroll"
-              className="toggle-checkbox absolute block w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-gray-800 border-4 border-gray-600 appearance-none cursor-pointer"
+              className="toggle-checkbox absolute block w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-card border-4 border-border appearance-none cursor-pointer"
             />
             <label
               htmlFor="auto-scroll"
-              className="toggle-label block overflow-hidden h-5 sm:h-6 rounded-full bg-gray-600 cursor-pointer"
+              className="toggle-label block overflow-hidden h-5 sm:h-6 rounded-full bg-border-medium cursor-pointer"
             ></label>
           </div>
           {/* Condensed Feedback Component */}
@@ -381,7 +343,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
           />
         </div>
       </div>
-      <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 rounded-xl border border-gray-700 ">
+      <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 rounded-xl border border-border ">
         {activeTab === "chapters" ? (
           isLoadingChapters ? (
             <div className="text-center py-6 sm:py-8">
@@ -410,10 +372,10 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
                   {chapter.time}
                 </div>
                 <div className="border-l-2 border-gray-600 pl-2 sm:pl-4 group-hover:border-blue-500 transition-colors">
-                  <h3 className="font-semibold text-gray-200 text-sm sm:text-base">
+                  <h3 className="font-semibold text-foreground text-sm sm:text-base">
                     {chapter.title}
                   </h3>
-                  <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                     {chapter.content}
                   </p>
                 </div>
@@ -477,10 +439,10 @@ const AITutorPanel: React.FC<{
   onShare,
 }) => {
   const modes: { key: LearningMode; label: string; icon: any }[] = [
-    { key: "chat", label: "Chat", icon: <MessageSquareText /> },
+    { key: "chat", label: "Chat", icon: <MessageCircle /> },
     { key: "flashcards", label: "Flashcards", icon: <StickyNote /> },
     { key: "quiz", label: "Quiz", icon: <MessageCircleQuestion /> },
-    { key: "summary", label: "Summary", icon: <Highlighter /> },
+    { key: "summary", label: "Summary", icon: <Text /> },
   ];
 
   const components = {
@@ -513,10 +475,10 @@ const AITutorPanel: React.FC<{
               onClick={() => onModeChange(key)}
               className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-2 ${
                 isLeftColumnVisible ? "sm:px-2" : "sm:px-4"
-              } py-1.5 text-xs sm:text-sm font-semibold rounded-md transition-colors cursor-pointer ${
+              } py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
                 currentMode === key
-                  ? "bg-card shadow-sm text-gray-100"
-                  : "text-gray-400 hover:bg-gray-700"
+                  ? "bg-card text-foreground"
+                  : "text-muted-foreground hover:bg-foreground/10"
               }`}
             >
               {icon} {label}
@@ -527,7 +489,7 @@ const AITutorPanel: React.FC<{
           <button
             onClick={onShare}
             title="Share"
-            className="p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors"
+            className="p-2 text-foreground hover:bg-foreground/10 rounded-full transition-colors"
           >
             <Ellipsis />
           </button>
@@ -537,7 +499,7 @@ const AITutorPanel: React.FC<{
             title={
               isLeftColumnVisible ? "Full Screen Chat" : "Exit Full Screen"
             }
-            className={`p-2 text-gray-300 hover:bg-gray-700 rounded-full transition-colors ${
+            className={`p-2 text-foreground hover:bg-foreground/10 rounded-full transition-colors ${
               isLeftColumnVisible ? "hidden" : "sm:block"
             }`}
           >
@@ -545,7 +507,7 @@ const AITutorPanel: React.FC<{
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-hidden min-h-0">
+      <div className="flex-1 overflow-y-auto bg-background">
         {components[currentMode]}
       </div>
     </div>
@@ -582,49 +544,48 @@ const ShareModal: React.FC<{
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center text-foreground bg-black/20 backdrop-blur-sm animate-fade-in p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-card rounded-xl shadow-lg p-6 w-full max-w-md m-4 border border-gray-700">
-        <div className="flex justify-between items-center mb-4">
+      <div className="relative bg-card rounded-xl shadow-lg p-6 w-full max-w-md m-4 border border-border">
+        <div className=" flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Share Public Link</h2>
+
           <button
             onClick={onClose}
-            className="p-1 rounded-full text-gray-400 hover:bg-gray-700"
+            className="absolute top-3 right-3 p-2 text-foreground rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
           >
-            <XIcon />
+            <X />
           </button>
         </div>
         <div className="space-y-4">
-          <div className="flex items-center space-x-2 bg-background border border-gray-700 rounded-lg p-2">
+          <div className="flex items-center space-x-2 bg-background border border-border rounded-lg p-2">
             <input
               type="text"
               readOnly
               value={url}
-              className="flex-1 bg-transparent text-gray-300 focus:outline-none"
+              className="flex-1 bg-transparent text-muted-foreground focus:outline-none"
             />
             <button
               onClick={copyToClipboard}
-              className="flex items-center gap-2 bg-blue-600 px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700"
+              className="flex items-center gap-2 bg-primary p-2 rounded-md text-sm font-semibold hover:bg-primary/70"
             >
-              <Link /> {copySuccess || "Copy"}
+              <Clipboard className="text-white" />
             </button>
           </div>
-          <div className="text-center text-gray-400 text-sm">
+          <div className="text-center text-muted-foreground text-sm">
             Or share on social media
           </div>
           <div className="flex justify-center gap-4">
             {/* Add your social media icons here */}
-            <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
-              <Facebook className="w-6 h-6" />
+            <button className="p-3 border border-border rounded-full hover:bg-blue-300 cursor-pointer">
+              <Facebook className="w-6 h-6 text-foreground" />
             </button>
-            <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.223.085c.645 1.956 2.52 3.375 4.738 3.414A9.87 9.87 0 010 17.54a13.94 13.94 0 007.548 2.212c9.142 0 14.307-7.477 14.307-14.055 0-.213-.005-.426-.015-.637.96-.695 1.795-1.56 2.457-2.54z" />
-              </svg>
+            <button className="p-3 border border-border rounded-full hover:bg-blue-200 cursor-pointer">
+              <Linkedin className="w-6 h-6 text-foreground" />
             </button>
-            <button className="p-3 bg-gray-700 rounded-full hover:bg-gray-600">
-              <Instagram className="w-6 h-6" />
+            <button className="p-3 border border-border rounded-full hover:bg-pink-200 cursor-pointer">
+              <Instagram className="w-6 h-6 text-foreground" />
             </button>
           </div>
         </div>
@@ -822,7 +783,7 @@ const VideoPage: React.FC = () => {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
-      
+
       // Reset YouTube player reference
       if (ytPlayerRef.current) {
         try {
@@ -904,15 +865,15 @@ const VideoPage: React.FC = () => {
                   videoDurationRef.current = dur;
                   console.log(`⏱️ Video duration: ${dur}s`);
                 }
-                
                 // Start progress tracking interval
                 if (progressIntervalRef.current == null) {
                   console.log("🔄 Starting progress tracking interval");
                   progressIntervalRef.current = window.setInterval(() => {
                     try {
                       const cur = player.getCurrentTime?.() || 0;
-                      const d = player.getDuration?.() || videoDurationRef.current || 0;
-                      
+                      const d =
+                        player.getDuration?.() || videoDurationRef.current || 0;
+
                       if (d > 0) {
                         videoDurationRef.current = d;
                         currentTimeRef.current = cur;
@@ -969,7 +930,6 @@ const VideoPage: React.FC = () => {
       const setupTimeout = setTimeout(() => {
         setup();
       }, 2000); // Wait 2 seconds for iframe to be ready
-      
       return () => {
         clearTimeout(setupTimeout);
         console.log("🧹 Cleaning up YouTube player");
@@ -1123,7 +1083,7 @@ const VideoPage: React.FC = () => {
     setChatInitialized(false);
     setChatMessages([]);
     setChatError(null);
-    
+
     // Reset feedback state when video changes
     setHasShownFeedback(false);
   }, [currentVideoId]);
@@ -1169,29 +1129,32 @@ const VideoPage: React.FC = () => {
     }
   };
 
-  const handleSendMessage = useCallback(async (message: string) => {
-    if (!message.trim() || !currentVideoId) return;
+  const handleSendMessage = useCallback(
+    async (message: string) => {
+      if (!message.trim() || !currentVideoId) return;
 
-    // Add user message immediately
-    const userMessage = { text: message, isUser: true };
-    setChatMessages((prev) => [...prev, userMessage]);
+      // Add user message immediately
+      const userMessage = { text: message, isUser: true };
+      setChatMessages((prev) => [...prev, userMessage]);
 
-    setIsChatLoading(true);
-    setChatError(null);
+      setIsChatLoading(true);
+      setChatError(null);
 
-    try {
-      const response = await chatApi.sendMessage(currentVideoId, message);
-      const assistantMessage = { text: response.content, isUser: false };
-      setChatMessages((prev) => [...prev, assistantMessage]);
-    } catch (err) {
-      console.error("Failed to send message:", err);
-      setChatError("Failed to send message. Please try again.");
-      // Remove the user message if sending failed
-      setChatMessages((prev) => prev.slice(0, -1));
-    } finally {
-      setIsChatLoading(false);
-    }
-  }, [currentVideoId]);
+      try {
+        const response = await chatApi.sendMessage(currentVideoId, message);
+        const assistantMessage = { text: response.content, isUser: false };
+        setChatMessages((prev) => [...prev, assistantMessage]);
+      } catch (err) {
+        console.error("Failed to send message:", err);
+        setChatError("Failed to send message. Please try again.");
+        // Remove the user message if sending failed
+        setChatMessages((prev) => prev.slice(0, -1));
+      } finally {
+        setIsChatLoading(false);
+      }
+    },
+    [currentVideoId]
+  );
 
   const handleShare = useCallback(() => {
     setIsShareModalOpen(true);
@@ -1212,14 +1175,6 @@ const VideoPage: React.FC = () => {
   const handleModeChange = useCallback((mode: LearningMode) => {
     setCurrentMode(mode);
   }, []);
-
-
-
-
-
-
-
-
 
   return (
     <div className="bg-background text-foreground min-h-screen font-sans">
@@ -1381,7 +1336,7 @@ const VideoPage: React.FC = () => {
               )}
             </div>
           </header>
-          <div className="flex-shrink-0">
+                    <div className="flex-shrink-0">
             <div className="video-container">
               <VideoPlayer
                 src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}`}
@@ -1463,8 +1418,6 @@ const VideoPage: React.FC = () => {
         onClose={handleCloseShareModal}
         url={`https://www.youtube.com`}
       />
-
-
 
       <style>{`
                 /* Simple toggle switch styles */
@@ -1553,4 +1506,3 @@ const VideoPage: React.FC = () => {
 };
 
 export default VideoPage;
-

@@ -187,17 +187,10 @@ const handleLogoutClick = () => {
   return (
     <div ref={menuRef} className="relative font-sans text-foreground">
       <button
-        style={{ backgroundColor: theme.inputBackground }}
         onClick={toggleMenu}
-        className={`flex items-center w-full p-4 transition-colors duration-200 hover:bg-accent/20 cursor-pointer ${
+        className={`flex items-center w-full p-4 transition-colors duration-200 hover:bg-foreground/10 cursor-pointer ${
           isContracted ? "justify-center" : "justify-between"
         }`}
-        onMouseOver={(e) =>
-          (e.currentTarget.style.backgroundColor = theme.divider)
-        }
-        onMouseOut={(e) =>
-          (e.currentTarget.style.backgroundColor = theme.inputBackground)
-        }
       >
         <div
           className={`flex items-center justify-center"
@@ -221,12 +214,12 @@ const handleLogoutClick = () => {
                 ? "Free Plan"
                 : "Free Plan"}
             </p>
-            {isBackgroundLoading && (
+            {/**isBackgroundLoading && (
               <div className="flex items-center space-x-1 mt-1">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                 <span className="text-xs text-blue-400">Syncing...</span>
               </div>
-            )}
+            )*/}
           </div>
         </div>
         <Ellipsis
@@ -237,7 +230,7 @@ const handleLogoutClick = () => {
       </button>
 
       {isMenuOpen && (
-        <div className="absolute bottom-full left-2 mb-2 w-60 p-2 rounded-lg shadow-2xl z-20 border border-muted-foreground animate-fade-in-up text-foreground bg-card">
+        <div className="absolute bottom-full left-2 mb-2 w-60 p-2 rounded-lg shadow-2xl z-20 border border-border animate-fade-in-up text-foreground bg-card">
           <div className="space-y-1">
             {menuOptions.map((item) =>
               item.isDivider ? (
@@ -283,7 +276,7 @@ const handleLogoutClick = () => {
                   </button>
 
                   {item.children && activeSubMenu === item.label && (
-                    <div className="border border-muted-foreground absolute bg-card left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 animate-fade-in-up">
+                    <div className="border border-border absolute bg-card left-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg shadow-2xl z-30 animate-fade-in-up">
                       <div className="space-y-1">
                         {item.children.map((child) => (
                           <button
@@ -293,7 +286,7 @@ const handleLogoutClick = () => {
                               setMenuOpen(false);
                             }}
                             style={{ color: theme.primaryText }}
-                            className="w-full flex items-center space-x-3 p-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground text-gray-300 hover:text-white rounded-md transition-colors duration-200 cursor-pointer"
+                            className="w-full flex items-center space-x-3 p-2 text-left text-sm text-muted-foreground hover:bg-foreground/10 hover:text-accent-foreground rounded-md transition-colors duration-200 cursor-pointer"
                             onMouseOver={(e) => {
                               e.currentTarget.style.backgroundColor =
                                 theme.divider;
@@ -341,7 +334,6 @@ const Moreoptions = ({
     // Set the background on the main container
     <div
       className="flex flex-col justify-end"
-      style={{ backgroundColor: theme.background }}
     >
       <style>{`
           @keyframes fade-in {

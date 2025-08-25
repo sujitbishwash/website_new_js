@@ -53,7 +53,7 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   mapper,
 }) => {
   return (
-    <div className="p-4 bg-white dark:bg-black/20 border border-divider rounded-xl mb-4">
+    <div className="p-4 bg-background border border-divider rounded-xl mb-4">
       <h2 className="text-xl font-semibold text-card-foreground dark:text-gray-200 mb-4">
         {title}{" "}
         {optionalLabel && (
@@ -103,7 +103,7 @@ const Chip: React.FC<ChipProps> = ({
       }
       ${
         checked
-          ? "bg-blue-600 border-blue-500 text-white shadow-lg"
+          ? "bg-blue-600 border-blue-500 text-white"
           : "bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-gray-500"
       }
     `}
@@ -272,10 +272,10 @@ const TestConfigurationPageComponent = () => {
   // Loading state
   if (isLoading) {
     return (
-      <div className="bg-gradient-to-br from-background/10 to-background min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
-        <div className="w-full max-w-2xl mx-auto bg-gray-800/60 backdrop-blur-sm border border-gray-700 rounded-2xl shadow-2xl p-4 sm:p-8 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading Test configuration...</p>
+      <div className="bg-gradient-to-br from-background/10 to-background min-h-screen text-white font-sans flex items-center justify-center">
+        <div className="w-full mx-auto text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-8"></div>
+          <p className="text-muted-foreground">Loading Test configuration...</p>
         </div>
       </div>
     );
@@ -289,7 +289,7 @@ const TestConfigurationPageComponent = () => {
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Configure Your Test
           </h1>
-          <p className="mt-2 text-lg text-gray-400">
+          <p className="mt-2 text-lg text-muted-foreground">
             Select your preferences to start a practice test.
           </p>
         </div>

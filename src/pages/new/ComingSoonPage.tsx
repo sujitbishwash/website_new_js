@@ -151,8 +151,8 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ targetDate }) => {
               onChange={handleEmailChange}
               placeholder="Enter your email"
               required
-              className="flex-grow px-4 py-3 rounded-md text-white border-0 outline-none focus:ring-2 focus:ring-blue-400 transition-shadow duration-300"
-              style={{ backgroundColor: theme.inputBackground }}
+              className="flex-grow px-4 py-3 rounded-md text-foreground bg-input border-0 outline-none focus:ring-2 focus:ring-primary transition-shadow duration-300"
+
             />
             <button
               type="submit"

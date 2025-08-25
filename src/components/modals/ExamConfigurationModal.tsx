@@ -557,25 +557,21 @@ export default function ExamConfigurationModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm animate-fade-in p-4 font-sans"
-      onClick={onClose}
-    >
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
       <div
-        className="relative w-full max-w-2xl bg-[#1d1d1f] text-gray-200 rounded-2xl shadow-2xl border border-white/10 flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-2xl bg-card text-primary rounded-2xl shadow-2xl border border-border flex flex-col max-h-[90vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-5 border-b border-white/10 flex justify-between items-center">
-          <h3 className="text-xl font-semibold text-white">
+        <div className="p-5 border-b border-border flex justify-between items-center">
+          <h3 className="text-xl font-semibold text-foreground">
             Exam Configuration
           </h3>
           <button
-            className="p-1.5 text-gray-400 rounded-full hover:bg-white/10 hover:text-white transition-colors"
             onClick={onClose}
-            aria-label="Close modal"
+            className="absolute top-3 right-3 p-2 text-foreground rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
           >
-            <X className="w-5 h-5" />
+            <X />
           </button>
         </div>
 
@@ -583,8 +579,8 @@ export default function ExamConfigurationModal({
         <div className="p-6 space-y-6 overflow-y-auto">
           {/* Current Goal Display */}
           {examGoal && (
-            <div className="bg-white/5 p-4 rounded-lg text-sm">
-              <span className="font-semibold text-gray-300">Current Goal:</span>{" "}
+            <div className="bg-background p-4 rounded-lg text-sm">
+              <span className="font-semibold text-foreground">Current Goal:</span>{" "}
               {examGoal.exam} ({examGoal.groupType})
             </div>
           )}
@@ -612,7 +608,7 @@ export default function ExamConfigurationModal({
             <div className="space-y-2">
               <label
                 htmlFor="category-select"
-                className="block text-sm font-medium text-gray-400"
+                className="block text-sm font-medium text-muted-foreground"
               >
                 Exam Category
               </label>
@@ -620,7 +616,7 @@ export default function ExamConfigurationModal({
                 id="category-select"
                 value={selectedCategoryKey}
                 onChange={handleCategoryChange}
-                className="w-full bg-[#2c2c2e] border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full bg-input border border-border rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
               >
                 {categories.map((category) => (
                   <option key={category.key} value={category.key}>
@@ -632,7 +628,7 @@ export default function ExamConfigurationModal({
             <div className="space-y-2">
               <label
                 htmlFor="exam-select"
-                className="block text-sm font-medium text-gray-400"
+                className="block text-sm font-medium text-foreground"
               >
                 Specific Exam
               </label>
@@ -640,7 +636,7 @@ export default function ExamConfigurationModal({
                 id="exam-select"
                 value={selectedExamKey}
                 onChange={handleExamChange}
-                className="w-full bg-[#2c2c2e] border border-white/10 rounded-lg px-3 py-2.5 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="w-full bg-input border border-border rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
               >
                 {currentExams.map((exam) => (
                   <option key={exam.key} value={exam.key}>
@@ -653,36 +649,36 @@ export default function ExamConfigurationModal({
 
           {/* Details Card */}
           {selectedExamDetails && (
-            <div className="bg-white/5 p-5 rounded-lg space-y-4 border border-white/10 animate-fade-in-fast">
-              <h3 className="text-lg font-semibold text-white">
+            <div className="bg-background p-5 rounded-lg space-y-4 border border-border animate-fade-in-fast">
+              <h3 className="text-lg font-semibold text-foreground">
                 {selectedExamDetails.name}
               </h3>
 
               <div className="space-y-1">
-                <h4 className="text-sm font-semibold text-gray-400">
+                <h4 className="text-sm font-semibold text-muted-foreground">
                   Description
                 </h4>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-foreground text-sm leading-relaxed">
                   {selectedExamDetails.description}
                 </p>
               </div>
 
               <div className="space-y-1">
-                <h4 className="text-sm font-semibold text-gray-400">
+                <h4 className="text-sm font-semibold text-muted-foreground">
                   Eligibility
                 </h4>
-                <p className="text-gray-300 text-sm leading-relaxed">
+                <p className="text-foreground text-sm leading-relaxed">
                   {selectedExamDetails.eligibility}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-gray-400">
+                <h4 className="text-sm font-semibold text-muted-foreground">
                   Exam Pattern
                 </h4>
                 <ul className="list-disc list-inside space-y-1.5 pl-2">
                   {selectedExamDetails.pattern.map((step, index) => (
-                    <li key={index} className="text-gray-300 text-sm">
+                    <li key={index} className="text-foreground text-sm">
                       {step}
                     </li>
                   ))}
@@ -692,17 +688,17 @@ export default function ExamConfigurationModal({
           )}
         </div>
         {/* Modal Footer */}
-        <div className="flex justify-end items-center gap-4 p-5 border-t border-white/10 bg-[#2c2c2e]/50 rounded-b-2xl">
+        <div className="flex justify-end items-center gap-4 p-5 border-t border-border bg-card rounded-b-2xl">
           <button
             onClick={onClose}
-            className="px-5 py-2 text-sm font-semibold text-gray-200 bg-white/10 rounded-lg hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-colors"
+            className="cursor-pointer px-5 py-2 text-sm font-semibold text-muted-foreground bg-foreground/10 rounded-lg hover:bg-foreground/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={handleUpdateExamGoal}
             disabled={isUpdating}
-            className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1d1d1f] transition-all disabled:bg-blue-600/50 disabled:cursor-not-allowed flex items-center"
+            className="cursor-pointer px-5 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1d1d1f] transition-all disabled:bg-blue-600/50 disabled:cursor-not-allowed flex items-center"
           >
             {isUpdating && (
               <svg

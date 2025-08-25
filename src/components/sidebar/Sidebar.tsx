@@ -9,9 +9,10 @@ import {
   X,
   FileCheck2,
   History,
+  GaugeCircle,
 } from "lucide-react";
-import React, { useState,   } from "react";
-import { Link, useLocation,useNavigate } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg"; // Adjust path as needed
 import { ROUTE_NAMES, ROUTES } from "../../routes/constants";
 import MoreOptions from "./MoreOptions";
@@ -43,16 +44,16 @@ const Sidebar: React.FC<SidebarProps> = ({
   onExamConfigurationClick,
 }) => {
   const location = useLocation();
-  const navigate=useNavigate();
+  const navigate = useNavigate();
 
   const [isHovering, setIsHovering] = useState(false);
 
   const isActive = (path: string) => {
     return location.pathname === path;
   };
-const str = location.pathname;
-const parts = str.split("/");
-const firstPart = "/" + parts[1];
+  const str = location.pathname;
+  const parts = str.split("/");
+  const firstPart = "/" + parts[1];
   const navItems = [
     { path: ROUTES.HOME, icon: Home, label: "Home" },
     { path: ROUTES.HISTORY, icon: History, label: "History" },
@@ -69,6 +70,7 @@ const firstPart = "/" + parts[1];
       label: "Attempted Tests",
     },
     { path: ROUTES.REFER_AND_EARN, icon: Gift, label: "Refer and Earn" },
+    { path: ROUTES.STATS, icon: GaugeCircle, label: "Stats" },
   ];
   const SparklesIcon: React.FC<IconProps> = ({ className }) => (
     <svg
@@ -90,19 +92,33 @@ const firstPart = "/" + parts[1];
               0 0 20px rgba(168, 85, 247, 0.6), 
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
-      {
-      firstPart!= ROUTES.VIDEO_LEARNING && firstPart!= ROUTES.PREMIUM && (
-        <button
-          onClick={() => {
-            navigate(ROUTES.PREMIUM);
-          }}
-          className="fixed top-4 right-4 sm:right-8 z-20 flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none"
-        >
-          <SparklesIcon className="h-5 w-5" />
-          <span className="hidden sm:inline">Upgrade plan</span>
-          <span className="sm:hidden">Upgrade</span>
-        </button>
-      )}
+      {firstPart != ROUTES.VIDEO_LEARNING &&
+        firstPart != ROUTES.PREMIUM &&
+        firstPart != ROUTES.TEST_SERIES &&
+        firstPart != ROUTES.EXAM_INFO &&
+        firstPart != ROUTES.EXAM_RECONFIRM && (
+          <button
+            onClick={() => {
+              navigate(ROUTES.PREMIUM);
+            }}
+            className="
+            fixed top-4 right-4 sm:right-8 z-20 flex items-center gap-1 rounded-full 
+            py-2 ps-2.5 pe-3 text-sm font-semibold
+            bg-gray-200/50 dark:bg-[#373669]/50 backdrop-blur-md
+            text-gray 
+            hover:text-white 
+            hover:bg-[#E4E4F6] dark:hover:bg-[#414071] 
+            hover:bg-gradient-to-r from-blue-600 to-purple-700 
+            hover:backdrop-blur-0 hover:bg-opacity-100
+            cursor-pointer transition-all duration-300
+            glow-purple transform hover:scale-105 focus:outline-none
+          "
+          >
+            <SparklesIcon className="h-5 w-5" />
+            <span className="hidden sm:inline">Upgrade plan</span>
+            <span className="sm:hidden">Upgrade</span>
+          </button>
+        )}
       {/* Overlay for mobile */}
       {isOpen && (
         <div
@@ -199,7 +215,7 @@ const firstPart = "/" + parts[1];
                       isContracted ? "lg:justify-center" : ""
                     } ${
                       isActive(item.path)
-                        ? "bg-primary text-primary-foreground"
+                        ? "bg-primary text-white"
                         : "text-muted-foreground hover:bg-foreground/10 hover:text-foreground"
                     }`}
                   >
@@ -207,7 +223,7 @@ const firstPart = "/" + parts[1];
                       size={20}
                       className={`flex-shrink-0 ${
                         isActive(item.path)
-                          ? "text-primary-foreground"
+                          ? "text-white"
                           : "text-muted-foreground group-hover:text-foreground"
                       }`}
                     />
