@@ -100,6 +100,7 @@ const TestMainPage = () => {
 
   const [questions, setQuestions] = useState<Question[]>([]);
 
+  const testConfig = location.state?.testConfig;
   // --- Data Fetching and API Integration ---
 
   // Convert API response to internal Question format
@@ -119,12 +120,12 @@ const TestMainPage = () => {
 
     try {
       console.log("Attempting to fetch questions from API...");
-      const response = await quizApi.getQuestions(sessionId);
+      const response = await quizApi.startTest({ ...testConfig, topics:testConfig.sub_topic});
 
       if (response && response.questions) {
         const mappedQuestions = response.questions.map(
           mapApiQuestionToQuestion
-        );
+        ).sort((a, b) => a.id - b.id);
         setQuestions(mappedQuestions);
         console.log(
           "Successfully fetched questions from API:",

@@ -251,12 +251,12 @@ const TestConfigurationPageComponent = () => {
         language: selectedLanguage,
       };
 
-      const response = await testSeriesApi.createTest(testData);
+      //const response = await testSeriesApi.createTest(testData);
 
       // Navigate to exam info page with the test ID
       navigate(ROUTES.EXAM_INFO, {
         state: {
-          testId: response.testId,
+          //testId: response.testId,
           testConfig: testData,
           isDemo: false,
         },
