@@ -4,7 +4,7 @@ import {
   SubmitTestResponse,
 } from "@/lib/api-client";
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
 import TestResultDialog from "../../components/TestResultDialog";
 import { useUser } from "../../contexts/UserContext";
@@ -90,7 +90,9 @@ const TestMainPage = () => {
   const [isTimeLow, setIsTimeLow] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [sessionId, setSessionId] = useState<number>(7);
+  const location = useLocation();
+  const testId = location.state?.testId;
+  const [sessionId, setSessionId] = useState<number>(testId || 0);
   const navigate = useNavigate();
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

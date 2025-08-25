@@ -6,9 +6,10 @@ import Chat from "@/components/learning/Chat";
 import Flashcards from "@/components/learning/Flashcards";
 import Quiz from "@/components/learning/Quiz";
 import Summary from "@/components/learning/Summary";
-import { useVideoFeedback } from "@/hooks/useVideoFeedback";
+// import { useVideoFeedback } from "@/hooks/useVideoFeedback";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
+import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
 import {
   BookOpen,
   Ellipsis,
@@ -26,7 +27,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
+import { chatApi, videoApi, VideoDetail, ComponentName } from "../../lib/api-client";
 
 declare global {
   interface Window {
@@ -60,10 +61,10 @@ interface ContentTabsProps {
   transcriptError: string | null;
   videoId?: string;
   videoTitle?: string;
-  watchPercentage?: number;
-  sessionStartTime?: Date;
+  playPercentage?: number;
   onFeedbackSubmit: (payload: any) => void;
   onFeedbackSkip: () => void;
+  onOpenModal: () => void;
 }
 
 // Learning mode types
@@ -148,6 +149,75 @@ const SparklesIcon: React.FC<IconProps> = ({}) => (
     <path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path>
   </svg>
 );
+// --- Video Stats Component ---
+interface VideoStatsProps {
+  playPercentage: number;
+  videoDuration: number;
+  currentTime: number;
+}
+
+const VideoStats: React.FC<VideoStatsProps> = ({
+  playPercentage,
+  videoDuration,
+  currentTime,
+}) => {
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const timeRemaining = videoDuration > 0 ? videoDuration - currentTime : 0;
+
+  return (
+    <div className="bg-gray-800 rounded-lg p-3 mb-4">
+      <h3 className="text-sm font-semibold text-gray-200 mb-2">Video Progress</h3>
+      <div className="grid grid-cols-2 gap-4 text-xs">
+        <div>
+          <div className="text-gray-400">Play Progress</div>
+          <div className="text-white font-medium">{Math.round(playPercentage)}%</div>
+        </div>
+        <div>
+          <div className="text-gray-400">Current Time</div>
+          <div className="text-white font-medium">{formatTime(currentTime)}</div>
+        </div>
+        <div>
+          <div className="text-gray-400">Current Time</div>
+          <div className="text-white font-medium">{formatTime(currentTime)}</div>
+        </div>
+        <div>
+          <div className="text-gray-400">Time Remaining</div>
+          <div className="text-white font-medium">{formatTime(timeRemaining)}</div>
+        </div>
+        <div>
+          <div className="text-gray-400">Total Duration</div>
+          <div className="text-white font-medium">{formatTime(videoDuration)}</div>
+        </div>
+        <div>
+          <div className="text-gray-400">Time Remaining</div>
+          <div className="text-white font-medium">{formatTime(timeRemaining)}</div>
+        </div>
+      </div>
+      
+      {/* Progress Bar */}
+      <div className="mt-3">
+        <div>
+          <div className="flex justify-between text-xs text-gray-400 mb-1">
+            <span>Play Progress</span>
+            <span>{Math.round(playPercentage)}%</span>
+          </div>
+          <div className="w-full bg-gray-700 rounded-full h-2">
+            <div 
+              className="bg-green-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${playPercentage}%` }}
+            ></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // --- Sub-Components for Modularity ---
 
 interface HeaderProps {
@@ -158,6 +228,9 @@ interface HeaderProps {
   onShare: () => void;
   onToggleFullScreen: () => void;
   isLeftColumnVisible: boolean;
+  playPercentage: number;
+  currentTime: number;
+  videoDuration: number;
 }
 
 const Header: React.FC<HeaderProps> = ({
@@ -165,8 +238,17 @@ const Header: React.FC<HeaderProps> = ({
   isLoading,
   onShare,
   onToggleFullScreen,
+  playPercentage,
+  currentTime,
+  videoDuration,
 }) => {
   const navigate = useNavigate();
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
 
   return (
     <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 sm:gap-4">
@@ -178,6 +260,15 @@ const Header: React.FC<HeaderProps> = ({
             videoDetail?.title || "Video Title Not Available"
           )}
         </h1>
+        
+        {/* Quick Stats */}
+        {!isLoading && videoDuration > 0 && (
+          <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
+            <span>Progress: {Math.round(playPercentage)}%</span>
+            <span>Time: {formatTime(currentTime)} / {formatTime(videoDuration)}</span>
+            <span>Remaining: {formatTime(Math.max(0, videoDuration - currentTime))}</span>
+          </div>
+        )}
       </div>
       <div className="flex items-center gap-2 self-start sm:self-center">
         <button
@@ -202,16 +293,21 @@ const Header: React.FC<HeaderProps> = ({
 };
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => (
-  <div className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg">
+  <div className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg relative">
     <iframe
       id="yt-player-iframe"
       src={src}
       title="YouTube video player"
       frameBorder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
       allowFullScreen
-      className="w-full h-full"
-    ></iframe>
+      className="w-full h-full relative z-10"
+      loading="lazy"
+      style={{
+        isolation: 'isolate',
+        contain: 'layout style paint'
+      }}
+    />
   </div>
 );
 
@@ -224,10 +320,10 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   transcriptError,
   videoId,
   videoTitle,
-  watchPercentage,
-  sessionStartTime,
+  playPercentage,
   onFeedbackSubmit,
   onFeedbackSkip,
+  onOpenModal,
 }) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
@@ -278,14 +374,10 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
           <CondensedFeedback
             videoId={videoId}
             videoTitle={videoTitle}
-            watchPercentage={watchPercentage}
-            sessionDuration={
-              sessionStartTime
-                ? Math.floor((Date.now() - sessionStartTime.getTime()) / 1000)
-                : undefined
-            }
+            playPercentage={playPercentage}
             onFeedbackSubmit={onFeedbackSubmit}
             onFeedbackSkip={onFeedbackSkip}
+            onOpenModal={onOpenModal}
           />
         </div>
       </div>
@@ -583,25 +675,12 @@ const VideoPage: React.FC = () => {
     setShowFeedback(false);
   };
 
-  // Enhanced feedback state management
-  const [feedbackState, setFeedbackState] = useState<{
-    hasShownFeedback: boolean;
-    lastFeedbackTime: number | null;
-    feedbackCount: number;
-  }>({
-    hasShownFeedback: false,
-    lastFeedbackTime: null,
-    feedbackCount: 0,
-  });
+  // Simple feedback state
+  const [hasShownFeedback, setHasShownFeedback] = useState(false);
 
-  // Update feedback state when feedback is shown
-  const updateFeedbackState = useCallback((action: 'shown' | 'submitted' | 'skipped') => {
-    setFeedbackState(prev => ({
-      ...prev,
-      hasShownFeedback: true,
-      lastFeedbackTime: Date.now(),
-      feedbackCount: action === 'submitted' ? prev.feedbackCount + 1 : prev.feedbackCount,
-    }));
+  // Simple feedback state update
+  const updateFeedbackState = useCallback(() => {
+    setHasShownFeedback(true);
   }, []);
   // Video player ref for tracking progress
   const videoPlayerRef = useRef<HTMLIFrameElement>(null);
@@ -613,46 +692,130 @@ const VideoPage: React.FC = () => {
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
 
-  // Feedback functionality
+  // Local feedback and progress state management
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [playPercentage, setPlayPercentage] = useState(0);
+
+  // Track feedback submissions to prevent duplicates
   const {
-    isFeedbackModalOpen,
-    feedbackSuggestions,
-    isLoadingSuggestions,
-    sessionStartTime,
-    watchPercentage,
-    openFeedbackModal,
-    closeFeedbackModal,
-    submitFeedback,
-    skipFeedback,
-    startSession,
-    updateWatchPercentage,
-    shouldShowFeedbackOnLeave,
-    setShouldShowFeedbackOnLeave,
-  } = useVideoFeedback({
-    videoId: currentVideoId || "",
-    videoTitle: videoDetail?.title,
-    onFeedbackSubmitted: (payload: VideoFeedbackPayload) => {
-      console.log("Feedback submitted:", payload);
-      // You can add analytics tracking here
-    },
-    onFeedbackSkipped: () => {
-      console.log("Feedback skipped");
-      // You can add analytics tracking here
-    },
+    canSubmitFeedback,
+    existingFeedback,
+    markAsSubmitted,
+    _debug,
+  } = useFeedbackTracker({
+    component: ComponentName.Video,
+    sourceId: currentVideoId || "unknown",
+    pageUrl: window.location.href,
   });
 
-  // Start session when video loads
+  // Debug logging for feedback tracker
+  useEffect(() => {
+    if (_debug) {
+      console.log("🔍 Feedback Tracker Debug:", _debug);
+    }
+  }, [_debug]);
+
+  // Feedback modal functions
+  const openFeedbackModal = useCallback(() => {
+    // Check if feedback has already been submitted
+    if (!canSubmitFeedback) {
+      console.log("⚠️ Cannot open feedback modal - feedback already submitted");
+      return;
+    }
+
+    // Preserve video state before opening modal
+    const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
+    if (iframe && iframe.contentWindow) {
+      // Store current video state
+      localStorage.setItem('video_state_preserved', 'true');
+      localStorage.setItem('video_src', iframe.src);
+      console.log("💾 Video state preserved before modal open");
+    }
+    
+    setIsFeedbackModalOpen(true);
+  }, [canSubmitFeedback]);
+
+  const closeFeedbackModal = useCallback(() => {
+    setIsFeedbackModalOpen(false);
+    
+    // Force video restoration with multiple fallback methods
+    setTimeout(() => {
+      const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
+      if (iframe) {
+        console.log("🔄 Restoring video after modal close...");
+        
+        // Method 1: Refresh iframe src
+        const currentSrc = iframe.src;
+        iframe.src = "";
+        setTimeout(() => {
+          iframe.src = currentSrc;
+          console.log("✅ Video iframe refreshed");
+        }, 100);
+        
+        // Method 2: Force iframe reload if Method 1 fails
+        setTimeout(() => {
+          if (iframe.contentWindow) {
+            try {
+              iframe.contentWindow.location.reload();
+              console.log("✅ Video iframe force reloaded");
+            } catch (e) {
+              console.log("⚠️ Force reload failed, trying src refresh again");
+              iframe.src = currentSrc;
+            }
+          }
+        }, 500);
+        
+        // Method 3: Recreate iframe if all else fails
+        setTimeout(() => {
+          if (!iframe.contentWindow || iframe.contentWindow.location.href === 'about:blank') {
+            console.log("🔄 Recreating video iframe...");
+            const newIframe = iframe.cloneNode(true) as HTMLIFrameElement;
+            newIframe.src = currentSrc;
+            iframe.parentNode?.replaceChild(newIframe, iframe);
+            console.log("✅ Video iframe recreated");
+          }
+        }, 1000);
+      }
+    }, 300);
+  }, []);
+
+  const submitFeedback = useCallback(async (payload: VideoFeedbackPayload) => {
+    console.log("Feedback submitted:", payload);
+    
+    // Log the feedback data for debugging
+    console.log("📊 Feedback Data:", {
+      rating: payload.rating,
+      video_id: payload.videoId,
+      play_percentage: payload.playPercentage,
+      comment: payload.comment,
+      chips: payload.chips
+    });
+    
+    // Mark feedback as submitted to prevent duplicates
+    markAsSubmitted();
+    
+    // You can add analytics tracking here
+    closeFeedbackModal();
+  }, [closeFeedbackModal, markAsSubmitted]);
+
+  const skipFeedback = useCallback(() => {
+    console.log("Feedback skipped");
+    closeFeedbackModal();
+  }, [closeFeedbackModal]);
+
+
+
+  const updatePlayPercentage = useCallback((percentage: number) => {
+    setPlayPercentage(Math.min(100, Math.max(0, percentage)));
+  }, []);
+
+  // Reset feedback state when video changes
   useEffect(() => {
     if (currentVideoId) {
-      startSession();
-      setShouldShowFeedbackOnLeave(true);
+      console.log("🎬 Video ID changed:", currentVideoId);
       
       // Reset feedback state for new video
-      setFeedbackState({
-        hasShownFeedback: false,
-        lastFeedbackTime: null,
-        feedbackCount: 0,
-      });
+      setHasShownFeedback(false);
       
       // Reset video progress tracking
       if (progressIntervalRef.current) {
@@ -667,130 +830,84 @@ const VideoPage: React.FC = () => {
         } catch {}
         ytPlayerRef.current = null;
       }
+
     }
-  }, [currentVideoId, startSession, setShouldShowFeedbackOnLeave]);
+  }, [currentVideoId]);
 
-  // Track video progress based on session time (fallback method)
-  const startProgressTracking = useCallback(() => {
-    const progressInterval = setInterval(() => {
-      if (sessionStartTime && videoDurationRef.current > 0) {
-        // Calculate progress based on session duration
-        const sessionDuration = Math.floor(
-          (Date.now() - sessionStartTime.getTime()) / 1000
-        );
-        const estimatedProgress = Math.min(
-          100,
-          (sessionDuration / videoDurationRef.current) * 100
-        );
-        updateWatchPercentage(estimatedProgress);
-
-        // Auto-show feedback when video reaches 90%
-        if (estimatedProgress >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
-          openFeedbackModal();
-          updateFeedbackState('shown');
-        }
-      }
-    }, 1000); // Update every second
-
-    return () => clearInterval(progressInterval);
-  }, [
-    sessionStartTime,
-    updateWatchPercentage,
-    shouldShowFeedbackOnLeave,
-    openFeedbackModal,
-    updateFeedbackState,
-    feedbackState.hasShownFeedback,
-  ]);
-
-  // Enhanced progress tracking with user activity detection
-  const trackUserActivity = useCallback(() => {
-    // This function can be called periodically to ensure accurate progress
-    if (ytPlayerRef.current && videoDurationRef.current > 0) {
-      try {
-        const currentTime = ytPlayerRef.current.getCurrentTime?.() || 0;
-        const duration = ytPlayerRef.current.getDuration?.() || videoDurationRef.current;
         
-        if (duration > 0) {
-          const percentage = Math.min(100, (currentTime / duration) * 100);
-          updateWatchPercentage(percentage);
-          
-          // Show feedback if user has watched 90% or more
-          if (percentage >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
-            openFeedbackModal();
-            updateFeedbackState('shown');
-          }
-        }
-      } catch (error) {
-        console.warn("Error tracking user activity:", error);
-      }
-    }
-  }, [updateWatchPercentage, shouldShowFeedbackOnLeave, openFeedbackModal, updateFeedbackState, feedbackState.hasShownFeedback]);
 
-  // Periodic activity tracking to catch all progress changes
+
+
+
+
+
+
+
+
+
+
+
+
+  // Start YouTube progress tracking when video loads
   useEffect(() => {
-    if (sessionStartTime && shouldShowFeedbackOnLeave) {
-      const activityInterval = setInterval(() => {
-        trackUserActivity();
-      }, 2000); // Check every 2 seconds
-
-      return () => clearInterval(activityInterval);
-    }
-  }, [sessionStartTime, shouldShowFeedbackOnLeave, trackUserActivity]);
-
-  // Enhanced video progress tracking with user interaction detection
-  useEffect(() => {
-    if (sessionStartTime && shouldShowFeedbackOnLeave) {
-      // Listen for user interactions that might indicate video seeking
-      const handleUserInteraction = () => {
-        // Delay to allow video state to update
-        setTimeout(() => {
-          trackUserActivity();
-        }, 100);
-      };
-
-      // Add event listeners for user interactions
-      document.addEventListener('keydown', handleUserInteraction);
-      document.addEventListener('click', handleUserInteraction);
-      document.addEventListener('scroll', handleUserInteraction);
-
-      return () => {
-        document.removeEventListener('keydown', handleUserInteraction);
-        document.removeEventListener('click', handleUserInteraction);
-        document.removeEventListener('scroll', handleUserInteraction);
-      };
-    }
-  }, [sessionStartTime, shouldShowFeedbackOnLeave, trackUserActivity]);
-
-
-
-  // Start progress tracking when session starts
-  useEffect(() => {
-    if (sessionStartTime && shouldShowFeedbackOnLeave) {
+    if (currentVideoId) {
+      console.log("🎯 Setting up YouTube progress tracking");
+      
       // Load YouTube Iframe API to get precise duration and currentTime
       const setup = async () => {
-        // Inject API if not already loaded
-        if (!(window.YT && window.YT.Player)) {
-          const existing = document.getElementById("youtube-iframe-api");
-          if (!existing) {
-            const s = document.createElement("script");
-            s.id = "youtube-iframe-api";
-            s.src = "https://www.youtube.com/iframe_api";
-            document.body.appendChild(s);
-          }
-          await new Promise<void>((resolve) => {
-            window.onYouTubeIframeAPIReady = () => resolve();
-          });
-        }
-        
         try {
+          // Inject API if not already loaded
+          if (!(window.YT && window.YT.Player)) {
+            console.log("📡 Loading YouTube Iframe API...");
+            const existing = document.getElementById("youtube-iframe-api");
+            if (!existing) {
+              const s = document.createElement("script");
+              s.id = "youtube-iframe-api";
+              s.src = "https://www.youtube.com/iframe_api";
+              document.body.appendChild(s);
+            }
+            
+            // Wait for API to load
+            await new Promise<void>((resolve) => {
+              if (window.YT && window.YT.Player) {
+                resolve();
+              } else {
+                window.onYouTubeIframeAPIReady = () => resolve();
+              }
+            });
+            console.log("✅ YouTube Iframe API loaded");
+          }
+          
+          // Check if iframe exists and is ready
+          const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
+          if (!iframe) {
+            console.warn("❌ YouTube iframe not found");
+            return;
+          }
+          
+          // Wait for iframe to be ready
+          if (!iframe.contentWindow) {
+            console.log("⏳ Waiting for iframe to be ready...");
+            setTimeout(() => setup(), 1000);
+            return;
+          }
+          
+          console.log("🎮 Setting up YouTube player...");
+          
+          // Create a separate player instance that doesn't interfere with the iframe
           const player = new window.YT.Player("yt-player-iframe", {
             events: {
               onReady: (e: any) => {
+                console.log("🎯 YouTube player ready");
                 const dur = e.target.getDuration?.() || 0;
-                if (dur > 0) videoDurationRef.current = dur;
+                if (dur > 0) {
+                  videoDurationRef.current = dur;
+                  console.log(`⏱️ Video duration: ${dur}s`);
+                }
                 
                 // Start progress tracking interval
                 if (progressIntervalRef.current == null) {
+                  console.log("🔄 Starting progress tracking interval");
                   progressIntervalRef.current = window.setInterval(() => {
                     try {
                       const cur = player.getCurrentTime?.() || 0;
@@ -798,56 +915,64 @@ const VideoPage: React.FC = () => {
                       
                       if (d > 0) {
                         videoDurationRef.current = d;
+                        currentTimeRef.current = cur;
                         const pct = Math.min(100, (cur / d) * 100);
-                        updateWatchPercentage(pct);
+                        
+                        console.log(`📊 Play Progress: ${cur}s/${d}s = ${pct.toFixed(1)}%`);
+                        updatePlayPercentage(pct);
                         
                         // Auto-show feedback when video reaches 90%
-                        if (pct >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
+                        if (pct >= 90 && !hasShownFeedback && canSubmitFeedback) {
+                          console.log("🎉 Video reached 90% - showing feedback modal");
                           openFeedbackModal();
-                          updateFeedbackState('shown');
+                          updateFeedbackState();
                         }
                       }
                     } catch (error) {
-                      console.warn("Error getting video progress:", error);
+                      console.warn("❌ Error getting video progress:", error);
                     }
                   }, 1000);
                 }
               },
               onStateChange: (e: any) => {
                 if (e?.data === window.YT.PlayerState.ENDED) {
-                  // Video ended - show feedback modal
-                  updateWatchPercentage(100);
-                  if (shouldShowFeedbackOnLeave) {
+                  console.log("🎬 Video ended - triggering feedback modal");
+                  updatePlayPercentage(100);
+                  currentTimeRef.current = videoDurationRef.current;
+                  
+                  if (!hasShownFeedback && canSubmitFeedback) {
                     openFeedbackModal();
+                    updateFeedbackState();
                   }
                 } else if (e?.data === window.YT.PlayerState.PLAYING) {
-                  // Video started playing - ensure session is active
-                  if (!sessionStartTime) {
-                    startSession();
-                  }
+                  console.log("▶️ Video started playing");
                 } else if (e?.data === window.YT.PlayerState.PAUSED) {
-                  // Video paused - update progress one more time
-                  handleVideoInteraction();
+                  console.log("⏸️ Video paused");
                 } else if (e?.data === window.YT.PlayerState.BUFFERING) {
-                  // Video buffering - this might indicate user seeking
-                  // Update progress after a short delay
-                  setTimeout(() => handleVideoInteraction(), 500);
+                  console.log("🔄 Video buffering");
+                } else if (e?.data === window.YT.PlayerState.CUED) {
+                  console.log("🎯 Video cued and ready");
                 }
               },
             },
           });
+          
           ytPlayerRef.current = player;
+          console.log("✅ YouTube player initialized successfully");
+          
         } catch (error) {
-          console.warn("Failed to initialize YouTube player:", error);
-          // Fallback to session-based progress tracking
-          if (!videoDurationRef.current) videoDurationRef.current = 600;
-          const cleanup = startProgressTracking();
-          return cleanup;
+          console.error("❌ Failed to initialize YouTube player:", error);
         }
       };
       
-      const maybeCleanup = setup();
+      // Delay setup to ensure iframe is fully loaded
+      const setupTimeout = setTimeout(() => {
+        setup();
+      }, 2000); // Wait 2 seconds for iframe to be ready
+      
       return () => {
+        clearTimeout(setupTimeout);
+        console.log("🧹 Cleaning up YouTube player");
         if (progressIntervalRef.current != null) {
           clearInterval(progressIntervalRef.current);
           progressIntervalRef.current = null;
@@ -859,115 +984,56 @@ const VideoPage: React.FC = () => {
       };
     }
   }, [
-    sessionStartTime,
-    shouldShowFeedbackOnLeave,
-    startProgressTracking,
-    updateWatchPercentage,
+    currentVideoId,
+    updatePlayPercentage,
     openFeedbackModal,
-    startSession,
     updateFeedbackState,
-    feedbackState.hasShownFeedback,
+    hasShownFeedback,
+    videoDetail?.title,
   ]);
 
-  // Page leaving guard - only trigger when user has watched more than 90%
+  // Simple page leave detection
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (
-        shouldShowFeedbackOnLeave &&
-        watchPercentage >= 90 &&
-        !isFeedbackModalOpen
-      ) {
+      if (playPercentage >= 90 && !isFeedbackModalOpen && canSubmitFeedback) {
         event.preventDefault();
         event.returnValue = "You have watched most of this video. Would you like to provide feedback before leaving?";
-
-        // Store state for next visit
-        localStorage.setItem(
-          `feedback_pending_${currentVideoId}`,
-          JSON.stringify({
-            timestamp: Date.now(),
-            watchPercentage,
-            sessionStartTime: sessionStartTime?.toISOString(),
-            videoTitle: videoDetail?.title,
-          })
-        );
       }
     };
 
-    const handlePopState = (event: PopStateEvent) => {
-      if (
-        shouldShowFeedbackOnLeave &&
-        watchPercentage >= 90 &&
-        !isFeedbackModalOpen
-      ) {
-        // Show feedback modal before navigation
-        openFeedbackModal();
-
-        // Prevent immediate navigation
-        event.preventDefault();
-
-        // Store navigation intent
-        localStorage.setItem(
-          `navigation_pending_${currentVideoId}`,
-          JSON.stringify({
-            timestamp: Date.now(),
-            intendedPath: window.location.pathname,
-            intendedHref: window.location.href,
-          })
-        );
-      }
-    };
-
-    // Listen for navigation attempts
     window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, [playPercentage, isFeedbackModalOpen, canSubmitFeedback]);
 
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("popstate", handlePopState);
-    };
-  }, [
-    shouldShowFeedbackOnLeave,
-    watchPercentage,
-    isFeedbackModalOpen,
-    currentVideoId,
-    sessionStartTime,
-    videoDetail?.title,
-    openFeedbackModal,
-  ]);
+  // Auto-restore video when modal closes
+  useEffect(() => {
+    if (!isFeedbackModalOpen && localStorage.getItem('video_state_preserved') === 'true') {
+      console.log("🔄 Auto-restoring video after modal close...");
+      
+      setTimeout(() => {
+        const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
+        if (iframe) {
+          const preservedSrc = localStorage.getItem('video_src');
+          if (preservedSrc && iframe.src !== preservedSrc) {
+            iframe.src = preservedSrc;
+            console.log("✅ Video restored from preserved state");
+          }
+          
+          // Clear preserved state
+          localStorage.removeItem('video_state_preserved');
+          localStorage.removeItem('video_src');
+        }
+      }, 500);
+    }
+  }, [isFeedbackModalOpen]);
 
-  // Handle feedback completion and navigation
+  // Handle feedback completion
   const handleFeedbackComplete = useCallback(
     (action: "submit" | "skip" | "dismiss") => {
       closeFeedbackModal();
-
-      // Check if there was a pending navigation
-      const pendingNavigation = localStorage.getItem(
-        `navigation_pending_${currentVideoId}`
-      );
-      if (pendingNavigation) {
-        try {
-          const data = JSON.parse(pendingNavigation);
-          localStorage.removeItem(`navigation_pending_${currentVideoId}`);
-
-          // Allow navigation to proceed
-          if (
-            data.intendedPath &&
-            data.intendedPath !== window.location.pathname
-          ) {
-            navigate(data.intendedPath);
-          }
-        } catch (error) {
-          console.error("Failed to parse pending navigation:", error);
-        }
-      }
-
-      // Clear any pending feedback state
-      localStorage.removeItem(`feedback_pending_${currentVideoId}`);
-      
-      // Log feedback action for analytics
       console.log(`Feedback ${action} for video:`, currentVideoId);
     },
-    [closeFeedbackModal, currentVideoId, navigate]
+    [closeFeedbackModal, currentVideoId]
   );
 
   // Fetch video details
@@ -1059,11 +1125,7 @@ const VideoPage: React.FC = () => {
     setChatError(null);
     
     // Reset feedback state when video changes
-    setFeedbackState({
-      hasShownFeedback: false,
-      lastFeedbackTime: null,
-      feedbackCount: 0,
-    });
+    setHasShownFeedback(false);
   }, [currentVideoId]);
 
   const initializeChat = async () => {
@@ -1151,67 +1213,13 @@ const VideoPage: React.FC = () => {
     setCurrentMode(mode);
   }, []);
 
-  // Manual feedback trigger (for testing)
-  const handleManualFeedbackTrigger = useCallback(() => {
-    openFeedbackModal();
-  }, [openFeedbackModal]);
 
-  // Manual video duration setter (for testing)
-  const handleSetVideoDuration = useCallback((duration: number) => {
-    videoDurationRef.current = duration;
-    console.log("Video duration set to:", duration, "seconds");
-  }, []);
 
-  // Manual progress trigger (for testing)
-  const handleSetProgress = useCallback((percentage: number) => {
-    updateWatchPercentage(percentage);
-    if (percentage >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
-      openFeedbackModal();
-      updateFeedbackState('shown');
-    }
-  }, [updateWatchPercentage, shouldShowFeedbackOnLeave, openFeedbackModal, updateFeedbackState, feedbackState.hasShownFeedback]);
 
-  // Enhanced video progress tracking with user interaction detection
-  const handleVideoInteraction = useCallback(() => {
-    // This function can be called when user interacts with video controls
-    // to ensure accurate progress tracking
-    if (ytPlayerRef.current && videoDurationRef.current > 0) {
-      try {
-        const currentTime = ytPlayerRef.current.getCurrentTime?.() || 0;
-        const duration = ytPlayerRef.current.getDuration?.() || videoDurationRef.current;
-        const percentage = Math.min(100, (currentTime / duration) * 100);
-        updateWatchPercentage(percentage);
-        
-        // Show feedback if user has watched 90% or more
-        if (percentage >= 90 && shouldShowFeedbackOnLeave && !feedbackState.hasShownFeedback) {
-          openFeedbackModal();
-          updateFeedbackState('shown');
-        }
-      } catch (error) {
-        console.warn("Error getting video progress on interaction:", error);
-      }
-    }
-  }, [updateWatchPercentage, shouldShowFeedbackOnLeave, openFeedbackModal, updateFeedbackState, feedbackState.hasShownFeedback]);
 
-  // Listen for video player events to catch user interactions
-  useEffect(() => {
-    const handleVideoEvents = () => {
-      // This will be called when user interacts with video
-      handleVideoInteraction();
-    };
 
-    // Add event listeners to video iframe
-    const videoIframe = document.querySelector('iframe[src*="youtube.com"]');
-    if (videoIframe) {
-      videoIframe.addEventListener('load', handleVideoEvents);
-      videoIframe.addEventListener('click', handleVideoEvents);
-      
-      return () => {
-        videoIframe.removeEventListener('load', handleVideoEvents);
-        videoIframe.removeEventListener('click', handleVideoEvents);
-      };
-    }
-  }, [handleVideoInteraction]);
+
+
 
   return (
     <div className="bg-background text-foreground min-h-screen font-sans">
@@ -1230,10 +1238,74 @@ const VideoPage: React.FC = () => {
               onShare={handleShare}
               onToggleFullScreen={handleToggleFullScreen}
               isLeftColumnVisible={isLeftColumnVisible}
+              playPercentage={playPercentage}
+              currentTime={currentTimeRef.current}
+              videoDuration={videoDurationRef.current}
             />
-            <VideoPlayer
-              src={`https://www.youtube.com/embed/${currentVideoId}`}
+            <div className="video-container">
+              <VideoPlayer
+                src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}`}
+              />
+            </div>
+            
+            {/* Video Progress Stats */}
+            <VideoStats
+              playPercentage={playPercentage}
+              videoDuration={videoDurationRef.current}
+              currentTime={currentTimeRef.current}
             />
+            
+            {/* Feedback Status & Debug Buttons */}
+            <div className="mb-4 space-y-3">
+              {/* Feedback Status */}
+              {!canSubmitFeedback && existingFeedback && (
+                <div className="p-3 bg-green-900/20 border border-green-700 rounded-lg">
+                  <div className="flex items-center gap-2 text-green-400">
+                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">Feedback Submitted</span>
+                  </div>
+                  <p className="text-sm text-green-300 mt-1">
+                    You rated this video {existingFeedback.rating}/5 stars
+                  </p>
+                </div>
+              )}
+
+              {/* Debug Video Restore Button */}
+              {process.env.NODE_ENV === "development" && (
+                <div className="p-3 bg-gray-800 rounded-lg space-y-2">
+                  <button
+                    onClick={() => {
+                      const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
+                      if (iframe) {
+                        const currentSrc = iframe.src;
+                        iframe.src = "";
+                        setTimeout(() => {
+                          iframe.src = currentSrc;
+                          console.log("🔧 Manual video restore triggered");
+                        }, 100);
+                      }
+                    }}
+                    className="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 w-full"
+                  >
+                    🔧 Restore Video (Debug)
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      console.log("🔄 Manual feedback check triggered");
+                      // Force a feedback check by resetting the hook
+                      window.location.reload();
+                    }}
+                    className="px-3 py-2 bg-green-600 text-white rounded text-sm hover:bg-green-700 w-full"
+                  >
+                    🔄 Refresh Feedback Check (Debug)
+                  </button>
+                </div>
+              )}
+            </div>
+            
             <ContentTabs
               chapters={chapters}
               transcript={transcript}
@@ -1243,10 +1315,10 @@ const VideoPage: React.FC = () => {
               transcriptError={transcriptError}
               videoId={currentVideoId}
               videoTitle={videoDetail?.title}
-              watchPercentage={watchPercentage}
-              sessionStartTime={sessionStartTime || undefined}
+              playPercentage={playPercentage}
               onFeedbackSubmit={submitFeedback}
               onFeedbackSkip={skipFeedback}
+              onOpenModal={openFeedbackModal}
             />
           </div>
           <div
@@ -1310,8 +1382,17 @@ const VideoPage: React.FC = () => {
             </div>
           </header>
           <div className="flex-shrink-0">
-            <VideoPlayer
-              src={`https://www.youtube.com/embed/${currentVideoId}`}
+            <div className="video-container">
+              <VideoPlayer
+                src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}`}
+              />
+            </div>
+            
+            {/* Video Progress Stats - Mobile */}
+            <VideoStats
+              playPercentage={playPercentage}
+              videoDuration={videoDurationRef.current}
+              currentTime={currentTimeRef.current}
             />
           </div>
 
@@ -1357,13 +1438,12 @@ const VideoPage: React.FC = () => {
         onClose={() => handleFeedbackComplete("dismiss")}
         videoId={currentVideoId}
         videoTitle={videoDetail?.title}
-        suggestedChips={feedbackSuggestions}
-        sessionStartTime={sessionStartTime || undefined}
-        watchPercentage={watchPercentage}
+        suggestedChips={[]}
+        playPercentage={playPercentage}
         onSubmit={async (payload) => {
           try {
             await submitFeedback(payload);
-            updateFeedbackState('submitted');
+            updateFeedbackState();
             handleFeedbackComplete("submit");
           } catch (error) {
             console.error("Failed to submit feedback:", error);
@@ -1372,7 +1452,7 @@ const VideoPage: React.FC = () => {
         }}
         onSkip={() => {
           skipFeedback();
-          updateFeedbackState('skipped');
+          updateFeedbackState();
           handleFeedbackComplete("skip");
         }}
         onDismiss={() => handleFeedbackComplete("dismiss")}
@@ -1384,41 +1464,7 @@ const VideoPage: React.FC = () => {
         url={`https://www.youtube.com`}
       />
 
-      {/* Debug/Test Controls - Remove in production */}
-      {process.env.NODE_ENV === "development" && (
-        <div className="fixed bottom-4 right-4 z-50 space-y-2">
-          <button
-            onClick={handleManualFeedbackTrigger}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
-          >
-            Test Feedback
-          </button>
-          <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-            Watch: {Math.round(watchPercentage)}%
-          </div>
-          <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-            Duration: {videoDurationRef.current}s
-          </div>
-          <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-            Session: {sessionStartTime ? Math.floor((Date.now() - sessionStartTime.getTime()) / 1000) : 0}s
-          </div>
-          <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-            Feedback: {feedbackState.hasShownFeedback ? 'Shown' : 'Not shown'}
-          </div>
-          <button
-            onClick={() => handleSetVideoDuration(300)}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-          >
-            Set Duration (300s)
-          </button>
-          <button
-            onClick={() => handleSetProgress(95)}
-            className="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700"
-          >
-            Set Progress (95%)
-          </button>
-        </div>
-      )}
+
 
       <style>{`
                 /* Simple toggle switch styles */
@@ -1448,6 +1494,59 @@ const VideoPage: React.FC = () => {
                 .aspect-w-16 { position: relative; padding-bottom: 56.25%; }
                 .aspect-h-9 { }
                 .aspect-w-16 > *, .aspect-h-9 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
+                
+                /* Video iframe isolation - prevent modal interference */
+                #yt-player-iframe {
+                    isolation: isolate !important;
+                    contain: layout style paint !important;
+                    transform: translateZ(0) !important;
+                    backface-visibility: hidden !important;
+                    perspective: 1000px !important;
+                    will-change: transform !important;
+                    position: relative !important;
+                    z-index: 1 !important;
+                }
+                
+                /* Ensure video container is completely isolated */
+                .video-container {
+                    position: relative !important;
+                    z-index: 50 !important;
+                    isolation: isolate !important;
+                    contain: layout style paint !important;
+                    transform: translateZ(0) !important;
+                    backface-visibility: hidden !important;
+                }
+                
+                /* Prevent modal backdrop from affecting video */
+                .modal-backdrop {
+                    pointer-events: none !important;
+                }
+                
+                .modal-content {
+                    pointer-events: auto !important;
+                }
+                
+                /* Additional video protection with !important */
+                .video-container iframe {
+                    position: relative !important;
+                    z-index: 1 !important;
+                    isolation: isolate !important;
+                    contain: layout style paint !important;
+                    transform: translateZ(0) !important;
+                }
+                
+                /* Force video visibility */
+                .video-container {
+                    background: black !important;
+                    min-height: 400px !important;
+                }
+                
+                /* Ensure iframe is always visible */
+                #yt-player-iframe {
+                    opacity: 1 !important;
+                    visibility: visible !important;
+                    display: block !important;
+                }
             `}</style>
     </div>
   );

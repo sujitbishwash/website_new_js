@@ -2,7 +2,8 @@ import axios from 'axios';
 
 // API configuration
 const API_CONFIG = {
-  baseURL: 'https://api.krishak.in',
+  // baseURL: 'https://api.krishak.in',
+  baseURL: 'http://localhost:8000',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -410,6 +411,83 @@ export const quizApi = {
 
   submitTest: async (data: SubmitTestRequest): Promise<SubmitTestResponse> => {
     const response = await apiRequest<SubmitTestResponse>('POST', '/test-series/submit-test-session/', data);
+    return response.data;
+  },
+};
+
+// Feedback API
+export interface FeedbackRequest {
+  component: string;        // Required
+  description: string;      // Required (1-4000 chars)
+  rating: number;           // Required (1-5)
+  source_id: string;        // Required
+  page_url: string;         // Required
+}
+
+export interface FeedbackResponse {
+  id: string;               // Required
+  component: string;         // Required
+  description: string;       // Required
+  rating: number;           // Required
+  reporter: any;            // Required (Dict)
+  date_submitted: string;   // Required
+  source_id: string;        // Required
+  page_url: string;         // Required
+}
+
+// Component name enum
+export enum ComponentName {
+  Video = "Video",
+  Chat = "Chat", 
+  Quiz = "Quiz",
+  Summary = "Summary",
+  Flashcard = "Flashcard",
+  Test = "Test"
+}
+
+// Check feedback availability response
+export interface FeedbackStatus {
+  can_feedback: boolean;
+  existing_feedback: {
+    id: string;
+    rating: number;
+    description: string;
+    date_submitted: string;
+    page_url: string;
+  } | null;
+  reason: string;
+}
+
+// Feedback list response
+export interface FeedbackListResponse {
+  feedbacks: FeedbackResponse[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export const feedbackApi = {
+  // Check if user can submit feedback for a component
+  canSubmitFeedback: async (sourceId: string, component: ComponentName, pageUrl: string): Promise<FeedbackStatus> => {
+    const response = await apiRequest<FeedbackStatus>('GET', `/feedback/can-feedback?source_id=${sourceId}&component=${component}&page_url=${encodeURIComponent(pageUrl)}`);
+    return response.data;
+  },
+
+  // Submit new feedback
+  submitFeedback: async (data: FeedbackRequest): Promise<FeedbackResponse> => {
+    const response = await apiRequest<FeedbackResponse>('POST', '/feedback/', data);
+    return response.data;
+  },
+
+  // Get user's feedback list
+  getUserFeedback: async (page: number = 1, size: number = 10): Promise<FeedbackListResponse> => {
+    const response = await apiRequest<FeedbackListResponse>('GET', `/feedback/?page=${page}&size=${size}`);
+    return response.data;
+  },
+
+  // Get specific feedback by ID
+  getFeedbackById: async (id: string): Promise<FeedbackResponse> => {
+    const response = await apiRequest<FeedbackResponse>('GET', `/feedback/${id}`);
     return response.data;
   },
 };
