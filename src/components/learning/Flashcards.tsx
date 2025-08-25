@@ -41,6 +41,14 @@ interface ProgressBarProps {
   total: number;
 }
 
+// Add props interface for feedback state
+interface FlashcardsProps {
+  // Optional props to prevent duplicate API calls when passed from parent
+  canSubmitFeedback?: boolean;
+  existingFeedback?: any;
+  markAsSubmitted?: () => void;
+}
+
 // --- INITIAL DATA ---
 const initialCards: Card[] = [
   {
@@ -199,7 +207,11 @@ const Navigation: React.FC<NavigationProps> = ({
 
 // --- MAIN APP COMPONENT ---
 
-const Flashcards: React.FC = () => {
+const Flashcards: React.FC<FlashcardsProps> = ({
+  canSubmitFeedback: _canSubmitFeedback,
+  existingFeedback: _existingFeedback,
+  markAsSubmitted: _markAsSubmitted,
+}) => {
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);

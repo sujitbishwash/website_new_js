@@ -9,7 +9,7 @@ import Summary from "@/components/learning/Summary";
 // import { useVideoFeedback } from "@/hooks/useVideoFeedback";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
-import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
+import { useFeedbackTracker, useMultiFeedbackTracker } from "@/hooks/useFeedbackTracker";
 import {
   BookOpen,
   Clipboard,
@@ -30,7 +30,7 @@ import {
   Type,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail, ComponentName } from "../../lib/api-client";
 
@@ -70,6 +70,10 @@ interface ContentTabsProps {
   onFeedbackSubmit: (payload: any) => void;
   onFeedbackSkip: () => void;
   onOpenModal: () => void;
+  // Optional props to prevent duplicate API calls
+  canSubmitFeedback?: boolean;
+  existingFeedback?: any;
+  markAsSubmitted?: () => void;
 }
 
 // Learning mode types
@@ -254,24 +258,162 @@ const Header: React.FC<HeaderProps> = ({
   );
 };
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => (
-  <div className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg relative">
-    <iframe
-      id="yt-player-iframe"
-      src={src}
-      title="YouTube video player"
-      frameBorder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      allowFullScreen
-      className="w-full h-full relative z-10"
-      loading="lazy"
-      style={{
-        isolation: 'isolate',
-        contain: 'layout style paint'
-      }}
-    />
-  </div>
-);
+// Custom hook to ensure iframe persistence
+const useIframePersistence = (videoId: string | null) => {
+  const [iframeKey, setIframeKey] = useState(0);
+  
+  useEffect(() => {
+    if (!videoId) return;
+    
+    const checkAndRecreateIframe = () => {
+      const iframe = document.getElementById("yt-player-iframe");
+      if (!iframe) {
+        console.log("🚨 Iframe missing, recreating...");
+        setIframeKey(prev => prev + 1);
+      }
+    };
+    
+    // Check every second
+    const interval = setInterval(checkAndRecreateIframe, 1000);
+    
+    return () => clearInterval(interval);
+  }, [videoId]);
+  
+  return iframeKey;
+};
+
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [iframeCreated, setIframeCreated] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Debug logging for iframe lifecycle
+  useEffect(() => {
+    console.log("🎬 VideoPlayer component mounted with src:", src);
+    
+    // Check if iframe was created after a short delay
+    const checkIframe = setTimeout(() => {
+      const iframe = document.getElementById("yt-player-iframe");
+      console.log("🔍 Iframe check after mount:", iframe ? "Found" : "Not found");
+      if (iframe) {
+        console.log("🔍 Iframe details:", {
+          src: (iframe as HTMLIFrameElement).src,
+          style: iframe.style.cssText,
+          className: iframe.className,
+          display: window.getComputedStyle(iframe).display,
+          visibility: window.getComputedStyle(iframe).visibility,
+          opacity: window.getComputedStyle(iframe).opacity,
+          zIndex: window.getComputedStyle(iframe).zIndex
+        });
+      }
+      setIframeCreated(!!iframe);
+    }, 100);
+    
+    return () => {
+      console.log("🎬 VideoPlayer component unmounted");
+      clearTimeout(checkIframe);
+    };
+  }, [src]);
+
+  // Continuous monitoring of iframe presence
+  useEffect(() => {
+    const monitorIframe = setInterval(() => {
+      const iframe = document.getElementById("yt-player-iframe");
+      const currentState = !!iframe;
+      
+      if (iframeCreated !== currentState) {
+        console.log(`🔄 Iframe state changed: ${iframeCreated ? 'Present' : 'Absent'} -> ${currentState ? 'Present' : 'Absent'}`);
+        setIframeCreated(currentState);
+        
+        if (currentState && iframe) {
+          // Iframe reappeared, ensure it's visible
+          console.log("🔧 Ensuring iframe visibility...");
+          (iframe as HTMLIFrameElement).style.display = 'block';
+          (iframe as HTMLIFrameElement).style.visibility = 'visible';
+          (iframe as HTMLIFrameElement).style.opacity = '1';
+          (iframe as HTMLIFrameElement).style.zIndex = '10';
+        }
+      }
+    }, 500);
+
+    return () => clearInterval(monitorIframe);
+  }, [iframeCreated]);
+
+  const handleLoad = () => {
+    console.log("✅ Video iframe loaded successfully");
+    setIsLoading(false);
+    setHasError(false);
+    setIframeCreated(true);
+  };
+
+  const handleError = () => {
+    console.error("❌ Video iframe failed to load");
+    setHasError(true);
+    setIsLoading(false);
+  };
+
+  return (
+    <div className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg relative video-container">
+      {isLoading && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-900 z-20">
+          <div className="text-white text-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto mb-2"></div>
+            <p className="text-sm">Loading video...</p>
+          </div>
+        </div>
+      )}
+      
+      {hasError && (
+        <div className="absolute inset-0 flex items-center justify-center bg-red-900 z-20">
+          <div className="text-white text-center p-4">
+            <p className="text-sm mb-2">Failed to load video</p>
+            <button 
+              onClick={() => {
+                setHasError(false);
+                setIsLoading(true);
+                // Force a re-render by updating the src
+                const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
+                if (iframe) {
+                  iframe.src = src;
+                }
+              }}
+              className="px-3 py-1 bg-white text-red-900 rounded text-sm hover:bg-gray-100"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+      
+      <iframe
+        ref={iframeRef}
+        id="yt-player-iframe"
+        src={src}
+        title="YouTube video player"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        allowFullScreen
+        className="w-full h-full relative z-100"
+        loading="lazy"
+        onLoad={handleLoad}
+        onError={handleError}
+        style={{
+          isolation: 'isolate',
+          contain: 'layout style paint',
+          display: 'block',
+          visibility: 'visible',
+          opacity: '1',
+          zIndex: '100',
+          position: 'relative',
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'auto'
+        }}
+      />
+    </div>
+  );
+};
 
 const ContentTabs: React.FC<ContentTabsProps> = ({
   chapters,
@@ -286,6 +428,9 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   onFeedbackSubmit,
   onFeedbackSkip,
   onOpenModal,
+  canSubmitFeedback,
+  existingFeedback,
+  markAsSubmitted,
 }) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
@@ -340,6 +485,9 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
             onFeedbackSubmit={onFeedbackSubmit}
             onFeedbackSkip={onFeedbackSkip}
             onOpenModal={onOpenModal}
+            canSubmitFeedback={canSubmitFeedback}
+            existingFeedback={existingFeedback}
+            markAsSubmitted={markAsSubmitted}
           />
         </div>
       </div>
@@ -417,13 +565,32 @@ const AITutorPanel: React.FC<{
   isChatLoading: boolean;
   chatError: string | null;
   onSendMessage: (message: string) => void;
-
   onToggleFullScreen: () => void;
   isLeftColumnVisible: boolean;
-
   onToggleVideo: () => void;
   isVideoVisible: boolean;
   onShare: () => void;
+  // Feedback state for each component
+  chatFeedbackState?: {
+    canSubmitFeedback: boolean;
+    existingFeedback: any;
+    markAsSubmitted: () => void;
+  };
+  quizFeedbackState?: {
+    canSubmitFeedback: boolean;
+    existingFeedback: any;
+    markAsSubmitted: () => void;
+  };
+  summaryFeedbackState?: {
+    canSubmitFeedback: boolean;
+    existingFeedback: any;
+    markAsSubmitted: () => void;
+  };
+  flashcardFeedbackState?: {
+    canSubmitFeedback: boolean;
+    existingFeedback: any;
+    markAsSubmitted: () => void;
+  };
 }> = ({
   currentMode,
   onModeChange,
@@ -437,6 +604,10 @@ const AITutorPanel: React.FC<{
   onToggleVideo,
   isVideoVisible,
   onShare,
+  chatFeedbackState,
+  quizFeedbackState,
+  summaryFeedbackState,
+  flashcardFeedbackState,
 }) => {
   const modes: { key: LearningMode; label: string; icon: any }[] = [
     { key: "chat", label: "Chat", icon: <MessageCircle /> },
@@ -454,11 +625,36 @@ const AITutorPanel: React.FC<{
         error={chatError}
         onSendMessage={onSendMessage}
         isLeftColumnVisible={isLeftColumnVisible}
+        // Pass feedback state for Chat component
+        canSubmitFeedback={chatFeedbackState?.canSubmitFeedback}
+        existingFeedback={chatFeedbackState?.existingFeedback}
+        markAsSubmitted={chatFeedbackState?.markAsSubmitted}
       />
     ),
-    flashcards: <Flashcards />,
-    quiz: <Quiz />,
-    summary: <Summary />,
+    flashcards: (
+      <Flashcards 
+        // Pass feedback state for Flashcard component
+        canSubmitFeedback={flashcardFeedbackState?.canSubmitFeedback}
+        existingFeedback={flashcardFeedbackState?.existingFeedback}
+        markAsSubmitted={flashcardFeedbackState?.markAsSubmitted}
+      />
+    ),
+    quiz: (
+      <Quiz 
+        // Pass feedback state for Quiz component
+        canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
+        existingFeedback={quizFeedbackState?.existingFeedback}
+        markAsSubmitted={quizFeedbackState?.markAsSubmitted}
+      />
+    ),
+    summary: (
+      <Summary 
+        // Pass feedback state for Summary component
+        canSubmitFeedback={summaryFeedbackState?.canSubmitFeedback}
+        existingFeedback={summaryFeedbackState?.existingFeedback}
+        markAsSubmitted={summaryFeedbackState?.markAsSubmitted}
+      />
+    ),
   };
 
   return (
@@ -653,91 +849,138 @@ const VideoPage: React.FC = () => {
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
 
+  // Use iframe persistence hook
+  const iframeKey = useIframePersistence(currentVideoId);
+
+  // Memoize components array to prevent hook recreation
+  const feedbackComponents = useMemo(() => [
+    ComponentName.Video,
+    ComponentName.Chat,
+    ComponentName.Quiz,
+    ComponentName.Summary,
+    ComponentName.Flashcard
+  ], []);
+
+  // Debug video ID
+  useEffect(() => {
+    console.log("🎬 Video ID Debug:", {
+      videoId,
+      locationStateVideoId: location.state?.videoId,
+      currentVideoId,
+      url: window.location.href
+    });
+  }, [videoId, location.state?.videoId, currentVideoId]);
+
   // Local feedback and progress state management
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [playPercentage, setPlayPercentage] = useState(0);
 
-  // Track feedback submissions to prevent duplicates
+  // Track feedback submissions for all components using single API call
   const {
-    canSubmitFeedback,
-    existingFeedback,
-    markAsSubmitted,
-    _debug,
-  } = useFeedbackTracker({
-    component: ComponentName.Video,
+    feedbackStates,
+    isLoading: isFeedbackLoading,
+    error: feedbackError,
+    markAsSubmitted: markFeedbackAsSubmitted,
+    resetFeedback,
+    _debug: multiFeedbackDebug,
+  } = useMultiFeedbackTracker({
+    components: feedbackComponents,
     sourceId: currentVideoId || "unknown",
     pageUrl: window.location.href,
   });
 
+  // Extract individual component states for backward compatibility
+  const videoFeedbackState = feedbackStates[ComponentName.Video];
+  const chatFeedbackState = feedbackStates[ComponentName.Chat];
+  const quizFeedbackState = feedbackStates[ComponentName.Quiz];
+  const summaryFeedbackState = feedbackStates[ComponentName.Summary];
+  const flashcardFeedbackState = feedbackStates[ComponentName.Flashcard];
+
+  // Improved fallback logic - allow feedback if state is loaded and no existing feedback
+  const videoCanSubmitFeedback = videoFeedbackState ? videoFeedbackState.canSubmitFeedback : (isFeedbackLoading ? false : true);
+  const videoExistingFeedback = videoFeedbackState?.existingFeedback ?? null;
+  const chatCanSubmitFeedback = chatFeedbackState ? chatFeedbackState.canSubmitFeedback : (isFeedbackLoading ? false : true);
+  const chatExistingFeedback = chatFeedbackState?.existingFeedback ?? null;
+  const quizCanSubmitFeedback = quizFeedbackState ? quizFeedbackState.canSubmitFeedback : (isFeedbackLoading ? false : true);
+  const quizExistingFeedback = quizFeedbackState?.existingFeedback ?? null;
+  const summaryCanSubmitFeedback = summaryFeedbackState ? summaryFeedbackState.canSubmitFeedback : (isFeedbackLoading ? false : true);
+  const summaryExistingFeedback = summaryFeedbackState?.existingFeedback ?? null;
+  const flashcardCanSubmitFeedback = flashcardFeedbackState ? flashcardFeedbackState.canSubmitFeedback : (isFeedbackLoading ? false : true);
+  const flashcardExistingFeedback = flashcardFeedbackState?.existingFeedback ?? null;
+
+  // Create wrapper functions for markAsSubmitted to maintain backward compatibility
+  const videoMarkAsSubmitted = useCallback(() => {
+    markFeedbackAsSubmitted(ComponentName.Video);
+  }, [markFeedbackAsSubmitted]);
+
+  const chatMarkAsSubmitted = useCallback(() => {
+    markFeedbackAsSubmitted(ComponentName.Chat);
+  }, [markFeedbackAsSubmitted]);
+
+  const quizMarkAsSubmitted = useCallback(() => {
+    markFeedbackAsSubmitted(ComponentName.Quiz);
+  }, [markFeedbackAsSubmitted]);
+
+  const summaryMarkAsSubmitted = useCallback(() => {
+    markFeedbackAsSubmitted(ComponentName.Summary);
+  }, [markFeedbackAsSubmitted]);
+
+  const flashcardMarkAsSubmitted = useCallback(() => {
+    markFeedbackAsSubmitted(ComponentName.Flashcard);
+  }, [markFeedbackAsSubmitted]);
+
   // Debug logging for feedback tracker
   useEffect(() => {
-    if (_debug) {
-      console.log("🔍 Feedback Tracker Debug:", _debug);
+    if (multiFeedbackDebug) {
+      console.log("🔍 Multi-Feedback Tracker Debug:", multiFeedbackDebug);
+      console.log("📊 Feedback States:", feedbackStates);
     }
-  }, [_debug]);
+  }, [multiFeedbackDebug, feedbackStates]);
+
+  // Debug logging for video feedback state
+  useEffect(() => {
+    console.log("🎬 Video Feedback State Debug:", {
+      videoFeedbackState,
+      videoCanSubmitFeedback,
+      videoExistingFeedback,
+      isFeedbackLoading,
+      currentVideoId
+    });
+  }, [videoFeedbackState, videoCanSubmitFeedback, videoExistingFeedback, isFeedbackLoading, currentVideoId]);
 
   // Feedback modal functions
   const openFeedbackModal = useCallback(() => {
+    // Don't open if feedback is still loading
+    if (isFeedbackLoading) {
+      console.log("⏳ Cannot open feedback modal - feedback still loading");
+      return;
+    }
+
     // Check if feedback has already been submitted
-    if (!canSubmitFeedback) {
+    if (!videoCanSubmitFeedback) {
       console.log("⚠️ Cannot open feedback modal - feedback already submitted");
       return;
     }
 
-    // Preserve video state before opening modal
-    const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
-    if (iframe && iframe.contentWindow) {
-      // Store current video state
-      localStorage.setItem('video_state_preserved', 'true');
-      localStorage.setItem('video_src', iframe.src);
-      console.log("💾 Video state preserved before modal open");
+    // Check if there's existing feedback
+    if (videoExistingFeedback) {
+      console.log("⚠️ Cannot open feedback modal - existing feedback found:", videoExistingFeedback);
+      return;
+    }
+
+    // Don't open if already shown
+    if (hasShownFeedback) {
+      console.log("🔄 Cannot open feedback modal - already shown");
+      return;
     }
     
+    console.log("✅ Opening feedback modal");
     setIsFeedbackModalOpen(true);
-  }, [canSubmitFeedback]);
+  }, [videoCanSubmitFeedback, videoExistingFeedback, hasShownFeedback, isFeedbackLoading]);
 
   const closeFeedbackModal = useCallback(() => {
     setIsFeedbackModalOpen(false);
-    
-    // Force video restoration with multiple fallback methods
-    setTimeout(() => {
-      const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
-      if (iframe) {
-        console.log("🔄 Restoring video after modal close...");
-        
-        // Method 1: Refresh iframe src
-        const currentSrc = iframe.src;
-        iframe.src = "";
-        setTimeout(() => {
-          iframe.src = currentSrc;
-          console.log("✅ Video iframe refreshed");
-        }, 100);
-        
-        // Method 2: Force iframe reload if Method 1 fails
-        setTimeout(() => {
-          if (iframe.contentWindow) {
-            try {
-              iframe.contentWindow.location.reload();
-              console.log("✅ Video iframe force reloaded");
-            } catch (e) {
-              console.log("⚠️ Force reload failed, trying src refresh again");
-              iframe.src = currentSrc;
-            }
-          }
-        }, 500);
-        
-        // Method 3: Recreate iframe if all else fails
-        setTimeout(() => {
-          if (!iframe.contentWindow || iframe.contentWindow.location.href === 'about:blank') {
-            console.log("🔄 Recreating video iframe...");
-            const newIframe = iframe.cloneNode(true) as HTMLIFrameElement;
-            newIframe.src = currentSrc;
-            iframe.parentNode?.replaceChild(newIframe, iframe);
-            console.log("✅ Video iframe recreated");
-          }
-        }, 1000);
-      }
-    }, 300);
+    console.log("🔄 Modal closed - video should be visible");
   }, []);
 
   const submitFeedback = useCallback(async (payload: VideoFeedbackPayload) => {
@@ -752,12 +995,19 @@ const VideoPage: React.FC = () => {
       chips: payload.chips
     });
     
-    // Mark feedback as submitted to prevent duplicates
-    markAsSubmitted();
-    
-    // You can add analytics tracking here
-    closeFeedbackModal();
-  }, [closeFeedbackModal, markAsSubmitted]);
+    try {
+      // Mark feedback as submitted to prevent duplicates
+      markFeedbackAsSubmitted(ComponentName.Video);
+      
+      // You can add analytics tracking here
+      console.log("✅ Feedback marked as submitted successfully");
+      closeFeedbackModal();
+    } catch (error) {
+      console.error("❌ Failed to submit feedback:", error);
+      // Don't close modal on error, let the modal handle the error display
+      throw error;
+    }
+  }, [closeFeedbackModal, markFeedbackAsSubmitted]);
 
   const skipFeedback = useCallback(() => {
     console.log("Feedback skipped");
@@ -778,6 +1028,9 @@ const VideoPage: React.FC = () => {
       // Reset feedback state for new video
       setHasShownFeedback(false);
       
+      // Reset the feedback tracker to prevent continuous API calls
+      resetFeedback();
+      
       // Reset video progress tracking
       if (progressIntervalRef.current) {
         clearInterval(progressIntervalRef.current);
@@ -793,7 +1046,7 @@ const VideoPage: React.FC = () => {
       }
 
     }
-  }, [currentVideoId]);
+  }, [currentVideoId, resetFeedback]);
 
         
 
@@ -883,7 +1136,7 @@ const VideoPage: React.FC = () => {
                         updatePlayPercentage(pct);
                         
                         // Auto-show feedback when video reaches 90%
-                        if (pct >= 90 && !hasShownFeedback && canSubmitFeedback) {
+                        if (pct >= 90 && !hasShownFeedback && videoCanSubmitFeedback) {
                           console.log("🎉 Video reached 90% - showing feedback modal");
                           openFeedbackModal();
                           updateFeedbackState();
@@ -901,7 +1154,7 @@ const VideoPage: React.FC = () => {
                   updatePlayPercentage(100);
                   currentTimeRef.current = videoDurationRef.current;
                   
-                  if (!hasShownFeedback && canSubmitFeedback) {
+                  if (!hasShownFeedback && videoCanSubmitFeedback) {
                     openFeedbackModal();
                     updateFeedbackState();
                   }
@@ -950,12 +1203,100 @@ const VideoPage: React.FC = () => {
     updateFeedbackState,
     hasShownFeedback,
     videoDetail?.title,
+    videoCanSubmitFeedback,
   ]);
+
+  // Auto-open feedback modal based on conditions
+  useEffect(() => {
+    // Don't auto-open if feedback is still loading
+    if (isFeedbackLoading) {
+      console.log("⏳ Feedback still loading, skipping auto-open");
+      return;
+    }
+
+    // Don't auto-open if feedback was already submitted
+    if (!videoCanSubmitFeedback) {
+      console.log("❌ Feedback already submitted, skipping auto-open");
+      return;
+    }
+
+    // Don't auto-open if already shown
+    if (hasShownFeedback) {
+      console.log("🔄 Feedback already shown, skipping auto-open");
+      return;
+    }
+
+    // Don't auto-open if there's existing feedback
+    if (videoExistingFeedback) {
+      console.log("⚠️ Existing feedback found, skipping auto-open");
+      return;
+    }
+
+    // Auto-open if video is at 95% (changed from 90% to avoid 94% issue)
+    if (playPercentage >= 95) {
+      console.log("🎉 Auto-opening feedback modal - video at 95%");
+      openFeedbackModal();
+      updateFeedbackState();
+    }
+    
+    // Auto-open if video ended and feedback can be submitted
+    if (playPercentage >= 100) {
+      console.log("🎬 Auto-opening feedback modal - video ended");
+      openFeedbackModal();
+      updateFeedbackState();
+    }
+  }, [playPercentage, videoCanSubmitFeedback, videoExistingFeedback, hasShownFeedback, isFeedbackLoading, openFeedbackModal, updateFeedbackState]);
+
+  // Auto-open feedback modal when page loads if conditions are met
+  useEffect(() => {
+    // Don't auto-open if feedback is still loading
+    if (isFeedbackLoading) {
+      console.log("⏳ Feedback still loading, skipping page load auto-open");
+      return;
+    }
+
+    // Check if we should auto-open feedback modal on page load
+    const shouldAutoOpen = () => {
+      // Don't auto-open if feedback already submitted
+      if (!videoCanSubmitFeedback) {
+        console.log("❌ Feedback already submitted, skipping page load auto-open");
+        return false;
+      }
+      
+      // Don't auto-open if already shown
+      if (hasShownFeedback) {
+        console.log("🔄 Feedback already shown, skipping page load auto-open");
+        return false;
+      }
+      
+      // Don't auto-open if there's existing feedback
+      if (videoExistingFeedback) {
+        console.log("⚠️ Existing feedback found, skipping page load auto-open");
+        return false;
+      }
+      
+      // Auto-open if video is at 95% or more (changed from 90% to avoid 94% issue)
+      if (playPercentage >= 95) return true;
+      
+      // Auto-open if video ended
+      if (playPercentage >= 100) return true;
+      
+      return false;
+    };
+
+    if (shouldAutoOpen()) {
+      console.log("🚀 Auto-opening feedback modal on page load");
+      setTimeout(() => {
+        openFeedbackModal();
+        updateFeedbackState();
+      }, 2000); // Delay to let page load
+    }
+  }, [videoCanSubmitFeedback, hasShownFeedback, playPercentage, isFeedbackLoading, openFeedbackModal, updateFeedbackState]);
 
   // Simple page leave detection
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      if (playPercentage >= 90 && !isFeedbackModalOpen && canSubmitFeedback) {
+      if (playPercentage >= 90 && !isFeedbackModalOpen && videoCanSubmitFeedback) {
         event.preventDefault();
         event.returnValue = "You have watched most of this video. Would you like to provide feedback before leaving?";
       }
@@ -963,27 +1304,12 @@ const VideoPage: React.FC = () => {
 
     window.addEventListener("beforeunload", handleBeforeUnload);
     return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-  }, [playPercentage, isFeedbackModalOpen, canSubmitFeedback]);
+  }, [playPercentage, isFeedbackModalOpen, videoCanSubmitFeedback]);
 
   // Auto-restore video when modal closes
   useEffect(() => {
-    if (!isFeedbackModalOpen && localStorage.getItem('video_state_preserved') === 'true') {
-      console.log("🔄 Auto-restoring video after modal close...");
-      
-      setTimeout(() => {
-        const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
-        if (iframe) {
-          const preservedSrc = localStorage.getItem('video_src');
-          if (preservedSrc && iframe.src !== preservedSrc) {
-            iframe.src = preservedSrc;
-            console.log("✅ Video restored from preserved state");
-          }
-          
-          // Clear preserved state
-          localStorage.removeItem('video_state_preserved');
-          localStorage.removeItem('video_src');
-        }
-      }, 500);
+    if (!isFeedbackModalOpen) {
+      console.log("🔄 Modal closed - video should be visible");
     }
   }, [isFeedbackModalOpen]);
 
@@ -1001,19 +1327,37 @@ const VideoPage: React.FC = () => {
     const fetchVideoDetails = async () => {
       try {
         setIsLoadingVideo(true);
+        console.log("🎬 Fetching video details for ID:", currentVideoId);
 
         // Try to get video details from API
         const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
+        console.log("🔗 Video URL:", videoUrl);
+        
         const details = await videoApi.getVideoDetail(videoUrl);
+        console.log("✅ Video details fetched:", details);
         setVideoDetail(details);
       } catch (err: any) {
-        console.error("Failed to fetch video details:", err);
+        console.error("❌ Failed to fetch video details:", err);
+        // Set a fallback video detail to prevent complete failure
+        setVideoDetail({
+          external_source_id: currentVideoId,
+          title: "Video Title Not Available",
+          description: "Video description not available",
+          tags: [],
+          url: `https://www.youtube.com/watch?v=${currentVideoId}`,
+          type: "youtube",
+          user_code: "",
+          topics: [],
+          created_at: new Date().toISOString()
+        });
       } finally {
         setIsLoadingVideo(false);
       }
     };
 
-    fetchVideoDetails();
+    if (currentVideoId) {
+      fetchVideoDetails();
+    }
   }, [currentVideoId]);
 
   // Fetch chapters
@@ -1197,10 +1541,57 @@ const VideoPage: React.FC = () => {
               currentTime={currentTimeRef.current}
               videoDuration={videoDurationRef.current}
             />
-            <div className="video-container">
-              <VideoPlayer
-                src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}`}
-              />
+            <div className="video-container relative">
+              {currentVideoId ? (
+                <VideoPlayer
+                  key={`video-player-${currentVideoId}-${iframeKey}`}
+                  src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}`}
+                />
+              ) : (
+                <div className="aspect-video bg-gray-800 flex items-center justify-center">
+                  <p className="text-white">No video ID available</p>
+                </div>
+              )}
+              {process.env.NODE_ENV === "development" && (
+                <div className="mt-2 p-2 bg-gray-800 rounded text-xs text-gray-300">
+                  <p>Debug Info:</p>
+                  <p>Video ID: {currentVideoId || 'undefined'}</p>
+                  <p>Iframe Key: {iframeKey}</p>
+                  <p>Origin: {window.location.origin}</p>
+                  <p>Full URL: {currentVideoId ? `https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}` : 'N/A'}</p>
+                  <p>Modal Open: {isFeedbackModalOpen ? 'Yes' : 'No'}</p>
+                  <p>Iframe Present: {document.getElementById("yt-player-iframe") ? 'Yes' : 'No'}</p>
+                  <p>VideoPlayer Mounted: {currentVideoId ? 'Yes' : 'No'}</p>
+                  <p>Video Container Present: {document.querySelector('.video-container') ? 'Yes' : 'No'}</p>
+                  <button 
+                    onClick={() => {
+                      const iframe = document.getElementById("yt-player-iframe");
+                      if (iframe) {
+                        console.log("🔍 Manual iframe check:", {
+                          element: iframe,
+                          src: (iframe as HTMLIFrameElement).src,
+                          style: iframe.style.cssText,
+                          computedStyle: window.getComputedStyle(iframe)
+                        });
+                      } else {
+                        console.log("❌ Iframe not found in DOM");
+                      }
+                    }}
+                    className="mt-2 px-2 py-1 bg-blue-600 text-white rounded text-xs"
+                  >
+                    Check Iframe Details
+                  </button>
+                  <button 
+                    onClick={() => {
+                      // Force re-render of VideoPlayer
+                      window.location.reload();
+                    }}
+                    className="mt-2 ml-2 px-2 py-1 bg-red-600 text-white rounded text-xs"
+                  >
+                    Force Reload
+                  </button>
+                </div>
+              )}
             </div>
             
             {/* Video Progress Stats */}
@@ -1213,7 +1604,7 @@ const VideoPage: React.FC = () => {
             {/* Feedback Status & Debug Buttons */}
             <div className="mb-4 space-y-3">
               {/* Feedback Status */}
-              {!canSubmitFeedback && existingFeedback && (
+              {!videoCanSubmitFeedback && videoExistingFeedback && (
                 <div className="p-3 bg-green-900/20 border border-green-700 rounded-lg">
                   <div className="flex items-center gap-2 text-green-400">
                     <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -1222,7 +1613,7 @@ const VideoPage: React.FC = () => {
                     <span className="font-medium">Feedback Submitted</span>
                   </div>
                   <p className="text-sm text-green-300 mt-1">
-                    You rated this video {existingFeedback.rating}/5 stars
+                    You rated this video {videoExistingFeedback.rating}/5 stars
                   </p>
                 </div>
               )}
@@ -1274,6 +1665,9 @@ const VideoPage: React.FC = () => {
               onFeedbackSubmit={submitFeedback}
               onFeedbackSkip={skipFeedback}
               onOpenModal={openFeedbackModal}
+              canSubmitFeedback={videoCanSubmitFeedback}
+              existingFeedback={videoExistingFeedback}
+              markAsSubmitted={videoMarkAsSubmitted}
             />
           </div>
           <div
@@ -1294,6 +1688,27 @@ const VideoPage: React.FC = () => {
               onToggleVideo={handleToggleVideo}
               isVideoVisible={isVideoVisible}
               onShare={handleShare}
+              // Pass feedback state for each component
+              chatFeedbackState={{
+                canSubmitFeedback: chatCanSubmitFeedback,
+                existingFeedback: chatExistingFeedback,
+                markAsSubmitted: chatMarkAsSubmitted,
+              }}
+              quizFeedbackState={{
+                canSubmitFeedback: quizCanSubmitFeedback,
+                existingFeedback: quizExistingFeedback,
+                markAsSubmitted: quizMarkAsSubmitted,
+              }}
+              summaryFeedbackState={{
+                canSubmitFeedback: summaryCanSubmitFeedback,
+                existingFeedback: summaryExistingFeedback,
+                markAsSubmitted: summaryMarkAsSubmitted,
+              }}
+              flashcardFeedbackState={{
+                canSubmitFeedback: flashcardCanSubmitFeedback,
+                existingFeedback: flashcardExistingFeedback,
+                markAsSubmitted: flashcardMarkAsSubmitted,
+              }}
             />
           </div>
         </main>
@@ -1382,6 +1797,27 @@ const VideoPage: React.FC = () => {
               onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
               isVideoVisible={isVideoVisible}
               onShare={() => setIsShareModalOpen(true)}
+              // Pass feedback state for each component
+              chatFeedbackState={{
+                canSubmitFeedback: chatCanSubmitFeedback,
+                existingFeedback: chatExistingFeedback,
+                markAsSubmitted: chatMarkAsSubmitted,
+              }}
+              quizFeedbackState={{
+                canSubmitFeedback: quizCanSubmitFeedback,
+                existingFeedback: quizExistingFeedback,
+                markAsSubmitted: quizMarkAsSubmitted,
+              }}
+              summaryFeedbackState={{
+                canSubmitFeedback: summaryCanSubmitFeedback,
+                existingFeedback: summaryExistingFeedback,
+                markAsSubmitted: summaryMarkAsSubmitted,
+              }}
+              flashcardFeedbackState={{
+                canSubmitFeedback: flashcardCanSubmitFeedback,
+                existingFeedback: flashcardExistingFeedback,
+                markAsSubmitted: flashcardMarkAsSubmitted,
+              }}
             />
           </div>
         </div>
@@ -1411,6 +1847,12 @@ const VideoPage: React.FC = () => {
           handleFeedbackComplete("skip");
         }}
         onDismiss={() => handleFeedbackComplete("dismiss")}
+        // Pass feedback tracker state to prevent duplicate API calls
+        canSubmitFeedback={videoCanSubmitFeedback}
+        existingFeedback={videoExistingFeedback}
+        markAsSubmitted={videoMarkAsSubmitted}
+        // Pass component name for display
+        componentName="Video"
       />
 
       <ShareModal
@@ -1457,25 +1899,47 @@ const VideoPage: React.FC = () => {
                     perspective: 1000px !important;
                     will-change: transform !important;
                     position: relative !important;
-                    z-index: 1 !important;
+                    z-index: 100 !important;
+                    pointer-events: auto !important;
                 }
                 
                 /* Ensure video container is completely isolated */
                 .video-container {
                     position: relative !important;
-                    z-index: 50 !important;
+                    z-index: 100 !important;
                     isolation: isolate !important;
                     contain: layout style paint !important;
                     transform: translateZ(0) !important;
                     backface-visibility: hidden !important;
+                    pointer-events: auto !important;
                 }
                 
                 /* Prevent modal backdrop from affecting video */
-                .modal-backdrop {
+                .feedback-modal-backdrop {
                     pointer-events: none !important;
+                    z-index: 40 !important;
                 }
                 
-                .modal-content {
+                .feedback-modal {
+                    pointer-events: auto !important;
+                    z-index: 41 !important;
+                }
+                
+                /* Ensure video stays above modal */
+                .aspect-video {
+                    position: relative !important;
+                    z-index: 100 !important;
+                    isolation: isolate !important;
+                    pointer-events: auto !important;
+                }
+                
+                /* Force iframe to stay visible */
+                iframe#yt-player-iframe {
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    z-index: 100 !important;
+                    position: relative !important;
                     pointer-events: auto !important;
                 }
                 

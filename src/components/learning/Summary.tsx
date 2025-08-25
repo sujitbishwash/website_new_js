@@ -233,7 +233,19 @@ const LoadingSpinner = () => (
 
 // --- MAIN APP COMPONENT ---
 
-export default function Summary() {
+// Add props interface for feedback state
+interface SummaryProps {
+  // Optional props to prevent duplicate API calls when passed from parent
+  canSubmitFeedback?: boolean;
+  existingFeedback?: any;
+  markAsSubmitted?: () => void;
+}
+
+const Summary: React.FC<SummaryProps> = ({
+  canSubmitFeedback: _canSubmitFeedback,
+  existingFeedback: _existingFeedback,
+  markAsSubmitted: _markAsSubmitted,
+}) => {
   const [summaryData, setSummaryData] = useState<SummarySectionData[] | null>(
     null
   );
@@ -291,16 +303,25 @@ export default function Summary() {
   };
 
   return (
-    <div className="w-full h-full ">
-      <div className="max-w-4xl mx-auto  ">
-        <main className="flex flex-col px-2 sm:px-8 ">
-          <SummaryHeader
-            activeLength={summaryLength}
-            onLengthChange={setSummaryLength}
-          />
-          {renderContent()}
-        </main>
+    <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto">
+        <SummaryHeader
+          activeLength={summaryLength}
+          onLengthChange={setSummaryLength}
+        />
+        
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <div className="space-y-6">
+            {summaryData?.map((section, index) => (
+              <SummarySection key={index} section={section} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
-}
+};
+
+export default Summary;

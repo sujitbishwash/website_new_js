@@ -219,8 +219,19 @@ const QuestionView: React.FC<{
   );
 };
 
-// --- Main App Component (Container) ---
-const Quiz: React.FC = () => {
+// Add props interface for feedback state
+interface QuizProps {
+  // Optional props to prevent duplicate API calls when passed from parent
+  canSubmitFeedback?: boolean;
+  existingFeedback?: any;
+  markAsSubmitted?: () => void;
+}
+
+const Quiz: React.FC<QuizProps> = ({
+  canSubmitFeedback: _canSubmitFeedback,
+  existingFeedback: _existingFeedback,
+  markAsSubmitted: _markAsSubmitted,
+}) => {
   const [currentQuestion, setCurrentQuestion] = React.useState<number>(0);
   const [showScore, setShowScore] = React.useState<boolean>(false);
   const [score, setScore] = React.useState<number>(0);

@@ -302,7 +302,7 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test submitted successfully:", apiResponse);
-        setShowTestResultDialog(true);
+        setShowTesstResultDialog(true);
       }
     } catch (error) {
       console.error("Failed to submit test:", error);
@@ -320,7 +320,7 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test auto-submitted successfully:", apiResponse);
-        setShowTestResultDialog(true);
+        setShowTesstResultDialog(true);
       }
     } catch (error) {
       console.error("Failed to auto-submit test:", error);
@@ -383,7 +383,7 @@ const TestMainPage = () => {
   const currentQuestion = questions[currentQuestionIndex];
 
   const handleCloseTestResultDialog = () => {
-    setShowTestResultDialog(false);
+    setShowTesstResultDialog(false);
     navigate(ROUTES.DASHBOARD);
   };
 
@@ -775,26 +775,22 @@ const TestMainPage = () => {
       {showTestResultDialog && (
         <TestResultDialog
           results={{
-            attemptedQuestions: questions.filter(
-              (q) => q.status === "answered" || q.status === "marked-answered"
-            ).length,
-            correctQuestions: questions.filter(
-              (q) => q.status === "answered" || q.status === "marked-answered"
-            ).length, // Assuming all answered are correct for demo
+            attemptedQuestions: questions.filter(q => q.answer !== null).length,
+            correctQuestions: questions.filter(q => q.answer !== null).length, // This should be calculated based on correct answers
             totalQuestions: questions.length,
-            positiveMarks: questions.filter(
-              (q) => q.status === "answered" || q.status === "marked-answered"
-            ).length,
-            negativeMarks: 0,
-            totalMarks: questions.filter(
-              (q) => q.status === "answered" || q.status === "marked-answered"
-            ).length,
-            timeTaken: formatTime(600 - timeLeft),
-            rank: 5,
-            totalStudents: 150,
+            positiveMarks: 0, // This should be calculated based on correct answers
+            negativeMarks: 0, // This should be calculated based on incorrect answers
+            totalMarks: 0, // This should be calculated
+            timeTaken: `${Math.floor((600 - timeLeft) / 60)}:${((600 - timeLeft) % 60).toString().padStart(2, '0')}`,
+            rank: 1, // This should come from API
+            totalStudents: 100, // This should come from API
+            sessionId: sessionId, // Add session ID for feedback tracking
           }}
           onClose={handleCloseTestResultDialog}
-          navigate={() => navigate(ROUTES.ANALYSIS)}
+                      navigate={() => {
+              handleCloseTestResultDialog();
+              navigate(ROUTES.ANALYSIS);
+            }}
         />
       )}
     </div>

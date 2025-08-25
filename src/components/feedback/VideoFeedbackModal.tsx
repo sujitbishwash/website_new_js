@@ -1,7 +1,6 @@
 import { Star } from "lucide-react";
-import React, { useEffect, useMemo, useState, useCallback } from "react";
-import { feedbackApi, FeedbackRequest, ComponentName } from "@/lib/api-client";
-import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
+import React, { useState, useEffect, useMemo } from "react";
+import { feedbackApi, FeedbackRequest } from "@/lib/api-client";
 
 // --- TYPE DEFINITIONS ---
 
@@ -16,11 +15,11 @@ export interface VideoFeedbackPayload {
   comment?: string;
   chips?: string[];
   videoId?: string;
-  createdAt: string;
+  createdAt?: string;
   playPercentage?: number;
 }
 
-export interface VideoFeedbackModalProps {
+interface VideoFeedbackModalProps {
   isOpen: boolean;
   onClose: () => void;
   videoId?: string;
@@ -29,9 +28,15 @@ export interface VideoFeedbackModalProps {
   initialComment?: string;
   suggestedChips?: FeedbackChip[];
   playPercentage?: number;
-  onSubmit: (payload: VideoFeedbackPayload) => void;
+  onSubmit: (payload: VideoFeedbackPayload) => Promise<void>;
   onSkip?: () => void;
   onDismiss?: () => void;
+  // Optional props to prevent duplicate API calls when passed from parent
+  canSubmitFeedback?: boolean;
+  existingFeedback?: any;
+  markAsSubmitted?: () => void;
+  // Component info for display
+  componentName?: string;
 }
 
 // --- HELPER COMPONENTS & CONSTANTS ---
@@ -116,6 +121,12 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   onSubmit,
   onSkip,
   onDismiss,
+  // Optional props to prevent duplicate API calls when passed from parent
+  canSubmitFeedback: parentCanSubmitFeedback,
+  existingFeedback: parentExistingFeedback,
+  markAsSubmitted: parentMarkAsSubmitted,
+  // Component info for display
+  componentName = "Video",
 }) => {
   const [rating, setRating] = useState<number | null>(initialRating);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
@@ -126,28 +137,27 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [activeCategory, setActiveCategory] = useState<string>("all");
 
-  // Track feedback submissions to prevent duplicates
-  const {
-    canSubmitFeedback,
-    existingFeedback,
-    isLoading: isCheckingFeedback,
-    error: feedbackCheckError,
-    reason,
-    markAsSubmitted,
-  } = useFeedbackTracker({
-    component: ComponentName.Video,
-    sourceId: videoId || "unknown",
-    pageUrl: window.location.href,
-    onFeedbackExists: (existing) => {
-      console.log("📝 User has already submitted feedback for this video:", existing);
-      // Pre-fill the form with existing feedback if modal is opened
-      if (isOpen && existing) {
-        setRating(existing.rating);
-        setComment(existing.description);
-        // Note: We can't restore chips since they're not stored in the backend response
-      }
-    },
+  // Use parent feedback tracker state (no fallback needed since parent always provides state)
+  const canSubmitFeedback = parentCanSubmitFeedback ?? true;
+  const existingFeedback = parentExistingFeedback ?? null;
+  const markAsSubmitted = parentMarkAsSubmitted ?? (() => {
+    console.warn("markAsSubmitted not provided by parent component");
   });
+
+  // Show existing rating if available
+  const displayRating = existingFeedback?.rating || rating;
+  const hasExistingFeedback = !!existingFeedback;
+
+  // Debug logging for feedback state
+  useEffect(() => {
+    console.log("🔍 VideoFeedbackModal Debug:", {
+      parentCanSubmitFeedback,
+      canSubmitFeedback,
+      existingFeedback,
+      hasExistingFeedback,
+      videoId
+    });
+  }, [parentCanSubmitFeedback, canSubmitFeedback, existingFeedback, hasExistingFeedback, videoId]);
 
   const isLowRating = useMemo(() => rating !== null && rating <= 3, [rating]);
   const showFeedbackArea = useMemo(
@@ -292,7 +302,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
 
   if (submissionStatus === "success") {
     return (
-      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 pointer-events-none feedback-modal-backdrop">
+      <div className="fixed inset-0 z-[40] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 pointer-events-none feedback-modal-backdrop">
         <div className="w-full max-w-lg p-8 text-center bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 animate-fade-in pointer-events-auto feedback-modal feedback-success">
           <div className="w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
             <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -314,18 +324,41 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 pointer-events-none feedback-modal-backdrop">
+    <div className="fixed inset-0 z-[40] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 pointer-events-none feedback-modal-backdrop">
       <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 animate-fade-in pointer-events-auto feedback-modal">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-200">
-              How was this video?
+              How was this {componentName.toLowerCase()}?
             </h2>
             {videoTitle && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
                 {videoTitle}
               </p>
+            )}
+            {/* Show existing rating if available */}
+            {hasExistingFeedback && (
+              <div className="flex items-center gap-2 mt-2">
+                <span className="text-sm text-green-600 dark:text-green-400 font-medium">
+                  Previously rated: {displayRating} stars
+                </span>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className={`w-4 h-4 ${
+                        star <= displayRating 
+                          ? 'text-yellow-400 fill-current' 
+                          : 'text-gray-300 dark:text-gray-600'
+                      }`}
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
             )}
           </div>
           <button
@@ -352,7 +385,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                 Your previous feedback: "{existingFeedback.description}"
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-300 mt-2">
-                Reason: {reason}
+                Previous feedback submitted
               </p>
             </div>
           )}
@@ -574,6 +607,10 @@ export interface CondensedFeedbackProps {
   onFeedbackSkip?: () => void;
   onOpenModal?: () => void;
   className?: string;
+  // Optional props to prevent duplicate API calls
+  canSubmitFeedback?: boolean;
+  existingFeedback?: any;
+  markAsSubmitted?: () => void;
 }
 
 export const CondensedFeedback: React.FC<CondensedFeedbackProps> = ({
@@ -584,6 +621,10 @@ export const CondensedFeedback: React.FC<CondensedFeedbackProps> = ({
   onFeedbackSkip,
   onOpenModal,
   className = "",
+  // Optional props to prevent duplicate API calls
+  canSubmitFeedback: parentCanSubmitFeedback,
+  existingFeedback: parentExistingFeedback,
+  markAsSubmitted: parentMarkAsSubmitted,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [rating, setRating] = useState<number | null>(null);
@@ -591,15 +632,11 @@ export const CondensedFeedback: React.FC<CondensedFeedbackProps> = ({
   const [comment, setComment] = useState("");
   const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
 
-  // Track feedback submissions to prevent duplicates
-  const {
-    canSubmitFeedback,
-    existingFeedback,
-    markAsSubmitted,
-  } = useFeedbackTracker({
-    component: ComponentName.Video,
-    sourceId: videoId || "unknown",
-    pageUrl: window.location.href,
+  // Use parent feedback tracker state (no fallback needed since parent always provides state)
+  const canSubmitFeedback = parentCanSubmitFeedback ?? true;
+  const existingFeedback = parentExistingFeedback ?? null;
+  const markAsSubmitted = parentMarkAsSubmitted ?? (() => {
+    console.warn("markAsSubmitted not provided by parent component");
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -715,7 +752,7 @@ export const CondensedFeedback: React.FC<CondensedFeedbackProps> = ({
         }`}
         title={!canSubmitFeedback ? "Already rated" : "Rate this video"}
       >
-        <Star/>
+        <Star className="w-6 h-6" />
         {!canSubmitFeedback ? "Rated" : "Rate"}
       </button>
 

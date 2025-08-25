@@ -271,18 +271,18 @@ interface ChatSendResponse {
 
 export const chatApi = {
   getChatHistory: async (videoId: string): Promise<ChatHistoryResponse> => {
-    const response = await apiRequest<ChatHistoryResponse>('GET', `/ai_agent/history?vedio_id=${encodeURIComponent(videoId)}`);
+    const response = await apiRequest<ChatHistoryResponse>('GET', `/ai_agent/history?video_id=${encodeURIComponent(videoId)}`);
     return response.data;
   },
 
   startChat: async (videoId: string): Promise<ChatStartResponse> => {
-    const response = await apiRequest<ChatStartResponse>('POST', '/ai_agent/start', { vedio_id: videoId });
+    const response = await apiRequest<ChatStartResponse>('POST', '/ai_agent/start', { video_id: videoId });
     return response.data;
   },
 
   sendMessage: async (videoId: string, message: string): Promise<ChatSendResponse> => {
     const response = await apiRequest<ChatSendResponse>('POST', '/ai_agent/send', {
-      vedio_id: videoId,
+      video_id: videoId,
       message: message
     });
     return response.data;
@@ -458,6 +458,13 @@ export interface FeedbackStatus {
   reason: string;
 }
 
+// New multi-component feedback status response
+export interface MultiComponentFeedbackStatus {
+  components: {
+    [key in ComponentName]?: FeedbackStatus;
+  };
+}
+
 // Feedback list response
 export interface FeedbackListResponse {
   feedbacks: FeedbackResponse[];
@@ -467,9 +474,16 @@ export interface FeedbackListResponse {
 }
 
 export const feedbackApi = {
-  // Check if user can submit feedback for a component
+  // Check if user can submit feedback for a single component (legacy)
   canSubmitFeedback: async (sourceId: string, component: ComponentName, pageUrl: string): Promise<FeedbackStatus> => {
     const response = await apiRequest<FeedbackStatus>('GET', `/feedback/can-feedback?source_id=${sourceId}&component=${component}&page_url=${encodeURIComponent(pageUrl)}`);
+    return response.data;
+  },
+
+  // Check if user can submit feedback for multiple components (new format)
+  canSubmitFeedbackMulti: async (sourceId: string, components: ComponentName[], pageUrl: string): Promise<MultiComponentFeedbackStatus> => {
+    const componentsParam = components.join(',');
+    const response = await apiRequest<MultiComponentFeedbackStatus>('GET', `/feedback/can-feedback?source_id=${sourceId}&components=${componentsParam}&page_url=${encodeURIComponent(pageUrl)}`);
     return response.data;
   },
 

@@ -1,4 +1,8 @@
 import { FileText, X } from "lucide-react";
+import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
+import { ComponentName } from "@/lib/api-client";
+import VideoFeedbackModal from "./feedback/VideoFeedbackModal";
+import { useState, useCallback } from "react";
 
 // --- Type Definitions ---
 interface TestResults {
@@ -11,6 +15,7 @@ interface TestResults {
   timeTaken: string;
   rank: number;
   totalStudents: number;
+  sessionId?: number; // Add session ID for feedback tracking
 }
 
 interface StatRowProps {
@@ -24,11 +29,16 @@ interface ResultModalHeaderProps {
 
 interface ResultModalBodyProps {
   results: TestResults;
+  onOpenFeedback: () => void;
+  hasExistingFeedback: boolean;
+  existingRating?: number;
 }
 
 interface ResultModalFooterProps {
   onClose: () => void;
   navigate: () => void;
+  onOpenFeedback: () => void;
+  hasExistingFeedback: boolean;
 }
 
 interface TestResultDialogProps {
@@ -67,7 +77,12 @@ const ResultModalHeader = ({ onClose }: ResultModalHeaderProps) => (
 );
 
 // Body/Content for the results modal
-const ResultModalBody = ({ results }: ResultModalBodyProps) => {
+const ResultModalBody = ({ 
+  results, 
+  onOpenFeedback, 
+  hasExistingFeedback, 
+  existingRating 
+}: ResultModalBodyProps) => {
   const {
     attemptedQuestions,
     correctQuestions,
@@ -107,12 +122,60 @@ const ResultModalBody = ({ results }: ResultModalBodyProps) => {
 
       <StatRow label="Time Taken" value={timeTaken} />
       <StatRow label="Rank" value={`${rank} / ${totalStudents}`} />
+
+      {/* Feedback Section */}
+      <div className="mt-6 pt-4 border-t border-gray-700">
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-white font-semibold text-sm md:text-base">
+              Test Experience
+            </h4>
+            {hasExistingFeedback && existingRating && (
+              <div className="flex items-center gap-2 mt-1">
+                <span className="text-sm text-green-400">
+                  Rated: {existingRating} stars
+                </span>
+                <div className="flex items-center gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <svg
+                      key={star}
+                      className={`w-3 h-3 ${
+                        star <= existingRating 
+                          ? 'text-yellow-400 fill-current' 
+                          : 'text-gray-600'
+                      }`}
+                      viewBox="0 0 20 20"
+                    >
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <button
+            onClick={onOpenFeedback}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              hasExistingFeedback
+                ? 'bg-gray-600 hover:bg-gray-500 text-gray-300'
+                : 'bg-blue-600 hover:bg-blue-500 text-white'
+            }`}
+          >
+            {hasExistingFeedback ? 'Update Feedback' : 'Rate Experience'}
+          </button>
+        </div>
+      </div>
     </div>
   );
 };
 
 // Footer for the results modal
-const ResultModalFooter = ({ onClose, navigate }: ResultModalFooterProps) => (
+const ResultModalFooter = ({ 
+  onClose, 
+  navigate, 
+  onOpenFeedback, 
+  hasExistingFeedback 
+}: ResultModalFooterProps) => (
   <div className="flex flex-col sm:flex-row gap-3 p-5 bg-gray-800/50 rounded-b-2xl">
     <button
       onClick={onClose}
@@ -136,29 +199,119 @@ const TestResultDialog = ({
   onClose,
   navigate,
 }: TestResultDialogProps) => {
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  
+  // Track feedback submissions for Test component
+  const {
+    canSubmitFeedback,
+    existingFeedback,
+    markAsSubmitted,
+  } = useFeedbackTracker({
+    component: ComponentName.Test,
+    sourceId: results.sessionId?.toString() || "unknown",
+    pageUrl: window.location.href,
+  });
+
+  const handleOpenFeedback = useCallback(() => {
+    setIsFeedbackModalOpen(true);
+  }, []);
+
+  const handleCloseFeedback = useCallback(() => {
+    setIsFeedbackModalOpen(false);
+  }, []);
+
+  const handleFeedbackSubmit = useCallback(async (payload: any) => {
+    console.log("Test feedback submitted:", payload);
+    markAsSubmitted();
+    handleCloseFeedback();
+  }, [markAsSubmitted, handleCloseFeedback]);
+
+  const handleFeedbackSkip = useCallback(() => {
+    console.log("Test feedback skipped");
+    handleCloseFeedback();
+  }, [handleCloseFeedback]);
+
+  // Auto-open feedback modal after test completion
+  const shouldAutoOpenFeedback = !existingFeedback && canSubmitFeedback;
+  
   if (!results) {
     return null; // Don't render if there are no results
   }
 
   return (
-    <div className="bg-gray-900 bg-opacity-70 backdrop-blur-sm fixed inset-0 z-50 flex justify-center items-center p-4">
-      <div className="bg-[#1e2124] text-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100 animate-fadeIn">
-        <ResultModalHeader onClose={onClose} />
-        <ResultModalBody results={results} />
-        <ResultModalFooter onClose={onClose} navigate={navigate} />
+    <>
+      <div className="bg-gray-900 bg-opacity-70 backdrop-blur-sm fixed inset-0 z-50 flex justify-center items-center p-4">
+        <div className="bg-[#1e2124] text-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100 animate-fadeIn">
+          <ResultModalHeader onClose={onClose} />
+          <ResultModalBody 
+            results={results} 
+            onOpenFeedback={handleOpenFeedback}
+            hasExistingFeedback={!!existingFeedback}
+            existingRating={existingFeedback?.rating}
+          />
+          <ResultModalFooter 
+            onClose={onClose} 
+            navigate={navigate}
+            onOpenFeedback={handleOpenFeedback}
+            hasExistingFeedback={!!existingFeedback}
+          />
+        </div>
+
+        {/* This style block is for the fadeIn animation */}
+        <style>{`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+          }
+          .animate-fadeIn {
+            animation: fadeIn 0.3s ease-out forwards;
+          }
+        `}</style>
       </div>
 
-      {/* This style block is for the fadeIn animation */}
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.3s ease-out forwards;
-        }
-      `}</style>
-    </div>
+      {/* Feedback Modal */}
+      <VideoFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={handleCloseFeedback}
+        videoId={results.sessionId?.toString() || "unknown"}
+        videoTitle={`Test Session ${results.sessionId}`}
+        suggestedChips={[]}
+        playPercentage={100} // Test is completed
+        onSubmit={handleFeedbackSubmit}
+        onSkip={handleFeedbackSkip}
+        onDismiss={handleCloseFeedback}
+        canSubmitFeedback={canSubmitFeedback}
+        existingFeedback={existingFeedback}
+        markAsSubmitted={markAsSubmitted}
+        componentName="Test"
+      />
+
+      {/* Auto-open feedback modal after test completion */}
+      {shouldAutoOpenFeedback && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+          <div className="bg-[#1e2124] text-white rounded-2xl shadow-2xl w-full max-w-md mx-auto p-6">
+            <h3 className="text-xl font-bold mb-4">How was your test experience?</h3>
+            <p className="text-gray-300 mb-6">
+              We'd love to hear your feedback about this test to improve our questions and interface.
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={handleOpenFeedback}
+                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+              >
+                Give Feedback
+              </button>
+              <button
+                onClick={handleFeedbackSkip}
+                className="flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+              >
+                Skip
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -31,6 +31,10 @@ interface ChatProps {
   error: string | null;
   onSendMessage: (message: string) => void;
   isLeftColumnVisible: boolean;
+  // Optional props to prevent duplicate API calls when passed from parent
+  canSubmitFeedback?: boolean;
+  existingFeedback?: any;
+  markAsSubmitted?: () => void;
 }
 
 // --- SVG Icons ---
