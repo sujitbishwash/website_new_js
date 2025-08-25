@@ -84,7 +84,7 @@ export default function ExamInformationPage() {
   const testConfig = location.state?.testConfig;
 
   return (
-      <div className="bg-gray-800 overflow-hidden w-full flex flex-col max-h-[100vh]">
+      <div className="bg-card overflow-hidden w-full flex flex-col max-h-[100vh]">
         {/* Header Section - This part will not scroll */}
         <header className="flex-shrink-0 flex justify-between items-center p-6 border-b border-gray-700">
           <h1 className="text-2xl sm:text-3xl font-bold text-white">

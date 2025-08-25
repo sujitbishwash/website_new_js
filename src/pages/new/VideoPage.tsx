@@ -11,16 +11,20 @@ import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import {
   BookOpen,
+  Clipboard,
   Ellipsis,
   Eye,
   EyeOff,
   Facebook,
+  FileStack,
   Highlighter,
   Instagram,
   Link,
+  MessageCircle,
   MessageCircleQuestion,
   MessageSquareText,
   StickyNote,
+  Text,
   Type,
   X,
 } from "lucide-react";
@@ -385,10 +389,10 @@ const AITutorPanel: React.FC<{
   onShare,
 }) => {
   const modes: { key: LearningMode; label: string; icon: any }[] = [
-    { key: "chat", label: "Chat", icon: <MessageSquareText /> },
+    { key: "chat", label: "Chat", icon: <MessageCircle /> },
     { key: "flashcards", label: "Flashcards", icon: <StickyNote /> },
     { key: "quiz", label: "Quiz", icon: <MessageCircleQuestion /> },
-    { key: "summary", label: "Summary", icon: <Highlighter /> },
+    { key: "summary", label: "Summary", icon: <Text /> },
   ];
 
   const components = {
@@ -513,9 +517,9 @@ const ShareModal: React.FC<{
             />
             <button
               onClick={copyToClipboard}
-              className="flex items-center gap-2 bg-blue-600 px-3 py-1.5 rounded-md text-sm font-semibold hover:bg-blue-700"
+              className="flex items-center gap-2 bg-primary p-2 rounded-md text-sm font-semibold hover:bg-primary/70"
             >
-              <Link /> {copySuccess || "Copy"}
+              <Clipboard /> 
             </button>
           </div>
           <div className="text-center text-gray-400 text-sm">
@@ -1309,7 +1313,7 @@ const VideoPage: React.FC = () => {
               )}
             </div>
           </header>
-          <div className="flex-shrink-0">
+          <div className={`flex-shrink-0 ${isVideoVisible?"":"hidden"}`}>
             <VideoPlayer
               src={`https://www.youtube.com/embed/${currentVideoId}`}
             />
@@ -1385,7 +1389,7 @@ const VideoPage: React.FC = () => {
       />
 
       {/* Debug/Test Controls - Remove in production */}
-      {process.env.NODE_ENV === "development" && (
+      {/**process.env.NODE_ENV === "development" && (
         <div className="fixed bottom-4 right-4 z-50 space-y-2">
           <button
             onClick={handleManualFeedbackTrigger}
@@ -1418,7 +1422,7 @@ const VideoPage: React.FC = () => {
             Set Progress (95%)
           </button>
         </div>
-      )}
+      )*/}
 
       <style>{`
                 /* Simple toggle switch styles */
