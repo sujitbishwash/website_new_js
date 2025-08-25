@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 
 // Centralized theme colors for easy customization
@@ -133,10 +134,9 @@ const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
   <li className="mb-2">
     <div className="flex items-start">
       <span
-        className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
-        style={{ backgroundColor: theme.accent }}
+        className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-foreground"
       ></span>
-      <p style={{ color: theme.secondaryText }}>
+      <p className="text-muted-foreground">
         {point.text}
         <SourceIcon />
       </p>
@@ -150,10 +150,9 @@ const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
           <li key={subPoint.id} className="mb-2">
             <div className="flex items-start">
               <span
-                className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
-                style={{ backgroundColor: theme.mutedText }}
+                className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-muted-foreground"
               ></span>
-              <p style={{ color: theme.secondaryText }}>
+              <p className="text-muted-foreground">
                 {subPoint.text}
                 <SourceIcon />
               </p>
@@ -170,8 +169,7 @@ const SummarySection: React.FC<{ section: SummarySectionData }> = ({
 }) => (
   <div className="mb-8">
     <h2
-      className="text-2xl font-bold mb-4"
-      style={{ color: theme.primaryText }}
+      className="text-2xl font-bold mb-4 text-foreground"
     >
       {section.title}
     </h2>
@@ -191,18 +189,12 @@ const SummaryHeader: React.FC<{
   const lengths: SummaryLength[] = ["small", "medium", "long"];
 
   return (
-    <div className="flex justify-center items-center mb-8">
+    <div className="flex justify-center items-center mb-4">
       <div className="relative">
         <select
           value={activeLength}
           onChange={(e) => onLengthChange(e.target.value as SummaryLength)}
-          className="appearance-none px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 capitalize w-48 text-center"
-          style={{
-            backgroundColor: theme.inputBackground,
-            color: theme.primaryText,
-            border: `1px solid ${theme.divider}`,
-            cursor: "pointer",
-          }}
+          className="appearance-none px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 capitalize w-48 text-center bg-background text-foreground border border-border cursor-pointer hover:bg-accent"
         >
           {lengths.map((length) => (
             <option
@@ -218,16 +210,9 @@ const SummaryHeader: React.FC<{
           ))}
         </select>
         <div
-          className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3"
-          style={{ color: theme.secondaryText }}
+          className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-foreground"
         >
-          <svg
-            className="fill-current h-4 w-4"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-          >
-            <path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" />
-          </svg>
+          <ChevronDown/>
         </div>
       </div>
     </div>
@@ -237,10 +222,10 @@ const SummaryHeader: React.FC<{
 const LoadingSpinner = () => (
   <div className="flex justify-center items-center p-10">
     <div
-      className="w-16 h-16 border-4 border-dashed rounded-full animate-spin"
+      className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-accent"
       style={{ borderColor: `${theme.accent} transparent` }}
     ></div>
-    <p className="ml-4 text-lg" style={{ color: theme.primaryText }}>
+    <p className="ml-4 text-lg">
       Loading Summary...
     </p>
   </div>
@@ -306,20 +291,13 @@ export default function Summary() {
   };
 
   return (
-    <div className="w-full h-full font-sans">
-      <div className="max-w-4xl mx-auto">
-        <main
-          className="rounded-xl p-6 sm:p-8"
-          style={{ backgroundColor: theme.cardBackground }}
-        >
+    <div className="w-full h-full ">
+      <div className="max-w-4xl mx-auto  ">
+        <main className="flex flex-col px-2 sm:px-8 ">
           <SummaryHeader
             activeLength={summaryLength}
             onLengthChange={setSummaryLength}
           />
-          <div
-            className="border-t my-6"
-            style={{ borderColor: theme.divider }}
-          ></div>
           {renderContent()}
         </main>
       </div>

@@ -97,7 +97,6 @@ const Flashcard: React.FC<FlashcardProps> = ({
   onFlip,
   animationDirection,
 }) => {
-  // Using Tailwind's animation utilities instead of custom keyframes
   const animationClass =
     animationDirection === "right"
       ? "animate-in slide-in-from-right duration-500"
@@ -105,9 +104,12 @@ const Flashcard: React.FC<FlashcardProps> = ({
       ? "animate-in slide-in-from-left duration-500"
       : "";
 
+  const baseFaceClass =
+    "absolute w-full h-full flex flex-col justify-center items-center p-10 box-border bg-card rounded-[1.25rem] [backface-visibility:hidden]";
+
   return (
     <div
-      className={`w-full h-[420px] [perspective:1200px] ${animationClass}`}
+      className={`w-full h-[320px] [perspective:1200px] ${animationClass}`}
       onClick={onFlip}
     >
       <div
@@ -116,23 +118,30 @@ const Flashcard: React.FC<FlashcardProps> = ({
         }`}
       >
         {/* Front Face */}
-        <div className="absolute w-full h-full [backface-visibility:hidden] flex flex-col justify-center items-center p-10 box-border bg-card rounded-[1.25rem]">
+        <div className={baseFaceClass}>
           <span className="absolute top-6 left-8 text-sm font-semibold text-primary uppercase tracking-wider">
             Question
           </span>
-          <p className="text-[clamp(1.5rem,3.5vw,2.75rem)] font-bold text-center text-foreground leading-tight">
+          <p
+            className="text-[clamp(1.25rem,2.5vw,2rem)]
+ font-bold text-center text-foreground leading-tight"
+          >
             {card.question}
           </p>
           <span className="absolute bottom-6 text-sm text-muted-foreground font-medium">
             Tap or press Spacebar to flip
           </span>
         </div>
+
         {/* Back Face */}
-        <div className="absolute w-full h-full [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col justify-center items-center p-10 box-border bg-card rounded-[1.25rem]">
+        <div className={`${baseFaceClass} [transform:rotateY(180deg)]`}>
           <span className="absolute top-6 left-8 text-sm font-semibold text-primary uppercase tracking-wider">
             Answer
           </span>
-          <p className="text-[clamp(1.5rem,3.5vw,2.75rem)] font-bold text-center text-foreground leading-tight">
+          <p
+            className="text-[clamp(1.25rem,2.5vw,2rem)]
+ font-bold text-center text-foreground leading-tight"
+          >
             {card.answer}
           </p>
           <span className="absolute bottom-6 text-sm text-muted-foreground font-medium">
@@ -153,9 +162,9 @@ const Navigation: React.FC<NavigationProps> = ({
   return (
     <div className="items-center mt-6">
       <div className="items-center justify-self-center">
-      <span className="text-sm font-semibold text-primary">
-        {currentIndex + 1} / {totalCards}
-      </span>
+        <span className="text-sm font-semibold text-primary">
+          {currentIndex + 1} / {totalCards}
+        </span>
       </div>
       <div className="grid grid-cols-3 items-center gap-4 mt-2">
         <button
@@ -257,8 +266,8 @@ const Flashcards: React.FC = () => {
   }, [handleNavigate]);
 
   return (
-    <div className="bg-background font-sans text-foreground min-h-screen w-full max-w-full p-4 border-border box-border flex flex-col gap-5 justify-start items-center">
-      <div className="w-full max-w-xl">
+    <div className="bg-background font-sans text-foreground w-full max-w-full p-4 border-border box-border flex flex-col gap-5 justify-start items-center">
+      <div className="w-full max-w-2xl">
         {cards.length > 0 ? (
           <div className="flex flex-col ">
             <ProgressBar current={currentIndex} total={cards.length} />

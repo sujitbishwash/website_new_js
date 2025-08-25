@@ -457,7 +457,7 @@ const AITutorPanel: React.FC<{
           </button>
         </div>
       </div>
-      <div className="flex-1 overflow-hidden min-h-0">
+      <div className="flex-1 overflow-auto min-h-0 bg-background">
         {components[currentMode]}
       </div>
     </div>

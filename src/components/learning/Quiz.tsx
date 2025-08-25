@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
 // --- Setup ---
@@ -123,20 +123,20 @@ const Navigation: React.FC<{
   isAnswered: boolean;
 }> = ({ handlePrev, handleNext, currentQuestion, isAnswered }) => {
   return (
-    <div className="flex justify-end items-center mt-6 gap-3">
+    <div className="grid grid-cols-2 mt-6">
       <button
         onClick={handlePrev}
         disabled={currentQuestion === 0 || isAnswered}
-        className="bg-background text-foreground w-10 h-10 rounded-full flex items-center justify-center text-lg font-medium transition-colors duration-200 ease-in-out hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border border-border cursor-pointer"
+        className="justify-self-start bg-background text-foreground w-10 h-10 rounded-full flex items-center justify-center text-lg font-medium transition-colors duration-200 ease-in-out hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border border-border cursor-pointer"
       >
-        <ChevronLeft/>
+        <ArrowLeft/>
       </button>
       <button
         onClick={handleNext}
         disabled={isAnswered}
-        className="bg-background text-foreground w-10 h-10 rounded-full flex items-center justify-center text-lg font-medium transition-colors duration-200 ease-in-out hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border border-border cursor-pointer"
+        className="justify-self-end bg-background text-foreground w-10 h-10 rounded-full flex items-center justify-center text-lg font-medium transition-colors duration-200 ease-in-out hover:bg-accent disabled:opacity-50 disabled:cursor-not-allowed border border-border cursor-pointer"
       >
-        <ChevronRight/>
+        <ArrowRight/>
       </button>
     </div>
   );
@@ -305,7 +305,7 @@ const Quiz: React.FC = () => {
 
   return (
     <div
-      className="bg-background min-h-screen flex flex-col items-center justify-start p-4 text-neutral-100"
+      className="bg-background flex flex-col items-center justify-start p-4 text-neutral-100"
     >
       <div className="w-full max-w-2xl min-h-[400px] text-left flex flex-col justify-center transition-transform duration-300 ease-in-out ">
         {showScore ? (

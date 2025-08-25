@@ -86,9 +86,8 @@ const ChatHeader: React.FC = () => (
     </div>
     {/* Changed title from "AI Tutor" to "AI Padhai" */}
     <h1
-      className="text-3xl sm:text-4xl font-bold mb-4"
+      className="text-3xl sm:text-4xl font-bold mb-4 text-primary"
       style={{
-        color: theme.primaryText,
         background: "linear-gradient(135deg, #60A5FA 0%, #A78BFA 100%)",
         WebkitBackgroundClip: "text",
         WebkitTextFillColor: "transparent",
@@ -97,7 +96,7 @@ const ChatHeader: React.FC = () => (
     >
       Learn with AI Padhai
     </h1>
-    <p className="text-gray-300 text-lg max-w-md mx-auto leading-relaxed">
+    <p className="text-foreground text-lg max-w-md mx-auto leading-relaxed">
       Your intelligent learning companion for personalized education and
       interactive discussions
     </p>
@@ -105,7 +104,7 @@ const ChatHeader: React.FC = () => (
 );
 
 const SuggestionChip: React.FC<{ text: string }> = ({ text }) => (
-  <button className="bg-gradient-to-r from-gray-700/80 to-gray-600/80 hover:from-gray-600/90 hover:to-gray-500/90 transition-all duration-300 text-sm md:text-base text-gray-200 py-3 px-6 rounded-full backdrop-blur-sm border border-gray-600/50 hover:border-gray-500/60 shadow-lg hover:shadow-xl transform hover:scale-105">
+  <button className="bg-gradient-to-r from-gray-700/80 to-gray-600/80 hover:from-gray-600/90 hover:to-gray-500/90 transition-all duration-300 text-sm md:text-base text-foreground py-3 px-6 rounded-full backdrop-blur-sm border border-gray-600/50 hover:border-gray-500/60 shadow-lg hover:shadow-xl transform hover:scale-105">
     {text}
   </button>
 );
@@ -145,7 +144,7 @@ const Message: React.FC<MessageType> = ({ text, isUser }) => {
       <div
         className={`px-5 rounded-2xl ${
           isUser
-            ? "bg-primary text-white rounded-br-none"
+            ? "bg-primary text-white rounded-tr-none"
             : hasKeyPoints
             ? "bg-transparent text-yellow-100 rounded-bl-none"
             : hasExamples
@@ -154,7 +153,7 @@ const Message: React.FC<MessageType> = ({ text, isUser }) => {
             ? "bg-transparent text-blue-100 rounded-bl-none"
             : hasExplanation
             ? "bg-transparent text-green-100 rounded-bl-none"
-            : "bg-transparent text-gray-100 rounded-bl-none"
+            : "bg-transparent text-foreground rounded-bl-none"
         }`}
       >
         <MarkdownRenderer content={markdownText} />
@@ -233,7 +232,7 @@ const PlanSelector: React.FC = () => {
             <a
               key={plan}
               href="#"
-              className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded-lg"
+              className="block px-4 py-2 text-sm text-foreground hover:bg-gray-700 rounded-lg"
               onClick={(e) => {
                 e.preventDefault();
                 setSelectedPlan(plan);
@@ -303,7 +302,7 @@ const ModeSelector: React.FC = () => {
             <a
               key={mode}
               href="#"
-              className="block px-4 py-2 text-sm text-gray-200 hover:bg-gray-700 rounded-lg"
+              className="block px-4 py-2 text-sm text-foreground hover:bg-gray-700 rounded-lg"
               onClick={(e) => {
                 e.preventDefault();
                 setSelectedMode(mode);
@@ -340,7 +339,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             p: ({ children, ...props }) => (
               <p
                 {...props}
-                className="mb-5 text-gray-100 leading-7"
+                className="mb-5 text-foreground leading-7"
                 style={{
                   fontSize: "0.95rem",
                   lineHeight: "1.8",
@@ -354,7 +353,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             h1: ({ children, ...props }) => (
               <h1
                 {...props}
-                className="text-xl font-bold text-white mb-6 mt-8 pb-2 border-b border-gray-600/30"
+                className="text-xl font-bold text-foreground mb-6 mt-8 pb-2 border-b border-gray-600/30"
                 style={{ fontSize: "1.25rem" }}
               >
                 {children}
@@ -400,7 +399,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             li: ({ children, ...props }) => (
               <li
                 {...props}
-                className="text-gray-200 leading-7 pl-2"
+                className="text-foreground leading-7 pl-2"
                 style={{
                   fontSize: "0.9rem",
                   lineHeight: "1.8",
@@ -463,7 +462,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             strong: ({ children, ...props }) => (
               <strong
                 {...props}
-                className="font-bold text-white bg-blue-900/20 px-2 py-1 rounded border border-blue-700/30"
+                className="font-bold text-foreground bg-blue-900/20 px-2 py-1 rounded border border-blue-700/30"
                 style={{ fontWeight: "700" }}
               >
                 {children}
@@ -513,7 +512,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             th: ({ children, ...props }) => (
               <th
                 {...props}
-                className="border border-gray-600/50 px-4 py-3 text-left font-bold text-white bg-gray-700/50"
+                className="border border-gray-600/50 px-4 py-3 text-left font-bold text-foreground bg-gray-700/50"
                 style={{
                   border: "1px solid rgba(75, 85, 99, 0.5)",
                   padding: "0.75rem 1rem",
@@ -528,7 +527,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             td: ({ children, ...props }) => (
               <td
                 {...props}
-                className="border border-gray-600/50 px-4 py-3 text-gray-200 bg-gray-800/30"
+                className="border border-gray-600/50 px-4 py-3 text-foreground bg-gray-800/30"
                 style={{
                   border: "1px solid rgba(75, 85, 99, 0.5)",
                   padding: "0.75rem 1rem",
@@ -612,26 +611,26 @@ const ChatInput: React.FC<{
             {/*
             <button
               type="button"
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full"
+              className="p-2 text-gray-400 hover:text-foreground hover:bg-gray-700 rounded-full"
             >
               <PlusIcon />
             </button>
             <button
               type="button"
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full"
+              className="p-2 text-gray-400 hover:text-foreground hover:bg-gray-700 rounded-full"
             >
               <SettingsIcon />
             </button>
             <button
               type="button"
-              className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full"
+              className="p-2 text-gray-400 hover:text-foreground hover:bg-gray-700 rounded-full"
             >
               <CanvasIcon />
             </button>*/}
             <button
               onClick={handleSend}
               type="submit"
-              className="p-2 text-white bg-gray-700 rounded-full hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500 cursor-pointer"
+              className="p-2 text-white bg-border-medium rounded-full hover:bg-border-high disabled:bg-border disabled:text-border cursor-pointer"
               disabled={isLoading}
             >
               <ArrowUp />
