@@ -234,6 +234,13 @@ const TestResultDialog = ({
   // Auto-open feedback modal after test completion
   const shouldAutoOpenFeedback = !existingFeedback && canSubmitFeedback;
   
+  // Open feedback immediately when results are shown if allowed
+  React.useEffect(() => {
+    if (shouldAutoOpenFeedback) {
+      setIsFeedbackModalOpen(true);
+    }
+  }, [shouldAutoOpenFeedback]);
+  
   if (!results) {
     return null; // Don't render if there are no results
   }
@@ -286,31 +293,7 @@ const TestResultDialog = ({
         componentName="Test"
       />
 
-      {/* Auto-open feedback modal after test completion */}
-      {shouldAutoOpenFeedback && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="bg-[#1e2124] text-white rounded-2xl shadow-2xl w-full max-w-md mx-auto p-6">
-            <h3 className="text-xl font-bold mb-4">How was your test experience?</h3>
-            <p className="text-gray-300 mb-6">
-              We'd love to hear your feedback about this test to improve our questions and interface.
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={handleOpenFeedback}
-                className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors"
-              >
-                Give Feedback
-              </button>
-              <button
-                onClick={handleFeedbackSkip}
-                className="flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition-colors"
-              >
-                Skip
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Auto-open overlay removed; we now directly open the modal via effect */}
     </>
   );
 };

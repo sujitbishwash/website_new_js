@@ -1,5 +1,4 @@
 import VideoFeedbackModal, {
-  CondensedFeedback,
   VideoFeedbackPayload,
 } from "@/components/feedback/VideoFeedbackModal";
 import Chat from "@/components/learning/Chat";
@@ -30,7 +29,7 @@ import {
   Type,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail, ComponentName } from "../../lib/api-client";
 
@@ -228,6 +227,7 @@ const Header: React.FC<HeaderProps> = ({
         </h1>
         
         {/* Quick Stats */}
+        {/*
         {!isLoading && videoDuration > 0 && (
           <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
             <span>Progress: {Math.round(playPercentage)}%</span>
@@ -235,6 +235,8 @@ const Header: React.FC<HeaderProps> = ({
             <span>Remaining: {formatTime(Math.max(0, videoDuration - currentTime))}</span>
           </div>
         )}
+
+        */}
       </div>
       <div className="flex items-center gap-2 self-start sm:self-center">
         <button
@@ -258,87 +260,18 @@ const Header: React.FC<HeaderProps> = ({
   );
 };
 
-// Custom hook to ensure iframe persistence
-const useIframePersistence = (videoId: string | null) => {
-  const [iframeKey, setIframeKey] = useState(0);
-  
-  useEffect(() => {
-    if (!videoId) return;
-    
-    const checkAndRecreateIframe = () => {
-      const iframe = document.getElementById("yt-player-iframe");
-      if (!iframe) {
-        console.log("🚨 Iframe missing, recreating...");
-        setIframeKey(prev => prev + 1);
-      }
-    };
-    
-    // Check every second
-    const interval = setInterval(checkAndRecreateIframe, 1000);
-    
-    return () => clearInterval(interval);
-  }, [videoId]);
-  
-  return iframeKey;
-};
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [iframeCreated, setIframeCreated] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const iframePreservedRef = useRef<HTMLIFrameElement | null>(null);
+
 
   // Debug logging for iframe lifecycle
-  useEffect(() => {
-    console.log("🎬 VideoPlayer component mounted with src:", src);
-    
-    // Check if iframe was created after a short delay
-    const checkIframe = setTimeout(() => {
-      const iframe = document.getElementById("yt-player-iframe");
-      console.log("🔍 Iframe check after mount:", iframe ? "Found" : "Not found");
-      if (iframe) {
-        console.log("🔍 Iframe details:", {
-          src: (iframe as HTMLIFrameElement).src,
-          style: iframe.style.cssText,
-          className: iframe.className,
-          display: window.getComputedStyle(iframe).display,
-          visibility: window.getComputedStyle(iframe).visibility,
-          opacity: window.getComputedStyle(iframe).opacity,
-          zIndex: window.getComputedStyle(iframe).zIndex
-        });
-      }
-      setIframeCreated(!!iframe);
-    }, 100);
-    
-    return () => {
-      console.log("🎬 VideoPlayer component unmounted");
-      clearTimeout(checkIframe);
-    };
-  }, [src]);
 
   // Continuous monitoring of iframe presence
-  useEffect(() => {
-    const monitorIframe = setInterval(() => {
-      const iframe = document.getElementById("yt-player-iframe");
-      const currentState = !!iframe;
-      
-      if (iframeCreated !== currentState) {
-        console.log(`🔄 Iframe state changed: ${iframeCreated ? 'Present' : 'Absent'} -> ${currentState ? 'Present' : 'Absent'}`);
-        setIframeCreated(currentState);
-        
-        if (currentState && iframe) {
-          // Iframe reappeared, ensure it's visible
-          console.log("🔧 Ensuring iframe visibility...");
-          (iframe as HTMLIFrameElement).style.display = 'block';
-          (iframe as HTMLIFrameElement).style.visibility = 'visible';
-          (iframe as HTMLIFrameElement).style.opacity = '1';
-          (iframe as HTMLIFrameElement).style.zIndex = '10';
-        }
-      }
-    }, 500);
-
-    return () => clearInterval(monitorIframe);
-  }, [iframeCreated]);
 
   const handleLoad = () => {
     console.log("✅ Video iframe loaded successfully");
@@ -477,18 +410,6 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
               className="toggle-label block overflow-hidden h-5 sm:h-6 rounded-full bg-border-medium cursor-pointer"
             ></label>
           </div>
-          {/* Condensed Feedback Component */}
-          <CondensedFeedback
-            videoId={videoId}
-            videoTitle={videoTitle}
-            playPercentage={playPercentage}
-            onFeedbackSubmit={onFeedbackSubmit}
-            onFeedbackSkip={onFeedbackSkip}
-            onOpenModal={onOpenModal}
-            canSubmitFeedback={canSubmitFeedback}
-            existingFeedback={existingFeedback}
-            markAsSubmitted={markAsSubmitted}
-          />
         </div>
       </div>
       <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 rounded-xl border border-border ">
@@ -790,6 +711,31 @@ const ShareModal: React.FC<{
   );
 };
 
+// Memoize the VideoPlayer component to prevent re-renders from feedback state changes
+const MemoizedVideoPlayer = React.memo(VideoPlayer, (prevProps, nextProps) => {
+  // Only re-render if the src actually changes
+  return prevProps.src === nextProps.src;
+});
+
+// Memoize the video container to prevent re-renders
+const VideoContainer = React.memo(({ currentVideoId }: { currentVideoId: string | null }) => {
+  if (!currentVideoId) {
+    return (
+      <div className="aspect-video bg-gray-800 flex items-center justify-center">
+        <p className="text-white">No video ID available</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="video-container relative">
+      <MemoizedVideoPlayer
+        src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}`}
+      />
+    </div>
+  );
+});
+
 // --- Main App Component ---
 const VideoPage: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
@@ -846,11 +792,29 @@ const VideoPage: React.FC = () => {
   const ytPlayerRef = useRef<any>(null);
   const progressIntervalRef = useRef<number | null>(null);
 
+  // Track iframe visibility to prevent feedback operations that cause black screen
+  const [isIframeVisible, setIsIframeVisible] = useState(true);
+  
+  // Monitor iframe visibility
+  useEffect(() => {
+    const checkIframeVisibility = () => {
+      const iframe = document.getElementById("yt-player-iframe");
+      const isVisible = !!iframe && iframe.style.display !== 'none' && iframe.style.visibility !== 'hidden';
+      setIsIframeVisible(isVisible);
+      
+      if (!isVisible) {
+        console.log("🚨 Iframe not visible, preventing feedback operations");
+      }
+    };
+    
+    // Check every 500ms
+    const interval = setInterval(checkIframeVisibility, 500);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
-
-  // Use iframe persistence hook
-  const iframeKey = useIframePersistence(currentVideoId);
 
   // Memoize components array to prevent hook recreation
   const feedbackComponents = useMemo(() => [
@@ -860,6 +824,34 @@ const VideoPage: React.FC = () => {
     ComponentName.Summary,
     ComponentName.Flashcard
   ], []);
+
+  // Get feedback states for all components
+  const {
+    feedbackStates,
+    isLoading: isFeedbackLoading,
+    error: feedbackError,
+    markAsSubmitted: markFeedbackAsSubmitted,
+    resetFeedback,
+    _debug: multiFeedbackDebug,
+  } = useMultiFeedbackTracker({
+    components: feedbackComponents,
+    sourceId: currentVideoId || "unknown",
+    pageUrl: window.location.href,
+  });
+
+  // Debounce feedback state changes to prevent excessive re-renders
+  const [debouncedFeedbackStates, setDebouncedFeedbackStates] = useState(feedbackStates);
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedFeedbackStates(feedbackStates);
+    }, 100); // 100ms debounce
+    
+    return () => clearTimeout(timer);
+  }, [feedbackStates]);
+
+  // Use debounced states to prevent excessive re-renders
+  const stableFeedbackStates = useMemo(() => debouncedFeedbackStates, [debouncedFeedbackStates]);
 
   // Debug video ID
   useEffect(() => {
@@ -875,26 +867,56 @@ const VideoPage: React.FC = () => {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [playPercentage, setPlayPercentage] = useState(0);
 
-  // Track feedback submissions for all components using single API call
-  const {
-    feedbackStates,
-    isLoading: isFeedbackLoading,
-    error: feedbackError,
-    markAsSubmitted: markFeedbackAsSubmitted,
-    resetFeedback,
-    _debug: multiFeedbackDebug,
-  } = useMultiFeedbackTracker({
-    components: feedbackComponents,
-    sourceId: currentVideoId || "unknown",
-    pageUrl: window.location.href,
-  });
+  // Get iframe persistence key to force re-render when iframe is missing
+  const iframeKey = 0;
+
+  // Completely disable feedback state updates when video is playing to prevent black screen
+  const [isVideoPlaying, setIsVideoPlaying] = useState(false);
+  
+  // Track video play state
+  useEffect(() => {
+    const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
+    if (iframe) {
+      const handlePlay = () => setIsVideoPlaying(true);
+      const handlePause = () => setIsVideoPlaying(false);
+      const handleEnded = () => setIsVideoPlaying(false);
+      
+      // Listen for YouTube player events
+      iframe.addEventListener('load', () => {
+        try {
+          // Try to access YouTube player API
+          const player = iframe.contentWindow?.postMessage;
+          if (player) {
+            console.log("🎬 YouTube player loaded, monitoring play state");
+          }
+        } catch (error) {
+          console.log("🎬 YouTube player loaded (API access restricted)");
+        }
+      });
+      
+      return () => {
+        iframe.removeEventListener('load', handlePlay);
+        iframe.removeEventListener('pause', handlePause);
+        iframe.removeEventListener('ended', handleEnded);
+      };
+    }
+  }, [currentVideoId]);
+
+  // Use stable feedback states only when video is not playing
+  const finalFeedbackStates = useMemo(() => {
+    if (isVideoPlaying) {
+      console.log("🎬 Video is playing, using cached feedback states to prevent black screen");
+      return stableFeedbackStates;
+    }
+    return feedbackStates;
+  }, [isVideoPlaying, stableFeedbackStates, feedbackStates]);
 
   // Extract individual component states for backward compatibility
-  const videoFeedbackState = feedbackStates[ComponentName.Video];
-  const chatFeedbackState = feedbackStates[ComponentName.Chat];
-  const quizFeedbackState = feedbackStates[ComponentName.Quiz];
-  const summaryFeedbackState = feedbackStates[ComponentName.Summary];
-  const flashcardFeedbackState = feedbackStates[ComponentName.Flashcard];
+  const videoFeedbackState = finalFeedbackStates[ComponentName.Video];
+  const chatFeedbackState = finalFeedbackStates[ComponentName.Chat];
+  const quizFeedbackState = finalFeedbackStates[ComponentName.Quiz];
+  const summaryFeedbackState = finalFeedbackStates[ComponentName.Summary];
+  const flashcardFeedbackState = finalFeedbackStates[ComponentName.Flashcard];
 
   // Improved fallback logic - allow feedback if state is loaded and no existing feedback
   const videoCanSubmitFeedback = videoFeedbackState ? videoFeedbackState.canSubmitFeedback : (isFeedbackLoading ? false : true);
@@ -933,9 +955,9 @@ const VideoPage: React.FC = () => {
   useEffect(() => {
     if (multiFeedbackDebug) {
       console.log("🔍 Multi-Feedback Tracker Debug:", multiFeedbackDebug);
-      console.log("📊 Feedback States:", feedbackStates);
+      console.log("�� Feedback States:", stableFeedbackStates);
     }
-  }, [multiFeedbackDebug, feedbackStates]);
+  }, [multiFeedbackDebug, stableFeedbackStates]);
 
   // Debug logging for video feedback state
   useEffect(() => {
@@ -953,6 +975,12 @@ const VideoPage: React.FC = () => {
     // Don't open if feedback is still loading
     if (isFeedbackLoading) {
       console.log("⏳ Cannot open feedback modal - feedback still loading");
+      return;
+    }
+
+    // Don't open if iframe is not visible (prevents black screen)
+    if (!isIframeVisible) {
+      console.log("🚨 Cannot open feedback modal - iframe not visible, would cause black screen");
       return;
     }
 
@@ -976,7 +1004,7 @@ const VideoPage: React.FC = () => {
     
     console.log("✅ Opening feedback modal");
     setIsFeedbackModalOpen(true);
-  }, [videoCanSubmitFeedback, videoExistingFeedback, hasShownFeedback, isFeedbackLoading]);
+  }, [videoCanSubmitFeedback, videoExistingFeedback, hasShownFeedback, isFeedbackLoading, isIframeVisible]);
 
   const closeFeedbackModal = useCallback(() => {
     setIsFeedbackModalOpen(false);
@@ -1135,9 +1163,9 @@ const VideoPage: React.FC = () => {
                         console.log(`📊 Play Progress: ${cur}s/${d}s = ${pct.toFixed(1)}%`);
                         updatePlayPercentage(pct);
                         
-                        // Auto-show feedback when video reaches 90%
-                        if (pct >= 90 && !hasShownFeedback && videoCanSubmitFeedback) {
-                          console.log("🎉 Video reached 90% - showing feedback modal");
+                        // Auto-show feedback when video reaches 94%
+                        if (pct >= 94 && !hasShownFeedback && videoCanSubmitFeedback) {
+                          console.log("🎉 Video reached 94% - showing feedback modal");
                           openFeedbackModal();
                           updateFeedbackState();
                         }
@@ -1232,9 +1260,9 @@ const VideoPage: React.FC = () => {
       return;
     }
 
-    // Auto-open if video is at 95% (changed from 90% to avoid 94% issue)
-    if (playPercentage >= 95) {
-      console.log("🎉 Auto-opening feedback modal - video at 95%");
+    // Auto-open if video is at 94%
+    if (playPercentage >= 94) {
+      console.log("🎉 Auto-opening feedback modal - video at 94%");
       openFeedbackModal();
       updateFeedbackState();
     }
@@ -1275,8 +1303,8 @@ const VideoPage: React.FC = () => {
         return false;
       }
       
-      // Auto-open if video is at 95% or more (changed from 90% to avoid 94% issue)
-      if (playPercentage >= 95) return true;
+      // Auto-open if video is at 94% or more
+      if (playPercentage >= 94) return true;
       
       // Auto-open if video ended
       if (playPercentage >= 100) return true;
@@ -1520,6 +1548,42 @@ const VideoPage: React.FC = () => {
     setCurrentMode(mode);
   }, []);
 
+  // Force iframe to be visible and prevent hiding
+  useEffect(() => {
+    const forceIframeVisibility = () => {
+      const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
+      if (iframe) {
+        // Force iframe to be visible
+        iframe.style.display = 'block !important';
+        iframe.style.visibility = 'visible !important';
+        iframe.style.opacity = '1 !important';
+        iframe.style.zIndex = '100 !important';
+        iframe.style.position = 'relative !important';
+        iframe.style.width = '100% !important';
+        iframe.style.height = '100% !important';
+        
+        // Also force the container to be visible
+        const container = iframe.closest('.video-container');
+        if (container) {
+          (container as HTMLElement).style.display = 'block !important';
+          (container as HTMLElement).style.visibility = 'visible !important';
+          (container as HTMLElement).style.opacity = '1 !important';
+          (container as HTMLElement).style.zIndex = '100 !important';
+        }
+        
+        console.log("🔧 Forcing iframe visibility to prevent black screen");
+      }
+    };
+    
+    // Force visibility immediately
+    forceIframeVisibility();
+    
+    // Also force visibility every 2 seconds as a backup
+    const interval = setInterval(forceIframeVisibility, 2000);
+    
+    return () => clearInterval(interval);
+  }, [currentVideoId]);
+
   return (
     <div className="bg-background text-foreground min-h-screen font-sans">
       <div className="mx-auto hidden w-full h-full sm:block">
@@ -1541,55 +1605,12 @@ const VideoPage: React.FC = () => {
               currentTime={currentTimeRef.current}
               videoDuration={videoDurationRef.current}
             />
-            <div className="video-container relative">
+            <div className="video-container">
               {currentVideoId ? (
-                <VideoPlayer
-                  key={`video-player-${currentVideoId}-${iframeKey}`}
-                  src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}`}
-                />
+                <VideoPlayer src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}`} />
               ) : (
                 <div className="aspect-video bg-gray-800 flex items-center justify-center">
                   <p className="text-white">No video ID available</p>
-                </div>
-              )}
-              {process.env.NODE_ENV === "development" && (
-                <div className="mt-2 p-2 bg-gray-800 rounded text-xs text-gray-300">
-                  <p>Debug Info:</p>
-                  <p>Video ID: {currentVideoId || 'undefined'}</p>
-                  <p>Iframe Key: {iframeKey}</p>
-                  <p>Origin: {window.location.origin}</p>
-                  <p>Full URL: {currentVideoId ? `https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}` : 'N/A'}</p>
-                  <p>Modal Open: {isFeedbackModalOpen ? 'Yes' : 'No'}</p>
-                  <p>Iframe Present: {document.getElementById("yt-player-iframe") ? 'Yes' : 'No'}</p>
-                  <p>VideoPlayer Mounted: {currentVideoId ? 'Yes' : 'No'}</p>
-                  <p>Video Container Present: {document.querySelector('.video-container') ? 'Yes' : 'No'}</p>
-                  <button 
-                    onClick={() => {
-                      const iframe = document.getElementById("yt-player-iframe");
-                      if (iframe) {
-                        console.log("🔍 Manual iframe check:", {
-                          element: iframe,
-                          src: (iframe as HTMLIFrameElement).src,
-                          style: iframe.style.cssText,
-                          computedStyle: window.getComputedStyle(iframe)
-                        });
-                      } else {
-                        console.log("❌ Iframe not found in DOM");
-                      }
-                    }}
-                    className="mt-2 px-2 py-1 bg-blue-600 text-white rounded text-xs"
-                  >
-                    Check Iframe Details
-                  </button>
-                  <button 
-                    onClick={() => {
-                      // Force re-render of VideoPlayer
-                      window.location.reload();
-                    }}
-                    className="mt-2 ml-2 px-2 py-1 bg-red-600 text-white rounded text-xs"
-                  >
-                    Force Reload
-                  </button>
                 </div>
               )}
             </div>
@@ -1753,9 +1774,7 @@ const VideoPage: React.FC = () => {
           </header>
                     <div className="flex-shrink-0">
             <div className="video-container">
-              <VideoPlayer
-                src={`https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${window.location.origin}`}
-              />
+              <VideoContainer currentVideoId={currentVideoId} />
             </div>
             
             {/* Video Progress Stats - Mobile */}

@@ -1,5 +1,8 @@
 import { ChevronDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
+import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
+import { ComponentName } from "@/lib/api-client";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -181,6 +184,56 @@ const SummarySection: React.FC<{ section: SummarySectionData }> = ({
   </div>
 );
 
+// Footer with explicit Rate button and modal handling
+const SummaryFeedback: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const { canSubmitFeedback, existingFeedback, markAsSubmitted } = useFeedbackTracker({
+    component: ComponentName.Summary,
+    sourceId: "summary",
+    pageUrl: window.location.href,
+  });
+
+  const open = () => setIsOpen(true);
+  const close = () => setIsOpen(false);
+  const onSubmit = async (payload: any) => {
+    console.log("Summary feedback submitted:", payload);
+    markAsSubmitted();
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="mt-6 pt-4 border-t border-border flex items-center justify-between">
+      <div className="text-sm text-muted-foreground">
+        Share your thoughts about this summary.
+      </div>
+      <button
+        onClick={open}
+        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+          existingFeedback ? "bg-gray-600 hover:bg-gray-500 text-gray-300" : "bg-blue-600 hover:bg-blue-500 text-white"
+        }`}
+        disabled={!canSubmitFeedback && !existingFeedback}
+      >
+        {existingFeedback ? "Update Feedback" : "Rate Summary"}
+      </button>
+      <VideoFeedbackModal
+        isOpen={isOpen}
+        onClose={close}
+        videoId={"summary"}
+        videoTitle={"Summary"}
+        suggestedChips={[]}
+        playPercentage={100}
+        onSubmit={onSubmit}
+        onSkip={close}
+        onDismiss={close}
+        canSubmitFeedback={canSubmitFeedback}
+        existingFeedback={existingFeedback}
+        markAsSubmitted={markAsSubmitted}
+        componentName="Summary"
+      />
+    </div>
+  );
+};
+
 // Updated header with a dropdown selector
 const SummaryHeader: React.FC<{
   activeLength: SummaryLength;
@@ -317,6 +370,7 @@ const Summary: React.FC<SummaryProps> = ({
             {summaryData?.map((section, index) => (
               <SummarySection key={index} section={section} />
             ))}
+            <SummaryFeedback />
           </div>
         )}
       </div>

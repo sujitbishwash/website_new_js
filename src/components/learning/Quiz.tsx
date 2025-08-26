@@ -1,5 +1,8 @@
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import React from "react";
+import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
+import { ComponentName } from "@/lib/api-client";
 
 // --- Setup ---
 
@@ -22,20 +25,7 @@ interface Question {
 }
 
 // Centralized theme colors for a polished look
-const theme = {
-  background: "#0F172A", // Darker slate background
-  cardBackground: "#1E293B", // Lighter slate for the card
-  inputBackground: "#334155",
-  primaryText: "#F1F5F9", // Off-white for main text
-  secondaryText: "#94A3B8", // Muted slate for secondary text
-  accent: "#38BDF8", // A vibrant sky blue accent
-  accentHover: "#7DD3FC",
-  buttonGradientFrom: "#0EA5E9",
-  buttonGradientTo: "#2563EB",
-  divider: "#334155",
-  correct: "#22C55E",
-  incorrect: "#F43F5E",
-};
+// theme constants removed (unused)
 
 // --- Data ---
 const quizQuestions: Question[] = [
@@ -286,33 +276,29 @@ const Quiz: React.FC<QuizProps> = ({
     setSelectedAnswerIndex(null);
   };
 
-  const styles = {
-    app: {
-      backgroundColor: theme.background,
-      minHeight: "100vh",
-      display: "flex",
-      flexDirection: "column" as "column",
-      alignItems: "center",
-      justifyContent: "center",
-      fontFamily: "'Poppins', sans-serif",
-      padding: "16px",
-      color: theme.primaryText,
-    },
-    quizCard: {
-      backgroundColor: theme.cardBackground,
-      width: "100%",
-      maxWidth: "600px",
-      minHeight: "400px",
-      borderRadius: "24px",
-      padding: "32px",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-      textAlign: "left" as "left",
-      display: "flex",
-      flexDirection: "column" as "column",
-      justifyContent: "center",
-      transition: "transform 0.3s ease",
-    },
+  // Feedback handling for quiz completion
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
+  const { canSubmitFeedback, existingFeedback, markAsSubmitted } = useFeedbackTracker({
+    component: ComponentName.Quiz,
+    sourceId: "quiz",
+    pageUrl: window.location.href,
+  });
+
+  React.useEffect(() => {
+    if (showScore && canSubmitFeedback && !existingFeedback) {
+      setIsFeedbackModalOpen(true);
+    }
+  }, [showScore, canSubmitFeedback, existingFeedback]);
+
+  const handleCloseFeedback = () => setIsFeedbackModalOpen(false);
+  const handleSubmitFeedback = async (payload: any) => {
+    console.log("Quiz feedback submitted:", payload);
+    markAsSubmitted();
+    setIsFeedbackModalOpen(false);
   };
+  const handleSkipFeedback = () => setIsFeedbackModalOpen(false);
+
+  // inline styles removed (unused)
 
   return (
     <div
@@ -337,6 +323,21 @@ const Quiz: React.FC<QuizProps> = ({
             handleNext={handleNextQuestion}
           />
         )}
+        <VideoFeedbackModal
+          isOpen={isFeedbackModalOpen}
+          onClose={handleCloseFeedback}
+          videoId={"quiz"}
+          videoTitle={"Quiz"}
+          suggestedChips={[]}
+          playPercentage={100}
+          onSubmit={handleSubmitFeedback}
+          onSkip={handleSkipFeedback}
+          onDismiss={handleCloseFeedback}
+          canSubmitFeedback={canSubmitFeedback}
+          existingFeedback={existingFeedback}
+          markAsSubmitted={markAsSubmitted}
+          componentName="Quiz"
+        />
       </div>
     </div>
   );

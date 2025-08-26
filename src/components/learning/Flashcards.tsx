@@ -1,5 +1,8 @@
 import { ArrowLeft, ArrowRight, Shuffle } from "lucide-react";
 import React, { useCallback, useEffect, useState } from "react";
+import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
+import { ComponentName } from "@/lib/api-client";
 
 // Centralized theme colors for a more refined design
 const theme = {
@@ -277,6 +280,37 @@ const Flashcards: React.FC<FlashcardsProps> = ({
     };
   }, [handleNavigate]);
 
+  // Feedback tracking for Flashcards
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const {
+    canSubmitFeedback,
+    existingFeedback,
+    markAsSubmitted,
+  } = useFeedbackTracker({
+    component: ComponentName.Flashcard,
+    sourceId: "flashcards",
+    pageUrl: window.location.href,
+  });
+
+  useEffect(() => {
+    if (
+      cards.length > 0 &&
+      currentIndex === cards.length - 1 &&
+      canSubmitFeedback &&
+      !existingFeedback
+    ) {
+      setIsFeedbackModalOpen(true);
+    }
+  }, [cards.length, currentIndex, canSubmitFeedback, existingFeedback]);
+
+  const handleFeedbackClose = () => setIsFeedbackModalOpen(false);
+  const handleFeedbackSubmit = async (payload: any) => {
+    console.log("Flashcards feedback submitted:", payload);
+    markAsSubmitted();
+    setIsFeedbackModalOpen(false);
+  };
+  const handleFeedbackSkip = () => setIsFeedbackModalOpen(false);
+
   return (
     <div className="bg-background font-sans text-foreground w-full max-w-full p-4 border-border box-border flex flex-col gap-5 justify-start items-center">
       <div className="w-full max-w-2xl">
@@ -296,6 +330,21 @@ const Flashcards: React.FC<FlashcardsProps> = ({
               totalCards={cards.length}
               onNavigate={handleNavigate}
               onShuffle={handleShuffle}
+            />
+            <VideoFeedbackModal
+              isOpen={isFeedbackModalOpen}
+              onClose={handleFeedbackClose}
+              videoId={"flashcards"}
+              videoTitle={"Flashcards"}
+              suggestedChips={[]}
+              playPercentage={100}
+              onSubmit={handleFeedbackSubmit}
+              onSkip={handleFeedbackSkip}
+              onDismiss={handleFeedbackClose}
+              canSubmitFeedback={canSubmitFeedback}
+              existingFeedback={existingFeedback}
+              markAsSubmitted={markAsSubmitted}
+              componentName="Flashcards"
             />
           </div>
         ) : (
