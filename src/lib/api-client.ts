@@ -2,7 +2,7 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  baseURL: "https://2x0gn2m2-8000.inc1.devtunnels.ms",//"https://api.krishak.in",
+  baseURL: "https://api.krishak.in",//"https://2x0gn2m2-8000.inc1.devtunnels.ms",
   headers: {
     "Content-Type": "application/json",
   },

@@ -1,5 +1,6 @@
 export interface ThemeColors {
   background: string;
+  backgroundSubtle: string; // New subtle background color
   cardBackground: string;
   inputBackground: string;
   primaryText: string;
@@ -22,6 +23,7 @@ const v = (name: string) => `var(--ap-${name})`;
 
 export const theme: ThemeColors = {
   background: v("background"),
+  backgroundSubtle: v("backgroundSubtle"), // Added new color
   cardBackground: v("cardBackground"),
   inputBackground: v("inputBackground"),
   primaryText: v("primaryText"),
@@ -38,28 +40,12 @@ export const theme: ThemeColors = {
   yellow: v("yellow"),
   red: v("red"),
 };
-/**  slate: {
-     background: "#111827",
-    cardBackground: "#1F2937",
-    inputBackground: "#374151",
-    primaryText: "#FFFFFF",
-    secondaryText: "#9CA3AF",
-    mutedText: "#6B7280",
-    accent: "#4A84C8",
-    accentLight: "rgba(74, 132, 200, 0.08)",
-    buttonGradientFrom: "#3B82F6",
-    buttonGradientTo: "#2563EB",
-    divider: "#4B5563",
-    dividerMedium: "#2C2C2E",
-    dividerHigh: "#1F1F20",
-    green: "#34D399",
-    yellow: "#FBBF24",
-    red: "#F87171",
-  },*/
+
 // Available color palettes
 export const palettes: Record<string, ThemeColors> = {
   default: {
     background: "#1d1d1f",
+    backgroundSubtle: "#232325", // A bit lighter than background
     cardBackground: "#2c2c2e",
     inputBackground: "#3a3a3c",
     primaryText: "#FFFFFF",
@@ -78,6 +64,7 @@ export const palettes: Record<string, ThemeColors> = {
   },
   ocean: {
     background: "#0B1220",
+    backgroundSubtle: "#101828", // A bit lighter than background
     cardBackground: "#0F172A",
     inputBackground: "#1E293B",
     primaryText: "#E2E8F0",
@@ -96,6 +83,7 @@ export const palettes: Record<string, ThemeColors> = {
   },
   forest: {
     background: "#0B1410",
+    backgroundSubtle: "#111A16", // A bit lighter than background
     cardBackground: "#102117",
     inputBackground: "#1B2B22",
     primaryText: "#E6F2EA",
@@ -114,6 +102,7 @@ export const palettes: Record<string, ThemeColors> = {
   },
   sunset: {
     background: "#181212",
+    backgroundSubtle: "#1F1919", // A bit lighter than background
     cardBackground: "#1F1616",
     inputBackground: "#2A1D1D",
     primaryText: "#F4EDEB",
@@ -132,6 +121,7 @@ export const palettes: Record<string, ThemeColors> = {
   },
   lavender: {
     background: "#161320",
+    backgroundSubtle: "#1C1926", // A bit lighter than background
     cardBackground: "#1E192B",
     inputBackground: "#2A243A",
     primaryText: "#EDEBFA",
@@ -150,6 +140,7 @@ export const palettes: Record<string, ThemeColors> = {
   },
   rose: {
     background: "#191417",
+    backgroundSubtle: "#201A1D", // A bit lighter than background
     cardBackground: "#221B1F",
     inputBackground: "#2E2329",
     primaryText: "#FAF1F3",
@@ -168,6 +159,7 @@ export const palettes: Record<string, ThemeColors> = {
   },
   amber: {
     background: "#1B1711",
+    backgroundSubtle: "#221D17", // A bit lighter than background
     cardBackground: "#241F18",
     inputBackground: "#322A21",
     primaryText: "#FAF5EB",
@@ -199,8 +191,9 @@ export const applyColorTheme = (name: ColorThemeName) => {
   // Derive light/dark variants to ensure clear contrast differences
   const p: ThemeColors = isDark
     ? {
-        // Light mode overrides for professional contrast
+        // Dark mode overrides
         background: "#1d1d1f",
+        backgroundSubtle: "#232325", // Subtle dark variant
         cardBackground: "#2c2c2e",
         inputBackground: "#3a3a3c",
         primaryText: "#FFFFFF",
@@ -218,24 +211,24 @@ export const applyColorTheme = (name: ColorThemeName) => {
         red: "#FF3B30",
       }
     : {
-        // Light mode overrides for professional contrast
-        background: "#F4F6F8", // light gray-blue page background
-        cardBackground: "#FFFFFF", // bright white for elevated elements
-        inputBackground: "#E9EEF3", // noticeably darker than background for strong field distinction
-        primaryText: "#1E293B", // dark slate for better readability
-        secondaryText: "#4B5563", // neutral gray for subtitles
-        mutedText: "#6B7280", // softer gray for hints
-        // keep accent family from selected palette for brand feel
+        // Light mode overrides
+        background: "#F4F6F8",
+        backgroundSubtle: "#FBFCFD", // Subtle light variant
+        cardBackground: "#FFFFFF",
+        inputBackground: "#E9EEF3",
+        primaryText: "#1E293B",
+        secondaryText: "#4B5563",
+        mutedText: "#6B7280",
         accent: palette.accent,
         accentLight: palette.accentLight,
         buttonGradientFrom: palette.buttonGradientFrom,
         buttonGradientTo: palette.buttonGradientTo,
-        divider: "#CBD5E1", // light gray, less harsh than pure gray-200
+        divider: "#CBD5E1",
         dividerMedium: "#94A3B8",
         dividerHigh: "#64748B",
-        green: "#22B573", // balanced success tone
-        yellow: "#E2B23A", // warm but not neon
-        red: "#E45858", // calm error red
+        green: "#22B573",
+        yellow: "#E2B23A",
+        red: "#E45858",
       };
 
   const set = (key: keyof ThemeColors, value: string) =>
@@ -251,6 +244,8 @@ export const applyColorTheme = (name: ColorThemeName) => {
   setUI("--foreground", p.primaryText);
   setUI("--card", p.cardBackground);
   setUI("--card-foreground", p.primaryText);
+  // Custoom
+  setUI("--background-subtle", p.backgroundSubtle);
   // Primary & accent
   setUI("--primary", p.accent);
   setUI("--primary-foreground", p.primaryText);

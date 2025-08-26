@@ -9,6 +9,7 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   --color-background: var(--background);
+  --color-background-subtle: var(--background-subtle); /* Added here */
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
@@ -46,6 +47,7 @@
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
+  --background-subtle: oklch(0.99 0 0); /* A very light gray, just off-white */
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -80,6 +82,7 @@
 
 .dark {
   --background: oklch(0.145 0 0);
+  --background-subtle: oklch(0.17 0 0); /* A slightly lighter dark background */
   --foreground: oklch(0.985 0 0);
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);

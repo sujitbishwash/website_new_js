@@ -94,7 +94,6 @@ const Sidebar: React.FC<SidebarProps> = ({
             `}</style>
       {firstPart != ROUTES.VIDEO_LEARNING &&
         firstPart != ROUTES.PREMIUM &&
-        firstPart != ROUTES.TEST_SERIES &&
         firstPart != ROUTES.EXAM_INFO &&
         firstPart != ROUTES.EXAM_RECONFIRM && (
           <button

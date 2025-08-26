@@ -21,14 +21,15 @@ const CalendarIcon = ({ size = 12, strokeWidth = 2.5 }) => (
 
 
 // --- Button 1: Silver Square ---
-const Button1 = ({ size = 64, number = 1 }) => {
+const Button1 = ({ size = 64, number = 1, onClick = () => {} }) => {
   const fontSize = size * 0.5; // Dynamic font size
   return (
     <button
-      className="relative flex items-center justify-center rounded-sm bg-gradient-to-b from-white to-gray-200 border border-gray-300 transition-all hover:scale-105 hover:shadow-lg active:shadow-inner"
+    onClick={onClick}
+      className="relative flex items-center justify-center rounded-sm bg-gradient-to-b from-white to-gray-200 border border-gray-400 transition-all hover:scale-105 hover:shadow-lg active:shadow-inner text-black"
       style={{ width: size, height: size }}
     >
-      <span className="font-bold text-gray-600" style={{ fontSize: `${fontSize}px` }}>
+      <span className="font-bold " style={{ fontSize: `${fontSize}px` }}>
         {number}
       </span>
     </button>
@@ -36,12 +37,13 @@ const Button1 = ({ size = 64, number = 1 }) => {
 };
 
 // --- Button 2: Red Angled Shape (Inverted Button3) ---
-const Button2 = ({ size = 64, number = 2 }) => {
+const Button2 = ({ size = 64, number = 2, onClick = () => {} }) => {
   const height = size * 1;
   const fontSize = size * 0.5;
   return (
     <div
-      className="relative flex items-center justify-center transition-transform hover:scale-105"
+    onClick={onClick}
+      className="relative flex items-center justify-center transition-transform hover:scale-105 select-none"
       style={{ width: size, height: height }}
     >
       <svg viewBox="0 0 56 56" className="absolute inset-0 w-full h-full">
@@ -65,12 +67,13 @@ const Button2 = ({ size = 64, number = 2 }) => {
 };
 
 // --- Button 3: Green Angled Shape ---
-const Button3 = ({ size = 64, number = 3 }) => {
+const Button3 = ({ size = 64, number = 3, onClick = () => {} }) => {
     const height = size * 1;
     const fontSize = size * 0.5;
   return (
     <div
-      className="relative flex items-center justify-center transition-transform hover:scale-105"
+    onClick={onClick}
+      className="relative flex items-center justify-center transition-transform hover:scale-105 select-none"
       style={{ width: size, height: height }}
     >
       <svg viewBox="0 0 56 56" className="absolute inset-0 w-full h-full">
@@ -94,10 +97,11 @@ const Button3 = ({ size = 64, number = 3 }) => {
 
 
 // --- Button 4: Purple Circle ---
-const Button4 = ({ size = 64, number = 4 }) => {
+const Button4 = ({ size = 64, number = 4, onClick = () => {} }) => {
   const fontSize = size * 0.5;
   return (
     <button
+    onClick={onClick}
       className="relative flex items-center justify-center rounded-full bg-gradient-to-b from-purple-500 to-purple-700 border  transition-all hover:scale-105 hover:shadow-lg active:shadow-inner"
       style={{ width: size, height: size }}
     >
@@ -109,12 +113,13 @@ const Button4 = ({ size = 64, number = 4 }) => {
 };
 
 // --- Button 5: Purple Circle with Icon ---
-const Button5 = ({ size = 64, number = 5 }) => {
+const Button5 = ({ size = 64, number = 5, onClick = () => {} }) => {
   const fontSize = size * 0.5;
   const iconContainerSize = size * 0.375;
   const iconSize = size * 0.18;
   return (
     <button
+    onClick={onClick}
       className="relative flex items-center justify-center rounded-full bg-gradient-to-b from-purple-500 to-purple-700 border  transition-all hover:scale-105 hover:shadow-lg active:shadow-inner"
       style={{ width: size, height: size }}
     >
