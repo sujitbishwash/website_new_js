@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { ROUTES } from "../../routes/constants";
+import { ChevronDown, CircleUser, Hexagon } from "lucide-react";
 
 // --- Type Definitions ---
 interface ExamDetails {
@@ -47,55 +48,124 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
 }) => {
   const navigate = useNavigate();
   const [isConfirmed, setIsConfirmed] = useState(false);
+  const langDropdownRef = useRef<HTMLDivElement>(null);
+  const [language, setLanguage] = useState("English");
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [textSize, setTextSize] = useState("text-base");
   const location = useLocation();
   const { profile, examGoal } = useUser();
   const testId = location.state?.testId;
   const testConfig = location.state?.testConfig;
-
+  const handleLanguageChange = (lang: string) => {
+    setLanguage(lang);
+    setIsLangDropdownOpen(false);
+  };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        langDropdownRef.current &&
+        !langDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsLangDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   return (
     // The main container now uses h-screen to take the full viewport height
 
-    <div className="bg-card text-foreground w-full flex flex-col h-screen overflow-hidden" style={{ fontFamily: "Arial, sans-serif" }}>
+    <div
+      className="bg-card text-foreground w-full flex flex-col h-screen overflow-hidden"
+      style={{ fontFamily: "Arial, sans-serif" }}
+    >
       {/* Header Section - This part will not scroll */}
-      <header className="flex-shrink-0 flex justify-between items-center p-6 border-b border-border">
-        <h4 className="text-2xl sm:text-3xl font-bold text-foreground">
-          {examDetails.title}
-        </h4>
-        
+      <header className="bg-card p-3 flex justify-between items-center z-10 border-b">
+        {/*<div className="flex items-center justify-between ml-18 lg:ml-0">
+          <Hexagon width={48} height={48} className="text-muted-foreground" />
+        </div>*/}
+        <div className="flex text-center px-2">
+          <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
+            {examDetails.title}
+          </h1>
+        </div>
         <div className=" items-center space-x-4 hidden sm:flex">
           <div className="text-right">
-            <p className="font-semibold">
-              {profile?.name || "Student Name"}
-            </p>
+            <p className="font-semibold">{profile?.name || "Student Name"}</p>
           </div>
-          <img
-            src={`https://placehold.co/48x48/6366F1/FFFFFF?text=${profile?.name[0]}`}
-            alt="Student avatar"
-            className="w-12 h-12 rounded-full border-2 border-indigo-500"
+
+          <CircleUser
+            height={48}
+            width={48}
+            className="text-muted-foreground"
           />
         </div>
       </header>
       {/* Main Content Area: flex-grow allows this section to fill available space, and overflow-y-auto enables scrolling */}
       <div className="flex-grow overflow-y-auto">
-        <main className="p-6 sm:p-8">
+        <main className={`p-6 sm:p-8 ${textSize}`}>
           <div className="mb-6">
-            <div className="flex flex-row gap-8">
-              
-              <p className="text-sm text-foreground">
-                Total Questions: {examDetails.totalQuestions}
-              </p>
-              <p className="text-sm text-foreground">
-                Maximum Marks: {examDetails.maxMarks}
-              </p>
-              <p className="text-sm text-foreground">
-                Duration: {examDetails.duration}
-              </p>
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              {/* Left: Exam Details */}
+              <div className="flex flex-row gap-6">
+                <p className="text-sm text-foreground">
+                  Total Questions: {examDetails.totalQuestions}
+                </p>
+                <p className="text-sm text-foreground">
+                  Maximum Marks: {examDetails.maxMarks}
+                </p>
+                <p className="text-sm text-foreground">
+                  Duration: {examDetails.duration}
+                </p>
+              </div>
+
+              {/* Right: Controls */}
+              <div className="flex items-center justify-end gap-2 sm:gap-4 w-full sm:w-auto">
+                <select
+                  onChange={(e) => setTextSize(e.target.value)}
+                  value={textSize}
+                  className="bg-background-subtle text-white rounded-md px-2 py-1 appearance-none text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="text-sm">A-</option>
+                  <option value="text-base">A</option>
+                  <option value="text-lg">A+</option>
+                </select>
+
+                {/* Language Dropdown */}
+                <div ref={langDropdownRef} className="relative hidden md:block">
+                  <button
+                    onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                    className="flex items-center bg-background-subtle hover:bg-blue-400/20 px-2 py-1 rounded-md text-sm"
+                  >
+                    {language}
+                    <ChevronDown className="text-foreground" />
+                  </button>
+                  {isLangDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-32 bg-background-subtle rounded-md py-1 z-30 border select-none">
+                      <div
+                        onClick={() => handleLanguageChange("English")}
+                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-blue-400/20"
+                      >
+                        English
+                      </div>
+                      <div
+                        onClick={() => handleLanguageChange("Hindi")}
+                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-blue-400/20"
+                      >
+                        Hindi
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
-            <h2 className="text-xl font-bold mt-2 text-foreground mb-4">
-              Read the following instructions carefully.
-            </h2>
+          <h2 className="text-xl font-bold mt-2 text-foreground mb-4">
+            Read the following instructions carefully.
+          </h2>
           {/* Instructions List */}
           <ul className="space-y-3 text-foreground list-decimal list-inside mb-8">
             {examDetails.instructions.map(

@@ -631,7 +631,7 @@ export default function HomePage() {
             <span>Continue Learning</span>
             <a
               href="#"
-              className="text-sm font-medium text-accent hover:opacity-80 transition-colors"
+              className="text-sm font-medium text-primary hover:opacity-80 transition-colors"
             >
               View all
             </a>
@@ -688,7 +688,7 @@ export default function HomePage() {
             <span>Attempted Tests</span>
             <a
               href="#"
-              className="text-sm font-medium text-accent hover:opacity-80 transition-colors"
+              className="text-sm font-medium text-primary hover:opacity-80 transition-colors"
             >
               View all
             </a>

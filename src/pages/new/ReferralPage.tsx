@@ -1,6 +1,19 @@
 import { theme } from "@/styles/theme";
 import { useState } from "react";
 
+// --- Apple-inspired Theme ---
+// A refined color palette for a clean, modern aesthetic.
+const appleTheme = {
+  background: "#f5f5f7",
+  cardBackground: "#ffffff",
+  primaryText: "#1d1d1f",
+  secondaryText: "#6e6e73",
+  mutedText: "#86868b",
+  divider: "#d2d2d7",
+  accent: "#007aff", // Apple's signature blue
+  accentLight: "rgba(0, 122, 255, 0.1)",
+  lightBlueBackground: "#f0f8ff",
+};
 // --- CSS Styles Component ---
 // The CSS is included directly in the component to avoid file resolution errors.
 const ReferralStyles = () => (
@@ -281,8 +294,63 @@ const ReferralStyles = () => (
         color: ${theme.green};
         font-weight: 600;
     }
+        
+    /* --- FAQ Section --- */
+    .faq-item {
+        border-bottom: 1px solid ${appleTheme.divider};
+        padding: 20px 0;
+    }
+    .faq-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: ${appleTheme.primaryText};
+    }
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out, margin-top 0.3s ease-out;
+        color: ${appleTheme.secondaryText};
+        line-height: 1.6;
+    }
+    .faq-answer.open {
+        max-height: 200px; /* Adjust as needed */
+        margin-top: 16px;
+    }
+    .faq-toggle {
+        font-size: 1.5rem;
+        font-weight: 300;
+        transition: transform 0.3s ease;
+    }
+    .faq-toggle.open {
+        transform: rotate(45deg);
+    }
+
   `}</style>
 );
+
+// --- FAQ Item Component ---
+const FaqItem = ({ q, a }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div className="faq-item">
+      <div className="faq-question" onClick={() => setIsOpen(!isOpen)}>
+        <span>{q}</span>
+        <span className={`faq-toggle ${isOpen ? "open" : ""}`}>+</span>
+      </div>
+      <div className={`faq-answer ${isOpen ? "open" : ""}`}>
+        <p>{a}</p>
+      </div>
+    </div>
+  );
+};
 
 // --- Main Referral Page Component ---
 const ReferralPage = () => {
@@ -309,7 +377,24 @@ const ReferralPage = () => {
     "📝 Free Quizzes & Mock Tests",
     "📊 Detailed Performance Reports",
   ];
-
+  const faqData = [
+    {
+      q: "Who is eligible to refer friends?",
+      a: "Anyone with an active AI Padhai account can refer friends. There's no limit to how many friends you can refer.",
+    },
+    {
+      q: "How do I refer a friend?",
+      a: "Simply share your unique referral code or link with them. When they sign up and make their first purchase, you'll both get rewarded.",
+    },
+    {
+      q: "What do I get?",
+      a: "You receive ₹50 in cash rewards for every successful referral. After your first successful referral, you also unlock a free month of our Premium plan.",
+    },
+    {
+      q: "What does my friend get?",
+      a: "Your friend gets a 10% discount on their first purchase when they use your referral code.",
+    },
+  ];
   return (
     <>
       <ReferralStyles />
@@ -466,6 +551,14 @@ const ReferralPage = () => {
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* --- FAQ Card --- */}
+          <div className="referral-card">
+            <h3 className="card-title">Frequently Asked Questions</h3>
+            {faqData.map((faq) => (
+              <FaqItem key={faq.q} q={faq.q} a={faq.a} />
+            ))}
           </div>
         </div>
       </div>

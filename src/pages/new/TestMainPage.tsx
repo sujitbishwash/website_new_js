@@ -42,7 +42,7 @@ import {
 // --- Helper Components & Modals ---
 const InstructionsModal = ({ onClose }: { onClose: () => void }) => (
   <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 animate-fade-in p-4">
-    <div className="bg-card p-6 rounded-lg shadow-xl text-foreground w-full max-w-2xl max-h-[80vh] flex flex-col">
+    <div className="bg-card p-6 rounded-lg shadow-xl text-foreground w-full max-w-4xl max-h-[80vh] flex flex-col">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-blue-300">Test Instructions</h2>
         <button
@@ -664,10 +664,10 @@ const TestMainPage = () => {
   return (
     <div className="bg-background text-muted-foreground font-sans h-screen flex flex-col">
       {/* Header */}
-      <header className="bg-card p-3 flex justify-between items-center z-20 border-b">
-        <div className="flex items-center">
+      <header className="bg-card p-3 flex justify-between items-center border-b">
+        {/**<div className="flex items-center justify-between pl-18 lg:pl-0">
           <Hexagon />
-        </div>
+        </div>*/}
         {/* Responsive Title */}
         <div className="flex-1 text-center px-2">
           <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
@@ -675,21 +675,9 @@ const TestMainPage = () => {
           </h1>
         </div>
         <div className="flex items-center">
-          {/* User Info - Mobile */}
-          <div className="md:hidden mr-2">
-            {profile && (
-              <div className="text-xs text-muted-foreground">
-                <div className="font-medium">{profile.name || "Student"}</div>
-                {examGoal && (
-                  <div className="text-blue-400">{examGoal.exam}</div>
-                )}
-              </div>
-            )}
-          </div>
-
           <button
             onClick={toggleFullScreen}
-            className="hidden md:flex items-center bg-background-subtle hover:bg-blue-400/20 px-3 py-2 rounded-md ml-2 text-sm"
+            className="z-30 hidden md:flex items-center bg-background-subtle hover:bg-blue-400/20 px-3 py-2 rounded-md ml-2 text-sm"
           >
             {isFullscreen ? "Exit Full Screen" : "Full Screen"}
             {isFullscreen ? (
@@ -700,9 +688,10 @@ const TestMainPage = () => {
           </button>
           {/* Mobile Menu Button */}
           <button
-            className="md:hidden text-foreground ml-2"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
+  className="md:hidden text-foreground ml-2 relative z-30"
+  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+>
+
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -724,7 +713,9 @@ const TestMainPage = () => {
       {/* Main Content */}
       <div className="flex-grow flex flex-col md:flex-row overflow-hidden">
         {/* Question Panel */}
-        <main className="flex-grow p-2 sm:p-4 flex flex-col overflow-hidden pb-20 md:pb-4">
+        <main
+          className={`flex-grow p-2 sm:p-4 flex flex-col overflow-hidden pb-20 md:pb-4 ${textSize}`}
+        >
           <div className="flex-shrink-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
               {/* Section Tabs */}
@@ -770,15 +761,15 @@ const TestMainPage = () => {
                     {formatTime(timeLeft)}
                   </span>
                 </div>
-                {/**<select
-                onChange={(e) => setTextSize(e.target.value)}
-                value={textSize}
-                className="bg-background-subtle text-white rounded-md px-2 py-1 appearance-none text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="text-sm">A-</option>
-                <option value="text-base">A</option>
-                <option value="text-lg">A+</option>
-              </select>*/}
+                <select
+                  onChange={(e) => setTextSize(e.target.value)}
+                  value={textSize}
+                  className="bg-background-subtle text-white rounded-md px-2 py-1 appearance-none text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="text-sm">A-</option>
+                  <option value="text-base">A</option>
+                  <option value="text-lg">A+</option>
+                </select>
                 {/**<select
                 onChange={(e) => setLanguage(e.target.value)}
                 value={language}
@@ -858,7 +849,7 @@ const TestMainPage = () => {
         {/* Sidebar */}
         <aside
           ref={asideRef}
-          className={`w-3/4 lg:w-80 xl:w-96 bg-card/90 backdrop-blur-sm p-4 sm:p-6 flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out ${
+          className={`w-2/3 lg:w-72 xl:w-80 bg-card/90 backdrop-blur-sm p-4 sm:p-3 flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out ${
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
           } lg:translate-x-0 fixed lg:relative top-0 right-0 h-full lg:h-auto z-30 lg:z-0 border-l`}
         >
@@ -871,17 +862,16 @@ const TestMainPage = () => {
 
           {/* User Profile Section */}
 
-          <div className="flex-shrink-0 bg-background-subtle p-4 rounded-lg mb-6 flex items-center gap-4 border text-foreground ">
+          <div className="flex-shrink-0 bg-background-subtle p-4 rounded-lg mb-3 flex items-center gap-4 border text-foreground ">
             <CircleUser className="h-12 w-12 text-border" />
             <div className="text-sm">
               <div className="text-base">{profile?.name || "Student Name"}</div>
-              {profile?.email && <div className="text-xs">{profile.email}</div>}
               {examGoal && <div className="text-xs">{examGoal.exam}</div>}
             </div>
           </div>
 
           {/* --- RESPONSIVE LEGEND SECTION --- */}
-          <div className="flex-shrink-0 bg-background-subtle p-4 rounded-lg mb-6 border">
+          <div className="flex-shrink-0 bg-background-subtle p-4 rounded-lg mb-3 border">
             <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm text-foreground">
               <div className="flex items-center gap-2">
                 <Button3 size={24} number={2} />
@@ -1109,7 +1099,7 @@ const TestMainPage = () => {
                   : "bg-yellow-600 hover:bg-yellow-700 text-white"
               }`}
             >
-              Clear
+              Clear Response
             </button>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
