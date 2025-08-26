@@ -10,7 +10,7 @@ import PersonalDetails from "@/pages/new/PersonalDetails";
 import PrivacyPolicy from "@/pages/new/PrivacyPolicy";
 import Splash from "@/pages/new/Splash";
 import TermsAndConditions from "@/pages/new/TermsAndConditions";
-import VideoPage from "@/pages/new/VideoPage";
+// import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/Layout";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -29,6 +29,7 @@ import TestConfigurationPage from "../pages/new/TestConfigurationPage";
 import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
 import Stats  from "../pages/new/Stats";
+import VideoPage from "@/pages/new/videopageog";
 
 // Route configuration object for easy maintenance
 export const routes = [

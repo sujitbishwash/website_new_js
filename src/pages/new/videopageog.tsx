@@ -1,12 +1,10 @@
-import VideoFeedbackModal, {
-    CondensedFeedback,
-    VideoFeedbackPayload,
-  } from "@/components/feedback/VideoFeedbackModal";
+import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import Chat from "@/components/learning/Chat";
-  import Flashcards from "@/components/learning/Flashcards";ß
+  import Flashcards from "@/components/learning/Flashcards";
   import Quiz from "@/components/learning/Quiz";
   import Summary from "@/components/learning/Summary";
-  import { useVideoFeedback } from "@/hooks/useVideoFeedback";
+  import { useMultiFeedbackTracker } from "@/hooks/useFeedbackTracker";
+  import { ComponentName } from "@/lib/api-client";
   import { ROUTES } from "@/routes/constants";
   import { theme } from "@/styles/theme";
   import {
@@ -16,20 +14,17 @@ import VideoFeedbackModal, {
     Eye,
     EyeOff,
     Facebook,
-    FileStack,
-    Highlighter,
     Instagram,
-    Link,
     Linkedin,
     MessageCircle,
     MessageCircleQuestion,
-    MessageSquareText,
     StickyNote,
     Text,
     Type,
     X,
   } from "lucide-react";
-  import { useCallback, useEffect, useRef, useState } from "react";
+  import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+  import React from "react";
   import { useLocation, useNavigate, useParams } from "react-router-dom";
   import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
   
@@ -63,11 +58,7 @@ import VideoFeedbackModal, {
     isLoadingTranscript: boolean;
     chaptersError: string | null;
     transcriptError: string | null;
-    videoId?: string;
-    videoTitle?: string;
-    watchPercentage?: number;
-    sessionStartTime?: Date;
-    onFeedbackSubmit: (payload: any) => void;
+    onFeedbackSubmit: () => void;
     onFeedbackSkip: () => void;
   }
   
@@ -91,15 +82,13 @@ import VideoFeedbackModal, {
     </svg>
   );
   
-  const XIcon = () => <Icon path="M18 6L6 18 M6 6l12 12" className="w-5 h-5" />;
-  
   const MinimizeIcon = () => (
     <Icon
       path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"
       className="w-5 h-5"
     />
   );
-  const SparklesIcon: React.FC<IconProps> = ({}) => (
+  const SparklesIcon = () => (
     <svg
       width="20"
       height="20"
@@ -115,17 +104,12 @@ import VideoFeedbackModal, {
   interface HeaderProps {
     videoDetail: VideoDetail | null;
     isLoading: boolean;
-    onToggleVideo: () => void;
-    isVideoVisible: boolean;
-    onShare: () => void;
     onToggleFullScreen: () => void;
-    isLeftColumnVisible: boolean;
   }
   
   const Header: React.FC<HeaderProps> = ({
     videoDetail,
     isLoading,
-    onShare,
     onToggleFullScreen,
   }) => {
     const navigate = useNavigate();
@@ -148,7 +132,7 @@ import VideoFeedbackModal, {
             }}
             className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none"
           >
-            <SparklesIcon path="" className="h-5 w-5" />
+            <SparklesIcon />
             <span className="hidden sm:inline">Upgrade plan</span>
             <span className="sm:hidden">Upgrade</span>
           </button>
@@ -163,18 +147,49 @@ import VideoFeedbackModal, {
     );
   };
   
-  const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => (
-    <div className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg">
-      <iframe
-        id="yt-player-iframe"
-        src={src}
-        title="YouTube video player"
-        frameBorder="0"
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-        allowFullScreen
-        className="w-full h-full"
-      ></iframe>
-    </div>
+  const VideoPlayer: React.FC<VideoPlayerProps> = ({ src }) => {
+    const videoId = src.split('v=')[1];
+    return (
+      <div className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg">
+        <iframe
+          id={`yt-player-iframe-${videoId}`}
+          src={src}
+          title="YouTube video player"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="w-full h-full"
+        ></iframe>
+      </div>
+    );
+  };
+  
+  // Memoize the VideoPlayer component to prevent re-renders from feedback state changes
+  const MemoizedVideoPlayer = React.memo(VideoPlayer, (prevProps, nextProps) => {
+    // Only re-render if the src actually changes
+    return prevProps.src === nextProps.src;
+  });
+  
+  // Stable isolated video that mounts once per videoId
+  const StableVideo: React.FC<{ videoId: string | null }> = React.memo(
+    ({ videoId }) => {
+      if (!videoId) {
+        return (
+          <div className="aspect-video bg-gray-800 flex items-center justify-center">
+            <p className="text-white">No video ID available</p>
+          </div>
+        );
+      }
+      return (
+        <div className="video-container relative">
+          <MemoizedVideoPlayer
+            key={videoId}
+            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}`}
+          />
+        </div>
+      );
+    },
+    (prev, next) => prev.videoId === next.videoId
   );
   
   const ContentTabs: React.FC<ContentTabsProps> = ({
@@ -184,10 +199,6 @@ import VideoFeedbackModal, {
     isLoadingTranscript,
     chaptersError,
     transcriptError,
-    videoId,
-    videoTitle,
-    watchPercentage,
-    sessionStartTime,
     onFeedbackSubmit,
     onFeedbackSkip,
   }) => {
@@ -236,19 +247,6 @@ import VideoFeedbackModal, {
                 className="toggle-label block overflow-hidden h-5 sm:h-6 rounded-full bg-border-medium cursor-pointer"
               ></label>
             </div>
-            {/* Condensed Feedback Component */}
-            <CondensedFeedback
-              videoId={videoId}
-              videoTitle={videoTitle}
-              watchPercentage={watchPercentage}
-              sessionDuration={
-                sessionStartTime
-                  ? Math.floor((Date.now() - sessionStartTime.getTime()) / 1000)
-                  : undefined
-              }
-              onFeedbackSubmit={onFeedbackSubmit}
-              onFeedbackSkip={onFeedbackSkip}
-            />
           </div>
         </div>
         <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 rounded-xl border border-border ">
@@ -332,6 +330,27 @@ import VideoFeedbackModal, {
     onToggleVideo: () => void;
     isVideoVisible: boolean;
     onShare: () => void;
+    // Feedback state for each component
+    chatFeedbackState?: {
+      canSubmitFeedback: boolean;
+      existingFeedback: any;
+      markAsSubmitted: () => void;
+    };
+    quizFeedbackState?: {
+      canSubmitFeedback: boolean;
+      existingFeedback: any;
+      markAsSubmitted: () => void;
+    };
+    summaryFeedbackState?: {
+      canSubmitFeedback: boolean;
+      existingFeedback: any;
+      markAsSubmitted: () => void;
+    };
+    flashcardFeedbackState?: {
+      canSubmitFeedback: boolean;
+      existingFeedback: any;
+      markAsSubmitted: () => void;
+    };
   }> = ({
     currentMode,
     onModeChange,
@@ -345,6 +364,10 @@ import VideoFeedbackModal, {
     onToggleVideo,
     isVideoVisible,
     onShare,
+    chatFeedbackState,
+    quizFeedbackState,
+    summaryFeedbackState,
+    flashcardFeedbackState,
   }) => {
     const modes: { key: LearningMode; label: string; icon: any }[] = [
       { key: "chat", label: "Chat", icon: <MessageCircle /> },
@@ -362,11 +385,36 @@ import VideoFeedbackModal, {
           error={chatError}
           onSendMessage={onSendMessage}
           isLeftColumnVisible={isLeftColumnVisible}
+          // Pass feedback state for Chat component
+          canSubmitFeedback={chatFeedbackState?.canSubmitFeedback}
+          existingFeedback={chatFeedbackState?.existingFeedback}
+          markAsSubmitted={chatFeedbackState?.markAsSubmitted}
         />
       ),
-      flashcards: <Flashcards />,
-      quiz: <Quiz />,
-      summary: <Summary />,
+      flashcards: (
+        <Flashcards 
+          // Pass feedback state for Flashcard component
+          canSubmitFeedback={flashcardFeedbackState?.canSubmitFeedback}
+          existingFeedback={flashcardFeedbackState?.existingFeedback}
+          markAsSubmitted={flashcardFeedbackState?.markAsSubmitted}
+        />
+      ),
+      quiz: (
+        <Quiz 
+          // Pass feedback state for Quiz component
+          canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
+          existingFeedback={quizFeedbackState?.existingFeedback}
+          markAsSubmitted={quizFeedbackState?.markAsSubmitted}
+        />
+      ),
+      summary: (
+        <Summary 
+          // Pass feedback state for Summary component
+          canSubmitFeedback={summaryFeedbackState?.canSubmitFeedback}
+          existingFeedback={summaryFeedbackState?.existingFeedback}
+          markAsSubmitted={summaryFeedbackState?.markAsSubmitted}
+        />
+      ),
     };
   
     return (
@@ -520,10 +568,10 @@ import VideoFeedbackModal, {
     const [chaptersError, setChaptersError] = useState<string | null>(null);
     const [transcriptError, setTranscriptError] = useState<string | null>(null);
     const [isLeftColumnVisible, setIsLeftColumnVisible] = useState(true);
-  
+
     // State for learning mode
     const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
-  
+
     // Chat state management
     const [chatMessages, setChatMessages] = useState<
       Array<{ text: string; isUser: boolean }>
@@ -531,100 +579,125 @@ import VideoFeedbackModal, {
     const [isChatLoading, setIsChatLoading] = useState(false);
     const [chatError, setChatError] = useState<string | null>(null);
     const [chatInitialized, setChatInitialized] = useState(false);
-    const [showFeedback, setShowFeedback] = useState(true);
-  
-    const handleFeedbackSubmit = (payload: VideoFeedbackPayload) => {
-      console.log("Feedback Submitted:", payload);
-      // In a real app, you might hide the component after a delay
-      // setTimeout(() => setShowFeedback(false), 2000);
-    };
-  
-    const handleFeedbackSkip = () => {
-      console.log("Feedback Skipped");
-      setShowFeedback(false);
-    };
-  
-    // Enhanced feedback state management
-    const [feedbackState, setFeedbackState] = useState<{
-      hasShownFeedback: boolean;
-      lastFeedbackTime: number | null;
-      feedbackCount: number;
-    }>({
-      hasShownFeedback: false,
-      lastFeedbackTime: null,
-      feedbackCount: 0,
-    });
-  
-    // Update feedback state when feedback is shown
-    const updateFeedbackState = useCallback(
-      (action: "shown" | "submitted" | "skipped") => {
-        setFeedbackState((prev) => ({
-          ...prev,
-          hasShownFeedback: true,
-          lastFeedbackTime: Date.now(),
-          feedbackCount:
-            action === "submitted" ? prev.feedbackCount + 1 : prev.feedbackCount,
-        }));
-      },
-      []
-    );
+
     // Video player ref for tracking progress
-    const videoPlayerRef = useRef<HTMLIFrameElement>(null);
     const videoDurationRef = useRef<number>(0);
     const currentTimeRef = useRef<number>(0);
     const ytPlayerRef = useRef<any>(null);
     const progressIntervalRef = useRef<number | null>(null);
-  
+
     // Get video ID from URL params or location state
     const currentVideoId = videoId || location.state?.videoId;
-  
-    // Feedback functionality
+
+    // Memoize components array to prevent hook recreation
+    const feedbackComponents = useMemo(() => [
+      ComponentName.Video,
+      ComponentName.Chat,
+      ComponentName.Quiz,
+      ComponentName.Summary,
+      ComponentName.Flashcard
+    ], []);
+
+    // Feedback tracking for multiple components (new format)
     const {
-      isFeedbackModalOpen,
-      feedbackSuggestions,
-      isLoadingSuggestions,
-      sessionStartTime,
-      watchPercentage,
-      openFeedbackModal,
-      closeFeedbackModal,
-      submitFeedback,
-      skipFeedback,
-      startSession,
-      updateWatchPercentage,
-      shouldShowFeedbackOnLeave,
-      setShouldShowFeedbackOnLeave,
-    } = useVideoFeedback({
-      videoId: currentVideoId || "",
-      videoTitle: videoDetail?.title,
-      onFeedbackSubmitted: (payload: VideoFeedbackPayload) => {
-        console.log("Feedback submitted:", payload);
-        // You can add analytics tracking here
-      },
-      onFeedbackSkipped: () => {
-        console.log("Feedback skipped");
-        // You can add analytics tracking here
-      },
+      feedbackStates,
+      isLoading: isFeedbackLoading,
+      error: feedbackError,
+      markAsSubmitted: markFeedbackAsSubmitted,
+      resetFeedback,
+    } = useMultiFeedbackTracker({
+      components: feedbackComponents,
+      sourceId: currentVideoId || "unknown",
+      pageUrl: window.location.href,
     });
-  
-    // Start session when video loads
+
+    // Extract video feedback state
+    const videoFeedbackState = feedbackStates[ComponentName.Video];
+    const videoCanSubmitFeedback = videoFeedbackState ? videoFeedbackState.canSubmitFeedback : (isFeedbackLoading ? false : true);
+    const videoExistingFeedback = videoFeedbackState?.existingFeedback ?? null;
+
+    // Extract feedback states for all components
+    const chatFeedbackState = feedbackStates[ComponentName.Chat];
+    const quizFeedbackState = feedbackStates[ComponentName.Quiz];
+    const summaryFeedbackState = feedbackStates[ComponentName.Summary];
+    const flashcardFeedbackState = feedbackStates[ComponentName.Flashcard];
+
+    // Create wrapper functions for markAsSubmitted for each component
+    const chatMarkAsSubmitted = useCallback(() => {
+      markFeedbackAsSubmitted(ComponentName.Chat);
+    }, [markFeedbackAsSubmitted]);
+
+    const quizMarkAsSubmitted = useCallback(() => {
+      markFeedbackAsSubmitted(ComponentName.Quiz);
+    }, [markFeedbackAsSubmitted]);
+
+    const summaryMarkAsSubmitted = useCallback(() => {
+      markFeedbackAsSubmitted(ComponentName.Summary);
+    }, [markFeedbackAsSubmitted]);
+
+    const flashcardMarkAsSubmitted = useCallback(() => {
+      markFeedbackAsSubmitted(ComponentName.Flashcard);
+    }, [markFeedbackAsSubmitted]);
+
+    // Create wrapper function for markAsSubmitted to maintain backward compatibility
+    const videoMarkAsSubmitted = useCallback(() => {
+      markFeedbackAsSubmitted(ComponentName.Video);
+    }, [markFeedbackAsSubmitted]);
+
+    // Create wrapper objects for feedback state that include markAsSubmitted
+    const chatFeedbackStateWrapper = chatFeedbackState ? {
+      canSubmitFeedback: chatFeedbackState.canSubmitFeedback,
+      existingFeedback: chatFeedbackState.existingFeedback,
+      markAsSubmitted: chatMarkAsSubmitted,
+    } : undefined;
+
+    const quizFeedbackStateWrapper = quizFeedbackState ? {
+      canSubmitFeedback: quizFeedbackState.canSubmitFeedback,
+      existingFeedback: quizFeedbackState.existingFeedback,
+      markAsSubmitted: quizMarkAsSubmitted,
+    } : undefined;
+
+    const summaryFeedbackStateWrapper = summaryFeedbackState ? {
+      canSubmitFeedback: summaryFeedbackState.canSubmitFeedback,
+      existingFeedback: summaryFeedbackState.existingFeedback,
+      markAsSubmitted: summaryMarkAsSubmitted,
+    } : undefined;
+
+    const flashcardFeedbackStateWrapper = flashcardFeedbackState ? {
+      canSubmitFeedback: flashcardFeedbackState.canSubmitFeedback,
+      existingFeedback: flashcardFeedbackState.existingFeedback,
+      markAsSubmitted: flashcardMarkAsSubmitted,
+    } : undefined;
+
+    // Local modal state for feedback
+    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+    const openFeedbackModal = useCallback(() => setIsFeedbackModalOpen(true), []);
+    const closeFeedbackModal = useCallback(() => setIsFeedbackModalOpen(false), []);
+
+    // Use refs for feedback gates to avoid effect dependencies causing teardown
+    const videoCanSubmitFeedbackRef = useRef<boolean>(false);
+    const hasShownFeedbackRef = useRef<boolean>(false);
+
+    // Update refs when feedback state changes
+    useEffect(() => {
+      videoCanSubmitFeedbackRef.current = videoCanSubmitFeedback;
+    }, [videoCanSubmitFeedback]);
+
+    // Reset feedback state when video changes
     useEffect(() => {
       if (currentVideoId) {
-        startSession();
-        setShouldShowFeedbackOnLeave(true);
-  
         // Reset feedback state for new video
-        setFeedbackState({
-          hasShownFeedback: false,
-          lastFeedbackTime: null,
-          feedbackCount: 0,
-        });
-  
+        hasShownFeedbackRef.current = false;
+        
+        // Reset the feedback tracker to prevent continuous API calls
+        resetFeedback();
+        
         // Reset video progress tracking
         if (progressIntervalRef.current) {
           clearInterval(progressIntervalRef.current);
           progressIntervalRef.current = null;
         }
-  
+
         // Reset YouTube player reference
         if (ytPlayerRef.current) {
           try {
@@ -633,204 +706,130 @@ import VideoFeedbackModal, {
           ytPlayerRef.current = null;
         }
       }
-    }, [currentVideoId, startSession, setShouldShowFeedbackOnLeave]);
+    }, [currentVideoId, resetFeedback]);
   
-    // Track video progress based on session time (fallback method)
-    const startProgressTracking = useCallback(() => {
-      const progressInterval = setInterval(() => {
-        if (sessionStartTime && videoDurationRef.current > 0) {
-          // Calculate progress based on session duration
-          const sessionDuration = Math.floor(
-            (Date.now() - sessionStartTime.getTime()) / 1000
-          );
-          const estimatedProgress = Math.min(
-            100,
-            (sessionDuration / videoDurationRef.current) * 100
-          );
-          updateWatchPercentage(estimatedProgress);
-  
-          // Auto-show feedback when video reaches 90%
-          if (
-            estimatedProgress >= 90 &&
-            shouldShowFeedbackOnLeave &&
-            !feedbackState.hasShownFeedback
-          ) {
-            openFeedbackModal();
-            updateFeedbackState("shown");
-          }
-        }
-      }, 1000); // Update every second
-  
-      return () => clearInterval(progressInterval);
-    }, [
-      sessionStartTime,
-      updateWatchPercentage,
-      shouldShowFeedbackOnLeave,
-      openFeedbackModal,
-      updateFeedbackState,
-      feedbackState.hasShownFeedback,
-    ]);
-  
-    // Enhanced progress tracking with user activity detection
-    const trackUserActivity = useCallback(() => {
-      // This function can be called periodically to ensure accurate progress
-      if (ytPlayerRef.current && videoDurationRef.current > 0) {
-        try {
-          const currentTime = ytPlayerRef.current.getCurrentTime?.() || 0;
-          const duration =
-            ytPlayerRef.current.getDuration?.() || videoDurationRef.current;
-  
-          if (duration > 0) {
-            const percentage = Math.min(100, (currentTime / duration) * 100);
-            updateWatchPercentage(percentage);
-  
-            // Show feedback if user has watched 90% or more
-            if (
-              percentage >= 90 &&
-              shouldShowFeedbackOnLeave &&
-              !feedbackState.hasShownFeedback
-            ) {
-              openFeedbackModal();
-              updateFeedbackState("shown");
-            }
-          }
-        } catch (error) {
-          console.warn("Error tracking user activity:", error);
-        }
-      }
-    }, [
-      updateWatchPercentage,
-      shouldShowFeedbackOnLeave,
-      openFeedbackModal,
-      updateFeedbackState,
-      feedbackState.hasShownFeedback,
-    ]);
-  
-    // Periodic activity tracking to catch all progress changes
+    // Start YouTube progress tracking when video loads
     useEffect(() => {
-      if (sessionStartTime && shouldShowFeedbackOnLeave) {
-        const activityInterval = setInterval(() => {
-          trackUserActivity();
-        }, 2000); // Check every 2 seconds
-  
-        return () => clearInterval(activityInterval);
-      }
-    }, [sessionStartTime, shouldShowFeedbackOnLeave, trackUserActivity]);
-  
-    // Enhanced video progress tracking with user interaction detection
-    useEffect(() => {
-      if (sessionStartTime && shouldShowFeedbackOnLeave) {
-        // Listen for user interactions that might indicate video seeking
-        const handleUserInteraction = () => {
-          // Delay to allow video state to update
-          setTimeout(() => {
-            trackUserActivity();
-          }, 100);
-        };
-  
-        // Add event listeners for user interactions
-        document.addEventListener("keydown", handleUserInteraction);
-        document.addEventListener("click", handleUserInteraction);
-        document.addEventListener("scroll", handleUserInteraction);
-  
-        return () => {
-          document.removeEventListener("keydown", handleUserInteraction);
-          document.removeEventListener("click", handleUserInteraction);
-          document.removeEventListener("scroll", handleUserInteraction);
-        };
-      }
-    }, [sessionStartTime, shouldShowFeedbackOnLeave, trackUserActivity]);
-  
-    // Start progress tracking when session starts
-    useEffect(() => {
-      if (sessionStartTime && shouldShowFeedbackOnLeave) {
+      if (currentVideoId) {
+        console.log("🎯 Setting up YouTube progress tracking");
+        
         // Load YouTube Iframe API to get precise duration and currentTime
         const setup = async () => {
-          // Inject API if not already loaded
-          if (!(window.YT && window.YT.Player)) {
-            const existing = document.getElementById("youtube-iframe-api");
-            if (!existing) {
-              const s = document.createElement("script");
-              s.id = "youtube-iframe-api";
-              s.src = "https://www.youtube.com/iframe_api";
-              document.body.appendChild(s);
-            }
-            await new Promise<void>((resolve) => {
-              window.onYouTubeIframeAPIReady = () => resolve();
-            });
-          }
-  
           try {
-            const player = new window.YT.Player("yt-player-iframe", {
+            // Inject API if not already loaded
+            if (!(window.YT && window.YT.Player)) {
+              console.log("📡 Loading YouTube Iframe API...");
+              const existing = document.getElementById("youtube-iframe-api");
+              if (!existing) {
+                const s = document.createElement("script");
+                s.id = "youtube-iframe-api";
+                s.src = "https://www.youtube.com/iframe_api";
+                document.body.appendChild(s);
+              }
+              
+              // Wait for API to load
+              await new Promise<void>((resolve) => {
+                if (window.YT && window.YT.Player) {
+                  resolve();
+                } else {
+                  window.onYouTubeIframeAPIReady = () => resolve();
+                }
+              });
+              console.log("✅ YouTube Iframe API loaded");
+            }
+            
+            // Check if iframe exists and is ready
+            const iframe = document.getElementById(`yt-player-iframe-${currentVideoId}`) as HTMLIFrameElement;
+            if (!iframe) {
+              console.warn("❌ YouTube iframe not found");
+              return;
+            }
+            
+            // Wait for iframe to be ready
+            if (!iframe.contentWindow) {
+              console.log("⏳ Waiting for iframe to be ready...");
+              setTimeout(() => setup(), 1000);
+              return;
+            }
+            
+            console.log("🎮 Setting up YouTube player...");
+            
+            // Create a separate player instance that doesn't interfere with the iframe
+            const player = new window.YT.Player(`yt-player-iframe-${currentVideoId}`, {
               events: {
                 onReady: (e: any) => {
+                  console.log("🎯 YouTube player ready");
                   const dur = e.target.getDuration?.() || 0;
-                  if (dur > 0) videoDurationRef.current = dur;
-  
+                  if (dur > 0) {
+                    videoDurationRef.current = dur;
+                    console.log(`⏱️ Video duration: ${dur}s`);
+                  }
                   // Start progress tracking interval
                   if (progressIntervalRef.current == null) {
+                    console.log("🔄 Starting progress tracking interval");
                     progressIntervalRef.current = window.setInterval(() => {
                       try {
                         const cur = player.getCurrentTime?.() || 0;
                         const d =
                           player.getDuration?.() || videoDurationRef.current || 0;
-  
+
                         if (d > 0) {
                           videoDurationRef.current = d;
+                          currentTimeRef.current = cur;
                           const pct = Math.min(100, (cur / d) * 100);
-                          updateWatchPercentage(pct);
-  
-                          // Auto-show feedback when video reaches 90%
-                          if (
-                            pct >= 90 &&
-                            shouldShowFeedbackOnLeave &&
-                            !feedbackState.hasShownFeedback
-                          ) {
+                          
+                          console.log(`📊 Play Progress: ${cur}s/${d}s = ${pct.toFixed(1)}%`);
+                          
+                          // Auto-show feedback when video reaches threshold; use refs to avoid effect rerun
+                          if (pct >= 90 && !hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current) {
+                            console.log("🎉 Video reached 90% - showing feedback modal");
                             openFeedbackModal();
-                            updateFeedbackState("shown");
+                            hasShownFeedbackRef.current = true;
                           }
                         }
                       } catch (error) {
-                        console.warn("Error getting video progress:", error);
+                        console.warn("❌ Error getting video progress:", error);
                       }
                     }, 1000);
                   }
                 },
                 onStateChange: (e: any) => {
                   if (e?.data === window.YT.PlayerState.ENDED) {
-                    // Video ended - show feedback modal
-                    updateWatchPercentage(100);
-                    if (shouldShowFeedbackOnLeave) {
+                    console.log("🎬 Video ended - triggering feedback modal");
+                    currentTimeRef.current = videoDurationRef.current;
+                    
+                    if (!hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current) {
                       openFeedbackModal();
+                      hasShownFeedbackRef.current = true;
                     }
                   } else if (e?.data === window.YT.PlayerState.PLAYING) {
-                    // Video started playing - ensure session is active
-                    if (!sessionStartTime) {
-                      startSession();
-                    }
+                    console.log("▶️ Video started playing");
                   } else if (e?.data === window.YT.PlayerState.PAUSED) {
-                    // Video paused - update progress one more time
-                    handleVideoInteraction();
+                    console.log("⏸️ Video paused");
                   } else if (e?.data === window.YT.PlayerState.BUFFERING) {
-                    // Video buffering - this might indicate user seeking
-                    // Update progress after a short delay
-                    setTimeout(() => handleVideoInteraction(), 500);
+                    console.log("🔄 Video buffering");
+                  } else if (e?.data === window.YT.PlayerState.CUED) {
+                    console.log("🎯 Video cued and ready");
                   }
                 },
               },
             });
+            
             ytPlayerRef.current = player;
+            console.log("✅ YouTube player initialized successfully");
+            
           } catch (error) {
-            console.warn("Failed to initialize YouTube player:", error);
-            // Fallback to session-based progress tracking
-            if (!videoDurationRef.current) videoDurationRef.current = 600;
-            const cleanup = startProgressTracking();
-            return cleanup;
+            console.error("❌ Failed to initialize YouTube player:", error);
           }
         };
-  
-        const maybeCleanup = setup();
+        
+        // Delay setup to ensure iframe is fully loaded
+        const setupTimeout = setTimeout(() => {
+          setup();
+        }, 2000); // Wait 2 seconds for iframe to be ready
         return () => {
+          clearTimeout(setupTimeout);
+          console.log("🧹 Cleaning up YouTube player");
           if (progressIntervalRef.current != null) {
             clearInterval(progressIntervalRef.current);
             progressIntervalRef.current = null;
@@ -842,22 +841,16 @@ import VideoFeedbackModal, {
         };
       }
     }, [
-      sessionStartTime,
-      shouldShowFeedbackOnLeave,
-      startProgressTracking,
-      updateWatchPercentage,
+      currentVideoId,
       openFeedbackModal,
-      startSession,
-      updateFeedbackState,
-      feedbackState.hasShownFeedback,
     ]);
   
     // Page leaving guard - only trigger when user has watched more than 90%
     useEffect(() => {
       const handleBeforeUnload = (event: BeforeUnloadEvent) => {
         if (
-          shouldShowFeedbackOnLeave &&
-          watchPercentage >= 90 &&
+          videoCanSubmitFeedbackRef.current &&
+          !videoExistingFeedback &&
           !isFeedbackModalOpen
         ) {
           event.preventDefault();
@@ -869,8 +862,7 @@ import VideoFeedbackModal, {
             `feedback_pending_${currentVideoId}`,
             JSON.stringify({
               timestamp: Date.now(),
-              watchPercentage,
-              sessionStartTime: sessionStartTime?.toISOString(),
+              watchPercentage: 100, // Assuming 100% for leave
               videoTitle: videoDetail?.title,
             })
           );
@@ -879,8 +871,8 @@ import VideoFeedbackModal, {
   
       const handlePopState = (event: PopStateEvent) => {
         if (
-          shouldShowFeedbackOnLeave &&
-          watchPercentage >= 90 &&
+          videoCanSubmitFeedbackRef.current &&
+          !videoExistingFeedback &&
           !isFeedbackModalOpen
         ) {
           // Show feedback modal before navigation
@@ -910,11 +902,10 @@ import VideoFeedbackModal, {
         window.removeEventListener("popstate", handlePopState);
       };
     }, [
-      shouldShowFeedbackOnLeave,
-      watchPercentage,
+      videoCanSubmitFeedbackRef.current,
+      videoExistingFeedback,
       isFeedbackModalOpen,
       currentVideoId,
-      sessionStartTime,
       videoDetail?.title,
       openFeedbackModal,
     ]);
@@ -1043,11 +1034,11 @@ import VideoFeedbackModal, {
       setChatError(null);
   
       // Reset feedback state when video changes
-      setFeedbackState({
-        hasShownFeedback: false,
-        lastFeedbackTime: null,
-        feedbackCount: 0,
-      });
+      // setFeedbackState({ // This line was removed as per the edit hint
+      //   hasShownFeedback: false,
+      //   lastFeedbackTime: null,
+      //   feedbackCount: 0,
+      // });
     }, [currentVideoId]);
   
     const initializeChat = async () => {
@@ -1138,39 +1129,6 @@ import VideoFeedbackModal, {
       setCurrentMode(mode);
     }, []);
   
-    // Manual feedback trigger (for testing)
-    const handleManualFeedbackTrigger = useCallback(() => {
-      openFeedbackModal();
-    }, [openFeedbackModal]);
-  
-    // Manual video duration setter (for testing)
-    const handleSetVideoDuration = useCallback((duration: number) => {
-      videoDurationRef.current = duration;
-      console.log("Video duration set to:", duration, "seconds");
-    }, []);
-  
-    // Manual progress trigger (for testing)
-    const handleSetProgress = useCallback(
-      (percentage: number) => {
-        updateWatchPercentage(percentage);
-        if (
-          percentage >= 90 &&
-          shouldShowFeedbackOnLeave &&
-          !feedbackState.hasShownFeedback
-        ) {
-          openFeedbackModal();
-          updateFeedbackState("shown");
-        }
-      },
-      [
-        updateWatchPercentage,
-        shouldShowFeedbackOnLeave,
-        openFeedbackModal,
-        updateFeedbackState,
-        feedbackState.hasShownFeedback,
-      ]
-    );
-  
     // Enhanced video progress tracking with user interaction detection
     const handleVideoInteraction = useCallback(() => {
       // This function can be called when user interacts with video controls
@@ -1180,28 +1138,28 @@ import VideoFeedbackModal, {
           const currentTime = ytPlayerRef.current.getCurrentTime?.() || 0;
           const duration =
             ytPlayerRef.current.getDuration?.() || videoDurationRef.current;
-          const percentage = Math.min(100, (currentTime / duration) * 100);
-          updateWatchPercentage(percentage);
-  
+          // const percentage = Math.min(100, (currentTime / duration) * 100); // This line is no longer needed
+          // updateWatchPercentage(percentage); // This function is no longer available
+
           // Show feedback if user has watched 90% or more
-          if (
-            percentage >= 90 &&
-            shouldShowFeedbackOnLeave &&
-            !feedbackState.hasShownFeedback
-          ) {
-            openFeedbackModal();
-            updateFeedbackState("shown");
-          }
+          // if ( // This block was removed as per the edit hint
+          //   // percentage >= 90 && // This line is no longer needed
+          //   // shouldShowFeedbackOnLeave && // This variable is no longer available
+          //   !feedbackState.hasShownFeedback
+          // ) {
+          //   openFeedbackModal();
+          //   updateFeedbackState("shown");
+          // }
         } catch (error) {
           console.warn("Error getting video progress on interaction:", error);
         }
       }
     }, [
-      updateWatchPercentage,
-      shouldShowFeedbackOnLeave,
+      // updateWatchPercentage, // This function is no longer available
+      // shouldShowFeedbackOnLeave, // This variable is no longer available
       openFeedbackModal,
-      updateFeedbackState,
-      feedbackState.hasShownFeedback,
+      // updateFeedbackState, // This function is no longer available
+      // feedbackState.hasShownFeedback, // This variable is no longer available
     ]);
   
     // Listen for video player events to catch user interactions
@@ -1236,15 +1194,9 @@ import VideoFeedbackModal, {
               <Header
                 videoDetail={videoDetail}
                 isLoading={isLoadingVideo}
-                onToggleVideo={handleToggleVideo}
-                isVideoVisible={isVideoVisible}
-                onShare={handleShare}
                 onToggleFullScreen={handleToggleFullScreen}
-                isLeftColumnVisible={isLeftColumnVisible}
               />
-              <VideoPlayer
-                src={`https://www.youtube.com/embed/${currentVideoId}`}
-              />
+              <StableVideo videoId={currentVideoId} />
               <ContentTabs
                 chapters={chapters}
                 transcript={transcript}
@@ -1252,12 +1204,8 @@ import VideoFeedbackModal, {
                 isLoadingTranscript={isLoadingTranscript}
                 chaptersError={chaptersError}
                 transcriptError={transcriptError}
-                videoId={currentVideoId}
-                videoTitle={videoDetail?.title}
-                watchPercentage={watchPercentage}
-                sessionStartTime={sessionStartTime || undefined}
-                onFeedbackSubmit={submitFeedback}
-                onFeedbackSkip={skipFeedback}
+                onFeedbackSubmit={() => handleFeedbackComplete("submit")}
+                onFeedbackSkip={() => handleFeedbackComplete("skip")}
               />
             </div>
             <div
@@ -1278,6 +1226,11 @@ import VideoFeedbackModal, {
                 onToggleVideo={handleToggleVideo}
                 isVideoVisible={isVideoVisible}
                 onShare={handleShare}
+                // Pass feedback states to AITutorPanel
+                chatFeedbackState={chatFeedbackStateWrapper}
+                quizFeedbackState={quizFeedbackStateWrapper}
+                summaryFeedbackState={summaryFeedbackStateWrapper}
+                flashcardFeedbackState={flashcardFeedbackStateWrapper}
               />
             </div>
           </main>
@@ -1305,7 +1258,7 @@ import VideoFeedbackModal, {
                     }}
                     className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer glow-purple transition-transform transform hover:scale-105 focus:outline-none"
                   >
-                    <SparklesIcon path="" className="h-5 w-5" />
+                    <SparklesIcon />
                     Upgrade plan
                   </button>
                 ) : (
@@ -1315,15 +1268,13 @@ import VideoFeedbackModal, {
                     }}
                     className="flex items-center gap-1 rounded-full p-2 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer glow-purple transition-transform transform hover:scale-105 focus:outline-none"
                   >
-                    <SparklesIcon path="" className="h-5 w-5" />
+                    <SparklesIcon />
                   </button>
                 )}
               </div>
             </header>
             <div className={`flex-shrink-0 ${isVideoVisible ? "" : "hidden"}`}>
-              <VideoPlayer
-                src={`https://www.youtube.com/embed/${currentVideoId}`}
-              />
+              <StableVideo videoId={currentVideoId} />
             </div>
   
             {isLeftColumnVisible ? (
@@ -1357,6 +1308,11 @@ import VideoFeedbackModal, {
                 onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
                 isVideoVisible={isVideoVisible}
                 onShare={() => setIsShareModalOpen(true)}
+                // Pass feedback states to AITutorPanel
+                chatFeedbackState={chatFeedbackStateWrapper}
+                quizFeedbackState={quizFeedbackStateWrapper}
+                summaryFeedbackState={summaryFeedbackStateWrapper}
+                flashcardFeedbackState={flashcardFeedbackStateWrapper}
               />
             </div>
           </div>
@@ -1365,28 +1321,23 @@ import VideoFeedbackModal, {
         {/* Feedback Modal */}
         <VideoFeedbackModal
           isOpen={isFeedbackModalOpen}
-          onClose={() => handleFeedbackComplete("dismiss")}
+          onClose={() => setIsFeedbackModalOpen(false)}
           videoId={currentVideoId}
           videoTitle={videoDetail?.title}
-          suggestedChips={feedbackSuggestions}
-          sessionStartTime={sessionStartTime || undefined}
-          watchPercentage={watchPercentage}
-          onSubmit={async (payload) => {
+          suggestedChips={[]}
+          playPercentage={100}
+          onSubmit={async () => {
             try {
-              await submitFeedback(payload);
-              updateFeedbackState("submitted");
-              handleFeedbackComplete("submit");
-            } catch (error) {
-              console.error("Failed to submit feedback:", error);
-              // The modal will handle the error display
-            }
+              videoMarkAsSubmitted();
+              setIsFeedbackModalOpen(false);
+            } catch {}
           }}
-          onSkip={() => {
-            skipFeedback();
-            updateFeedbackState("skipped");
-            handleFeedbackComplete("skip");
-          }}
-          onDismiss={() => handleFeedbackComplete("dismiss")}
+          onSkip={() => setIsFeedbackModalOpen(false)}
+          onDismiss={() => setIsFeedbackModalOpen(false)}
+          canSubmitFeedback={videoCanSubmitFeedback}
+          existingFeedback={videoExistingFeedback}
+          markAsSubmitted={videoMarkAsSubmitted}
+          componentName="Video"
         />
   
         <ShareModal

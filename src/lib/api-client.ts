@@ -271,18 +271,18 @@ interface ChatSendResponse {
 
 export const chatApi = {
   getChatHistory: async (videoId: string): Promise<ChatHistoryResponse> => {
-    const response = await apiRequest<ChatHistoryResponse>('GET', `/ai_agent/history?video_id=${encodeURIComponent(videoId)}`);
+    const response = await apiRequest<ChatHistoryResponse>('GET', `/ai_agent/history?vedio_id=${encodeURIComponent(videoId)}`);
     return response.data;
   },
 
   startChat: async (videoId: string): Promise<ChatStartResponse> => {
-    const response = await apiRequest<ChatStartResponse>('POST', '/ai_agent/start', { video_id: videoId });
+    const response = await apiRequest<ChatStartResponse>('POST', '/ai_agent/start', { vedio_id: videoId });
     return response.data;
   },
 
   sendMessage: async (videoId: string, message: string): Promise<ChatSendResponse> => {
     const response = await apiRequest<ChatSendResponse>('POST', '/ai_agent/send', {
-      video_id: videoId,
+      vedio_id: videoId,
       message: message
     });
     return response.data;
