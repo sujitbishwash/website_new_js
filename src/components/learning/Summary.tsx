@@ -185,19 +185,31 @@ const SummarySection: React.FC<{ section: SummarySectionData }> = ({
 );
 
 // Footer with explicit Rate button and modal handling
-const SummaryFeedback: React.FC = () => {
+const SummaryFeedback: React.FC<SummaryProps> = ({
+  videoId,
+  canSubmitFeedback,
+  existingFeedback,
+  markAsSubmitted,
+}) => {
   const [isOpen, setIsOpen] = useState(false);
-  const { canSubmitFeedback, existingFeedback, markAsSubmitted } = useFeedbackTracker({
-    component: ComponentName.Summary,
-    sourceId: "summary",
-    pageUrl: window.location.href,
-  });
 
-  const open = () => setIsOpen(true);
+  console.log(canSubmitFeedback, existingFeedback, markAsSubmitted);
+  
+
+  const open = () => {
+    console.log("🔍 Summary feedback button clicked:", {
+      canSubmitFeedback,
+      existingFeedback: !!existingFeedback,
+      hasMarkAsSubmitted: !!markAsSubmitted
+    });
+    setIsOpen(true);
+  };
   const close = () => setIsOpen(false);
   const onSubmit = async (payload: any) => {
     console.log("Summary feedback submitted:", payload);
-    markAsSubmitted();
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
     setIsOpen(false);
   };
 
@@ -206,19 +218,31 @@ const SummaryFeedback: React.FC = () => {
       <div className="text-sm text-muted-foreground">
         Share your thoughts about this summary.
       </div>
-      <button
-        onClick={open}
-        className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-          existingFeedback ? "bg-gray-600 hover:bg-gray-500 text-gray-300" : "bg-blue-600 hover:bg-blue-500 text-white"
-        }`}
-        disabled={!canSubmitFeedback && !existingFeedback}
-      >
-        {existingFeedback ? "Update Feedback" : "Rate Summary"}
-      </button>
+      <div className="flex gap-2">
+        <button
+          onClick={open}
+          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            existingFeedback ? "bg-gray-600 hover:bg-gray-500 text-gray-300" : "bg-blue-600 hover:bg-blue-500 text-white"
+          }`}
+          disabled={!canSubmitFeedback && !existingFeedback}
+        >
+          {existingFeedback ? "Update Feedback" : "Rate Summary"}
+        </button>
+        {/* Debug feedback button */}
+        <button
+          onClick={() => {
+            console.log("🔍 Manual feedback test button clicked for Summary");
+            setIsOpen(true);
+          }}
+          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+        >
+          Test Feedback
+        </button>
+      </div>
       <VideoFeedbackModal
         isOpen={isOpen}
         onClose={close}
-        videoId={"summary"}
+        videoId={videoId}
         videoTitle={"Summary"}
         suggestedChips={[]}
         playPercentage={100}
@@ -289,16 +313,25 @@ const LoadingSpinner = () => (
 // Add props interface for feedback state
 interface SummaryProps {
   // Optional props to prevent duplicate API calls when passed from parent
+  videoId: string;
   canSubmitFeedback?: boolean;
   existingFeedback?: any;
   markAsSubmitted?: () => void;
 }
 
 const Summary: React.FC<SummaryProps> = ({
-  canSubmitFeedback: _canSubmitFeedback,
-  existingFeedback: _existingFeedback,
-  markAsSubmitted: _markAsSubmitted,
+  videoId,
+  canSubmitFeedback,
+  existingFeedback,
+  markAsSubmitted,
 }) => {
+  // Debug feedback props
+  console.log("🔍 Summary Component Props:", {
+    videoId,
+    canSubmitFeedback,
+    existingFeedback: !!existingFeedback,
+    hasMarkAsSubmitted: !!markAsSubmitted
+  });
   const [summaryData, setSummaryData] = useState<SummarySectionData[] | null>(
     null
   );
@@ -370,7 +403,7 @@ const Summary: React.FC<SummaryProps> = ({
             {summaryData?.map((section, index) => (
               <SummarySection key={index} section={section} />
             ))}
-            <SummaryFeedback />
+            <SummaryFeedback videoId={videoId} canSubmitFeedback={canSubmitFeedback} existingFeedback={existingFeedback} markAsSubmitted={markAsSubmitted} />
           </div>
         )}
       </div>

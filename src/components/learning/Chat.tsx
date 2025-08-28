@@ -642,7 +642,11 @@ export default function Chat({
   error,
   onSendMessage,
   isLeftColumnVisible,
+  canSubmitFeedback,
+  existingFeedback,
+  markAsSubmitted,
 }: ChatProps) {
+
   return (
     <div className="flex flex-col flex-1 h-full bg-background text-primaryText w-full">
       {/* Wrapper to center content if left column hidden */}

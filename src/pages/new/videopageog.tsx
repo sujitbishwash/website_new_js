@@ -351,6 +351,13 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
       existingFeedback: any;
       markAsSubmitted: () => void;
     };
+    // Components to render
+    components: {
+      chat: React.ReactNode;
+      flashcards: React.ReactNode;
+      quiz: React.ReactNode;
+      summary: React.ReactNode;
+    };
   }> = ({
     currentMode,
     onModeChange,
@@ -368,6 +375,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
     quizFeedbackState,
     summaryFeedbackState,
     flashcardFeedbackState,
+    components,
   }) => {
     const modes: { key: LearningMode; label: string; icon: any }[] = [
       { key: "chat", label: "Chat", icon: <MessageCircle /> },
@@ -375,48 +383,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
       { key: "quiz", label: "Quiz", icon: <MessageCircleQuestion /> },
       { key: "summary", label: "Summary", icon: <Text /> },
     ];
-  
-    const components = {
-      chat: (
-        <Chat
-          videoId={videoId}
-          messages={chatMessages}
-          isLoading={isChatLoading}
-          error={chatError}
-          onSendMessage={onSendMessage}
-          isLeftColumnVisible={isLeftColumnVisible}
-          // Pass feedback state for Chat component
-          canSubmitFeedback={chatFeedbackState?.canSubmitFeedback}
-          existingFeedback={chatFeedbackState?.existingFeedback}
-          markAsSubmitted={chatFeedbackState?.markAsSubmitted}
-        />
-      ),
-      flashcards: (
-        <Flashcards 
-          // Pass feedback state for Flashcard component
-          canSubmitFeedback={flashcardFeedbackState?.canSubmitFeedback}
-          existingFeedback={flashcardFeedbackState?.existingFeedback}
-          markAsSubmitted={flashcardFeedbackState?.markAsSubmitted}
-        />
-      ),
-      quiz: (
-        <Quiz 
-          // Pass feedback state for Quiz component
-          canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
-          existingFeedback={quizFeedbackState?.existingFeedback}
-          markAsSubmitted={quizFeedbackState?.markAsSubmitted}
-        />
-      ),
-      summary: (
-        <Summary 
-          // Pass feedback state for Summary component
-          canSubmitFeedback={summaryFeedbackState?.canSubmitFeedback}
-          existingFeedback={summaryFeedbackState?.existingFeedback}
-          markAsSubmitted={summaryFeedbackState?.markAsSubmitted}
-        />
-      ),
-    };
-  
+
     return (
       <div className={`bg-card flex flex-col h-full sm:max-h-[100vh]`}>
         <div className="relative bg-background">
@@ -616,11 +583,21 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
     const videoCanSubmitFeedback = videoFeedbackState ? videoFeedbackState.canSubmitFeedback : (isFeedbackLoading ? false : true);
     const videoExistingFeedback = videoFeedbackState?.existingFeedback ?? null;
 
-    // Extract feedback states for all components
-    const chatFeedbackState = feedbackStates[ComponentName.Chat];
-    const quizFeedbackState = feedbackStates[ComponentName.Quiz];
-    const summaryFeedbackState = feedbackStates[ComponentName.Summary];
-    const flashcardFeedbackState = feedbackStates[ComponentName.Flashcard];
+    // Extract feedback states for all components with default values
+    const chatFeedbackState = feedbackStates[ComponentName.Chat] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
+    const quizFeedbackState = feedbackStates[ComponentName.Quiz] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
+    const summaryFeedbackState = feedbackStates[ComponentName.Summary] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
+    const flashcardFeedbackState = feedbackStates[ComponentName.Flashcard] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
+
+    // Debug feedback states
+    console.log("🔍 Feedback States:", {
+      chat: chatFeedbackState,
+      quiz: quizFeedbackState,
+      summary: summaryFeedbackState,
+      flashcard: flashcardFeedbackState,
+      isLoading: isFeedbackLoading,
+      error: feedbackError
+    });
 
     // Create wrapper functions for markAsSubmitted for each component
     const chatMarkAsSubmitted = useCallback(() => {
@@ -669,6 +646,8 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
       markAsSubmitted: flashcardMarkAsSubmitted,
     } : undefined;
 
+    // Components object will be defined after all functions are available
+
     // Local modal state for feedback
     const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
     const openFeedbackModal = useCallback(() => setIsFeedbackModalOpen(true), []);
@@ -711,14 +690,11 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
     // Start YouTube progress tracking when video loads
     useEffect(() => {
       if (currentVideoId) {
-        console.log("🎯 Setting up YouTube progress tracking");
-        
         // Load YouTube Iframe API to get precise duration and currentTime
         const setup = async () => {
           try {
             // Inject API if not already loaded
             if (!(window.YT && window.YT.Player)) {
-              console.log("📡 Loading YouTube Iframe API...");
               const existing = document.getElementById("youtube-iframe-api");
               if (!existing) {
                 const s = document.createElement("script");
@@ -735,38 +711,30 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
                   window.onYouTubeIframeAPIReady = () => resolve();
                 }
               });
-              console.log("✅ YouTube Iframe API loaded");
             }
             
             // Check if iframe exists and is ready
             const iframe = document.getElementById(`yt-player-iframe-${currentVideoId}`) as HTMLIFrameElement;
             if (!iframe) {
-              console.warn("❌ YouTube iframe not found");
               return;
             }
             
             // Wait for iframe to be ready
             if (!iframe.contentWindow) {
-              console.log("⏳ Waiting for iframe to be ready...");
               setTimeout(() => setup(), 1000);
               return;
             }
-            
-            console.log("🎮 Setting up YouTube player...");
             
             // Create a separate player instance that doesn't interfere with the iframe
             const player = new window.YT.Player(`yt-player-iframe-${currentVideoId}`, {
               events: {
                 onReady: (e: any) => {
-                  console.log("🎯 YouTube player ready");
                   const dur = e.target.getDuration?.() || 0;
                   if (dur > 0) {
                     videoDurationRef.current = dur;
-                    console.log(`⏱️ Video duration: ${dur}s`);
                   }
                   // Start progress tracking interval
                   if (progressIntervalRef.current == null) {
-                    console.log("🔄 Starting progress tracking interval");
                     progressIntervalRef.current = window.setInterval(() => {
                       try {
                         const cur = player.getCurrentTime?.() || 0;
@@ -778,48 +746,35 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
                           currentTimeRef.current = cur;
                           const pct = Math.min(100, (cur / d) * 100);
                           
-                          console.log(`📊 Play Progress: ${cur}s/${d}s = ${pct.toFixed(1)}%`);
-                          
                           // Auto-show feedback when video reaches threshold; use refs to avoid effect rerun
                           if (pct >= 90 && !hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current) {
-                            console.log("🎉 Video reached 90% - showing feedback modal");
                             openFeedbackModal();
                             hasShownFeedbackRef.current = true;
                           }
                         }
                       } catch (error) {
-                        console.warn("❌ Error getting video progress:", error);
+                        // Silently handle errors to reduce console noise
                       }
                     }, 1000);
                   }
                 },
                 onStateChange: (e: any) => {
                   if (e?.data === window.YT.PlayerState.ENDED) {
-                    console.log("🎬 Video ended - triggering feedback modal");
                     currentTimeRef.current = videoDurationRef.current;
                     
                     if (!hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current) {
                       openFeedbackModal();
                       hasShownFeedbackRef.current = true;
                     }
-                  } else if (e?.data === window.YT.PlayerState.PLAYING) {
-                    console.log("▶️ Video started playing");
-                  } else if (e?.data === window.YT.PlayerState.PAUSED) {
-                    console.log("⏸️ Video paused");
-                  } else if (e?.data === window.YT.PlayerState.BUFFERING) {
-                    console.log("🔄 Video buffering");
-                  } else if (e?.data === window.YT.PlayerState.CUED) {
-                    console.log("🎯 Video cued and ready");
                   }
                 },
               },
             });
             
             ytPlayerRef.current = player;
-            console.log("✅ YouTube player initialized successfully");
             
           } catch (error) {
-            console.error("❌ Failed to initialize YouTube player:", error);
+            // Silently handle errors to reduce console noise
           }
         };
         
@@ -829,7 +784,6 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
         }, 2000); // Wait 2 seconds for iframe to be ready
         return () => {
           clearTimeout(setupTimeout);
-          console.log("🧹 Cleaning up YouTube player");
           if (progressIntervalRef.current != null) {
             clearInterval(progressIntervalRef.current);
             progressIntervalRef.current = null;
@@ -1108,6 +1062,47 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
       },
       [currentVideoId]
     );
+
+    // Components object - defined after all functions are available
+    const components = {
+      chat: (
+        <Chat
+          videoId={currentVideoId || ""}
+          messages={chatMessages}
+          isLoading={isChatLoading}
+          error={chatError}
+          onSendMessage={handleSendMessage}
+          isLeftColumnVisible={isLeftColumnVisible}
+          canSubmitFeedback={chatFeedbackState?.canSubmitFeedback}
+          existingFeedback={chatFeedbackState?.existingFeedback}
+          markAsSubmitted={chatMarkAsSubmitted}
+        />
+      ),
+      flashcards: (
+        <Flashcards 
+          videoId={currentVideoId || ""}
+          canSubmitFeedback={flashcardFeedbackState?.canSubmitFeedback}
+          existingFeedback={flashcardFeedbackState?.existingFeedback}
+          markAsSubmitted={flashcardMarkAsSubmitted}
+        />
+      ),
+      quiz: (
+        <Quiz 
+          videoId={currentVideoId || ""}
+          canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
+          existingFeedback={quizFeedbackState?.existingFeedback}
+          markAsSubmitted={quizMarkAsSubmitted}
+        />
+      ),
+      summary: (
+        <Summary 
+          videoId={currentVideoId || ""}
+          canSubmitFeedback={summaryFeedbackState?.canSubmitFeedback}
+          existingFeedback={summaryFeedbackState?.existingFeedback}
+          markAsSubmitted={summaryMarkAsSubmitted}
+        />
+      ),
+    };
   
     const handleShare = useCallback(() => {
       setIsShareModalOpen(true);
@@ -1227,10 +1222,27 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
                 isVideoVisible={isVideoVisible}
                 onShare={handleShare}
                 // Pass feedback states to AITutorPanel
-                chatFeedbackState={chatFeedbackStateWrapper}
-                quizFeedbackState={quizFeedbackStateWrapper}
-                summaryFeedbackState={summaryFeedbackStateWrapper}
-                flashcardFeedbackState={flashcardFeedbackStateWrapper}
+                chatFeedbackState={chatFeedbackState ? {
+                  canSubmitFeedback: chatFeedbackState.canSubmitFeedback,
+                  existingFeedback: chatFeedbackState.existingFeedback,
+                  markAsSubmitted: chatMarkAsSubmitted,
+                } : undefined}
+                quizFeedbackState={quizFeedbackState ? {
+                  canSubmitFeedback: quizFeedbackState.canSubmitFeedback,
+                  existingFeedback: quizFeedbackState.existingFeedback,
+                  markAsSubmitted: quizMarkAsSubmitted,
+                } : undefined}
+                summaryFeedbackState={summaryFeedbackState ? {
+                  canSubmitFeedback: summaryFeedbackState.canSubmitFeedback,
+                  existingFeedback: summaryFeedbackState.existingFeedback,
+                  markAsSubmitted: summaryMarkAsSubmitted,
+                } : undefined}
+                flashcardFeedbackState={flashcardFeedbackState ? {
+                  canSubmitFeedback: flashcardFeedbackState.canSubmitFeedback,
+                  existingFeedback: flashcardFeedbackState.existingFeedback,
+                  markAsSubmitted: flashcardMarkAsSubmitted,
+                } : undefined}
+                components={components}
               />
             </div>
           </main>
@@ -1309,10 +1321,27 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
                 isVideoVisible={isVideoVisible}
                 onShare={() => setIsShareModalOpen(true)}
                 // Pass feedback states to AITutorPanel
-                chatFeedbackState={chatFeedbackStateWrapper}
-                quizFeedbackState={quizFeedbackStateWrapper}
-                summaryFeedbackState={summaryFeedbackStateWrapper}
-                flashcardFeedbackState={flashcardFeedbackStateWrapper}
+                chatFeedbackState={chatFeedbackState ? {
+                  canSubmitFeedback: chatFeedbackState.canSubmitFeedback,
+                  existingFeedback: chatFeedbackState.existingFeedback,
+                  markAsSubmitted: chatMarkAsSubmitted,
+                } : undefined}
+                quizFeedbackState={quizFeedbackState ? {
+                  canSubmitFeedback: quizFeedbackState.canSubmitFeedback,
+                  existingFeedback: quizFeedbackState.existingFeedback,
+                  markAsSubmitted: quizMarkAsSubmitted,
+                } : undefined}
+                summaryFeedbackState={summaryFeedbackState ? {
+                  canSubmitFeedback: summaryFeedbackState.canSubmitFeedback,
+                  existingFeedback: summaryFeedbackState.existingFeedback,
+                  markAsSubmitted: summaryMarkAsSubmitted,
+                } : undefined}
+                flashcardFeedbackState={flashcardFeedbackState ? {
+                  canSubmitFeedback: flashcardFeedbackState.canSubmitFeedback,
+                  existingFeedback: flashcardFeedbackState.existingFeedback,
+                  markAsSubmitted: flashcardMarkAsSubmitted,
+                } : undefined}
+                components={components}
               />
             </div>
           </div>

@@ -212,16 +212,25 @@ const QuestionView: React.FC<{
 // Add props interface for feedback state
 interface QuizProps {
   // Optional props to prevent duplicate API calls when passed from parent
+  videoId: string;
   canSubmitFeedback?: boolean;
   existingFeedback?: any;
   markAsSubmitted?: () => void;
 }
 
 const Quiz: React.FC<QuizProps> = ({
-  canSubmitFeedback: _canSubmitFeedback,
-  existingFeedback: _existingFeedback,
-  markAsSubmitted: _markAsSubmitted,
+  videoId,
+  canSubmitFeedback,
+  existingFeedback,
+  markAsSubmitted,
 }) => {
+  // Debug feedback props
+  console.log("🔍 Quiz Component Props:", {
+    videoId,
+    canSubmitFeedback,
+    existingFeedback: !!existingFeedback,
+    hasMarkAsSubmitted: !!markAsSubmitted
+  });
   const [currentQuestion, setCurrentQuestion] = React.useState<number>(0);
   const [showScore, setShowScore] = React.useState<boolean>(false);
   const [score, setScore] = React.useState<number>(0);
@@ -278,14 +287,17 @@ const Quiz: React.FC<QuizProps> = ({
 
   // Feedback handling for quiz completion
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
-  const { canSubmitFeedback, existingFeedback, markAsSubmitted } = useFeedbackTracker({
-    component: ComponentName.Quiz,
-    sourceId: "quiz",
-    pageUrl: window.location.href,
-  });
 
   React.useEffect(() => {
+    console.log("🔍 Quiz Feedback useEffect:", {
+      showScore,
+      canSubmitFeedback,
+      existingFeedback: !!existingFeedback,
+      shouldOpen: showScore && canSubmitFeedback && !existingFeedback
+    });
+    
     if (showScore && canSubmitFeedback && !existingFeedback) {
+      console.log("🎯 Opening Quiz feedback modal");
       setIsFeedbackModalOpen(true);
     }
   }, [showScore, canSubmitFeedback, existingFeedback]);
@@ -293,7 +305,9 @@ const Quiz: React.FC<QuizProps> = ({
   const handleCloseFeedback = () => setIsFeedbackModalOpen(false);
   const handleSubmitFeedback = async (payload: any) => {
     console.log("Quiz feedback submitted:", payload);
-    markAsSubmitted();
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
     setIsFeedbackModalOpen(false);
   };
   const handleSkipFeedback = () => setIsFeedbackModalOpen(false);
@@ -306,11 +320,25 @@ const Quiz: React.FC<QuizProps> = ({
     >
       <div className="w-full max-w-2xl min-h-[400px] text-left flex flex-col justify-center transition-transform duration-300 ease-in-out ">
         {showScore ? (
-          <ScoreView
-            score={score}
-            totalQuestions={quizQuestions.length}
-            restartQuiz={restartQuiz}
-          />
+          <div>
+            <ScoreView
+              score={score}
+              totalQuestions={quizQuestions.length}
+              restartQuiz={restartQuiz}
+            />
+            {/* Debug feedback button */}
+            <div className="mt-4 text-center">
+              <button
+                onClick={() => {
+                  console.log("🔍 Manual feedback test button clicked");
+                  setIsFeedbackModalOpen(true);
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Test Feedback Modal
+              </button>
+            </div>
+          </div>
         ) : (
           <QuestionView
             question={quizQuestions[currentQuestion]}
@@ -326,7 +354,7 @@ const Quiz: React.FC<QuizProps> = ({
         <VideoFeedbackModal
           isOpen={isFeedbackModalOpen}
           onClose={handleCloseFeedback}
-          videoId={"quiz"}
+          videoId={videoId}
           videoTitle={"Quiz"}
           suggestedChips={[]}
           playPercentage={100}

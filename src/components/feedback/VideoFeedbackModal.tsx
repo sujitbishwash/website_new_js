@@ -10,6 +10,8 @@ export interface FeedbackChip {
   category: 'technical' | 'content' | 'experience' | 'positive';
 }
 
+export type FeedbackComponent = "Chat" | "Flashcard" | "Quiz" | "Summary" | "Video" | "Test";
+
 export interface VideoFeedbackPayload {
   rating: number;
   comment?: string;
@@ -36,7 +38,7 @@ interface VideoFeedbackModalProps {
   existingFeedback?: any;
   markAsSubmitted?: () => void;
   // Component info for display
-  componentName?: string;
+  componentName?: FeedbackComponent;
 }
 
 // --- HELPER COMPONENTS & CONSTANTS ---
@@ -250,7 +252,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
     try {
       // Transform data for backend API
       const backendPayload: FeedbackRequest = {
-        component: "Video",
+        component: componentName,
         description: comment.trim() || selectedChips.join(", ") || `Rating: ${rating}/5`,
         rating,
         source_id: videoId || "unknown",

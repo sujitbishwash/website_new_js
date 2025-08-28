@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight, Shuffle } from "lucide-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useMemo, memo, useRef } from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
 import { ComponentName } from "@/lib/api-client";
@@ -47,6 +47,7 @@ interface ProgressBarProps {
 // Add props interface for feedback state
 interface FlashcardsProps {
   // Optional props to prevent duplicate API calls when passed from parent
+  videoId: string;
   canSubmitFeedback?: boolean;
   existingFeedback?: any;
   markAsSubmitted?: () => void;
@@ -87,11 +88,11 @@ const initialCards: Card[] = [
 
 // --- MODULAR COMPONENTS ---
 
-const ProgressBar: React.FC<{ current: number; total: number }> = ({
+const ProgressBar: React.FC<{ current: number; total: number }> = memo(({
   current,
   total,
 }) => {
-  const progressPercentage = (current / total) * 100;
+  const progressPercentage = useMemo(() => (current / total) * 100, [current, total]);
   return (
     <div className="w-full bg-border rounded-full h-2 mb-6">
       <div
@@ -100,7 +101,9 @@ const ProgressBar: React.FC<{ current: number; total: number }> = ({
       ></div>
     </div>
   );
-};
+});
+
+ProgressBar.displayName = 'ProgressBar';
 
 const Flashcard: React.FC<FlashcardProps> = ({
   card,
@@ -211,9 +214,10 @@ const Navigation: React.FC<NavigationProps> = ({
 // --- MAIN APP COMPONENT ---
 
 const Flashcards: React.FC<FlashcardsProps> = ({
-  canSubmitFeedback: _canSubmitFeedback,
-  existingFeedback: _existingFeedback,
-  markAsSubmitted: _markAsSubmitted,
+  videoId,
+  canSubmitFeedback,
+  existingFeedback,
+  markAsSubmitted,
 }) => {
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -282,6 +286,7 @@ const Flashcards: React.FC<FlashcardsProps> = ({
 
   // Feedback tracking for Flashcards
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  {/*
   const {
     canSubmitFeedback,
     existingFeedback,
@@ -291,25 +296,78 @@ const Flashcards: React.FC<FlashcardsProps> = ({
     sourceId: "flashcards",
     pageUrl: window.location.href,
   });
+  */}
 
   useEffect(() => {
+    // Only open feedback modal if:
+    // 1. There are cards available
+    // 2. User has reached the last card
+    // 3. Feedback can be submitted (default to true if undefined)
+    // 4. No existing feedback exists
+    // 5. Modal is not already open
     if (
       cards.length > 0 &&
       currentIndex === cards.length - 1 &&
-      canSubmitFeedback &&
-      !existingFeedback
+      (canSubmitFeedback !== false) && // Default to true if undefined
+      !existingFeedback &&
+      !isFeedbackModalOpen
     ) {
+      console.log("🎯 Opening Flashcards feedback modal - user completed all cards");
       setIsFeedbackModalOpen(true);
     }
-  }, [cards.length, currentIndex, canSubmitFeedback, existingFeedback]);
+  }, [cards.length, currentIndex, canSubmitFeedback, existingFeedback, isFeedbackModalOpen]);
+
+  // Debug logging for feedback state - only log when there are actual changes
+  const prevDebugState = useRef({
+    cardsLength: 0,
+    currentIndex: -1,
+    canSubmitFeedback: undefined as boolean | undefined,
+    existingFeedback: false,
+    isFeedbackModalOpen: false,
+    markAsSubmittedExists: false
+  });
+
+  useEffect(() => {
+    const currentState = {
+      cardsLength: cards.length,
+      currentIndex,
+      canSubmitFeedback,
+      existingFeedback: !!existingFeedback,
+      isFeedbackModalOpen,
+      markAsSubmittedExists: !!markAsSubmitted
+    };
+
+    // Only log if state actually changed and we have cards
+    const hasChanged = JSON.stringify(currentState) !== JSON.stringify(prevDebugState.current);
+    
+    if (hasChanged && cards.length > 0) {
+      console.log("🔍 Flashcards feedback state changed:", {
+        ...currentState,
+        shouldOpenModal: cards.length > 0 && 
+                        currentIndex === cards.length - 1 && 
+                        (canSubmitFeedback !== false) && 
+                        !existingFeedback && 
+                        !isFeedbackModalOpen
+      });
+      prevDebugState.current = currentState;
+    }
+  }, [cards.length, currentIndex, canSubmitFeedback, existingFeedback, isFeedbackModalOpen, markAsSubmitted]);
 
   const handleFeedbackClose = () => setIsFeedbackModalOpen(false);
   const handleFeedbackSubmit = async (payload: any) => {
     console.log("Flashcards feedback submitted:", payload);
-    markAsSubmitted();
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
     setIsFeedbackModalOpen(false);
   };
-  const handleFeedbackSkip = () => setIsFeedbackModalOpen(false);
+  const handleFeedbackSkip = () => {
+    console.log("Flashcards feedback skipped");
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
+    setIsFeedbackModalOpen(false);
+  };
 
   return (
     <div className="bg-background font-sans text-foreground w-full max-w-full p-4 border-border box-border flex flex-col gap-5 justify-start items-center">
@@ -331,10 +389,37 @@ const Flashcards: React.FC<FlashcardsProps> = ({
               onNavigate={handleNavigate}
               onShuffle={handleShuffle}
             />
+            
+            {/* Manual feedback trigger - only show if feedback can be submitted and no existing feedback */}
+            {(canSubmitFeedback !== false) && !existingFeedback && (
+              <div className="mt-4 flex justify-center">
+                <button
+                  onClick={() => setIsFeedbackModalOpen(true)}
+                  className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+                >
+                  Rate Flashcards
+                </button>
+              </div>
+            )}
+            
+            {/* Show feedback status if feedback has been submitted */}
+            {existingFeedback && (
+              <div className="mt-4 flex justify-center">
+                <div className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-600 text-gray-300 flex items-center gap-2">
+                  <span>✓ Feedback submitted</span>
+                  {existingFeedback.rating && (
+                    <span className="text-yellow-400">
+                      {existingFeedback.rating}/5 stars
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            
             <VideoFeedbackModal
               isOpen={isFeedbackModalOpen}
               onClose={handleFeedbackClose}
-              videoId={"flashcards"}
+              videoId={videoId}
               videoTitle={"Flashcards"}
               suggestedChips={[]}
               playPercentage={100}
@@ -344,7 +429,7 @@ const Flashcards: React.FC<FlashcardsProps> = ({
               canSubmitFeedback={canSubmitFeedback}
               existingFeedback={existingFeedback}
               markAsSubmitted={markAsSubmitted}
-              componentName="Flashcards"
+              componentName="Flashcard"
             />
           </div>
         ) : (
