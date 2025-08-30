@@ -275,7 +275,7 @@ const TestMainPage = () => {
   const { profile, examGoal } = useUser();
 
   const testId = location.state?.testId;
-  const [sessionId, setSessionId] = useState<number>(testId || 0);
+  const [sessionId, setSessionId] = useState<number>(0);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 

@@ -11,7 +11,7 @@ import {
   Button4,
   Button5,
 } from "../../components/test/buttons";
-import { CircleUser, Hexagon } from "lucide-react";
+import { CircleUser } from "lucide-react";
 // Icon components for the legend - using inline SVG for simplicity
 
 // Main component for the instructions page
@@ -19,7 +19,6 @@ export default function ExamInformationPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile, examGoal } = useUser();
-  const testId = location.state?.testId;
   const testConfig = location.state?.testConfig;
 
   return (
@@ -115,7 +114,6 @@ export default function ExamInformationPage() {
           onClick={() =>
             navigate(ROUTES.TEST_SERIES, {
               state: {
-                testId: testId,
                 isDemo: false,
               },
             })
@@ -127,7 +125,7 @@ export default function ExamInformationPage() {
         <button
           onClick={() =>
             navigate(ROUTES.EXAM_RECONFIRM, {
-              state: { testId: testId, testConfig: testConfig },
+              state: { testConfig: testConfig },
             })
           }
           className="px-8 py-2 font-bold text-white bg-primary hover:bg-primary/80 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary"

@@ -256,7 +256,6 @@ const TestConfigurationPageComponent = () => {
       // Navigate to exam info page with the test ID
       navigate(ROUTES.EXAM_INFO, {
         state: {
-          //testId: response.testId,
           testConfig: testData,
           isDemo: false,
         },

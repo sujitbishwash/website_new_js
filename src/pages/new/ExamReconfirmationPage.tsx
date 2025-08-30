@@ -54,7 +54,6 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
   const [textSize, setTextSize] = useState("text-base");
   const location = useLocation();
   const { profile, examGoal } = useUser();
-  const testId = location.state?.testId;
   const testConfig = location.state?.testConfig;
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
@@ -211,7 +210,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
             disabled={!isConfirmed}
             onClick={() =>
               navigate(ROUTES.TEST_MAIN_PAGE, {
-                state: { testId: testId, testConfig: testConfig },
+                state: { testConfig: testConfig },
               })
             }
             className={`font-bold py-2 px-6 rounded-lg transition-all ${
