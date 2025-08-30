@@ -2,6 +2,7 @@ import { ArrowUp, MessageCircle } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -646,6 +647,63 @@ export default function Chat({
   existingFeedback,
   markAsSubmitted,
 }: ChatProps) {
+  // Feedback state management
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+
+  // Check if feedback modal should open after 5 conversations
+  useEffect(() => {
+    // Count user messages (excluding AI responses)
+    const userMessageCount = messages.filter(msg => msg.isUser).length;
+    
+    // Open feedback modal after 5 user messages if:
+    // 1. User has sent 5+ messages
+    // 2. Feedback can be submitted (must be explicitly true)
+    // 3. No existing feedback exists
+    // 4. Modal is not already open
+    // 5. User hasn't already submitted feedback
+    if (
+      userMessageCount >= 5 &&
+      canSubmitFeedback === true &&
+      !existingFeedback && // Check prop, not local state
+      !isFeedbackModalOpen
+    ) {
+      console.log("🎯 Opening Chat feedback modal - user has sent 5+ messages");
+      setIsFeedbackModalOpen(true);
+    }
+  }, [messages, canSubmitFeedback, existingFeedback, isFeedbackModalOpen]);
+
+  // Feedback handlers
+  const handleFeedbackClose = () => {
+    console.log("🔍 Chat feedback modal closing");
+    setIsFeedbackModalOpen(false);
+  };
+
+  const handleFeedbackDismiss = () => {
+    console.log("🔍 Chat feedback modal dismissed by user");
+    setIsFeedbackModalOpen(false);
+    // Mark that user has dismissed the feedback request
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
+  };
+
+  const handleFeedbackSkip = () => {
+    console.log("🔍 Chat feedback skipped");
+    setIsFeedbackModalOpen(false);
+    // Mark that user has skipped the feedback request
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
+  };
+
+  const handleFeedbackSubmit = async (payload: any) => {
+    console.log("Chat feedback submitted:", payload);
+    
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
+    setIsFeedbackModalOpen(false);
+  };
 
   return (
     <div className="flex flex-col flex-1 h-full bg-background text-primaryText w-full">
@@ -662,10 +720,55 @@ export default function Chat({
               <SuggestionChips />
             </div>
           )}
-          {messages.length > 0 && <MessageList messages={messages} />}
+          {messages.length > 0 && (
+            <>
+              {/* Conversation progress indicator */}
+              <div className="px-4 py-2 mb-2">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <span>Conversation Progress</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">
+                      {messages.filter(msg => msg.isUser).length} messages
+                    </span>
+                    {!existingFeedback && (
+                      <span className="text-xs text-muted-foreground">
+                        {Math.max(0, 5 - messages.filter(msg => msg.isUser).length)} more for feedback
+                      </span>
+                    )}
+                  </span>
+                </div>
+                {/* Progress bar */}
+                {!existingFeedback && (
+                  <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-in-out"
+                      style={{ 
+                        width: `${Math.min(100, (messages.filter(msg => msg.isUser).length / 5) * 100)}%` 
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+              <MessageList messages={messages} />
+            </>
+          )}
           {error && (
             <div className="text-red-400 text-sm bg-red-900/20 border border-red-600/30 rounded-lg px-4 py-3 text-center">
               {error}
+            </div>
+          )}
+          
+          {/* Show feedback status if feedback has been submitted */}
+          {existingFeedback && (
+            <div className="mt-4 flex justify-center">
+              <div className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-600 text-gray-300 flex items-center gap-2">
+                <span>✓ Chat feedback submitted</span>
+                {existingFeedback.rating && (
+                  <span className="text-yellow-400">
+                    {existingFeedback.rating}/5 stars
+                  </span>
+                )}
+              </div>
             </div>
           )}
         </div>
@@ -675,6 +778,23 @@ export default function Chat({
         onSendMessage={onSendMessage}
         isLoading={isLoading}
         isLeftColumnVisible={isLeftColumnVisible}
+      />
+      
+      {/* Feedback Modal */}
+      <VideoFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={handleFeedbackClose}
+        videoId={videoId}
+        videoTitle={"AI Chat"}
+        suggestedChips={[]}
+        playPercentage={100}
+        onSubmit={handleFeedbackSubmit}
+        onSkip={handleFeedbackSkip}
+        onDismiss={handleFeedbackDismiss}
+        canSubmitFeedback={canSubmitFeedback}
+        existingFeedback={existingFeedback}
+        markAsSubmitted={markAsSubmitted}
+        componentName="Chat"
       />
     </div>
   );

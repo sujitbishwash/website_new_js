@@ -440,19 +440,7 @@ const Flashcards: React.FC<FlashcardsProps> = ({
               </div>
             )}
             
-            {/* Show feedback status if feedback has been submitted */}
-            {existingFeedback && (
-              <div className="mt-4 flex justify-center">
-                <div className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-600 text-gray-300 flex items-center gap-2">
-                  <span>✓ Feedback submitted</span>
-                  {existingFeedback.rating && (
-                    <span className="text-yellow-400">
-                      {existingFeedback.rating}/5 stars
-                    </span>
-                  )}
-                </div>
-              </div>
-            )}
+
             
             <VideoFeedbackModal
               isOpen={isFeedbackModalOpen}

@@ -263,30 +263,11 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
   markAsSubmitted,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [showFeedbackDisplay, setShowFeedbackDisplay] = useState(false);
-  // Local state to track feedback immediately after submission
-  const [localExistingFeedback, setLocalExistingFeedback] = useState(existingFeedback);
-
-  // Update local state when prop changes
-  useEffect(() => {
-    setLocalExistingFeedback(existingFeedback);
-  }, [existingFeedback]);
 
   // Debug modal state changes
   useEffect(() => {
-    console.log("🔍 Summary modal state changed:", { isOpen, canSubmitFeedback, existingFeedback: !!existingFeedback, localExistingFeedback: !!localExistingFeedback });
-  }, [isOpen, canSubmitFeedback, existingFeedback, localExistingFeedback]);
-
-  // Trigger entrance animation when feedback exists
-  useEffect(() => {
-    if (localExistingFeedback) {
-      // Small delay for smooth entrance
-      const timer = setTimeout(() => setShowFeedbackDisplay(true), 100);
-      return () => clearTimeout(timer);
-    } else {
-      setShowFeedbackDisplay(false);
-    }
-  }, [localExistingFeedback]);
+    console.log("🔍 Summary modal state changed:", { isOpen, canSubmitFeedback, existingFeedback: !!existingFeedback });
+  }, [isOpen, canSubmitFeedback, existingFeedback]);
 
   console.log(canSubmitFeedback, existingFeedback, markAsSubmitted);
   
@@ -323,16 +304,6 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
   const onSubmit = async (payload: any) => {
     console.log("Summary feedback submitted:", payload);
     
-    // Immediately update local state to show feedback submitted
-    const newFeedback = {
-      id: Date.now().toString(), // Temporary ID
-      rating: payload.rating,
-      description: payload.comment || "",
-      date_submitted: new Date().toISOString(),
-      page_url: window.location.href
-    };
-    setLocalExistingFeedback(newFeedback);
-    
     if (markAsSubmitted) {
       markAsSubmitted();
     }
@@ -344,55 +315,15 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
       <div className="text-sm text-muted-foreground">
         Share your thoughts about this summary.
       </div>
-      {localExistingFeedback ? (
-        // Show previous rating with animated stars
-        <div className={`flex flex-col items-center gap-4 p-6 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-indigo-900/20 rounded-xl border border-blue-600/30 shadow-lg backdrop-blur-sm transition-all duration-1000 ease-out transform ${
-          showFeedbackDisplay 
-            ? "opacity-100 scale-100 translate-y-0 rotate-0" 
-            : "opacity-0 scale-90 translate-y-6 rotate-1"
-        }`}>
-          <div className="text-center">
-            <div className="text-lg font-semibold text-foreground mb-1">Your Previous Rating</div>
-            <div className="text-sm text-foreground/70">Thanks for your feedback!</div>
-          </div>
-          
-          {/* Animated Star Rating */}
-          <div className="flex items-center gap-2 p-4 bg-gradient-to-r from-white/10 to-white/5 rounded-full border border-white/20 shadow-inner">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <StarRating
-                key={star}
-                star={star}
-                rating={localExistingFeedback.rating || 0}
-                size="lg"
-                animated={true}
-              />
-            ))}
-          </div>
-          
-          {/* Rating Text */}
-          <div className="text-center">
-            <div className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-2 drop-shadow-sm">
-              {localExistingFeedback.rating || 0}/5
-            </div>
-            <div className="text-sm font-medium text-foreground/70 px-3 py-1 bg-white/10 rounded-full">
-              {localExistingFeedback.rating >= 4 ? "🌟 Excellent!" : 
-               localExistingFeedback.rating >= 3 ? "👍 Good!" : 
-               localExistingFeedback.rating >= 2 ? "😐 Fair" : "😔 Poor"}
-            </div>
-          </div>
-          
-          {/* Update Button */}
-          <button
-            onClick={open}
-            className="px-6 py-3 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
-          >
-            Update Rating
-          </button>
-          <div className="text-xs text-foreground/50 text-center mt-2">
-            Click to modify your previous feedback
-          </div>
-          
-
+      {existingFeedback ? (
+        // Show feedback submitted message
+        <div className="px-4 py-2 rounded-lg text-sm font-medium bg-gray-600 text-gray-300 flex items-center gap-2">
+          <span>✓ Feedback submitted</span>
+          {existingFeedback.rating && (
+            <span className="text-yellow-400">
+              {existingFeedback.rating}/5 stars
+            </span>
+          )}
         </div>
       ) : (
         // Show rate button if no feedback yet
@@ -415,7 +346,7 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
         onSkip={handleSkip}
         onDismiss={handleDismiss}
         canSubmitFeedback={canSubmitFeedback}
-        existingFeedback={localExistingFeedback}
+        existingFeedback={existingFeedback}
         markAsSubmitted={markAsSubmitted}
         componentName="Summary"
       />
