@@ -274,8 +274,8 @@ const TestMainPage = () => {
   const navigate = useNavigate();
   const { profile, examGoal } = useUser();
 
-  const testId = location.state?.testId;
-  const [sessionId, setSessionId] = useState<number>(0);
+  
+  const [sessionId, setSessionId] = useState<number>();
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -324,6 +324,7 @@ const TestMainPage = () => {
           .sort((a, b) => a.id - b.id);
 
         setQuestions(mappedQuestions);
+        setSessionId(response.session_id);
         console.log(
           "Successfully fetched questions from API:",
           mappedQuestions.length
@@ -361,6 +362,7 @@ const TestMainPage = () => {
 
   // --- Effects ---
 
+  {/*}
   // Get session ID from URL parameters (optional enhancement)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -372,11 +374,12 @@ const TestMainPage = () => {
       }
     }
   }, []);
+  */}
 
   // Fetch questions on component mount
   useEffect(() => {
     fetchQuestions();
-  }, [sessionId]);
+  }, []);
 
   // Timer Logic
   useEffect(() => {
@@ -549,7 +552,7 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test submitted successfully:", apiResponse);
-        setShowTesstResultDialog(true);
+        setShowTestResultDialog(true);
       }
     } catch (error) {
       console.error("Failed to submit test:", error);
@@ -567,7 +570,7 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test auto-submitted successfully:", apiResponse);
-        setShowTesstResultDialog(true);
+        setShowTestResultDialog(true);
       }
     } catch (error) {
       console.error("Failed to auto-submit test:", error);
@@ -632,7 +635,7 @@ const TestMainPage = () => {
   const currentQuestion = questions[currentQuestionIndex];
 
   const handleCloseTestResultDialog = () => {
-    setShowTesstResultDialog(false);
+    setShowTestResultDialog(false);
     navigate(ROUTES.DASHBOARD);
   };
 
