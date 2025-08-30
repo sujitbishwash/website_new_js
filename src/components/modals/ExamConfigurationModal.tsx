@@ -576,12 +576,12 @@ export default function ExamConfigurationModal({
         {/* Modal Content */}
         <div className="p-6 space-y-6 overflow-y-auto">
           {/* Current Goal Display */}
-          {examGoal && (
+          {/**examGoal && (
             <div className="bg-background p-4 rounded-lg text-sm">
               <span className="font-semibold text-foreground">Current Goal:</span>{" "}
               {examGoal.exam} ({examGoal.groupType})
             </div>
-          )}
+          )*/}
           {/* Messages */}
           {updateMessage && (
             <div className="bg-green-500/20 border border-green-500/30 text-green-300 text-sm p-3 rounded-lg">

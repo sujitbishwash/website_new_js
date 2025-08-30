@@ -81,7 +81,7 @@ const Layout: React.FC = () => {
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-muted-foreground bg-card border border-gray hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-lg p-2"
               >
-                <Menu size={24} />
+                 <Menu className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
               </button>
             </header>
           )}

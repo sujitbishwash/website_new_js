@@ -94,15 +94,16 @@ const Sidebar: React.FC<SidebarProps> = ({
             `}</style>
       {firstPart != ROUTES.VIDEO_LEARNING &&
         firstPart != ROUTES.PREMIUM &&
-        firstPart != ROUTES.TEST_SERIES &&
         firstPart != ROUTES.EXAM_INFO &&
-        firstPart != ROUTES.EXAM_RECONFIRM && (
+        firstPart != ROUTES.EXAM_RECONFIRM &&
+        firstPart != ROUTES.TEST_MAIN_PAGE &&
+        (
           <button
             onClick={() => {
               navigate(ROUTES.PREMIUM);
             }}
             className="
-            fixed top-4 right-4 sm:right-8 z-20 flex items-center gap-1 rounded-full 
+            fixed top-4 right-4 sm:right-8 z-30 flex items-center gap-1 rounded-full 
             py-2 ps-2.5 pe-3 text-sm font-semibold
             bg-gray-200/50 dark:bg-[#373669]/50 backdrop-blur-md
             text-gray 

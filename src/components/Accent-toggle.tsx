@@ -16,7 +16,7 @@ import { useState } from "react";
 export function AccentToggle() {
   const colorThemes = getAvailableColorThemes();
   const [themeName, setThemeName] = useState<ColorThemeName>(
-    (localStorage.getItem("ap-color-theme") as ColorThemeName) || "slate"
+    (localStorage.getItem("ap-color-theme") as ColorThemeName) || "default"
   );
   const handleColorTheme = (name: ColorThemeName) => {
     applyColorTheme(name);
@@ -36,7 +36,7 @@ export function AccentToggle() {
             style={{
               backgroundColor:
                 palettes[themeName]?.buttonGradientFrom ||
-                palettes.slate.buttonGradientFrom,
+                palettes.default.buttonGradientFrom,
             }}
           />
         </button>
@@ -54,7 +54,7 @@ export function AccentToggle() {
                 style={{
                   backgroundColor:
                     palettes[name]?.buttonGradientFrom ||
-                    palettes.slate.buttonGradientFrom,
+                    palettes.default.buttonGradientFrom,
                 }}
               />
             </div>

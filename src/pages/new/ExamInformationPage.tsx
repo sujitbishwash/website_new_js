@@ -11,6 +11,7 @@ import {
   Button4,
   Button5,
 } from "../../components/test/buttons";
+import { CircleUser, Hexagon } from "lucide-react";
 // Icon components for the legend - using inline SVG for simplicity
 
 // Main component for the instructions page
@@ -22,23 +23,26 @@ export default function ExamInformationPage() {
   const testConfig = location.state?.testConfig;
 
   return (
-    <div className="bg-card overflow-hidden w-full flex flex-col max-h-[100vh]" style={{ fontFamily: "Arial, sans-serif" }}>
+    <div
+      className="bg-card overflow-hidden w-full flex flex-col max-h-[100vh]"
+      style={{ fontFamily: "Arial, sans-serif" }}
+    >
       {/* Header Section - This part will not scroll */}
-      <header className="flex-shrink-0 flex justify-between items-center p-6 border-b border-border">
-        <h4 className="text-2xl sm:text-3xl font-bold text-foreground">
-          {instructions.title}
-        </h4>
+      <header className="bg-card p-3 flex justify-between items-center z-10 border-b">
+        {/*<div className="flex items-center justify-between ml-18 lg:ml-0">
+          <Hexagon width={48} height={48} className="text-muted-foreground" />
+        </div>*/}
+        <div className="flex text-center px-2">
+          <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
+            {instructions.title}
+          </h1>
+        </div>
         <div className=" items-center space-x-4 hidden sm:flex">
           <div className="text-right">
-            <p className="font-semibold">
-              {profile?.name || "Student Name"}
-            </p>
+            <p className="font-semibold">{profile?.name || "Student Name"}</p>
           </div>
-          <img
-            src={`https://placehold.co/48x48/6366F1/FFFFFF?text=${profile?.name[0]}`}
-            alt="Student avatar"
-            className="w-12 h-12 rounded-full border-2 border-indigo-500"
-          />
+
+          <CircleUser height={48} width={48} className="text-muted-foreground" />
         </div>
       </header>
 
@@ -78,12 +82,12 @@ export default function ExamInformationPage() {
               <li>{instructions.navigating[2]}</li>
               <li>{instructions.navigating[3]}</li>
             </ul>
-            <p className="font-semibold text-destructive">
-              {instructions.navigating[4]}
-            </p>
-            <p className="font-semibold text-green">
-              {instructions.navigating[5]}
-            </p>
+            <p className="!mt-4 p-3 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-lg font-semibold text-red-700 dark:text-red-300">
+                  {instructions.navigating[4]}
+                </p>
+                <p className="p-3 bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded-r-lg font-semibold text-green-700 dark:text-green-300">
+                  {instructions.navigating[5]}
+                </p>
           </div>
         </section>
 
@@ -163,7 +167,6 @@ const instructions = {
       icon: <Button5 size={42} number={5} />,
       text: "You have answered the question, but marked it for review.",
     },
-    
   ],
   markedForReviewNote:
     "The Marked for Review status for a question simply indicates that you would like to look at that question again. If a question is answered and Marked for Review, your answer for that question will be considered in the evaluation.",
@@ -173,7 +176,7 @@ const instructions = {
     "b. Click on Save & Next to save your answer for the current question and then go to the next question.",
     "c. Click on Mark for Review & Next to save your answer for the current question, mark it for review, and then go to the next question.",
     "Caution: Note that your answer for the current question will not be saved if you navigate to another question directly (without saving) by clicking on its question number.",
-    "Note: You can shuffle between sections and questions anytime during the examination as per your convenience."
+    "Note: You can shuffle between sections and questions anytime during the examination as per your convenience.",
   ],
   answering: [
     "Procedure for answering a multiple choice type question:",
@@ -183,5 +186,4 @@ const instructions = {
     "d. To save your answer, you MUST click on the Save & Next button.",
     "e. To mark the question for review, click on the Mark for Review & Next button. If an answer is selected for a question that is Marked for Review, that answer will be considered in the evaluation.",
   ],
-  
 };

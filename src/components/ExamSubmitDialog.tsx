@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import React from "react";
 
 // --- Type Definitions ---
@@ -69,13 +70,14 @@ const CloseIcon = () => (
  */
 const Modal = ({ children, onClose }: ModalProps) => (
   <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-opacity-30 p-4 backdrop-blur-sm"
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
     onClick={onClose}
   >
     <div
-      className="relative w-full max-w-3xl transform rounded-2xl bg-white p-6 text-left align-middle shadow-2xl transition-all sm:p-8"
-      onClick={(e) => e.stopPropagation()}
-    >
+        className="relative w-full max-w-2xl bg-card text-primary rounded-2xl shadow-2xl border border-border flex flex-col max-h-[90vh]"
+        onClick={(e) => e.stopPropagation()}
+      >
+      
       {children}
     </div>
   </div>
@@ -88,12 +90,12 @@ const ModalHeader = ({ onClose }: ModalHeaderProps) => (
   <>
     <button
       onClick={onClose}
-      className="absolute top-4 right-4 rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+      className="absolute top-4 right-4 rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
       aria-label="Close"
     >
       <CloseIcon />
     </button>
-    <h2 className="mb-6 text-center text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">
+    <h2 className="mb-6 text-center text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
       Submit your test
     </h2>
   </>
@@ -103,50 +105,47 @@ const ModalHeader = ({ onClose }: ModalHeaderProps) => (
  * The table view for desktop screens.
  */
 const SummaryTable = ({ summaryData }: SummaryTableProps) => (
-  <div className="overflow-hidden rounded-lg border border-gray-200">
+  <div className="overflow-hidden rounded-lg border border-border-high">
     <table className="min-w-full text-sm">
-      <thead className="bg-indigo-600">
+      <thead className="bg-primary">
         <tr className="text-white">
-          <th className="border-r border-indigo-500 px-4 py-3 text-left font-semibold">
+          <th className="border-r border-border px-4 py-3 text-left font-semibold">
             Section
           </th>
-          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">
+          <th className="border-r border-border px-4 py-3 text-center font-semibold">
             No. of questions
           </th>
-          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">
+          <th className="border-r border-border px-4 py-3 text-center font-semibold">
             Answered
           </th>
-          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">
+          <th className="border-r border-border px-4 py-3 text-center font-semibold">
             Not Answered
           </th>
-          <th className="border-r border-indigo-500 px-4 py-3 text-center font-semibold">
+          <th className="border-r border-border px-4 py-3 text-center font-semibold">
             Marked for Review
           </th>
           <th className="px-4 py-3 text-center font-semibold">Not Visited</th>
         </tr>
       </thead>
-      <tbody className="divide-y divide-gray-200 bg-white">
+      <tbody className="divide-y divide-border-high text-2xl">
         {summaryData.map((section: SummarySection) => (
-          <tr
-            key={section.name}
-            className="transition-colors hover:bg-gray-50/50"
-          >
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 font-medium text-gray-900">
+          <tr key={section.name} className="transition-colors">
+            <td className="whitespace-nowrap border-r text-sm border-border-high px-4 py-4 font-medium text-foreground">
               {section.name}
             </td>
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center text-gray-700">
+            <td className="whitespace-nowrap border-r border-border-high px-4 py-4 text-center text-foreground">
               {section.stats.total}
             </td>
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center font-semibold text-green-600">
+            <td className="whitespace-nowrap border-r border-border-high px-4 py-4 text-center font-semibold text-green-600">
               {section.stats.answered}
             </td>
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center font-semibold text-red-600">
+            <td className="whitespace-nowrap border-r border-border-high px-4 py-4 text-center font-semibold text-red-600">
               {section.stats.notAnswered}
             </td>
-            <td className="whitespace-nowrap border-r border-gray-200 px-4 py-4 text-center font-semibold text-blue-600">
+            <td className="whitespace-nowrap border-r border-border-high px-4 py-4 text-center font-semibold text-blue-600">
               {section.stats.markedForReview}
             </td>
-            <td className="whitespace-nowrap px-4 py-4 text-center text-gray-700">
+            <td className="whitespace-nowrap px-4 py-4 text-center text-muted-foreground">
               {section.stats.notVisited}
             </td>
           </tr>
@@ -160,8 +159,8 @@ const SummaryTable = ({ summaryData }: SummaryTableProps) => (
  * The card-based view for mobile screens.
  */
 const SummaryCard = ({ section }: SummaryCardProps) => (
-  <div className="rounded-lg border border-gray-200 bg-white p-4">
-    <h3 className="mb-3 text-lg font-bold text-indigo-700">{section.name}</h3>
+  <div className="rounded-lg border border-border-high bg-white p-4">
+    <h3 className="mb-3 text-lg font-bold text-primary">{section.name}</h3>
     <div className="space-y-2 text-sm">
       <div className="flex justify-between">
         <span className="text-gray-600">No. of questions:</span>
@@ -200,17 +199,16 @@ const SummaryCard = ({ section }: SummaryCardProps) => (
  */
 const ActionButtons = ({ onClose, onSubmit }: ActionButtonsProps) => (
   <>
-    <div className="my-6 h-px bg-gray-200" />
     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
       <button
         onClick={onClose}
-        className="w-full transform rounded-lg bg-gray-200 px-6 py-2.5 font-semibold text-gray-800 transition-all duration-200 ease-in-out hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 sm:w-auto"
+        className="w-full transform rounded-lg bg-border-high px-6 py-2.5 font-semibold text-muted-foreground hover:text-foreground transition-all duration-200 ease-in-out hover:bg-border focus:outline-none sm:w-auto"
       >
         Close
       </button>
       <button
         onClick={onSubmit}
-        className="w-full transform rounded-lg bg-indigo-600 px-6 py-2.5 font-semibold text-white shadow-md transition-all duration-200 ease-in-out hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
+        className="w-full transform rounded-lg bg-primary px-6 py-2.5 font-semibold text-white shadow-md transition-all duration-200 ease-in-out hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto"
       >
         Submit
       </button>
@@ -227,10 +225,23 @@ const ExamSubmitDialog = ({
 }: ExamSubmitDialogProps) => {
   return (
     <Modal onClose={onClose}>
-      <ModalHeader onClose={onClose} />
+      {/* Modal Header */}
+      <div className="p-5 border-b border-border flex justify-between items-center">
+        <h3 className="text-xl font-semibold text-foreground">
+          Submit your test
+        </h3>
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-2 text-foreground rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+        >
+          <X />
+        </button>
+      </div>
 
       {/* Responsive Content: Table for desktop, Cards for mobile */}
-      <div className="hidden sm:block">
+      
+        <div className="p-6 space-y-6 overflow-y-auto">
+      <div className="hidden sm:block mb-4">
         <SummaryTable summaryData={summaryData} />
       </div>
       <div className="block space-y-4 sm:hidden">
@@ -238,8 +249,21 @@ const ExamSubmitDialog = ({
           <SummaryCard key={section.name} section={section} />
         ))}
       </div>
+      </div>
 
-      <ActionButtons onClose={onClose} onSubmit={onSubmit} />
+      {/* Modal Footer */}
+      <div className="flex justify-end items-center gap-4 p-5 border-t border-border bg-card rounded-b-2xl">
+        <button
+          onClick={onClose}
+          className="cursor-pointer px-5 py-2 text-sm font-semibold text-muted-foreground bg-foreground/10 rounded-lg hover:bg-foreground/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onSubmit}
+          className="cursor-pointer px-5 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1d1d1f] transition-all disabled:bg-blue-600/50 disabled:cursor-not-allowed flex items-center"
+        >Submit</button>
+      </div>
     </Modal>
   );
 };

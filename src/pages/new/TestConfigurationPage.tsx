@@ -53,7 +53,7 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   mapper,
 }) => {
   return (
-    <div className="p-4 bg-background border border-divider rounded-xl mb-4">
+    <div className="p-4 bg-background border-1 rounded-xl mb-4">
       <h2 className="text-xl font-semibold text-card-foreground dark:text-gray-200 mb-4">
         {title}{" "}
         {optionalLabel && (
@@ -103,7 +103,7 @@ const Chip: React.FC<ChipProps> = ({
       }
       ${
         checked
-          ? "bg-blue-600 border-blue-500 text-white"
+          ? "bg-blue-600 border-blue-500 hover:bg-blue-500 hover:border-blue-400"
           : "bg-gray-700 border-gray-600 hover:bg-gray-600 hover:border-gray-500"
       }
     `}
@@ -251,12 +251,12 @@ const TestConfigurationPageComponent = () => {
         language: selectedLanguage,
       };
 
-      const response = await testSeriesApi.createTest(testData);
+      //const response = await testSeriesApi.createTest(testData);
 
       // Navigate to exam info page with the test ID
       navigate(ROUTES.EXAM_INFO, {
         state: {
-          testId: response.testId,
+          //testId: response.testId,
           testConfig: testData,
           isDemo: false,
         },
@@ -367,13 +367,13 @@ const TestConfigurationPageComponent = () => {
               !selectedDifficulty ||
               !selectedLanguage
             }
-            className={`px-4 py-2 text-xl font-semibold rounded-lg text-foreground bg-foreground/10 backdrop-blur-sm border border-foreground/20 hover:bg-white/20 transition-all duration-300 cursor-pointer ${
+            className={`px-4 py-2 text-xl font-semibold rounded-lg backdrop-blur-sm border-1  transition-all duration-300 ${
               isSubmitting ||
               !selectedSubject ||
               !selectedDifficulty ||
               !selectedLanguage
-                ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                : "bg-blue-600 hover:bg-blue-700 text-foreground"
+                ? "bg-border text-background-subtle cursor-not-allowed"
+                : "bg-primary hover:bg-primary/80 text-white cursor-pointer"
             }`}
           >
             {isSubmitting ? "Creating Test..." : "Start Test"}
