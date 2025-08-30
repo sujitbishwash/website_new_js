@@ -8,7 +8,7 @@ import Summary from "@/components/learning/Summary";
 // import { useVideoFeedback } from "@/hooks/useVideoFeedback";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
-import { useFeedbackTracker, useMultiFeedbackTracker } from "@/hooks/useFeedbackTracker";
+
 import {
   BookOpen,
   Clipboard,
@@ -827,18 +827,22 @@ const VideoPage: React.FC = () => {
   ], []);
 
   // Get feedback states for all components
-  const {
-    feedbackStates,
-    isLoading: isFeedbackLoading,
-    error: feedbackError,
-    markAsSubmitted: markFeedbackAsSubmitted,
-    resetFeedback,
-    _debug: multiFeedbackDebug,
-  } = useMultiFeedbackTracker({
-    components: feedbackComponents,
-    sourceId: currentVideoId || "unknown",
-    pageUrl: window.location.href,
-  });
+  // Simple feedback state management
+  const [feedbackStates, setFeedbackStates] = useState<{[key: string]: any}>({});
+  const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
+  const [feedbackError, setFeedbackError] = useState<string | null>(null);
+  
+  const markFeedbackAsSubmitted = useCallback((component: string) => {
+    setFeedbackStates(prev => ({
+      ...prev,
+      [component]: { ...prev[component], canSubmitFeedback: false }
+    }));
+  }, []);
+  
+  const resetFeedback = useCallback(() => {
+    setFeedbackStates({});
+    setFeedbackError(null);
+  }, []);
 
   // Debounce feedback state changes to prevent excessive re-renders
   const [debouncedFeedbackStates, setDebouncedFeedbackStates] = useState(feedbackStates);
@@ -947,11 +951,11 @@ const VideoPage: React.FC = () => {
 
   // Debug logging for feedback tracker
   useEffect(() => {
-    if (multiFeedbackDebug) {
-      console.log("🔍 Multi-Feedback Tracker Debug:", multiFeedbackDebug);
+
+
       console.log("�� Feedback States:", stableFeedbackStates);
     }
-  }, [multiFeedbackDebug, stableFeedbackStates]);
+  }, [stableFeedbackStates]);
 
   // Debug logging for video feedback state
   useEffect(() => {

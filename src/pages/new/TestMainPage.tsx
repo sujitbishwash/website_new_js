@@ -227,7 +227,7 @@ const FullscreenIcon = () => (
 
 // --- Custom Hook for detecting outside clicks ---
 const useOutsideClick = (
-  ref: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement | null>,
   callback: () => void
 ) => {
   useEffect(() => {
@@ -272,10 +272,9 @@ const TestMainPage = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { profile, examGoal } = useUser();
+    const { profile, examGoal } = useUser();
 
-  
-  const [sessionId, setSessionId] = useState<number>();
+  const [sessionId, setSessionId] = useState<number | null>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -286,8 +285,8 @@ const TestMainPage = () => {
   const questionsForCurrentSection = allQuestions[currentSection] || [];
 
   // --- Refs for outside click detection ---
-  const asideRef = useRef<HTMLElement>(null);
-  const footerRef = useRef<HTMLElement>(null);
+  const asideRef = useRef<HTMLElement | null>(null);
+  const footerRef = useRef<HTMLElement | null>(null);
 
   useOutsideClick(asideRef, () => {
     if (isMobileMenuOpen) setIsMobileMenuOpen(false);
@@ -1253,11 +1252,10 @@ const TestMainPage = () => {
               .padStart(2, "0")}`,
             rank: 1, // This should come from API
             totalStudents: 100, // This should come from API
-            sessionId: sessionId, // Add session ID for feedback tracking
+            sessionId: sessionId || undefined, // Add session ID for feedback tracking
           }}
           onClose={handleCloseTestResultDialog}
           navigate={() => {
-            handleCloseTestResultDialog();
             navigate(ROUTES.ANALYSIS);
           }}
         />
