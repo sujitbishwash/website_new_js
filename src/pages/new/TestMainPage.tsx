@@ -345,6 +345,9 @@ const TestMainPage = () => {
   // Submit test to API
   const submitTestToAPI = async (): Promise<SubmitTestResponse> => {
     console.log("Attempting to submit test to API...");
+    if (!sessionId) {
+      throw new Error("Session ID is required to submit test");
+    }
 
     const submitData: SubmitTestRequest = {
       session_id: sessionId,
