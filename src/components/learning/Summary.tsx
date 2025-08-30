@@ -264,22 +264,29 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showFeedbackDisplay, setShowFeedbackDisplay] = useState(false);
+  // Local state to track feedback immediately after submission
+  const [localExistingFeedback, setLocalExistingFeedback] = useState(existingFeedback);
+
+  // Update local state when prop changes
+  useEffect(() => {
+    setLocalExistingFeedback(existingFeedback);
+  }, [existingFeedback]);
 
   // Debug modal state changes
   useEffect(() => {
-    console.log("🔍 Summary modal state changed:", { isOpen, canSubmitFeedback, existingFeedback: !!existingFeedback });
-  }, [isOpen, canSubmitFeedback, existingFeedback]);
+    console.log("🔍 Summary modal state changed:", { isOpen, canSubmitFeedback, existingFeedback: !!existingFeedback, localExistingFeedback: !!localExistingFeedback });
+  }, [isOpen, canSubmitFeedback, existingFeedback, localExistingFeedback]);
 
   // Trigger entrance animation when feedback exists
   useEffect(() => {
-    if (existingFeedback) {
+    if (localExistingFeedback) {
       // Small delay for smooth entrance
       const timer = setTimeout(() => setShowFeedbackDisplay(true), 100);
       return () => clearTimeout(timer);
     } else {
       setShowFeedbackDisplay(false);
     }
-  }, [existingFeedback]);
+  }, [localExistingFeedback]);
 
   console.log(canSubmitFeedback, existingFeedback, markAsSubmitted);
   
@@ -315,6 +322,17 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
 
   const onSubmit = async (payload: any) => {
     console.log("Summary feedback submitted:", payload);
+    
+    // Immediately update local state to show feedback submitted
+    const newFeedback = {
+      id: Date.now().toString(), // Temporary ID
+      rating: payload.rating,
+      description: payload.comment || "",
+      date_submitted: new Date().toISOString(),
+      page_url: window.location.href
+    };
+    setLocalExistingFeedback(newFeedback);
+    
     if (markAsSubmitted) {
       markAsSubmitted();
     }
@@ -326,7 +344,7 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
       <div className="text-sm text-muted-foreground">
         Share your thoughts about this summary.
       </div>
-      {existingFeedback ? (
+      {localExistingFeedback ? (
         // Show previous rating with animated stars
         <div className={`flex flex-col items-center gap-4 p-6 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-indigo-900/20 rounded-xl border border-blue-600/30 shadow-lg backdrop-blur-sm transition-all duration-1000 ease-out transform ${
           showFeedbackDisplay 
@@ -344,7 +362,7 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
               <StarRating
                 key={star}
                 star={star}
-                rating={existingFeedback.rating || 0}
+                rating={localExistingFeedback.rating || 0}
                 size="lg"
                 animated={true}
               />
@@ -354,12 +372,12 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
           {/* Rating Text */}
           <div className="text-center">
             <div className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-2 drop-shadow-sm">
-              {existingFeedback.rating || 0}/5
+              {localExistingFeedback.rating || 0}/5
             </div>
             <div className="text-sm font-medium text-foreground/70 px-3 py-1 bg-white/10 rounded-full">
-              {existingFeedback.rating >= 4 ? "🌟 Excellent!" : 
-               existingFeedback.rating >= 3 ? "👍 Good!" : 
-               existingFeedback.rating >= 2 ? "😐 Fair" : "😔 Poor"}
+              {localExistingFeedback.rating >= 4 ? "🌟 Excellent!" : 
+               localExistingFeedback.rating >= 3 ? "👍 Good!" : 
+               localExistingFeedback.rating >= 2 ? "😐 Fair" : "😔 Poor"}
             </div>
           </div>
           
@@ -397,7 +415,7 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
         onSkip={handleSkip}
         onDismiss={handleDismiss}
         canSubmitFeedback={canSubmitFeedback}
-        existingFeedback={existingFeedback}
+        existingFeedback={localExistingFeedback}
         markAsSubmitted={markAsSubmitted}
         componentName="Summary"
       />
