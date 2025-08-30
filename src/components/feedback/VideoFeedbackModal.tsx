@@ -302,9 +302,19 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
 
   if (!isOpen) return null;
 
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) {
+      onDismiss?.();
+      onClose();
+    }
+  };
+
   if (submissionStatus === "success") {
     return (
-      <div className="fixed inset-0 z-[40] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 pointer-events-none feedback-modal-backdrop">
+      <div 
+        className="fixed inset-0 z-[40] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 pointer-events-auto feedback-modal-backdrop"
+        onClick={handleBackdropClick}
+      >
         <div className="w-full max-w-lg p-8 text-center bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 animate-fade-in pointer-events-auto feedback-modal feedback-success">
           <div className="w-16 h-16 mx-auto mb-4 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center">
             <svg className="w-8 h-8 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -326,7 +336,10 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   }
 
   return (
-    <div className="fixed inset-0 z-[40] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 pointer-events-none feedback-modal-backdrop">
+    <div 
+      className="fixed inset-0 z-[40] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 pointer-events-auto feedback-modal-backdrop"
+      onClick={handleBackdropClick}
+    >
       <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 animate-fade-in pointer-events-auto feedback-modal">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
@@ -380,14 +393,14 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                 </svg>
-                <span className="font-medium">Feedback Already Submitted</span>
+                <span className="font-medium">Update Your Rating</span>
               </div>
               <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                You've already rated this video with {existingFeedback.rating} stars. 
-                Your previous feedback: "{existingFeedback.description}"
+                You previously rated this {componentName?.toLowerCase()} with {existingFeedback.rating} stars. 
+                Feel free to update your rating and feedback below.
               </p>
               <p className="text-xs text-blue-600 dark:text-blue-300 mt-2">
-                Previous feedback submitted
+                Your changes will update the existing feedback
               </p>
             </div>
           )}
@@ -409,17 +422,17 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                   type="button"
                   aria-label={`Rate ${star} out of 5`}
                   aria-pressed={rating === star}
-                  onMouseEnter={() => canSubmitFeedback && setHoverRating(star)}
-                  onClick={() => canSubmitFeedback && setRating(star)}
+                  onMouseEnter={() => (canSubmitFeedback || existingFeedback) && setHoverRating(star)}
+                  onClick={() => (canSubmitFeedback || existingFeedback) && setRating(star)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' || e.key === ' ') {
                       e.preventDefault();
-                      canSubmitFeedback && setRating(star);
+                      (canSubmitFeedback || existingFeedback) && setRating(star);
                     }
                   }}
-                  disabled={!canSubmitFeedback}
+                  disabled={!(canSubmitFeedback || existingFeedback)}
                   className={`p-1 rounded-full transition-transform duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-offset-gray-800 ${
-                    !canSubmitFeedback 
+                    !(canSubmitFeedback || existingFeedback)
                       ? 'opacity-50 cursor-not-allowed' 
                       : 'hover:scale-110'
                   }`}
@@ -550,7 +563,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
             </button>
             <button
               type="submit"
-              disabled={rating === null || submissionStatus === "submitting" || !canSubmitFeedback}
+                                disabled={rating === null || submissionStatus === "submitting" || !(canSubmitFeedback || existingFeedback)}
               className="flex-1 px-8 py-2.5 text-sm sm:text-base font-bold text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed feedback-button"
             >
               {submissionStatus === "submitting" ? (
@@ -746,13 +759,13 @@ export const CondensedFeedback: React.FC<CondensedFeedbackProps> = ({
             setIsOpen(!isOpen);
           }
         }}
-        disabled={!canSubmitFeedback}
+                          disabled={!(canSubmitFeedback || existingFeedback)}
         className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
           !canSubmitFeedback
             ? 'text-green-400 bg-green-900/20 cursor-not-allowed'
             : 'text-gray-400 hover:text-gray-300 hover:bg-gray-700'
         }`}
-        title={!canSubmitFeedback ? "Already rated" : "Rate this video"}
+                        title={!(canSubmitFeedback || existingFeedback) ? "Already rated" : "Rate this video"}
       >
         <Star className="w-6 h-6" />
         {!canSubmitFeedback ? "Rated" : "Rate"}
@@ -787,7 +800,7 @@ export const CondensedFeedback: React.FC<CondensedFeedbackProps> = ({
                   <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
-                  <span className="font-medium">Already Rated</span>
+                                          <span className="font-medium">Update Rating</span>
                 </div>
                 <span>You rated this video {existingFeedback.rating}/5 stars</span>
               </div>
@@ -814,10 +827,10 @@ export const CondensedFeedback: React.FC<CondensedFeedbackProps> = ({
                           canSubmitFeedback && setRating(star);
                         }
                       }}
-                      disabled={!canSubmitFeedback}
-                      className={`p-1 transition-transform duration-200 ${
-                        !canSubmitFeedback ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'
-                      }`}
+                      disabled={!(canSubmitFeedback || existingFeedback)}
+                                              className={`p-1 transition-transform duration-200 ${
+                          !(canSubmitFeedback || existingFeedback) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'
+                        }`}
                     >
                       <StarIcon filled={(rating ?? 0) >= star} className="w-6 h-6" />
                     </button>
@@ -888,10 +901,10 @@ export const CondensedFeedback: React.FC<CondensedFeedbackProps> = ({
                     </button>
                     <button
                       type="submit"
-                      disabled={rating === null || submissionStatus === "submitting" || !canSubmitFeedback}
+                      disabled={rating === null || submissionStatus === "submitting" || !(canSubmitFeedback || existingFeedback)}
                       className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors feedback-button"
                     >
-                      {submissionStatus === "submitting" ? "Sending..." : !canSubmitFeedback ? "Already Rated" : "Submit"}
+                      {submissionStatus === "submitting" ? "Sending..." : !(canSubmitFeedback || existingFeedback) ? "Already Rated" : "Submit"}
                     </button>
                   </div>
 

@@ -74,29 +74,7 @@ export const useAuth = () => {
   return context;
 };
 
-// Add cache for user data
-let userDataCache: {
-  data: {
-    exam?: string;
-    group_type?: string;
-    name?: string;
-    email?: string;
-    id?: string;
-    phoneno?: string;
-    type?: string;
-    usercode?: string;
-    gender?: string;
-    date_of_birth?: string;
-    exam_goal?: {
-      exam: string | null;
-      group: string | null;
-    };
-  } | null;
-  timestamp: number;
-  isFetching?: boolean;
-} | null = null;
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 // Global flag to prevent multiple simultaneous API calls
 let isGlobalFetching = false;
@@ -115,17 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const getUserData = async () => {
     console.log("🔍 getUserData called", new Date().toISOString());
 
-    // Check if cache is valid
-    if (
-      userDataCache &&
-      Date.now() - userDataCache.timestamp < CACHE_DURATION
-    ) {
-      console.log("📋 Using stored user data");
-      return {
-        data: userDataCache.data,
-        status: 200,
-      };
-    }
+
 
     // Prevent multiple simultaneous API calls
     if (isGlobalFetching) {
@@ -133,17 +101,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Wait for the current request to complete
       while (isGlobalFetching) {
         await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-      // Return the stored data that should now be available
-      if (
-        userDataCache &&
-        Date.now() - userDataCache.timestamp < CACHE_DURATION
-      ) {
-        console.log("📋 Using stored user data after waiting");
-        return {
-          data: userDataCache.data,
-          status: 200,
-        };
       }
     }
 
@@ -160,11 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const response = await authApi.getAuthenticatedUser();
       console.log("✅ API call completed", new Date().toISOString());
 
-      // Update stored data
-      userDataCache = {
-        data: response.data || null, // API returns data directly, not wrapped in data.data
-        timestamp: Date.now(),
-      };
+
 
       // Also update localStorage with the fresh data
       updateLocalStorageUserData(response.data);
@@ -176,14 +129,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error) {
       console.error("❌ Error fetching user data:", error);
 
-      // If it's an authentication error, clear cache and auth data
+              // If it's an authentication error, clear auth data
       if (error && typeof error === "object" && "status" in error) {
         const apiError = error as any;
         if (apiError.status === 401 || apiError.status === 403) {
           console.log(
             "🔒 Authentication error - clearing stored data and auth data"
           );
-          userDataCache = null;
+
           // Don't call logout here as it might cause infinite loops
           // The calling function (checkUserState) will handle logout
         }
@@ -195,17 +148,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  // Clear stored data when user logs out
-  const clearUserDataCache = () => {
-    console.log("🧹 Clearing stored user data");
-    userDataCache = null;
-    isGlobalFetching = false;
-  };
+
 
   // Force refresh user data (bypass localStorage and fetch fresh data)
   const refreshUserData = async () => {
     console.log("🔄 Refreshing user data from API");
-    userDataCache = null; // Clear stored data
     return await getUserData(); // This will fetch fresh data
   };
 
@@ -345,7 +292,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     setHasExamGoal(false);
     setHasName(false);
-    clearUserDataCache(); // Clear cache on logout
+
 
     // Clear localStorage
     localStorage.removeItem("authToken");

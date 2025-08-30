@@ -32,7 +32,7 @@ interface ChatProps {
   onSendMessage: (message: string) => void;
   isLeftColumnVisible: boolean;
   // Optional props to prevent duplicate API calls when passed from parent
-  canSubmitFeedback?: boolean;
+  canSubmitFeedback?: boolean | undefined;
   existingFeedback?: any;
   markAsSubmitted?: () => void;
 }

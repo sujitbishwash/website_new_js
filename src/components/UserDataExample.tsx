@@ -3,7 +3,7 @@ import { useUser } from "../contexts/UserContext";
 
 /**
  * Example component showing how to use stored user data
- * This component will use data from the background cache without making API calls
+ * This component will use data from the UserContext without making API calls
  */
 const UserDataExample: React.FC = () => {
   const {
@@ -144,7 +144,7 @@ const UserDataExample: React.FC = () => {
           <li>Data is automatically stored when you visit the home page</li>
           <li>Other components can access this data without API calls</li>
           <li>Background sync keeps data fresh every 5 minutes</li>
-          <li>Cache persists across page refreshes</li>
+  
         </ul>
       </div>
     </div>

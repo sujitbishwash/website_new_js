@@ -48,7 +48,7 @@ interface ProgressBarProps {
 interface FlashcardsProps {
   // Optional props to prevent duplicate API calls when passed from parent
   videoId: string;
-  canSubmitFeedback?: boolean;
+  canSubmitFeedback?: boolean | undefined;
   existingFeedback?: any;
   markAsSubmitted?: () => void;
 }
@@ -219,6 +219,17 @@ const Flashcards: React.FC<FlashcardsProps> = ({
   existingFeedback,
   markAsSubmitted,
 }) => {
+  // Debug component mounting (only in development)
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log("🔍 Flashcards Component - Mounted with props:", {
+        videoId,
+        canSubmitFeedback,
+        existingFeedback: !!existingFeedback,
+        hasMarkAsSubmitted: !!markAsSubmitted
+      });
+    }
+  }, [videoId, canSubmitFeedback, existingFeedback, markAsSubmitted]);
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -308,12 +319,26 @@ const Flashcards: React.FC<FlashcardsProps> = ({
     if (
       cards.length > 0 &&
       currentIndex === cards.length - 1 &&
-      (canSubmitFeedback !== false) && // Default to true if undefined
+      canSubmitFeedback === true && // Must be explicitly true
       !existingFeedback &&
       !isFeedbackModalOpen
     ) {
       console.log("🎯 Opening Flashcards feedback modal - user completed all cards");
       setIsFeedbackModalOpen(true);
+    } else {
+      console.log("🔍 Flashcards feedback modal useEffect - conditions not met:", {
+        cardsLength: cards.length,
+        currentIndex,
+        isLastCard: currentIndex === cards.length - 1,
+        canSubmitFeedback,
+        existingFeedback: !!existingFeedback,
+        isFeedbackModalOpen,
+        shouldOpen: cards.length > 0 &&
+                   currentIndex === cards.length - 1 &&
+                   (canSubmitFeedback !== false) &&
+                   !existingFeedback &&
+                   !isFeedbackModalOpen
+      });
     }
   }, [cards.length, currentIndex, canSubmitFeedback, existingFeedback, isFeedbackModalOpen]);
 
@@ -353,7 +378,14 @@ const Flashcards: React.FC<FlashcardsProps> = ({
     }
   }, [cards.length, currentIndex, canSubmitFeedback, existingFeedback, isFeedbackModalOpen, markAsSubmitted]);
 
-  const handleFeedbackClose = () => setIsFeedbackModalOpen(false);
+  const handleFeedbackClose = () => {
+    console.log("🔍 Flashcards feedback modal closing - setting isFeedbackModalOpen to false");
+    setIsFeedbackModalOpen(false);
+    // Add a small delay to prevent immediate re-opening
+    setTimeout(() => {
+      console.log("🔍 Flashcards feedback modal state after close:", { isFeedbackModalOpen: false });
+    }, 100);
+  };
   const handleFeedbackSubmit = async (payload: any) => {
     console.log("Flashcards feedback submitted:", payload);
     if (markAsSubmitted) {
@@ -391,10 +423,13 @@ const Flashcards: React.FC<FlashcardsProps> = ({
             />
             
             {/* Manual feedback trigger - only show if feedback can be submitted and no existing feedback */}
-            {(canSubmitFeedback !== false) && !existingFeedback && (
+            {canSubmitFeedback === true && !existingFeedback && (
               <div className="mt-4 flex justify-center">
                 <button
-                  onClick={() => setIsFeedbackModalOpen(true)}
+                  onClick={() => {
+                    console.log("🔍 Manual feedback button clicked - opening modal");
+                    setIsFeedbackModalOpen(true);
+                  }}
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors"
                 >
                   Rate Flashcards

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { feedbackApi, FeedbackStatus, ComponentName, MultiComponentFeedbackStatus } from '@/lib/api-client';
+import { feedbackApi, FeedbackStatus, ComponentName } from '@/lib/api-client';
 
 interface UseFeedbackTrackerOptions {
   component: ComponentName;
@@ -37,7 +37,13 @@ interface UseMultiFeedbackTrackerReturn {
   feedbackStates: {
     [key in ComponentName]?: {
       canSubmitFeedback: boolean;
-      existingFeedback: FeedbackStatus['existing_feedback'] | null;
+      existingFeedback: {
+        id: string;
+        rating: number;
+        description: string;
+        date_submitted: string;
+        page_url: string;
+      } | null;
       reason: string;
     };
   };
@@ -123,8 +129,9 @@ export const useFeedbackTracker = ({
 
   // Mark feedback as submitted (called after successful submission)
   const markAsSubmitted = useCallback(() => {
-    setCanSubmitFeedback(false);
-    console.log(`✅ Feedback marked as submitted for ${component}:${sourceId}`);
+    setCanSubmitFeedback(false); // Prevent duplicate submissions
+    // Keep existingFeedback as is - don't override API data
+    console.log(`✅ Feedback marked as submitted for ${component}:${sourceId} - preventing duplicates`);
   }, [component, sourceId]);
 
   // Reset feedback state (useful for testing or admin purposes)
@@ -184,7 +191,13 @@ export const useMultiFeedbackTracker = ({
   const [feedbackStates, setFeedbackStates] = useState<{
     [key in ComponentName]?: {
       canSubmitFeedback: boolean;
-      existingFeedback: FeedbackStatus['existing_feedback'] | null;
+      existingFeedback: {
+        id: string;
+        rating: number;
+        description: string;
+        date_submitted: string;
+        page_url: string;
+      } | null;
       reason: string;
     };
   }>({});
@@ -219,18 +232,26 @@ export const useMultiFeedbackTracker = ({
 
     try {
       const response = await feedbackApi.canSubmitFeedbackMulti(sourceId, components, pageUrl);
+
+      console.log("🔍 Multi-feedback response:", response);
       
       const newStates: {
         [key in ComponentName]?: {
           canSubmitFeedback: boolean;
-          existingFeedback: FeedbackStatus['existing_feedback'] | null;
+          existingFeedback: {
+            id: string;
+            rating: number;
+            description: string;
+            date_submitted: string;
+            page_url: string;
+          } | null;
           reason: string;
         };
       } = {};
 
-      components.forEach(component => {
-        const componentData = response.components[component];
-        if (componentData) {
+      response.components.forEach(componentData => {
+        const component = componentData.component;
+        if (component) {
           newStates[component] = {
             canSubmitFeedback: componentData.can_feedback,
             existingFeedback: componentData.existing_feedback,
@@ -258,15 +279,22 @@ export const useMultiFeedbackTracker = ({
   }, [components, sourceId, pageUrl, onFeedbackExists]);
 
   const markAsSubmitted = useCallback((component: ComponentName) => {
-    setFeedbackStates(prev => ({
-      ...prev,
-      [component]: {
-        ...prev[component],
-        canSubmitFeedback: false
-      }
-    }));
-    console.log(`✅ Feedback marked as submitted for ${component}:${sourceId}`);
+    setFeedbackStates(prev => {
+      const currentState = prev[component];
+      
+      return {
+        ...prev,
+        [component]: {
+          ...currentState,
+          canSubmitFeedback: false, // Prevent duplicate submissions
+          // Keep existingFeedback as is - don't override API data
+        }
+      };
+    });
+    console.log(`✅ Feedback marked as submitted for ${component}:${sourceId} - preventing duplicates`);
   }, [sourceId]);
+
+
 
   const resetFeedback = useCallback(() => {
     setFeedbackStates({});

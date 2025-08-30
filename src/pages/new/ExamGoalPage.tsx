@@ -93,7 +93,7 @@ const Dropdown: FC<DropdownProps> = ({
 const ExamGoalSelector: FC = () => {
   const navigate = useNavigate();
   const { checkExamGoal, refreshUserData } = useAuth();
-  const { clearCache } = useUser();
+  
   const [examType, setExamType] = useState<string>("");
   const [specificExam, setSpecificExam] = useState<string>("");
   const [examData, setExamData] = useState<ExamData>({});
@@ -183,9 +183,7 @@ const ExamGoalSelector: FC = () => {
       if (response.data.success) {
         console.log("✅ Exam goal added successfully:", response.data.message);
 
-        // Clear all caches to ensure fresh data
-        console.log("🧹 Clearing caches...");
-        clearCache();
+        
 
         // Force refresh the user data to get the updated exam goal
         console.log("🔄 Force refreshing user data...");

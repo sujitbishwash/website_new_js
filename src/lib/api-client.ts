@@ -460,9 +460,20 @@ export interface FeedbackStatus {
 
 // New multi-component feedback status response
 export interface MultiComponentFeedbackStatus {
-  components: {
-    [key in ComponentName]?: FeedbackStatus;
-  };
+  page_url: string;
+  components: Array<{
+    component: ComponentName;
+    can_feedback: boolean;
+    existing_feedback: {
+      id: string;
+      rating: number;
+      description: string;
+      date_submitted: string;
+      page_url: string;
+    } | null;
+    reason: string;
+    source_id: string;
+  }>;
 }
 
 // Feedback list response

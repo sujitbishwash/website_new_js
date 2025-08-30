@@ -332,22 +332,22 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
     onShare: () => void;
     // Feedback state for each component
     chatFeedbackState?: {
-      canSubmitFeedback: boolean;
+      canSubmitFeedback: boolean | undefined;
       existingFeedback: any;
       markAsSubmitted: () => void;
     };
     quizFeedbackState?: {
-      canSubmitFeedback: boolean;
+      canSubmitFeedback: boolean | undefined;
       existingFeedback: any;
       markAsSubmitted: () => void;
     };
     summaryFeedbackState?: {
-      canSubmitFeedback: boolean;
+      canSubmitFeedback: boolean | undefined;
       existingFeedback: any;
       markAsSubmitted: () => void;
     };
     flashcardFeedbackState?: {
-      canSubmitFeedback: boolean;
+      canSubmitFeedback: boolean | undefined;
       existingFeedback: any;
       markAsSubmitted: () => void;
     };
@@ -578,26 +578,30 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
       pageUrl: window.location.href,
     });
 
+    console.log("🔍 Feedback States:...............................", feedbackStates);
+
     // Extract video feedback state
     const videoFeedbackState = feedbackStates[ComponentName.Video];
     const videoCanSubmitFeedback = videoFeedbackState ? videoFeedbackState.canSubmitFeedback : (isFeedbackLoading ? false : true);
     const videoExistingFeedback = videoFeedbackState?.existingFeedback ?? null;
 
-    // Extract feedback states for all components with default values
+    // Extract feedback states for all components - provide sensible defaults
     const chatFeedbackState = feedbackStates[ComponentName.Chat] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
     const quizFeedbackState = feedbackStates[ComponentName.Quiz] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
     const summaryFeedbackState = feedbackStates[ComponentName.Summary] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
     const flashcardFeedbackState = feedbackStates[ComponentName.Flashcard] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
 
-    // Debug feedback states
-    console.log("🔍 Feedback States:", {
-      chat: chatFeedbackState,
-      quiz: quizFeedbackState,
-      summary: summaryFeedbackState,
-      flashcard: flashcardFeedbackState,
-      isLoading: isFeedbackLoading,
-      error: feedbackError
-    });
+    // Debug feedback states (only in development)
+    if (process.env.NODE_ENV === 'development') {
+      console.log("🔍 Feedback States:", {
+        chat: chatFeedbackState,
+        quiz: quizFeedbackState,
+        summary: summaryFeedbackState,
+        flashcard: flashcardFeedbackState,
+        isLoading: isFeedbackLoading,
+        error: feedbackError
+      });
+    }
 
     // Create wrapper functions for markAsSubmitted for each component
     const chatMarkAsSubmitted = useCallback(() => {

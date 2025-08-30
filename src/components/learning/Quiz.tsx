@@ -213,7 +213,7 @@ const QuestionView: React.FC<{
 interface QuizProps {
   // Optional props to prevent duplicate API calls when passed from parent
   videoId: string;
-  canSubmitFeedback?: boolean;
+  canSubmitFeedback?: boolean | undefined;
   existingFeedback?: any;
   markAsSubmitted?: () => void;
 }
@@ -302,7 +302,10 @@ const Quiz: React.FC<QuizProps> = ({
     }
   }, [showScore, canSubmitFeedback, existingFeedback]);
 
-  const handleCloseFeedback = () => setIsFeedbackModalOpen(false);
+  const handleCloseFeedback = () => {
+    console.log("🔍 Quiz feedback modal closing");
+    setIsFeedbackModalOpen(false);
+  };
   const handleSubmitFeedback = async (payload: any) => {
     console.log("Quiz feedback submitted:", payload);
     if (markAsSubmitted) {
@@ -326,18 +329,7 @@ const Quiz: React.FC<QuizProps> = ({
               totalQuestions={quizQuestions.length}
               restartQuiz={restartQuiz}
             />
-            {/* Debug feedback button */}
-            <div className="mt-4 text-center">
-              <button
-                onClick={() => {
-                  console.log("🔍 Manual feedback test button clicked");
-                  setIsFeedbackModalOpen(true);
-                }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Test Feedback Modal
-              </button>
-            </div>
+
           </div>
         ) : (
           <QuestionView

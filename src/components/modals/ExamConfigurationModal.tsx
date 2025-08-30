@@ -218,7 +218,7 @@ export default function ExamConfigurationModal({
     fetchExamGoal,
     syncExamGoalFromAuthContext,
     updateExamGoal,
-    clearCache,
+
     isLoading: userLoading,
     error: userError,
   } = useUser();
@@ -269,7 +269,7 @@ export default function ExamConfigurationModal({
         return;
       }
 
-      // If no sync, fetch from API using cache-first approach
+      // If no sync, fetch from API
       fetchExamGoal();
     }
   }, [isOpen, examGoal, fetchExamGoal, syncExamGoalFromAuthContext]);
@@ -358,8 +358,7 @@ export default function ExamConfigurationModal({
         );
         setUpdateMessage("Exam goal updated successfully!");
 
-        // Clear cache and refresh user data
-        clearCache();
+
         await refreshUserData();
 
         // Also refresh exam goal data in UserContext
@@ -381,7 +380,6 @@ export default function ExamConfigurationModal({
   }, [
     selectedExamDetails,
     selectedCategoryKey,
-    clearCache,
     refreshUserData,
     fetchExamGoal,
   ]);

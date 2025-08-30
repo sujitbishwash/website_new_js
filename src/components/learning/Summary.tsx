@@ -4,6 +4,79 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
 import { ComponentName } from "@/lib/api-client";
 
+// Star Rating Component with Animation
+interface StarRatingProps {
+  star: number;
+  rating: number;
+  size?: "sm" | "md" | "lg";
+  animated?: boolean;
+}
+
+const StarRating: React.FC<StarRatingProps> = ({ star, rating, size = "md", animated = false }) => {
+  const isFilled = star <= rating;
+  const sizeClasses = {
+    sm: "w-4 h-4",
+    md: "w-5 h-5", 
+    lg: "w-6 h-6"
+  };
+
+  return (
+    <div className={`${sizeClasses[size]} relative group`}>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill={isFilled ? "currentColor" : "none"}
+        stroke="currentColor"
+        strokeWidth="2"
+        className={`transition-all duration-500 ease-out transform ${
+          isFilled 
+            ? "text-yellow-400 drop-shadow-lg" 
+            : "text-gray-400"
+        } ${
+          animated && isFilled 
+            ? "animate-bounce" 
+            : ""
+        } hover:scale-110 group-hover:scale-110`}
+        style={{
+          animationDelay: `${star * 150}ms`,
+          animationDuration: "0.6s"
+        }}
+      >
+        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+      </svg>
+      
+      {/* Enhanced glow effect for filled stars */}
+      {isFilled && (
+        <>
+          {/* Inner glow */}
+          <div 
+            className={`absolute inset-0 bg-yellow-400 rounded-full blur-sm opacity-40 ${
+              animated ? "animate-pulse" : ""
+            }`}
+            style={{
+              animationDelay: `${star * 150}ms`,
+              animationDuration: "1.2s"
+            }}
+          />
+          {/* Outer glow */}
+          <div 
+            className={`absolute inset-0 bg-yellow-300 rounded-full blur-md opacity-20 ${
+              animated ? "animate-pulse" : ""
+            }`}
+            style={{
+              animationDelay: `${star * 150}ms`,
+              animationDuration: "1.8s"
+            }}
+          />
+        </>
+      )}
+      
+      {/* Hover effect for all stars */}
+      <div className="absolute inset-0 bg-yellow-200 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm" />
+    </div>
+  );
+};
+
 // Centralized theme colors for easy customization
 const theme = {
   background: "#111827",
@@ -192,6 +265,23 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
   markAsSubmitted,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [showFeedbackDisplay, setShowFeedbackDisplay] = useState(false);
+
+  // Debug modal state changes
+  useEffect(() => {
+    console.log("🔍 Summary modal state changed:", { isOpen, canSubmitFeedback, existingFeedback: !!existingFeedback });
+  }, [isOpen, canSubmitFeedback, existingFeedback]);
+
+  // Trigger entrance animation when feedback exists
+  useEffect(() => {
+    if (existingFeedback) {
+      // Small delay for smooth entrance
+      const timer = setTimeout(() => setShowFeedbackDisplay(true), 100);
+      return () => clearTimeout(timer);
+    } else {
+      setShowFeedbackDisplay(false);
+    }
+  }, [existingFeedback]);
 
   console.log(canSubmitFeedback, existingFeedback, markAsSubmitted);
   
@@ -202,6 +292,7 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
       existingFeedback: !!existingFeedback,
       hasMarkAsSubmitted: !!markAsSubmitted
     });
+    console.log("🔍 Setting modal to open - isOpen will be:", true);
     setIsOpen(true);
   };
   const close = () => setIsOpen(false);
@@ -218,27 +309,66 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
       <div className="text-sm text-muted-foreground">
         Share your thoughts about this summary.
       </div>
-      <div className="flex gap-2">
+      {existingFeedback ? (
+        // Show previous rating with animated stars
+        <div className={`flex flex-col items-center gap-4 p-6 bg-gradient-to-r from-blue-900/20 via-purple-900/20 to-indigo-900/20 rounded-xl border border-blue-600/30 shadow-lg backdrop-blur-sm transition-all duration-1000 ease-out transform ${
+          showFeedbackDisplay 
+            ? "opacity-100 scale-100 translate-y-0 rotate-0" 
+            : "opacity-0 scale-90 translate-y-6 rotate-1"
+        }`}>
+          <div className="text-center">
+            <div className="text-lg font-semibold text-foreground mb-1">Your Previous Rating</div>
+            <div className="text-sm text-foreground/70">Thanks for your feedback!</div>
+          </div>
+          
+          {/* Animated Star Rating */}
+          <div className="flex items-center gap-2 p-4 bg-gradient-to-r from-white/10 to-white/5 rounded-full border border-white/20 shadow-inner">
+            {[1, 2, 3, 4, 5].map((star) => (
+              <StarRating
+                key={star}
+                star={star}
+                rating={existingFeedback.rating || 0}
+                size="lg"
+                animated={true}
+              />
+            ))}
+          </div>
+          
+          {/* Rating Text */}
+          <div className="text-center">
+            <div className="text-3xl font-bold bg-gradient-to-r from-yellow-400 to-orange-400 bg-clip-text text-transparent mb-2 drop-shadow-sm">
+              {existingFeedback.rating || 0}/5
+            </div>
+            <div className="text-sm font-medium text-foreground/70 px-3 py-1 bg-white/10 rounded-full">
+              {existingFeedback.rating >= 4 ? "🌟 Excellent!" : 
+               existingFeedback.rating >= 3 ? "👍 Good!" : 
+               existingFeedback.rating >= 2 ? "😐 Fair" : "😔 Poor"}
+            </div>
+          </div>
+          
+          {/* Update Button */}
+          <button
+            onClick={open}
+            className="px-6 py-3 rounded-lg text-sm font-medium bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+          >
+            Update Rating
+          </button>
+          <div className="text-xs text-foreground/50 text-center mt-2">
+            Click to modify your previous feedback
+          </div>
+          
+
+        </div>
+      ) : (
+        // Show rate button if no feedback yet
         <button
           onClick={open}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-            existingFeedback ? "bg-gray-600 hover:bg-gray-500 text-gray-300" : "bg-blue-600 hover:bg-blue-500 text-white"
-          }`}
-          disabled={!canSubmitFeedback && !existingFeedback}
+          className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors"
+          disabled={canSubmitFeedback !== true}
         >
-          {existingFeedback ? "Update Feedback" : "Rate Summary"}
+          Rate Summary
         </button>
-        {/* Debug feedback button */}
-        <button
-          onClick={() => {
-            console.log("🔍 Manual feedback test button clicked for Summary");
-            setIsOpen(true);
-          }}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
-        >
-          Test Feedback
-        </button>
-      </div>
+      )}
       <VideoFeedbackModal
         isOpen={isOpen}
         onClose={close}
@@ -314,7 +444,7 @@ const LoadingSpinner = () => (
 interface SummaryProps {
   // Optional props to prevent duplicate API calls when passed from parent
   videoId: string;
-  canSubmitFeedback?: boolean;
+  canSubmitFeedback?: boolean | undefined;
   existingFeedback?: any;
   markAsSubmitted?: () => void;
 }
@@ -332,6 +462,7 @@ const Summary: React.FC<SummaryProps> = ({
     existingFeedback: !!existingFeedback,
     hasMarkAsSubmitted: !!markAsSubmitted
   });
+
   const [summaryData, setSummaryData] = useState<SummarySectionData[] | null>(
     null
   );

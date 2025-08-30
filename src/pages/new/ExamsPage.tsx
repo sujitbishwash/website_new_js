@@ -382,11 +382,11 @@ export default function ExamsPage() {
   const {
     profile,
     examGoal,
-    clearCache,
+    
     fetchExamGoal,
     refreshExamGoal,
     syncExamGoalFromAuthContext,
-    debugCache,
+    
     isDataLoaded,
     resetFetchFlags,
   } = useUser();
@@ -511,8 +511,8 @@ export default function ExamsPage() {
             return;
           }
 
-          // If no sync, fetch from API using cache-first approach
-          await fetchExamGoal();
+                // If no sync, fetch from API
+      await fetchExamGoal();
         } catch (err: any) {
           console.error(
             "❌ ExamsPage: Failed to fetch current exam goal:",
@@ -566,7 +566,7 @@ export default function ExamsPage() {
   }, [examGoal, examData]);
 
   // Ensure exam goal is fetched when component mounts and examData is available
-  // OPTIMIZATION: Only depends on examData to prevent loops, uses cache-first approach
+  // OPTIMIZATION: Only depends on examData to prevent loops
   useEffect(() => {
     if (Object.keys(examData).length > 0 && !examGoal) {
       console.log("🚀 ExamsPage: Exam data loaded, fetching exam goal...");
@@ -580,7 +580,7 @@ export default function ExamsPage() {
         return;
       }
 
-      // If no sync, fetch from API using cache-first approach
+      // If no sync, fetch from API
       fetchExamGoal();
     }
   }, [examData]); // Only depend on examData, not examGoal to prevent loops
@@ -757,8 +757,7 @@ export default function ExamsPage() {
         );
         setExamGoalUpdateMessage("Exam goal updated successfully!");
 
-        // Clear cache and refresh user data
-        clearCache();
+
         await refreshUserData();
 
         // Also refresh exam goal data in UserContext
@@ -1328,7 +1327,7 @@ export default function ExamsPage() {
               <strong>API Data Count:</strong> {apiExamData.length} exam types
             </div>
             <div style={{ marginBottom: "0.5rem" }}>
-              <strong>Exam Goal in Cache:</strong>{" "}
+              <strong>Exam Goal in State:</strong>{" "}
               {examGoal ? `${examGoal.exam} (${examGoal.groupType})` : "None"}
             </div>
             <div style={{ marginBottom: "0.5rem" }}>
@@ -1353,24 +1352,9 @@ export default function ExamsPage() {
               })()}
             </div>
             <div style={{ marginBottom: "0.5rem" }}>
-              <strong>Fetch Attempted:</strong> Always (cache-first approach)
+              <strong>Fetch Attempted:</strong> Always
             </div>
             <div style={{ marginBottom: "1rem" }}>
-              <button
-                onClick={debugCache}
-                style={{
-                  backgroundColor: theme.accent,
-                  color: "white",
-                  padding: "0.5rem 1rem",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "0.8rem",
-                  marginRight: "0.5rem",
-                }}
-              >
-                Debug Cache
-              </button>
               <button
                 onClick={() => {
                   const synced = syncExamGoalFromAuthContext();
