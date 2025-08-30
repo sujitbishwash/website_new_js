@@ -1,8 +1,6 @@
 import { ArrowLeft, ArrowRight, Shuffle } from "lucide-react";
 import React, { useCallback, useEffect, useState, useMemo, memo, useRef } from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
-import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
-import { ComponentName } from "@/lib/api-client";
 
 // Centralized theme colors for a more refined design
 const theme = {
@@ -381,10 +379,15 @@ const Flashcards: React.FC<FlashcardsProps> = ({
   const handleFeedbackClose = () => {
     console.log("🔍 Flashcards feedback modal closing - setting isFeedbackModalOpen to false");
     setIsFeedbackModalOpen(false);
-    // Add a small delay to prevent immediate re-opening
-    setTimeout(() => {
-      console.log("🔍 Flashcards feedback modal state after close:", { isFeedbackModalOpen: false });
-    }, 100);
+  };
+
+  const handleFeedbackDismiss = () => {
+    console.log("🔍 Flashcards feedback modal dismissed by user");
+    setIsFeedbackModalOpen(false);
+    // Mark that user has dismissed the feedback request
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
   };
   const handleFeedbackSubmit = async (payload: any) => {
     console.log("Flashcards feedback submitted:", payload);
@@ -460,7 +463,7 @@ const Flashcards: React.FC<FlashcardsProps> = ({
               playPercentage={100}
               onSubmit={handleFeedbackSubmit}
               onSkip={handleFeedbackSkip}
-              onDismiss={handleFeedbackClose}
+              onDismiss={handleFeedbackDismiss}
               canSubmitFeedback={canSubmitFeedback}
               existingFeedback={existingFeedback}
               markAsSubmitted={markAsSubmitted}

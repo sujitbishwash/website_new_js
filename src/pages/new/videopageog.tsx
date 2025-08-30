@@ -578,7 +578,6 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
       pageUrl: window.location.href,
     });
 
-    console.log("🔍 Feedback States:...............................", feedbackStates);
 
     // Extract video feedback state
     const videoFeedbackState = feedbackStates[ComponentName.Video];

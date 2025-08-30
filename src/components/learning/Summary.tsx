@@ -1,8 +1,6 @@
 import { ChevronDown } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
-import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
-import { ComponentName } from "@/lib/api-client";
 
 // Star Rating Component with Animation
 interface StarRatingProps {
@@ -296,6 +294,25 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
     setIsOpen(true);
   };
   const close = () => setIsOpen(false);
+  
+  const handleDismiss = () => {
+    console.log("🔍 Summary feedback modal dismissed by user");
+    setIsOpen(false);
+    // Mark that user has dismissed the feedback request
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
+  };
+
+  const handleSkip = () => {
+    console.log("🔍 Summary feedback skipped");
+    setIsOpen(false);
+    // Mark that user has skipped the feedback request
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
+  };
+
   const onSubmit = async (payload: any) => {
     console.log("Summary feedback submitted:", payload);
     if (markAsSubmitted) {
@@ -377,8 +394,8 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
         suggestedChips={[]}
         playPercentage={100}
         onSubmit={onSubmit}
-        onSkip={close}
-        onDismiss={close}
+        onSkip={handleSkip}
+        onDismiss={handleDismiss}
         canSubmitFeedback={canSubmitFeedback}
         existingFeedback={existingFeedback}
         markAsSubmitted={markAsSubmitted}

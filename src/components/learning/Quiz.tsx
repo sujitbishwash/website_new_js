@@ -1,8 +1,6 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import React from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
-import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
-import { ComponentName } from "@/lib/api-client";
 
 // --- Setup ---
 
@@ -306,6 +304,16 @@ const Quiz: React.FC<QuizProps> = ({
     console.log("🔍 Quiz feedback modal closing");
     setIsFeedbackModalOpen(false);
   };
+
+  const handleDismissFeedback = () => {
+    console.log("🔍 Quiz feedback modal dismissed by user");
+    setIsFeedbackModalOpen(false);
+    // Mark that user has dismissed the feedback request
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
+  };
+
   const handleSubmitFeedback = async (payload: any) => {
     console.log("Quiz feedback submitted:", payload);
     if (markAsSubmitted) {
@@ -313,7 +321,14 @@ const Quiz: React.FC<QuizProps> = ({
     }
     setIsFeedbackModalOpen(false);
   };
-  const handleSkipFeedback = () => setIsFeedbackModalOpen(false);
+
+  const handleSkipFeedback = () => {
+    console.log("🔍 Quiz feedback skipped");
+    if (markAsSubmitted) {
+      markAsSubmitted();
+    }
+    setIsFeedbackModalOpen(false);
+  };
 
   // inline styles removed (unused)
 
@@ -352,7 +367,7 @@ const Quiz: React.FC<QuizProps> = ({
           playPercentage={100}
           onSubmit={handleSubmitFeedback}
           onSkip={handleSkipFeedback}
-          onDismiss={handleCloseFeedback}
+          onDismiss={handleDismissFeedback}
           canSubmitFeedback={canSubmitFeedback}
           existingFeedback={existingFeedback}
           markAsSubmitted={markAsSubmitted}
