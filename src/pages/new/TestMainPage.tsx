@@ -41,18 +41,26 @@ import {
 
 // --- Helper Components & Modals ---
 const InstructionsModal = ({ onClose }: { onClose: () => void }) => (
-  <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 animate-fade-in p-4">
-    <div className="bg-card p-6 rounded-lg shadow-xl text-foreground w-full max-w-4xl max-h-[80vh] flex flex-col">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-blue-300">Test Instructions</h2>
+  <div
+    className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 "
+    onClick={onClose}
+  >
+    <div
+      className="relative w-full max-w-4xl bg-card text-primary rounded-2xl shadow-2xl border border-border flex flex-col max-h-[80vh]"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className="p-5 border-b border-border flex justify-between items-center">
+        <h3 className="text-xl font-semibold text-foreground">
+          Test Instructions
+        </h3>
         <button
           onClick={onClose}
-          className="text-gray-400 hover:text-foreground text-3xl leading-none"
+          className="absolute top-3 right-3 p-2 text-foreground rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
         >
-          &times;
+          <X />
         </button>
       </div>
-      <div className="overflow-y-auto text-muted-foreground space-y-3 text-sm pr-4">
+      <div className="overflow-y-auto text-muted-foreground space-y-3 text-sm pr-4 p-6">
         <p>
           1. The test consists of multiple-choice questions across different
           sections.
@@ -71,31 +79,49 @@ const InstructionsModal = ({ onClose }: { onClose: () => void }) => (
           mobile) to jump directly to any question.
         </p>
         <p>5. The color-coded legend for the question palette is as follows:</p>
-        <ul className="list-disc list-inside pl-4 space-y-1">
-          <li>
-            <span className="inline-block w-4 h-4 rounded-sm bg-foreground mr-2 align-middle"></span>
-            <strong>Not Visited:</strong> You have not seen the question yet.
-          </li>
-          <li>
-            <span className="inline-block w-4 h-4 rounded-sm bg-red-600 mr-2 align-middle"></span>
-            <strong>Not Answered:</strong> You have visited the question but not
-            selected an answer.
-          </li>
-          <li>
-            <span className="inline-block w-4 h-4 rounded-sm bg-green-600 mr-2 align-middle"></span>
-            <strong>Answered:</strong> You have answered the question.
-          </li>
-          <li>
-            <span className="inline-block w-4 h-4 rounded-full bg-purple-600 mr-2 align-middle"></span>
-            <strong>Marked for Review:</strong> You have marked the question for
-            later review without answering.
-          </li>
-          <li>
-            <span className="inline-block w-4 h-4 rounded-full bg-purple-600 mr-2 align-middle relative">
-              <Check />
+        <ul className="list-disc list-inside space-y-3 pl-6 pt-2">
+          <li className="flex items-center space-x-4">
+            <div>
+              <Button1 size={24} number={1} />
+            </div>
+            <span>
+              <strong>Not Visited:</strong> You have not seen the question yet.
             </span>
-            <strong>Answered & Marked for Review:</strong> You have answered the
-            question and also marked it for review.
+          </li>
+          <li className="flex items-center space-x-4">
+            <div>
+              <Button2 size={24} number={2} />
+            </div>
+            <span>
+              <strong>Not Answered:</strong> You have visited the question but
+              not selected an answer.
+            </span>
+          </li>
+          <li className="flex items-center space-x-4">
+            <div>
+              <Button3 size={24} number={3} />
+            </div>
+            <span>
+              <strong>Answered:</strong> You have answered the question.
+            </span>
+          </li>
+          <li className="flex items-center space-x-4">
+            <div>
+              <Button4 size={24} number={4} />
+            </div>
+            <span>
+              <strong>Marked for Review:</strong> You have marked the question
+              for later review without answering.
+            </span>
+          </li>
+          <li className="flex items-center space-x-4">
+            <div>
+              <Button5 size={24} number={5} />
+            </div>
+            <span>
+              <strong>Answered & Marked for Review:</strong> You have answered
+              the question and also marked it for review.
+            </span>
           </li>
         </ul>
         <p>
@@ -110,10 +136,10 @@ const InstructionsModal = ({ onClose }: { onClose: () => void }) => (
           8. Click on the "Submit Test" button to finish and submit your test.
         </p>
       </div>
-      <div className="flex justify-end mt-6">
+      <div className="flex justify-end items-center gap-4 p-5 border-t border-border bg-card rounded-b-2xl">
         <button
           onClick={onClose}
-          className="bg-blue-600 hover:bg-blue-700 text-foreground font-bold py-2 px-4 rounded-lg"
+          className="w-full transform rounded-lg px-6 py-2.5 font-semibold bg-blue-600 hover:bg-blue-700 text-foreground  hover:text-foreground transition-all duration-200 ease-in-out focus:outline-none sm:w-auto"
         >
           Got it
         </button>
@@ -688,10 +714,9 @@ const TestMainPage = () => {
           </button>
           {/* Mobile Menu Button */}
           <button
-  className="md:hidden text-foreground ml-2 relative z-30"
-  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
->
-
+            className="md:hidden text-foreground ml-2 relative z-30"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-6 w-6"
@@ -849,7 +874,7 @@ const TestMainPage = () => {
         {/* Sidebar */}
         <aside
           ref={asideRef}
-          className={`w-2/3 lg:w-72 xl:w-80 bg-card/90 backdrop-blur-sm p-4 sm:p-3 flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out ${
+          className={`w-3/4 lg:w-80 xl:w-96 bg-card/90 backdrop-blur-sm p-4 sm:p-3 flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out ${
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
           } lg:translate-x-0 fixed lg:relative top-0 right-0 h-full lg:h-auto z-30 lg:z-0 border-l`}
         >
@@ -1207,22 +1232,28 @@ const TestMainPage = () => {
       {showTestResultDialog && (
         <TestResultDialog
           results={{
-            attemptedQuestions: questions.filter(q => q.answer !== null).length,
-            correctQuestions: questions.filter(q => q.answer !== null).length, // This should be calculated based on correct answers
+            attemptedQuestions: questions.filter((q) => q.answer !== null)
+              .length,
+            correctQuestions: questions.filter((q) => q.answer !== null).length, // This should be calculated based on correct answers
             totalQuestions: questions.length,
             positiveMarks: 0, // This should be calculated based on correct answers
             negativeMarks: 0, // This should be calculated based on incorrect answers
             totalMarks: 0, // This should be calculated
-            timeTaken: `${Math.floor((600 - timeLeft) / 60)}:${((600 - timeLeft) % 60).toString().padStart(2, '0')}`,
+            timeTaken: `${Math.floor((600 - timeLeft) / 60)}:${(
+              (600 - timeLeft) %
+              60
+            )
+              .toString()
+              .padStart(2, "0")}`,
             rank: 1, // This should come from API
             totalStudents: 100, // This should come from API
             sessionId: sessionId, // Add session ID for feedback tracking
           }}
           onClose={handleCloseTestResultDialog}
-                      navigate={() => {
-              handleCloseTestResultDialog();
-              navigate(ROUTES.ANALYSIS);
-            }}
+          navigate={() => {
+            handleCloseTestResultDialog();
+            navigate(ROUTES.ANALYSIS);
+          }}
         />
       )}
       {showInstructionsModal && (
