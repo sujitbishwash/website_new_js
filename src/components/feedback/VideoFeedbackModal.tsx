@@ -1,6 +1,6 @@
-import { Star } from "lucide-react";
 import React, { useState, useEffect, useMemo } from "react";
 import { feedbackApi, FeedbackRequest } from "@/lib/api-client";
+import { X } from "lucide-react";
 
 // --- TYPE DEFINITIONS ---
 
@@ -43,6 +43,40 @@ interface VideoFeedbackModalProps {
 
 // --- HELPER COMPONENTS & CONSTANTS ---
 
+const SmileyIcon: React.FC<{ rating: number; active: boolean; className?: string }> = ({
+  rating,
+  active,
+  className = "",
+}) => {
+  const faceData = {
+    1: { path: 'M 8 15 Q 12 12 16 15', color: 'text-red-500' },
+    2: { path: 'M 8 15 Q 12 13.5 16 15', color: 'text-orange-400' },
+    3: { path: 'M 8 15 L 16 15', color: 'text-yellow-400' },
+    4: { path: 'M 8 15 Q 12 16.5 16 15', color: 'text-lime-400' },
+    5: { path: 'M 8 15 Q 12 18 16 15', color: 'text-green-500' },
+  };
+
+  const currentFace = faceData[rating as keyof typeof faceData];
+  const colorClass = active ? currentFace.color : 'text-gray-300 dark:text-gray-600';
+
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      className={`w-8 h-8 sm:w-10 sm:h-10 transition-colors ${colorClass} ${className}`}
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9 10h.01" />
+      <path d="M15 10h.01" />
+      <path d={currentFace.path} />
+    </svg>
+  );
+};
 const StarIcon: React.FC<{ filled: boolean; className?: string }> = ({
   filled,
   className = "",
@@ -64,20 +98,6 @@ const StarIcon: React.FC<{ filled: boolean; className?: string }> = ({
   </svg>
 );
 
-const CloseIcon: React.FC = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="w-5 h-5"
-  >
-    <path d="M18 6L6 18M6 6l12 12" />
-  </svg>
-);
 
 // Default chips with categories for better organization
 const DEFAULT_CHIPS: FeedbackChip[] = [
@@ -336,22 +356,20 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   }
 
   return (
-    <div 
-      className="fixed inset-0 z-[40] flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 pointer-events-auto feedback-modal-backdrop"
-      onClick={handleBackdropClick}
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4 pointer-events-auto" onClick={handleBackdropClick}
     >
-      <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 animate-fade-in pointer-events-auto feedback-modal">
+      <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gradient-to-br dark:from-gray-800 dark:to-gray-900 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 pointer-events-auto m-4 contrast-more:border-2 motion-reduce:animate-none animate-[fadeIn_0.5s_ease-out]">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
           <div>
             <h2 className="text-xl sm:text-2xl font-bold text-gray-800 dark:text-gray-200">
               How was this {componentName.toLowerCase()}?
             </h2>
-            {videoTitle && (
+            {/**videoTitle && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">
                 {videoTitle}
               </p>
-            )}
+            )*/}
             {/* Show existing rating if available */}
             {hasExistingFeedback && (
               <div className="flex items-center gap-2 mt-2">
@@ -359,29 +377,24 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                   Previously rated: {displayRating} stars
                 </span>
                 <div className="flex items-center gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      className={`w-4 h-4 ${
-                        star <= displayRating 
-                          ? 'text-yellow-400 fill-current' 
-                          : 'text-gray-300 dark:text-gray-600'
-                      }`}
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
-                  ))}
+                  {[1, 2, 3, 4, 5].map((ratingValue) => (
+                           <SmileyIcon
+                              key={ratingValue}
+                              rating={ratingValue}
+                              active={ratingValue <= displayRating}
+                              className="w-5 h-5 sm:w-5 sm:h-5"
+                            />
+                        ))}
                 </div>
               </div>
             )}
           </div>
           <button
-            onClick={handleDismiss}
-            className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-          >
-            <CloseIcon />
-          </button>
+          onClick={handleDismiss}
+          className="absolute top-3 right-3 p-2 text-foreground rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+        >
+          <X />
+        </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 feedback-form">
@@ -416,29 +429,16 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
               role="radiogroup"
               aria-label="Rate your experience with this video"
             >
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  key={star}
-                  type="button"
-                  aria-label={`Rate ${star} out of 5`}
-                  aria-pressed={rating === star}
-                  onMouseEnter={() => (canSubmitFeedback || existingFeedback) && setHoverRating(star)}
-                  onClick={() => (canSubmitFeedback || existingFeedback) && setRating(star)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      (canSubmitFeedback || existingFeedback) && setRating(star);
-                    }
-                  }}
-                  disabled={!(canSubmitFeedback || existingFeedback)}
-                  className={`p-1 rounded-full transition-transform duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500 dark:focus-visible:ring-offset-gray-800 ${
-                    !(canSubmitFeedback || existingFeedback)
-                      ? 'opacity-50 cursor-not-allowed' 
-                      : 'hover:scale-110'
-                  }`}
-                >
-                  <StarIcon filled={(hoverRating ?? rating ?? 0) >= star} />
-                </button>
+              {[1, 2, 3, 4, 5].map(ratingValue => (
+                <div key={ratingValue} className="flex flex-col items-center gap-1 w-12">
+                    <button type="button" onMouseEnter={() => setHoverRating(ratingValue)} onClick={() => setRating(ratingValue)} className="p-1 rounded-full transition-transform duration-200 ease-in-out enabled:hover:scale-110 motion-reduce:transition-none motion-reduce:hover:transform-none">
+                        <SmileyIcon rating={ratingValue} active={(hoverRating ?? rating ?? 0) >= ratingValue} />
+                    </button>
+                    <span className="text-xs text-gray-500 dark:text-gray-400 h-4">
+                        {ratingValue === 1 && 'Terrible'}
+                        {ratingValue === 5 && 'Excellent'}
+                    </span>
+                </div>
               ))}
             </div>
           </div>
@@ -552,11 +552,15 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
             </div>
           )}
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+      
+        </form>
+    {/* Action Buttons */}
+          
+      <div className="flex justify-end items-center gap-4 p-5 border-t border-border bg-card rounded-b-2xl">
             <button
               type="button"
               onClick={handleSkip}
+              
               className="px-6 py-2.5 text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-gray-400 feedback-button"
             >
               Maybe Later
@@ -599,525 +603,15 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
               </ul>
             </div>
           )}
-        </form>
-
         {/* Screen-reader only announcements */}
         <div className="sr-only" aria-live="polite" aria-atomic="true">
           {rating !== null && `Rated ${rating} out of 5 stars.`}
         </div>
         
         {/* Inject enhanced styles */}
-        <style dangerouslySetInnerHTML={{ __html: enhancedStyles }} />
       </div>
     </div>
   );
 };
-
-// --- CONDENSED FEEDBACK COMPONENT ---
-export interface CondensedFeedbackProps {
-  videoId?: string;
-  videoTitle?: string;
-  playPercentage?: number;
-  onFeedbackSubmit: (payload: VideoFeedbackPayload) => void;
-  onFeedbackSkip?: () => void;
-  onOpenModal?: () => void;
-  className?: string;
-  // Optional props to prevent duplicate API calls
-  canSubmitFeedback?: boolean;
-  existingFeedback?: any;
-  markAsSubmitted?: () => void;
-}
-
-export const CondensedFeedback: React.FC<CondensedFeedbackProps> = ({
-  videoId,
-  videoTitle,
-  playPercentage,
-  onFeedbackSubmit,
-  onFeedbackSkip,
-  onOpenModal,
-  className = "",
-  // Optional props to prevent duplicate API calls
-  canSubmitFeedback: parentCanSubmitFeedback,
-  existingFeedback: parentExistingFeedback,
-  markAsSubmitted: parentMarkAsSubmitted,
-}) => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [rating, setRating] = useState<number | null>(null);
-  const [selectedChips, setSelectedChips] = useState<string[]>([]);
-  const [comment, setComment] = useState("");
-  const [submissionStatus, setSubmissionStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
-
-  // Use parent feedback tracker state (no fallback needed since parent always provides state)
-  const canSubmitFeedback = parentCanSubmitFeedback ?? true;
-  const existingFeedback = parentExistingFeedback ?? null;
-  const markAsSubmitted = parentMarkAsSubmitted ?? (() => {
-    console.warn("markAsSubmitted not provided by parent component");
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (rating === null) return;
-
-    // Prevent duplicate submissions
-    if (!canSubmitFeedback) {
-      console.log("⚠️ User has already submitted feedback for this video");
-      setSubmissionStatus("error");
-      return;
-    }
-
-    // Enhanced validation
-    const validationErrors: string[] = [];
-    
-    if (rating === null) {
-      validationErrors.push("Please select a rating");
-    }
-    
-    const description = comment.trim() || selectedChips.join(", ") || `Rating: ${rating}/5`;
-    
-    if (description.length < 1) {
-      validationErrors.push("Please provide a description");
-    } else if (description.length > 4000) {
-      validationErrors.push("Description must be 4000 characters or less");
-    }
-
-    if (validationErrors.length > 0) {
-      console.error("Validation errors:", validationErrors);
-      setSubmissionStatus("error");
-      return;
-    }
-
-    setSubmissionStatus("submitting");
-    try {
-      // Transform data for backend API
-      const backendPayload: FeedbackRequest = {
-        component: "Video",
-        description: comment.trim() || selectedChips.join(", ") || `Rating: ${rating}/5`,
-        rating,
-        source_id: videoId || "unknown",
-        page_url: window.location.href,
-      };
-
-      // Send to backend API
-      console.log("🚀 Sending feedback to backend:", backendPayload);
-      await feedbackApi.submitFeedback(backendPayload);
-      console.log("✅ Feedback sent to backend successfully");
-
-      // Also call the local onFeedbackSubmit for any local handling
-      const localPayload: VideoFeedbackPayload = {
-        rating,
-        comment: comment.trim() || undefined,
-        chips: selectedChips.length > 0 ? selectedChips : undefined,
-        videoId,
-        createdAt: new Date().toISOString(),
-        playPercentage,
-      };
-
-      await onFeedbackSubmit(localPayload);
-      setSubmissionStatus("success");
-      setIsOpen(false);
-      
-      // Mark feedback as submitted to prevent duplicates
-      markAsSubmitted();
-      
-      // Reset form
-      setTimeout(() => {
-        setRating(null);
-        setSelectedChips([]);
-        setComment("");
-        setSubmissionStatus("idle");
-      }, 1000);
-    } catch (error) {
-      console.error("Failed to submit feedback:", error);
-      setSubmissionStatus("error");
-    }
-  };
-
-  const handleSkip = () => {
-    onFeedbackSkip?.();
-    setIsOpen(false);
-  };
-
-  const handleChipToggle = (chipId: string) => {
-    setSelectedChips(prev => 
-      prev.includes(chipId) 
-        ? prev.filter(id => id !== chipId)
-        : [...prev, chipId]
-    );
-  };
-
-  const isLowRating = rating !== null && rating <= 3;
-  const showFeedbackArea = rating !== null && (isLowRating || selectedChips.length > 0 || comment.trim());
-
-  return (
-    <div className={`relative ${className}`}>
-      {/* Trigger Button */}
-      <button
-        onClick={() => {
-          if (onOpenModal) {
-            onOpenModal();
-          } else {
-            setIsOpen(!isOpen);
-          }
-        }}
-                          disabled={!(canSubmitFeedback || existingFeedback)}
-        className={`flex items-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
-          !canSubmitFeedback
-            ? 'text-green-400 bg-green-900/20 cursor-not-allowed'
-            : 'text-gray-400 hover:text-gray-300 hover:bg-gray-700'
-        }`}
-                        title={!(canSubmitFeedback || existingFeedback) ? "Already rated" : "Rate this video"}
-      >
-        <Star className="w-6 h-6" />
-        {!canSubmitFeedback ? "Rated" : "Rate"}
-      </button>
-
-      {/* Dropdown Panel */}
-      {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-80 bg-card border border-gray-700 rounded-lg shadow-lg z-50 animate-fade-in">
-          <div className="p-4">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-gray-200">Rate this video</h3>
-              <button
-                onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-gray-300"
-              >
-                <CloseIcon />
-              </button>
-            </div>
-
-            {/* Play Progress Info */}
-            {playPercentage && (
-              <div className="mb-3 p-2 bg-gray-800 rounded text-xs text-gray-400">
-                <span>Play Progress: {Math.round(playPercentage)}%</span>
-              </div>
-            )}
-
-            {/* Already Submitted Warning */}
-            {!canSubmitFeedback && existingFeedback && (
-              <div className="mb-3 p-2 bg-green-900/20 border border-green-700 rounded text-xs text-green-400">
-                <div className="flex items-center gap-1 mb-1">
-                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                                          <span className="font-medium">Update Rating</span>
-                </div>
-                <span>You rated this video {existingFeedback.rating}/5 stars</span>
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit}>
-              {/* Star Rating */}
-              <div className="text-center mb-3">
-                <div 
-                  className="flex justify-center space-x-1 feedback-stars"
-                  role="radiogroup"
-                  aria-label="Rate this video"
-                >
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      aria-label={`Rate ${star} out of 5`}
-                      aria-pressed={rating === star}
-                      onClick={() => canSubmitFeedback && setRating(star)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          canSubmitFeedback && setRating(star);
-                        }
-                      }}
-                      disabled={!(canSubmitFeedback || existingFeedback)}
-                                              className={`p-1 transition-transform duration-200 ${
-                          !(canSubmitFeedback || existingFeedback) ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110'
-                        }`}
-                    >
-                      <StarIcon filled={(rating ?? 0) >= star} className="w-6 h-6" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Feedback Area */}
-              {rating !== null && (
-                <div className="space-y-3">
-                  <label className="text-xs font-medium text-gray-300">
-                    {isLowRating ? "What could be improved?" : "Any thoughts?"}
-                  </label>
-
-                  {/* Quick Chips */}
-                  <div className="flex flex-wrap gap-1">
-                    {DEFAULT_CHIPS.slice(0, 8).map((chip) => (
-                      <button
-                        key={chip.id}
-                        type="button"
-                        onClick={() => handleChipToggle(chip.id)}
-                        className={`px-2 py-1 text-xs rounded-full transition-colors feedback-chip ${
-                          selectedChips.includes(chip.id)
-                            ? "bg-blue-600 text-white selected"
-                            : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                        }`}
-                      >
-                        {chip.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Comment */}
-                  <div className="relative">
-                    <textarea
-                      value={comment}
-                      onChange={(e) => setComment(e.target.value)}
-                      placeholder="Optional comment..."
-                      rows={2}
-                      maxLength={4000}
-                      className={`w-full p-2 text-xs bg-gray-800 border rounded focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none resize-none ${
-                        comment.length > 3800 ? 'border-orange-500' : 
-                        comment.length > 4000 ? 'border-red-500' : 
-                        'border-gray-600'
-                      }`}
-                      aria-describedby="condensed-description-count"
-                    />
-                    <div className={`absolute bottom-1 right-1 text-xs ${
-                      comment.length > 3800 ? 'text-orange-400' : 
-                      comment.length > 4000 ? 'text-red-400' : 
-                      'text-gray-500'
-                    }`}>
-                      {comment.length}/4000
-                    </div>
-                    <div id="condensed-description-count" className="sr-only">
-                      {comment.length} characters out of 4000
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex gap-2 pt-2 border-t border-gray-700">
-                    <button
-                      type="button"
-                      onClick={handleSkip}
-                      className="px-3 py-1.5 text-xs font-medium text-gray-400 hover:text-gray-300 hover:bg-gray-700 rounded transition-colors feedback-button"
-                    >
-                      Skip
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={rating === null || submissionStatus === "submitting" || !(canSubmitFeedback || existingFeedback)}
-                      className="flex-1 px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 disabled:bg-gray-600 disabled:cursor-not-allowed transition-colors feedback-button"
-                    >
-                      {submissionStatus === "submitting" ? "Sending..." : !(canSubmitFeedback || existingFeedback) ? "Already Rated" : "Submit"}
-                    </button>
-                  </div>
-
-                  {/* Status Messages */}
-                  {submissionStatus === "success" && (
-                    <div className="text-xs text-green-400 text-center">✓ Thank you!</div>
-                  )}
-                  {submissionStatus === "error" && (
-                    <div className="text-xs text-red-400 text-center">
-                      <div className="mb-1">❌ Failed to submit</div>
-                      <div className="text-xs opacity-80">
-                        Check rating and description
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </form>
-          </div>
-        </div>
-      )}
-      
-      {/* Inject enhanced styles for condensed feedback */}
-      <style dangerouslySetInnerHTML={{ __html: enhancedStyles }} />
-    </div>
-  );
-};
-
-// Add enhanced CSS styles for better visual feedback
-const enhancedStyles = `
-  /* Enhanced feedback form styles */
-  .feedback-form textarea:focus {
-    border-color: #3b82f6 !important;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
-  }
-  
-  .feedback-form textarea.border-orange-300:focus {
-    border-color: #f59e0b !important;
-    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1) !important;
-  }
-  
-  .feedback-form textarea.border-red-300:focus {
-    border-color: #ef4444 !important;
-    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
-  }
-  
-  /* Star rating hover effects */
-  .feedback-stars button:hover:not(:disabled) {
-    transform: scale(1.1);
-    transition: transform 0.2s ease-in-out;
-  }
-  
-  /* Character count animations */
-  .feedback-char-count {
-    transition: color 0.2s ease-in-out;
-  }
-  
-  /* Error message animations */
-  .feedback-error {
-    animation: slideIn 0.3s ease-out;
-  }
-  
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  /* Success message animations */
-  .feedback-success {
-    animation: fadeIn 0.5s ease-out;
-  }
-  
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: scale(0.95);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-  
-  /* Loading spinner enhancements */
-  .feedback-spinner {
-    animation: spin 1s linear infinite;
-  }
-  
-  @keyframes spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  
-  /* Chip selection animations */
-  .feedback-chip {
-    transition: all 0.2s ease-in-out;
-  }
-  
-  .feedback-chip:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  }
-  
-  .feedback-chip.selected {
-    transform: scale(1.05);
-  }
-  
-  /* Category filter animations */
-  .feedback-category {
-    transition: all 0.2s ease-in-out;
-  }
-  
-  .feedback-category.active {
-    transform: scale(1.05);
-  }
-  
-  /* Button hover effects */
-  .feedback-button {
-    transition: all 0.2s ease-in-out;
-  }
-  
-  .feedback-button:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-  
-  /* Modal backdrop blur */
-  .feedback-modal-backdrop {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-  }
-  
-  /* Responsive improvements */
-  @media (max-width: 640px) {
-    .feedback-modal {
-      margin: 1rem;
-      max-height: calc(100vh - 2rem);
-    }
-    
-    .feedback-stars {
-      gap: 0.25rem;
-    }
-    
-    .feedback-stars button {
-      padding: 0.25rem;
-    }
-  }
-  
-  /* Dark mode enhancements */
-  @media (prefers-color-scheme: dark) {
-    .feedback-modal {
-      background: linear-gradient(135deg, #1f2937 0%, #111827 100%);
-      border: 1px solid #374151;
-    }
-    
-    .feedback-form textarea {
-      background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-      border-color: #4b5563;
-    }
-    
-    .feedback-form textarea:focus {
-      background: linear-gradient(135deg, #111827 0%, #1f2937 100%);
-      border-color: #3b82f6;
-    }
-  }
-  
-  /* High contrast mode support */
-  @media (prefers-contrast: high) {
-    .feedback-modal {
-      border-width: 2px;
-    }
-    
-    .feedback-button {
-      border: 2px solid currentColor;
-    }
-    
-    .feedback-form textarea {
-      border-width: 2px;
-    }
-  }
-  
-  /* Reduced motion support */
-  @media (prefers-reduced-motion: reduce) {
-    .feedback-modal,
-    .feedback-button,
-    .feedback-stars button,
-    .feedback-chip,
-    .feedback-category {
-      transition: none;
-      animation: none;
-    }
-    
-    .feedback-stars button:hover:not(:disabled) {
-      transform: none;
-    }
-    
-    .feedback-chip:hover {
-      transform: none;
-      box-shadow: none;
-    }
-    
-    .feedback-button:hover:not(:disabled) {
-      transform: none;
-      box-shadow: none;
-    }
-  }
-`;
 
 export default VideoFeedbackModal;
