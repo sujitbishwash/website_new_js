@@ -1,26 +1,15 @@
 import { Moon, Sun } from "lucide-react";
 
 import { useTheme } from "@/components/theme-provider";
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import {
-  applyColorTheme,
-  ColorThemeName,
-  getAvailableColorThemes,
-} from "@/styles/theme";
 
 export function ModeToggle() {
   const { setTheme } = useTheme();
-  const colorThemes = getAvailableColorThemes();
-  const handleColorTheme = (name: ColorThemeName) => {
-    applyColorTheme(name);
-    localStorage.setItem("ap-color-theme", name);
-  };
 
   return (
     <DropdownMenu>

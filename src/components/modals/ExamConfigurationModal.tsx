@@ -217,9 +217,6 @@ export default function ExamConfigurationModal({
     examGoal,
     fetchExamGoal,
     syncExamGoalFromAuthContext,
-    updateExamGoal,
-
-    isLoading: userLoading,
     error: userError,
   } = useUser();
 

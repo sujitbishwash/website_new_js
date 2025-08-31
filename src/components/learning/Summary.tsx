@@ -3,77 +3,6 @@ import React, { useEffect, useState } from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 
 // Star Rating Component with Animation
-interface StarRatingProps {
-  star: number;
-  rating: number;
-  size?: "sm" | "md" | "lg";
-  animated?: boolean;
-}
-
-const StarRating: React.FC<StarRatingProps> = ({ star, rating, size = "md", animated = false }) => {
-  const isFilled = star <= rating;
-  const sizeClasses = {
-    sm: "w-4 h-4",
-    md: "w-5 h-5", 
-    lg: "w-6 h-6"
-  };
-
-  return (
-    <div className={`${sizeClasses[size]} relative group`}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill={isFilled ? "currentColor" : "none"}
-        stroke="currentColor"
-        strokeWidth="2"
-        className={`transition-all duration-500 ease-out transform ${
-          isFilled 
-            ? "text-yellow-400 drop-shadow-lg" 
-            : "text-gray-400"
-        } ${
-          animated && isFilled 
-            ? "animate-bounce" 
-            : ""
-        } hover:scale-110 group-hover:scale-110`}
-        style={{
-          animationDelay: `${star * 150}ms`,
-          animationDuration: "0.6s"
-        }}
-      >
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-      </svg>
-      
-      {/* Enhanced glow effect for filled stars */}
-      {isFilled && (
-        <>
-          {/* Inner glow */}
-          <div 
-            className={`absolute inset-0 bg-yellow-400 rounded-full blur-sm opacity-40 ${
-              animated ? "animate-pulse" : ""
-            }`}
-            style={{
-              animationDelay: `${star * 150}ms`,
-              animationDuration: "1.2s"
-            }}
-          />
-          {/* Outer glow */}
-          <div 
-            className={`absolute inset-0 bg-yellow-300 rounded-full blur-md opacity-20 ${
-              animated ? "animate-pulse" : ""
-            }`}
-            style={{
-              animationDelay: `${star * 150}ms`,
-              animationDuration: "1.8s"
-            }}
-          />
-        </>
-      )}
-      
-      {/* Hover effect for all stars */}
-      <div className="absolute inset-0 bg-yellow-200 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-sm" />
-    </div>
-  );
-};
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -433,13 +362,11 @@ const Summary: React.FC<SummaryProps> = ({
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
   const [summaryLength, setSummaryLength] = useState<SummaryLength>("long");
 
   useEffect(() => {
     const fetchSummaryData = () => {
       setIsLoading(true);
-      setError(null);
 
       setTimeout(() => {
         try {
@@ -459,7 +386,6 @@ const Summary: React.FC<SummaryProps> = ({
               setSummaryData(longSummaryData);
           }
         } catch (err) {
-          setError("Failed to fetch summary. Please try again later.");
           console.error(err);
         } finally {
           setIsLoading(false);
@@ -470,20 +396,7 @@ const Summary: React.FC<SummaryProps> = ({
     fetchSummaryData();
   }, [summaryLength]); // Re-run the effect when summaryLength changes
 
-  const renderContent = () => {
-    if (isLoading) return <LoadingSpinner />;
-    if (error)
-      return (
-        <p className="text-center" style={{ color: theme.accent }}>
-          {error}
-        </p>
-      );
-    if (summaryData)
-      return summaryData.map((section) => (
-        <SummarySection key={section.id} section={section} />
-      ));
-    return null;
-  };
+
 
   return (
     <div className="min-h-screen bg-background text-foreground p-4 sm:p-6 lg:p-8">

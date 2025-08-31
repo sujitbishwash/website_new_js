@@ -54,7 +54,7 @@ const SmileyIcon: React.FC<{
   active: boolean;
   className?: string;
 }> = ({ rating, active, className = "" }) => {
-  const colorClasses = {
+  const colorClasses: Record<number, string> = {
     1: "text-red-500",
     2: "text-orange-400",
     3: "text-yellow-400",
@@ -63,12 +63,12 @@ const SmileyIcon: React.FC<{
   };
 
   const colorClass = active
-    ? colorClasses[rating as keyof typeof colorClasses]
+    ? colorClasses[rating] || colorClasses[3]
     : "text-gray-300 dark:text-gray-600";
 
   const baseIconClass = `w-9 h-9 sm:w-14 sm:h-14 transition-colors ${colorClass} ${className}`;
 
-  const icons= {
+  const icons: Record<number, React.ReactElement> = {
     1: <Angry className={baseIconClass} />, // Terrible
     2: <Frown className={baseIconClass} />, // Not Good
     3: <Meh className={baseIconClass} />, // Okay
@@ -76,7 +76,9 @@ const SmileyIcon: React.FC<{
     5: <Laugh className={baseIconClass} />, // Excellent
   };
 
-  return icons[rating] || icons[3]; // Return the specific icon, or neutral as a fallback.
+  // Ensure rating is a valid key, fallback to neutral (3) if not
+  const validRating = (rating >= 1 && rating <= 5) ? rating : 3;
+  return icons[validRating];
 };
 
 // Default chips with categories for better organization
@@ -115,7 +117,6 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   isOpen,
   onClose,
   videoId,
-  videoTitle,
   initialRating = null,
   initialComment = "",
   suggestedChips = DEFAULT_CHIPS,

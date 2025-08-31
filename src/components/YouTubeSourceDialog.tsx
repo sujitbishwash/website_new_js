@@ -36,23 +36,7 @@ const LinkIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-const XIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <line x1="18" y1="6" x2="6" y2="18" />
-    <line x1="6" y1="6" x2="18" y2="18" />
-  </svg>
-);
+
 
 const LoadingIcon: React.FC<IconProps> = ({ className }) => (
   <svg
@@ -149,14 +133,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     }
   };
 
-  const validateUrlFormat = (url: string): boolean => {
-    try {
-      new URL(url);
-      return true;
-    } catch {
-      return false;
-    }
-  };
+
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;

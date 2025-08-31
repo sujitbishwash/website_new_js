@@ -6,8 +6,7 @@ import { ROUTES } from "../routes/constants";
 import LogoutModal from "./LogoutModal";
 import ExamConfigurationModal from "./modals/ExamConfigurationModal";
 import ProfileModal from "./ProfilePage";
-import Sidebar from "./sidebar/Sidebar";
-import AiPadhaiLogo from "../assets/ai_padhai_logo.svg"; // Adjust path as needed
+import Sidebar from "./sidebar/Sidebar"; // Adjust path as needed
 
 const Layout: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);

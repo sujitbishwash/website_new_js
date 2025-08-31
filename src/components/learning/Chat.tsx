@@ -5,18 +5,6 @@ import remarkGfm from "remark-gfm";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 
 // Centralized theme colors for easy customization
-const theme = {
-  background: "#111827",
-  cardBackground: "#1F2937",
-  inputBackground: "#374151",
-  primaryText: "#FFFFFF",
-  secondaryText: "#9CA3AF",
-  mutedText: "#6B7280",
-  accent: "#60A5FA",
-  buttonGradientFrom: "#3B82F6",
-  buttonGradientTo: "#2563EB",
-  divider: "#4B5563",
-};
 
 // --- Type Definitions ---
 
@@ -142,142 +130,9 @@ const MessageList: React.FC<{ messages: MessageType[] }> = ({ messages }) => {
   );
 };
 
-const PlanSelector: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("Free");
-  const plans = ["Free", "Paid"];
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [wrapperRef]);
 
-  return (
-    <div className="relative" ref={wrapperRef}>
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-1 sm:space-x-2 sm:p-2 rounded-lg hover:bg-gray-700 transition-colors"
-      >
-        <span className="text-xs sm:text-sm font-medium">{selectedPlan}</span>
-        <svg
-          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          ></path>
-        </svg>
-      </button>
-      {isOpen && (
-        <div className="absolute bottom-full mb-2 w-28 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10">
-          {plans.map((plan) => (
-            <a
-              key={plan}
-              href="#"
-              className="block px-4 py-2 text-sm text-foreground hover:bg-gray-700 rounded-lg"
-              onClick={(e) => {
-                e.preventDefault();
-                setSelectedPlan(plan);
-                setIsOpen(false);
-              }}
-            >
-              {plan}
-            </a>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
-const ModeSelector: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
-  const [selectedMode, setSelectedMode] = useState("Learn");
-  const modes = ["Learn", "Chat"];
-  const wrapperRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [wrapperRef]);
-
-  return (
-    <div className="relative" ref={wrapperRef}>
-      {/* Changed styling from green to blue */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-1 sm:space-x-2 sm:p-2 rounded-lg hover:bg-gray-700 transition-colors"
-      >
-        <span className="hidden sm:inline text-xs sm:text-sm font-medium">
-          {selectedMode}
-        </span>
-        <svg
-          className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          }`}
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M19 9l-7 7-7-7"
-          ></path>
-        </svg>
-      </button>
-      {isOpen && (
-        <div className="absolute bottom-full mb-2 w-28 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-10">
-          {modes.map((mode) => (
-            <a
-              key={mode}
-              href="#"
-              className="block px-4 py-2 text-sm text-foreground hover:bg-gray-700 rounded-lg"
-              onClick={(e) => {
-                e.preventDefault();
-                setSelectedMode(mode);
-                setIsOpen(false);
-              }}
-            >
-              {mode}
-            </a>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-};
 
 // --- Markdown Renderer ---
 const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {

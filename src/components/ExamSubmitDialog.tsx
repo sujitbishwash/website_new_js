@@ -20,21 +20,12 @@ interface ModalProps {
   onClose: () => void;
 }
 
-interface ModalHeaderProps {
-  onClose: () => void;
-}
-
 interface SummaryTableProps {
   summaryData: SummarySection[];
 }
 
 interface SummaryCardProps {
   section: SummarySection;
-}
-
-interface ActionButtonsProps {
-  onClose: () => void;
-  onSubmit: () => void;
 }
 
 interface ExamSubmitDialogProps {
@@ -45,23 +36,7 @@ interface ExamSubmitDialogProps {
 
 // --- Helper Components ---
 
-// Icon for the close button
-const CloseIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M6 18L18 6M6 6l12 12"
-    />
-  </svg>
-);
+
 
 // --- Modular UI Components ---
 
@@ -83,23 +58,7 @@ const Modal = ({ children, onClose }: ModalProps) => (
   </div>
 );
 
-/**
- * The header section of the modal.
- */
-const ModalHeader = ({ onClose }: ModalHeaderProps) => (
-  <>
-    <button
-      onClick={onClose}
-      className="absolute top-4 right-4 rounded-full p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-      aria-label="Close"
-    >
-      <CloseIcon />
-    </button>
-    <h2 className="mb-6 text-center text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-      Submit your test
-    </h2>
-  </>
-);
+
 
 /**
  * The table view for desktop screens.
@@ -194,27 +153,7 @@ const SummaryCard = ({ section }: SummaryCardProps) => (
   </div>
 );
 
-/**
- * The action buttons at the bottom of the modal.
- */
-const ActionButtons = ({ onClose, onSubmit }: ActionButtonsProps) => (
-  <>
-    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-      <button
-        onClick={onClose}
-        className="w-full transform rounded-lg bg-border-high px-6 py-2.5 font-semibold text-muted-foreground hover:text-foreground transition-all duration-200 ease-in-out hover:bg-border focus:outline-none sm:w-auto"
-      >
-        Close
-      </button>
-      <button
-        onClick={onSubmit}
-        className="w-full transform rounded-lg bg-primary px-6 py-2.5 font-semibold text-white shadow-md transition-all duration-200 ease-in-out hover:bg-primary focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 sm:w-auto"
-      >
-        Submit
-      </button>
-    </div>
-  </>
-);
+
 
 // --- Main Exam Submit Dialog Component ---
 

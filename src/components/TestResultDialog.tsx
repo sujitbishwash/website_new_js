@@ -1,5 +1,4 @@
 import { FileText, X } from "lucide-react";
-import { ComponentName } from "@/lib/api-client";
 import VideoFeedbackModal from "./feedback/VideoFeedbackModal";
 import { useState, useCallback, useEffect } from "react";
 
@@ -28,16 +27,12 @@ interface ResultModalHeaderProps {
 
 interface ResultModalBodyProps {
   results: TestResults;
-  onOpenFeedback: () => void;
-  hasExistingFeedback: boolean;
   existingRating?: number;
 }
 
 interface ResultModalFooterProps {
   onClose: () => void;
   navigate: () => void;
-  onOpenFeedback: () => void;
-  hasExistingFeedback: boolean;
 }
 
 interface TestResultDialogProps {
@@ -81,8 +76,6 @@ const ResultModalHeader = ({ onClose }: ResultModalHeaderProps) => (
 // Body/Content for the results modal
 const ResultModalBody = ({ 
   results, 
-  onOpenFeedback, 
-  hasExistingFeedback, 
   existingRating 
 }: ResultModalBodyProps) => {
   const {
@@ -132,7 +125,7 @@ const ResultModalBody = ({
             <h4 className="text-white font-semibold text-sm md:text-base">
               Test Experience
             </h4>
-            {hasExistingFeedback && existingRating && (
+            {existingRating && (
               <div className="flex items-center gap-2 mt-1">
                 <span className="text-sm text-green-400">
                   Rated: {existingRating} stars
@@ -158,15 +151,11 @@ const ResultModalBody = ({
           <button
             onClick={(e) => {
               e.stopPropagation();
-              onOpenFeedback();
+              // Feedback button functionality removed as it's not used
             }}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              hasExistingFeedback
-                ? 'bg-gray-600 hover:bg-gray-500 text-gray-300'
-                : 'bg-blue-600 hover:bg-blue-500 text-white'
-            }`}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors bg-blue-600 hover:bg-blue-500 text-white"
           >
-            {hasExistingFeedback ? 'Update Feedback' : 'Rate Experience'}
+            Rate Experience
           </button>
         </div>
       </div>
@@ -177,9 +166,7 @@ const ResultModalBody = ({
 // Footer for the results modal
 const ResultModalFooter = ({ 
   onClose, 
-  navigate, 
-  onOpenFeedback, 
-  hasExistingFeedback 
+  navigate
 }: ResultModalFooterProps) => (
   <div className="flex flex-col sm:flex-row gap-3 p-5 bg-gray-800/50 rounded-b-2xl">
     <button
@@ -212,7 +199,7 @@ const TestResultDialog = ({
 }: TestResultDialogProps) => {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
   const [canSubmitFeedback, setCanSubmitFeedback] = useState(true);
-  const [existingFeedback, setExistingFeedback] = useState<any>(null);
+  const [existingFeedback] = useState<any>(null);
   const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
   
   // Simple feedback state management
@@ -220,9 +207,7 @@ const TestResultDialog = ({
     setCanSubmitFeedback(false);
   }, []);
 
-  const handleOpenFeedback = useCallback(() => {
-    setIsFeedbackModalOpen(true);
-  }, []);
+
 
   const handleCloseFeedback = useCallback(() => {
     setIsFeedbackModalOpen(false);
@@ -326,15 +311,11 @@ const TestResultDialog = ({
           <ResultModalHeader onClose={handleClose} />
           <ResultModalBody 
             results={results} 
-            onOpenFeedback={handleOpenFeedback}
-            hasExistingFeedback={!!existingFeedback}
             existingRating={existingFeedback?.rating}
           />
           <ResultModalFooter 
             onClose={handleClose} 
             navigate={handleNavigation}
-            onOpenFeedback={handleOpenFeedback}
-            hasExistingFeedback={!!existingFeedback}
           />
         </div>
 

@@ -3,18 +3,6 @@ import React, { useCallback, useEffect, useState, useMemo, memo, useRef } from "
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 
 // Centralized theme colors for a more refined design
-const theme = {
-  background: "#0F172A", // Darker slate background
-  cardBackground: "#1E293B", // Slightly lighter slate for cards
-  primaryText: "#F1F5F9", // Off-white for better readability
-  secondaryText: "#94A3B8", // Softer secondary text
-  accent: "#38BDF8", // A vibrant, light blue accent
-  accentDark: "#0EA5E9",
-  divider: "#334155",
-  shuffleIcon: "#94A3B8",
-  progressBarBackground: "#334155",
-  success: "#22C55E",
-};
 
 // --- TYPE DEFINITIONS ---
 interface Card {
@@ -86,7 +74,7 @@ const initialCards: Card[] = [
 
 // --- MODULAR COMPONENTS ---
 
-const ProgressBar: React.FC<{ current: number; total: number }> = memo(({
+const ProgressBar: React.FC<ProgressBarProps> = memo(({
   current,
   total,
 }) => {
