@@ -2,8 +2,8 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  // baseURL: 'https://api.krishak.in',
-  baseURL: 'http://localhost:8000',
+  baseURL: 'https://api.krishak.in',
+  // baseURL: 'http://localhost:8000',
   headers: {
     "Content-Type": "application/json",
   },
