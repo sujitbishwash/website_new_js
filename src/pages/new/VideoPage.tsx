@@ -26,8 +26,9 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import { useCallback, useEffect, useRef, useState } from "react";
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { chatApi, videoApi, VideoDetail, feedbackApi } from "../../lib/api-client";
+import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
 import YouTube from "react-youtube";
+import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
   
   declare global {
     interface Window {
@@ -478,20 +479,42 @@ import YouTube from "react-youtube";
 
 
     // Simple feedback state management
-    const [feedbackStates, setFeedbackStates] = useState<{[key: string]: any}>({});
-    const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
-    const [feedbackError, setFeedbackError] = useState<string | null>(null);
+      // Use the feedback tracker hook for all components
+  const {
+    feedbackStates,
+    isLoading: isFeedbackLoading,
+    error: feedbackError,
+    markAsSubmitted
+  } = useMultiFeedbackTracker({
+    components: [ComponentName.Video, ComponentName.Chat, ComponentName.Quiz, ComponentName.Summary, ComponentName.Flashcard],
+    sourceId: currentVideoId || '',
+    pageUrl: window.location.href,
+    onFeedbackExists: (component, existingFeedback) => {
+      console.log(`✅ Found existing feedback for ${component}:`, existingFeedback);
+    }
+  });
     
-    const markFeedbackAsSubmitted = useCallback((component: string) => {
-      setFeedbackStates(prev => ({
-        ...prev,
-        [component]: { ...prev[component], canSubmitFeedback: false }
-      }));
-    }, []);
-    
-    const resetFeedback = useCallback(() => {
-      setFeedbackStates({});
-      setFeedbackError(null);
+    // Create wrapper functions for markAsSubmitted for each component
+    const chatMarkAsSubmitted = useCallback(() => {
+      markAsSubmitted(ComponentName.Chat);
+    }, [markAsSubmitted]);
+
+    const quizMarkAsSubmitted = useCallback(() => {
+      markAsSubmitted(ComponentName.Quiz);
+    }, [markAsSubmitted]);
+
+    const summaryMarkAsSubmitted = useCallback(() => {
+      markAsSubmitted(ComponentName.Summary);
+    }, [markAsSubmitted]);
+
+    const flashcardMarkAsSubmitted = useCallback(() => {
+      markAsSubmitted(ComponentName.Flashcard);
+    }, [markAsSubmitted]);
+
+    // Create wrapper function for markAsSubmitted to maintain backward compatibility
+    const videoMarkAsSubmitted = useCallback(() => {
+      // Note: Video component is not tracked by the hook, so we'll handle it separately
+      console.log("Video feedback submitted");
     }, []);
 
 
@@ -518,27 +541,7 @@ import YouTube from "react-youtube";
       });
     }
 
-    // Create wrapper functions for markAsSubmitted for each component
-    const chatMarkAsSubmitted = useCallback(() => {
-      markFeedbackAsSubmitted(ComponentName.Chat);
-    }, [markFeedbackAsSubmitted]);
 
-    const quizMarkAsSubmitted = useCallback(() => {
-      markFeedbackAsSubmitted(ComponentName.Quiz);
-    }, [markFeedbackAsSubmitted]);
-
-    const summaryMarkAsSubmitted = useCallback(() => {
-      markFeedbackAsSubmitted(ComponentName.Summary);
-    }, [markFeedbackAsSubmitted]);
-
-    const flashcardMarkAsSubmitted = useCallback(() => {
-      markFeedbackAsSubmitted(ComponentName.Flashcard);
-    }, [markFeedbackAsSubmitted]);
-
-    // Create wrapper function for markAsSubmitted to maintain backward compatibility
-    const videoMarkAsSubmitted = useCallback(() => {
-      markFeedbackAsSubmitted(ComponentName.Video);
-    }, [markFeedbackAsSubmitted]);
 
 
 
@@ -616,8 +619,7 @@ import YouTube from "react-youtube";
         // Reset feedback state for new video
         hasShownFeedbackRef.current = false;
         
-        // Reset the feedback tracker to prevent continuous API calls
-        resetFeedback();
+        // The useMultiFeedbackTracker hook automatically resets when sourceId changes
         
         // Reset video progress tracking
         if (progressIntervalRef.current) {
@@ -633,57 +635,10 @@ import YouTube from "react-youtube";
           ytPlayerRef.current = null;
         }
       }
-    }, [currentVideoId, resetFeedback]);
-
-    // Fetch feedback states for all components when video loads
-    useEffect(() => {
-      if (currentVideoId && !isFeedbackLoading) {
-        const fetchFeedbackStates = async () => {
-          try {
-            setIsFeedbackLoading(true);
-            setFeedbackError(null);
-            
-            console.log('🔄 Fetching feedback states for components:', [ComponentName.Chat, ComponentName.Quiz, ComponentName.Summary, ComponentName.Flashcard]);
-            
-            const feedbackStatus = await feedbackApi.canSubmitFeedbackMulti(
-              currentVideoId,
-              [ComponentName.Chat, ComponentName.Quiz, ComponentName.Summary, ComponentName.Flashcard],
-              window.location.href
-            );
-            
-            console.log('✅ Received feedback status:', feedbackStatus);
-            
-            // Convert the multi-component response to our local state format
-            const newFeedbackStates: {[key: string]: any} = {};
-            feedbackStatus.components.forEach(component => {
-              newFeedbackStates[component.component] = {
-                canSubmitFeedback: component.can_feedback,
-                existingFeedback: component.existing_feedback,
-                reason: component.reason
-              };
-            });
-            
-            console.log('🔄 Setting feedback states:', newFeedbackStates);
-            setFeedbackStates(newFeedbackStates);
-          } catch (error) {
-            console.error('❌ Failed to fetch feedback states:', error);
-            setFeedbackError(error instanceof Error ? error.message : 'Failed to fetch feedback states');
-            
-            // Set default states on error
-            setFeedbackStates({
-              [ComponentName.Chat]: { canSubmitFeedback: true, existingFeedback: null, reason: "" },
-              [ComponentName.Quiz]: { canSubmitFeedback: true, existingFeedback: null, reason: "" },
-              [ComponentName.Summary]: { canSubmitFeedback: true, existingFeedback: null, reason: "" },
-              [ComponentName.Flashcard]: { canSubmitFeedback: true, existingFeedback: null, reason: "" }
-            });
-          } finally {
-            setIsFeedbackLoading(false);
-          }
-        };
-        
-        fetchFeedbackStates();
-      }
     }, [currentVideoId]);
+
+    // The useMultiFeedbackTracker hook automatically fetches feedback states
+    // when currentVideoId changes, so we don't need manual fetching here
   
     // Cleanup progress tracking on unmount
     useEffect(() => {
