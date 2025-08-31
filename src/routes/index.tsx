@@ -29,7 +29,7 @@ import TestConfigurationPage from "../pages/new/TestConfigurationPage";
 import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
 import Stats  from "../pages/new/Stats";
-import VideoPage from "@/pages/new/videopageog";
+import VideoPage from "@/pages/new/VideoPage";
 
 // Route configuration object for easy maintenance
 export const routes = [
