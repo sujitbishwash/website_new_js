@@ -368,3 +368,56 @@ export const useMultiFeedbackTracker = ({
     }
   };
 };
+
+// Hook for managing feedback chips suggestions
+export const useFeedbackChips = (rating?: number) => {
+  const [chips, setChips] = useState<{ [rating: string]: string[] }>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchChips = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const response = await feedbackApi.getFeedbackChips(rating);
+      setChips(response);
+      console.log(`🎯 Fetched feedback chips${rating ? ` for rating ${rating}` : ' for all ratings'}:`, response);
+    } catch (err: any) {
+      console.error(`❌ Error fetching feedback chips:`, err);
+      setError(err.message || 'Failed to fetch feedback chips');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [rating]);
+
+  // Fetch chips on mount and when rating changes
+  useEffect(() => {
+    fetchChips();
+  }, [fetchChips]);
+
+  // Get chips for a specific rating
+  const getChipsForRating = useCallback((rating: number): string[] => {
+    return chips[rating.toString()] || [];
+  }, [chips]);
+
+  // Get all available ratings
+  const getAvailableRatings = useCallback((): number[] => {
+    return Object.keys(chips).map(key => parseInt(key)).filter(rating => !isNaN(rating));
+  }, [chips]);
+
+  // Refresh chips data
+  const refreshChips = useCallback(() => {
+    fetchChips();
+  }, [fetchChips]);
+
+  return {
+    chips,
+    isLoading,
+    error,
+    getChipsForRating,
+    getAvailableRatings,
+    refreshChips,
+    fetchChips
+  };
+};

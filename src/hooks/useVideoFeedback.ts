@@ -1,10 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
-import { VideoFeedbackPayload, FeedbackChip } from '@/components/feedback/VideoFeedbackModal';
+import { VideoFeedbackPayload } from '@/components/feedback/VideoFeedbackModal';
 
 // Mock API functions - replace with actual API calls
 const feedbackApi = {
   // Get feedback suggestions from backend
-  getFeedbackSuggestions: async (): Promise<FeedbackChip[]> => {
+  getFeedbackSuggestions: async (): Promise<string[]> => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -12,31 +12,31 @@ const feedbackApi = {
     // In real implementation, this would come from your backend
     return [
       // Technical issues
-      { id: "audio-issues", label: "Audio issues", category: "technical" },
-      { id: "video-quality", label: "Poor video quality", category: "technical" },
-      { id: "buffering", label: "Buffering problems", category: "technical" },
+      "Audio issues",
+      "Poor video quality", 
+      "Buffering problems",
       
       // Content issues
-      { id: "too-fast", label: "Too fast", category: "content" },
-      { id: "too-slow", label: "Too slow", category: "content" },
-      { id: "confusing", label: "Confusing explanation", category: "content" },
-      { id: "missing-steps", label: "Missing steps", category: "content" },
-      { id: "wrong-example", label: "Wrong example", category: "content" },
-      { id: "slides-missing", label: "Slides missing", category: "content" },
-      { id: "too-basic", label: "Too basic", category: "content" },
-      { id: "too-advanced", label: "Too advanced", category: "content" },
+      "Too fast",
+      "Too slow",
+      "Confusing explanation",
+      "Missing steps",
+      "Wrong example",
+      "Slides missing",
+      "Too basic",
+      "Too advanced",
       
       // Experience issues
-      { id: "boring", label: "Boring", category: "experience" },
-      { id: "repetitive", label: "Repetitive", category: "experience" },
-      { id: "too-long", label: "Too long", category: "experience" },
+      "Boring",
+      "Repetitive",
+      "Too long",
       
       // Positive feedback
-      { id: "great-pace", label: "Great pace", category: "positive" },
-      { id: "clear-explanation", label: "Clear explanation", category: "positive" },
-      { id: "helpful-examples", label: "Helpful examples", category: "positive" },
-      { id: "engaging", label: "Engaging", category: "positive" },
-      { id: "well-structured", label: "Well structured", category: "positive" },
+      "Great pace",
+      "Clear explanation",
+      "Helpful examples",
+      "Engaging",
+      "Well structured",
     ];
   },
 
@@ -75,7 +75,7 @@ interface UseVideoFeedbackOptions {
 interface UseVideoFeedbackReturn {
   // State
   isFeedbackModalOpen: boolean;
-  feedbackSuggestions: FeedbackChip[];
+  feedbackSuggestions: string[];
   isLoadingSuggestions: boolean;
   sessionStartTime: Date | null;
   watchPercentage: number;
@@ -101,7 +101,7 @@ export const useVideoFeedback = ({
   onFeedbackSkipped,
 }: UseVideoFeedbackOptions): UseVideoFeedbackReturn => {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-  const [feedbackSuggestions, setFeedbackSuggestions] = useState<FeedbackChip[]>([]);
+  const [feedbackSuggestions, setFeedbackSuggestions] = useState<string[]>([]);
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [sessionStartTime, setSessionStartTime] = useState<Date | null>(null);
   const [watchPercentage, setWatchPercentage] = useState(0);

@@ -615,7 +615,6 @@ export default function Chat({
         onClose={handleFeedbackClose}
         videoId={videoId}
         videoTitle={"AI Chat"}
-        suggestedChips={[]}
         playPercentage={100}
         onSubmit={handleFeedbackSubmit}
         onSkip={handleFeedbackSkip}

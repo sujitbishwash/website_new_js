@@ -429,13 +429,11 @@ const Flashcards: React.FC<FlashcardsProps> = ({
             )}
             
 
-            
             <VideoFeedbackModal
               isOpen={isFeedbackModalOpen}
               onClose={handleFeedbackClose}
               videoId={videoId}
               videoTitle={"Flashcards"}
-              suggestedChips={[]}
               playPercentage={100}
               onSubmit={handleFeedbackSubmit}
               onSkip={handleFeedbackSkip}

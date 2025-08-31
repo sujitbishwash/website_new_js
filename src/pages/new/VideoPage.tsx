@@ -1177,10 +1177,9 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           isOpen={isFeedbackModalOpen}
           onClose={() => setIsFeedbackModalOpen(false)}
           videoId={currentVideoId}
-                      videoTitle={videoDetail?.title}
-            suggestedChips={[]}
-            playPercentage={videoProgress}
-            onSubmit={async () => {
+          videoTitle={videoDetail?.title}
+          playPercentage={videoProgress}
+          onSubmit={async () => {
             try {
               videoMarkAsSubmitted();
               setIsFeedbackModalOpen(false);

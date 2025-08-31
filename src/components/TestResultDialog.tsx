@@ -337,7 +337,6 @@ const TestResultDialog = ({
         onClose={handleCloseFeedback}
         videoId={results.sessionId?.toString() || "unknown"}
         videoTitle={`Test Session ${results.sessionId}`}
-        suggestedChips={[]}
         playPercentage={100} // Test is completed
         onSubmit={handleFeedbackSubmit}
         onSkip={handleFeedbackSkip}

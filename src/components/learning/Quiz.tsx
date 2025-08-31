@@ -363,7 +363,6 @@ const Quiz: React.FC<QuizProps> = ({
           onClose={handleCloseFeedback}
           videoId={videoId}
           videoTitle={"Quiz"}
-          suggestedChips={[]}
           playPercentage={100}
           onSubmit={handleSubmitFeedback}
           onSkip={handleSkipFeedback}
