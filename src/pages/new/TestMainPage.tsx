@@ -488,7 +488,8 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test submitted successfully:", apiResponse);
-        setShowTestResultDialog(true);
+        navigate(ROUTES.ANALYSIS);
+        //setShowTestResultDialog(true);
       }
     } catch (error) {
       console.error("Failed to submit test:", error);
@@ -713,7 +714,7 @@ const TestMainPage = () => {
                 <select
                   onChange={(e) => setTextSize(e.target.value)}
                   value={textSize}
-                  className="bg-background-subtle text-white rounded-md px-2 py-1 appearance-none text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="bg-background-subtle text-foreground rounded-md px-2 py-1 appearance-none text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   <option value="text-sm">A-</option>
                   <option value="text-base">A</option>
@@ -853,7 +854,7 @@ const TestMainPage = () => {
             <div className="grid grid-cols-6 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-3 justify-items-center">
               {questions.map((q, index) => {
                 const buttonProps = {
-                  number: q.id,
+                  number: index+1,
                   onClick: () => handlePaletteClick(index),
                   size: 40,
                 };

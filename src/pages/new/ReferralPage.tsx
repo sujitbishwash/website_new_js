@@ -1,4 +1,5 @@
 import { theme } from "@/styles/theme";
+import { Plus } from "lucide-react";
 import { useState } from "react";
 
 // --- Apple-inspired Theme ---
@@ -343,7 +344,7 @@ const FaqItem = ({ q, a }: { q: string; a: string }) => {
     <div className="faq-item">
       <div className="faq-question" onClick={() => setIsOpen(!isOpen)}>
         <span>{q}</span>
-        <span className={`faq-toggle ${isOpen ? "open" : ""}`}>+</span>
+        <span className={`faq-toggle ${isOpen ? "open" : ""}`}><Plus/></span>
       </div>
       <div className={`faq-answer ${isOpen ? "open" : ""}`}>
         <p>{a}</p>
