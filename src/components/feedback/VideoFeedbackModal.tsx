@@ -4,12 +4,6 @@ import { feedbackApi, FeedbackRequest } from "@/lib/api-client";
 
 // --- TYPE DEFINITIONS ---
 
-export interface FeedbackChip {
-  id: string;
-  label: string;
-  category: "technical" | "content" | "experience" | "positive";
-}
-
 export type FeedbackComponent =
   | "Chat"
   | "Flashcard"
@@ -34,7 +28,6 @@ interface VideoFeedbackModalProps {
   videoTitle?: string;
   initialRating?: number | null;
   initialComment?: string;
-  suggestedChips?: FeedbackChip[];
   playPercentage?: number;
   onSubmit: (payload: VideoFeedbackPayload) => Promise<void>;
   onSkip?: () => void;
@@ -81,35 +74,18 @@ const SmileyIcon: React.FC<{
   return icons[validRating];
 };
 
-// Default chips with categories for better organization
-const DEFAULT_CHIPS: FeedbackChip[] = [
-  // Technical issues
-  { id: "audio-issues", label: "Audio issues", category: "technical" },
-  { id: "video-quality", label: "Poor video quality", category: "technical" },
-  { id: "buffering", label: "Buffering problems", category: "technical" },
-
-  // Content issues
-  { id: "too-fast", label: "Too fast", category: "content" },
-  { id: "too-slow", label: "Too slow", category: "content" },
-  { id: "confusing", label: "Confusing explanation", category: "content" },
-  { id: "missing-steps", label: "Missing steps", category: "content" },
-  { id: "wrong-example", label: "Wrong example", category: "content" },
-  { id: "slides-missing", label: "Slides missing", category: "content" },
-  { id: "too-basic", label: "Too basic", category: "content" },
-  { id: "too-advanced", label: "Too advanced", category: "content" },
-
-  // Experience issues
-  { id: "boring", label: "Boring", category: "experience" },
-  { id: "repetitive", label: "Repetitive", category: "experience" },
-  { id: "too-long", label: "Too long", category: "experience" },
-
-  // Positive feedback
-  { id: "great-pace", label: "Great pace", category: "positive" },
-  { id: "clear-explanation", label: "Clear explanation", category: "positive" },
-  { id: "helpful-examples", label: "Helpful examples", category: "positive" },
-  { id: "engaging", label: "Engaging", category: "positive" },
-  { id: "well-structured", label: "Well structured", category: "positive" },
-];
+// Dynamic feedback chips based on rating
+const getFeedbackChipsForRating = (rating: number): string[] => {
+  const chipsByRating: Record<number, string[]> = {
+    1: ["Not worth my time", "Poor explanation", "Confusing content", "Waste of time", "Audio issues", "Video quality problems"],
+    2: ["Too many errors", "Hard to follow", "Needs improvement", "Below expectations", "Buffering problems", "Missing steps"],
+    3: ["Somewhat useful", "Neither good nor bad", "Average quality", "Could be better", "Too basic", "Too advanced"],
+    4: ["Practical examples", "Worth recommending", "Clear concepts", "Good content", "Great pace", "Well structured"],
+    5: ["Highly recommended", "Very engaging", "Excellent quality", "Outstanding content", "Clear explanation", "Helpful examples"]
+  };
+  
+  return chipsByRating[rating] || [];
+};
 
 // --- MAIN COMPONENT ---
 
@@ -119,7 +95,6 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   videoId,
   initialRating = null,
   initialComment = "",
-  suggestedChips = DEFAULT_CHIPS,
   playPercentage,
   onSubmit,
   onSkip,
@@ -140,7 +115,6 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "submitting" | "success" | "error"
   >("idle");
-  const [activeCategory, setActiveCategory] = useState<string>("all");
 
   // Use parent feedback tracker state (no fallback needed since parent always provides state)
   const canSubmitFeedback = parentCanSubmitFeedback ?? true;
@@ -178,17 +152,11 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
     [isLowRating, showCommentToggle]
   );
 
-  // Filter chips by category
-  const filteredChips = useMemo(() => {
-    if (activeCategory === "all") return suggestedChips;
-    return suggestedChips.filter((chip) => chip.category === activeCategory);
-  }, [suggestedChips, activeCategory]);
-
-  // Get unique categories
-  const categories = useMemo(() => {
-    const cats = [...new Set(suggestedChips.map((chip) => chip.category))];
-    return ["all", ...cats];
-  }, [suggestedChips]);
+  // Get dynamic chips based on rating
+  const dynamicChips = useMemo(() => {
+    if (!rating) return [];
+    return getFeedbackChipsForRating(rating);
+  }, [rating]);
 
   useEffect(() => {
     if (nudgeVisible) {
@@ -206,15 +174,14 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
       setShowCommentToggle(false);
       setNudgeVisible(false);
       setSubmissionStatus("idle");
-      setActiveCategory("all");
     }
   }, [isOpen, initialRating, initialComment]);
 
-  const handleChipToggle = (chipId: string) => {
+  const handleChipToggle = (chipLabel: string) => {
     setSelectedChips((prev) =>
-      prev.includes(chipId)
-        ? prev.filter((c) => c !== chipId)
-        : [...prev, chipId]
+      prev.includes(chipLabel)
+        ? prev.filter((c) => c !== chipLabel)
+        : [...prev, chipLabel]
     );
   };
 
@@ -520,45 +487,36 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                       : "Any additional thoughts?"}
                   </label>
 
-                  {/* Category Filter */}
-                  <div className="flex flex-wrap gap-2">
-                    {categories.map((category) => (
-                      <button
-                        key={category}
-                        type="button"
-                        onClick={() => setActiveCategory(category)}
-                        className={`px-3 py-1.5 text-xs font-medium rounded-full transition-colors feedback-category ${
-                          activeCategory === category
-                            ? "bg-blue-600 text-white active"
-                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
-                        }`}
-                      >
-                        {category === "all"
-                          ? "All"
-                          : category.charAt(0).toUpperCase() +
-                            category.slice(1)}
-                      </button>
-                    ))}
-                  </div>
-
-                  {/* Chips */}
-                  <div className="flex flex-wrap gap-2">
-                    {filteredChips.map((chip) => (
-                      <button
-                        key={chip.id}
-                        type="button"
-                        onClick={() => handleChipToggle(chip.id)}
-                        aria-pressed={selectedChips.includes(chip.id)}
-                        className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-blue-500 feedback-chip ${
-                          selectedChips.includes(chip.id)
-                            ? "bg-blue-600 text-white selected"
-                            : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
-                        }`}
-                      >
-                        {chip.label}
-                      </button>
-                    ))}
-                  </div>
+                  {/* Dynamic Feedback Chips based on rating */}
+                  {dynamicChips.length > 0 && (
+                    <div className="space-y-3">
+                      <div className="text-sm text-gray-600 dark:text-gray-400">
+                        Select up to 3 suggestions:
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {dynamicChips.map((chipLabel, index) => (
+                          <button
+                            key={index}
+                            type="button"
+                            onClick={() => handleChipToggle(chipLabel)}
+                            aria-pressed={selectedChips.includes(chipLabel)}
+                            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-blue-500 feedback-chip ${
+                              selectedChips.includes(chipLabel)
+                                ? "bg-blue-600 text-white selected"
+                                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                            }`}
+                          >
+                            {chipLabel}
+                          </button>
+                        ))}
+                      </div>
+                      {selectedChips.length > 0 && (
+                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                          Selected: {selectedChips.join(', ')}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Comment Textarea */}
                   <div className="relative">

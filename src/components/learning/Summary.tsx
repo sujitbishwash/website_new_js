@@ -269,7 +269,6 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
         onClose={close}
         videoId={videoId}
         videoTitle={"Summary"}
-        suggestedChips={[]}
         playPercentage={100}
         onSubmit={onSubmit}
         onSkip={handleSkip}

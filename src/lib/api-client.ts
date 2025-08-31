@@ -576,6 +576,11 @@ export interface FeedbackListResponse {
   size: number;
 }
 
+// Feedback chips suggestions response
+export interface FeedbackChipsResponse {
+  [rating: string]: string[]; // Rating as key (1-5), array of suggestion strings as value
+}
+
 export const feedbackApi = {
   // Check if user can submit feedback for a single component (legacy)
 
@@ -583,6 +588,13 @@ export const feedbackApi = {
   canSubmitFeedbackMulti: async (sourceId: string, components: ComponentName[], pageUrl: string): Promise<MultiComponentFeedbackStatus> => {
     const componentsParam = components.join(',');
     const response = await apiRequest<MultiComponentFeedbackStatus>('GET', `/feedback/can-feedback?source_id=${sourceId}&components=${componentsParam}&page_url=${encodeURIComponent(pageUrl)}`);
+    return response.data;
+  },
+
+  // Get feedback chips suggestions based on rating
+  getFeedbackChips: async (rating?: number): Promise<FeedbackChipsResponse> => {
+    const endpoint = rating ? `/feedback/chips?rating=${rating}` : '/feedback/chips';
+    const response = await apiRequest<FeedbackChipsResponse>('GET', endpoint);
     return response.data;
   },
 
