@@ -676,6 +676,38 @@ export default function Chat({
 
   return (
     <div className="flex flex-col flex-1 h-full bg-background text-primaryText w-full">
+      {/* Conversation progress indicator - Fixed sticky positioning */}
+      {messages.length > 0 && (
+        <div className="px-4 py-2 mb-2 sticky top-0 bg-background z-10 border-b border-border/50">
+          <div className={`w-full ${!isLeftColumnVisible ? "max-w-[60vw] mx-auto" : ""}`}>
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Conversation Progress</span>
+              <span className="flex items-center gap-2">
+                <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">
+                  {messages.filter(msg => msg.isUser).length} messages
+                </span>
+                {!existingFeedback && (
+                  <span className="text-xs text-muted-foreground">
+                    {Math.max(0, 5 - messages.filter(msg => msg.isUser).length)} more for feedback
+                  </span>
+                )}
+              </span>
+            </div>
+            {/* Progress bar */}
+            {!existingFeedback && (
+              <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+                <div
+                  className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-in-out"
+                  style={{ 
+                    width: `${Math.min(100, (messages.filter(msg => msg.isUser).length / 5) * 100)}%` 
+                  }}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Wrapper to center content if left column hidden */}
       <div
         className={`flex flex-1 overflow-y-auto pr-2 ${
@@ -691,33 +723,6 @@ export default function Chat({
           )}
           {messages.length > 0 && (
             <>
-              {/* Conversation progress indicator */}
-              <div className="px-4 py-2 mb-2 sticky top-0 bg-background z-10">
-                <div className="flex items-center justify-between text-sm text-muted-foreground">
-                  <span>Conversation Progress</span>
-                  <span className="flex items-center gap-2">
-                    <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">
-                      {messages.filter(msg => msg.isUser).length} messages
-                    </span>
-                    {!existingFeedback && (
-                      <span className="text-xs text-muted-foreground">
-                        {Math.max(0, 5 - messages.filter(msg => msg.isUser).length)} more for feedback
-                      </span>
-                    )}
-                  </span>
-                </div>
-                {/* Progress bar */}
-                {!existingFeedback && (
-                  <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-in-out"
-                      style={{ 
-                        width: `${Math.min(100, (messages.filter(msg => msg.isUser).length / 5) * 100)}%` 
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
               <MessageList messages={messages} />
             </>
           )}
