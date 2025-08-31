@@ -66,20 +66,9 @@ const SmileyIcon: React.FC<{
     ? colorClasses[rating as keyof typeof colorClasses]
     : "text-gray-300 dark:text-gray-600";
 
-  const commonProps = {
-    "aria-hidden": "true",
-    className: `w-8 h-8 sm:w-10 sm:h-10 transition-colors ${colorClass} ${className}`,
-    fill: "none",
-    stroke: "currentColor",
-    strokeWidth: "1.5",
-    strokeLinecap: "round" as "round",
-    strokeLinejoin: "round" as "round",
-    viewBox: "0 0 24 24",
-  };
-
   const baseIconClass = `w-9 h-9 sm:w-14 sm:h-14 transition-colors ${colorClass} ${className}`;
 
-  const icons: { [key: number]: JSX.Element } = {
+  const icons= {
     1: <Angry className={baseIconClass} />, // Terrible
     2: <Frown className={baseIconClass} />, // Not Good
     3: <Meh className={baseIconClass} />, // Okay
@@ -475,8 +464,6 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                   onKeyDown={(e) => {
                     if (e.key === "Enter" || e.key === " ") {
                       e.preventDefault();
-                      (canSubmitFeedback || existingFeedback) &&
-                        setRating(ratingValue);
                     }
                   }}
                   disabled={!(canSubmitFeedback || existingFeedback)}
