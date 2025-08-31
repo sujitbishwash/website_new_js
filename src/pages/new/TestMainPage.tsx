@@ -227,7 +227,7 @@ const FullscreenIcon = () => (
 
 // --- Custom Hook for detecting outside clicks ---
 const useOutsideClick = (
-  ref: React.RefObject<HTMLElement>,
+  ref: React.RefObject<HTMLElement | null>,
   callback: () => void
 ) => {
   useEffect(() => {
@@ -272,10 +272,9 @@ const TestMainPage = () => {
 
   const location = useLocation();
   const navigate = useNavigate();
-  const { profile, examGoal } = useUser();
+    const { profile, examGoal } = useUser();
 
-  const testId = location.state?.testId;
-  const [sessionId, setSessionId] = useState<number>(0);
+  const [sessionId, setSessionId] = useState<number | null>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -286,8 +285,8 @@ const TestMainPage = () => {
   const questionsForCurrentSection = allQuestions[currentSection] || [];
 
   // --- Refs for outside click detection ---
-  const asideRef = useRef<HTMLElement>(null);
-  const footerRef = useRef<HTMLElement>(null);
+  const asideRef = useRef<HTMLElement | null>(null);
+  const footerRef = useRef<HTMLElement | null>(null);
 
   useOutsideClick(asideRef, () => {
     if (isMobileMenuOpen) setIsMobileMenuOpen(false);
@@ -324,6 +323,7 @@ const TestMainPage = () => {
           .sort((a, b) => a.id - b.id);
 
         setQuestions(mappedQuestions);
+        setSessionId(response.session_id);
         console.log(
           "Successfully fetched questions from API:",
           mappedQuestions.length
@@ -344,6 +344,9 @@ const TestMainPage = () => {
   // Submit test to API
   const submitTestToAPI = async (): Promise<SubmitTestResponse> => {
     console.log("Attempting to submit test to API...");
+    if (!sessionId) {
+      throw new Error("Session ID is required to submit test");
+    }
 
     const submitData: SubmitTestRequest = {
       session_id: sessionId,
@@ -361,6 +364,7 @@ const TestMainPage = () => {
 
   // --- Effects ---
 
+  {/*}
   // Get session ID from URL parameters (optional enhancement)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -372,11 +376,12 @@ const TestMainPage = () => {
       }
     }
   }, []);
+  */}
 
   // Fetch questions on component mount
   useEffect(() => {
     fetchQuestions();
-  }, [sessionId]);
+  }, []);
 
   // Timer Logic
   useEffect(() => {
@@ -549,7 +554,7 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test submitted successfully:", apiResponse);
-        setShowTesstResultDialog(true);
+        setShowTestResultDialog(true);
       }
     } catch (error) {
       console.error("Failed to submit test:", error);
@@ -567,7 +572,7 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test auto-submitted successfully:", apiResponse);
-        setShowTesstResultDialog(true);
+        setShowTestResultDialog(true);
       }
     } catch (error) {
       console.error("Failed to auto-submit test:", error);
@@ -632,7 +637,7 @@ const TestMainPage = () => {
   const currentQuestion = questions[currentQuestionIndex];
 
   const handleCloseTestResultDialog = () => {
-    setShowTesstResultDialog(false);
+    setShowTestResultDialog(false);
     navigate(ROUTES.DASHBOARD);
   };
 
@@ -1247,11 +1252,10 @@ const TestMainPage = () => {
               .padStart(2, "0")}`,
             rank: 1, // This should come from API
             totalStudents: 100, // This should come from API
-            sessionId: sessionId, // Add session ID for feedback tracking
+            sessionId: sessionId || undefined, // Add session ID for feedback tracking
           }}
           onClose={handleCloseTestResultDialog}
           navigate={() => {
-            handleCloseTestResultDialog();
             navigate(ROUTES.ANALYSIS);
           }}
         />

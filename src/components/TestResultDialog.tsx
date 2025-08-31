@@ -1,8 +1,7 @@
 import { FileText, X } from "lucide-react";
-import { useFeedbackTracker } from "@/hooks/useFeedbackTracker";
 import { ComponentName } from "@/lib/api-client";
 import VideoFeedbackModal from "./feedback/VideoFeedbackModal";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 
 // --- Type Definitions ---
 interface TestResults {
@@ -67,7 +66,10 @@ const ResultModalHeader = ({ onClose }: ResultModalHeaderProps) => (
       Test Result
     </h2>
     <button
-      onClick={onClose}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClose();
+      }}
       className="text-gray-400 hover:text-white transition-colors rounded-full p-1"
       aria-label="Close"
     >
@@ -154,7 +156,10 @@ const ResultModalBody = ({
             )}
           </div>
           <button
-            onClick={onOpenFeedback}
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpenFeedback();
+            }}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               hasExistingFeedback
                 ? 'bg-gray-600 hover:bg-gray-500 text-gray-300'
@@ -178,19 +183,25 @@ const ResultModalFooter = ({
 }: ResultModalFooterProps) => (
   <div className="flex flex-col sm:flex-row gap-3 p-5 bg-gray-800/50 rounded-b-2xl">
     <button
-      onClick={onClose}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClose();
+      }}
       className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-gray-400"
     >
       Close
     </button>
     <button
-      onClick={navigate}
+      onClick={(e) => {
+        e.stopPropagation();
+        navigate();
+      }}
       className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-400"
     >
       View Detailed Analysis
     </button>
   </div>
-);
+ );
 
 // --- Main Component: TestResultDialog ---
 // This component now composes the smaller modular parts.
@@ -200,17 +211,14 @@ const TestResultDialog = ({
   navigate,
 }: TestResultDialogProps) => {
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [canSubmitFeedback, setCanSubmitFeedback] = useState(true);
+  const [existingFeedback, setExistingFeedback] = useState<any>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
   
-  // Track feedback submissions for Test component
-  const {
-    canSubmitFeedback,
-    existingFeedback,
-    markAsSubmitted,
-  } = useFeedbackTracker({
-    component: ComponentName.Test,
-    sourceId: results.sessionId?.toString() || "unknown",
-    pageUrl: window.location.href,
-  });
+  // Simple feedback state management
+  const markAsSubmitted = useCallback(() => {
+    setCanSubmitFeedback(false);
+  }, []);
 
   const handleOpenFeedback = useCallback(() => {
     setIsFeedbackModalOpen(true);
@@ -224,22 +232,78 @@ const TestResultDialog = ({
     console.log("Test feedback submitted:", payload);
     markAsSubmitted();
     handleCloseFeedback();
-  }, [markAsSubmitted, handleCloseFeedback]);
+    
+    // Always execute pending navigation after feedback submission
+    if (pendingNavigation) {
+      console.log("🚀 Executing pending navigation after feedback submission");
+      pendingNavigation();
+      setPendingNavigation(null);
+    } else {
+      console.log("🚀 No pending navigation, closing dialog");
+      onClose();
+    }
+  }, [markAsSubmitted, handleCloseFeedback, pendingNavigation, onClose]);
 
   const handleFeedbackSkip = useCallback(() => {
     console.log("Test feedback skipped");
     handleCloseFeedback();
-  }, [handleCloseFeedback]);
+    
+    // Always execute pending navigation after feedback skip
+    if (pendingNavigation) {
+      console.log("🚀 Executing pending navigation after feedback skip");
+      pendingNavigation();
+      setPendingNavigation(null);
+    } else {
+      console.log("🚀 No pending navigation, closing dialog");
+      onClose();
+    }
+  }, [handleCloseFeedback, pendingNavigation, onClose]);
 
   // Auto-open feedback modal after test completion
-  const shouldAutoOpenFeedback = !existingFeedback && canSubmitFeedback;
+  const shouldAutoOpenFeedback = canSubmitFeedback;
+  
+  // Debug logging
+  useEffect(() => {
+    console.log("🔍 TestResultDialog Debug:", {
+      shouldAutoOpenFeedback,
+      canSubmitFeedback,
+      existingFeedback,
+      isFeedbackModalOpen
+    });
+  }, [shouldAutoOpenFeedback, canSubmitFeedback, existingFeedback, isFeedbackModalOpen]);
   
   // Open feedback immediately when results are shown if allowed
-  React.useEffect(() => {
+  useEffect(() => {
+    console.log("🚀 Attempting to auto-open feedback modal:", shouldAutoOpenFeedback);
     if (shouldAutoOpenFeedback) {
+      console.log("✅ Opening feedback modal automatically");
       setIsFeedbackModalOpen(true);
     }
   }, [shouldAutoOpenFeedback]);
+
+  // Intercept navigation and open feedback first
+  const handleNavigation = useCallback(() => {
+    if (canSubmitFeedback) {
+      // Always store the navigation action and open feedback
+      setPendingNavigation(() => navigate);
+      setIsFeedbackModalOpen(true);
+    } else {
+      // No feedback needed, navigate directly
+      navigate();
+    }
+  }, [canSubmitFeedback, navigate]);
+
+  // Intercept close and open feedback first
+  const handleClose = useCallback(() => {
+    if (canSubmitFeedback) {
+      // Always store the close action and open feedback
+      setPendingNavigation(() => onClose);
+      setIsFeedbackModalOpen(true);
+    } else {
+      // No feedback needed, close directly
+      onClose();
+    }
+  }, [canSubmitFeedback, onClose]);
   
   if (!results) {
     return null; // Don't render if there are no results
@@ -248,8 +312,18 @@ const TestResultDialog = ({
   return (
     <>
       <div className="bg-gray-900 bg-opacity-70 backdrop-blur-sm fixed inset-0 z-50 flex justify-center items-center p-4">
-        <div className="bg-[#1e2124] text-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100 animate-fadeIn">
-          <ResultModalHeader onClose={onClose} />
+        <div 
+          className="bg-[#1e2124] text-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100 animate-fadeIn cursor-pointer"
+          onClick={() => {
+            console.log("🖱️ Dialog clicked:", { canSubmitFeedback, existingFeedback });
+            // Always open feedback modal if user can submit feedback
+            if (canSubmitFeedback) {
+              console.log("✅ Opening feedback modal on dialog click");
+              setIsFeedbackModalOpen(true);
+            }
+          }}
+        >
+          <ResultModalHeader onClose={handleClose} />
           <ResultModalBody 
             results={results} 
             onOpenFeedback={handleOpenFeedback}
@@ -257,8 +331,8 @@ const TestResultDialog = ({
             existingRating={existingFeedback?.rating}
           />
           <ResultModalFooter 
-            onClose={onClose} 
-            navigate={navigate}
+            onClose={handleClose} 
+            navigate={handleNavigation}
             onOpenFeedback={handleOpenFeedback}
             hasExistingFeedback={!!existingFeedback}
           />

@@ -3,7 +3,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import Flashcards from "@/components/learning/Flashcards";
   import Quiz from "@/components/learning/Quiz";
   import Summary from "@/components/learning/Summary";
-  import { useMultiFeedbackTracker } from "@/hooks/useFeedbackTracker";
+  
   import { ComponentName } from "@/lib/api-client";
   import { ROUTES } from "@/routes/constants";
   import { theme } from "@/styles/theme";
@@ -532,18 +532,22 @@ import { Progress } from "../../components/ui/progress";
       ComponentName.Flashcard
     ], []);
 
-    // Feedback tracking for multiple components (new format)
-    const {
-      feedbackStates,
-      isLoading: isFeedbackLoading,
-      error: feedbackError,
-      markAsSubmitted: markFeedbackAsSubmitted,
-      resetFeedback,
-    } = useMultiFeedbackTracker({
-      components: feedbackComponents,
-      sourceId: currentVideoId || "unknown",
-      pageUrl: window.location.href,
-    });
+    // Simple feedback state management
+    const [feedbackStates, setFeedbackStates] = useState<{[key: string]: any}>({});
+    const [isFeedbackLoading, setIsFeedbackLoading] = useState(false);
+    const [feedbackError, setFeedbackError] = useState<string | null>(null);
+    
+    const markFeedbackAsSubmitted = useCallback((component: string) => {
+      setFeedbackStates(prev => ({
+        ...prev,
+        [component]: { ...prev[component], canSubmitFeedback: false }
+      }));
+    }, []);
+    
+    const resetFeedback = useCallback(() => {
+      setFeedbackStates({});
+      setFeedbackError(null);
+    }, []);
 
 
     // Extract video feedback state

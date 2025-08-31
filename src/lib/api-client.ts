@@ -2,8 +2,8 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  baseURL: 'https://api.krishak.in',
-  //baseURL: 'http://localhost:8000',
+  // baseURL: 'https://api.krishak.in',
+  baseURL: 'http://localhost:8000',
   headers: {
     "Content-Type": "application/json",
   },
@@ -578,10 +578,6 @@ export interface FeedbackListResponse {
 
 export const feedbackApi = {
   // Check if user can submit feedback for a single component (legacy)
-  canSubmitFeedback: async (sourceId: string, component: ComponentName, pageUrl: string): Promise<FeedbackStatus> => {
-    const response = await apiRequest<FeedbackStatus>('GET', `/feedback/can-feedback?source_id=${sourceId}&component=${component}&page_url=${encodeURIComponent(pageUrl)}`);
-    return response.data;
-  },
 
   // Check if user can submit feedback for multiple components (new format)
   canSubmitFeedbackMulti: async (sourceId: string, components: ComponentName[], pageUrl: string): Promise<MultiComponentFeedbackStatus> => {
