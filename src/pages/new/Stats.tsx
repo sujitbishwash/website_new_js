@@ -1,21 +1,17 @@
-import React, { useState } from "react";
+import React, { useState, ReactNode } from "react";
 import {
   Flame,
-  Award,
   Trophy,
   Unlock,
   ArrowRight,
   Info,
-  BarChart,
   Clock,
   BookOpen,
-  Target,
   CheckCircle,
   ChevronLeft,
   ChevronRight,
   Zap,
   TrendingUp,
-  BrainCircuit,
   TargetIcon,
   CalendarClock,
   Sparkle,
@@ -36,8 +32,34 @@ const colors = {
   orange: "#FF9500",
 };
 
+// --- Type Definitions ---
+interface DailyDataPoint {
+  day: number;
+  score?: number;
+  hours?: number;
+  value?: number;
+}
+
+interface Section {
+  subject: string;
+  completed: number;
+  total: number;
+}
+
+interface Exam {
+  name: string;
+  date: Date;
+}
+
+interface TooltipData {
+  x: number;
+  y: number;
+  value: number;
+  index: number;
+}
+
 // --- Helper function to generate mock data ---
-const generateDailyData = (numDays) => {
+const generateDailyData = (numDays: number) => {
   const scores = [];
   const hours = [];
   let currentScore = 3; // Starting score
@@ -61,7 +83,41 @@ const generateDailyData = (numDays) => {
 const { scores: dailyScores, hours: dailyHours } = generateDailyData(45);
 
 // --- Mock Data for SBI PO Aspirant ---
-const dashboardData = {
+interface DashboardData {
+  user: {
+    name: string;
+    streak: number;
+    streakHistory: boolean[];
+  };
+  progress: Section[];
+  score: {
+    dailyScores: DailyDataPoint[];
+    totalQuestions: number;
+  };
+  time: {
+    dailyHours: DailyDataPoint[];
+  };
+  exams: Exam[];
+  performanceMetrics: {
+    attemptPercentage: number;
+    accuracyPercentage: number;
+    speedPercentage: number;
+  };
+  leaderboard: { rank: number; totalStudents: number };
+  todayStep: {
+    title: string;
+    topic: string;
+    questions: number;
+  };
+  aiRemark: string;
+  appFilterReward: {
+    title: string;
+    reason: string;
+    filterName: string;
+  };
+}
+
+const dashboardData: DashboardData = {
   user: {
     name: "Ankit",
     streak: 5,
@@ -106,7 +162,14 @@ const dashboardData = {
 };
 
 // --- UI Component Placeholders ---
-const Card = ({ children, className = "", tooltipText }) => (
+interface CardProps {
+  children: ReactNode;
+  className?: string;
+  tooltipText?: string;
+  style?: React.CSSProperties;
+}
+
+const Card: React.FC<CardProps> = ({ children, className = "", tooltipText }) => (
   <div
     className={`group transition-all duration-300 relative bg-card rounded-xl shadow-sm border border-border overflow-hidden ${className}`}
   >
@@ -125,21 +188,26 @@ const Card = ({ children, className = "", tooltipText }) => (
   </div>
 );
 
-const CardContent = ({ children, className = "" }) => (
+interface CardContentProps {
+  children: ReactNode;
+  className?: string;
+}
+
+const CardContent: React.FC<CardContentProps> = ({ children, className = "" }) => (
   <div className={`p-6 ${className}`}>{children}</div>
 );
 
-const Button = ({ children, className = "", ...props }) => (
-  <button
-    className={`bg-indigo-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm ${className}`}
-    {...props}
-  >
-    {children}
-  </button>
-);
+
+
+
 
 // --- Existing Components ---
-const StreakTracker = ({ history, streak }) => {
+interface StreakTrackerProps {
+  history: boolean[];
+  streak: number;
+}
+
+const StreakTracker: React.FC<StreakTrackerProps> = ({ history }) => {
   const days = ["S", "M", "T", "W", "T", "F", "S"];
   return (
     <div className="flex flex-col items-center justify-center h-full">
@@ -166,9 +234,13 @@ const StreakTracker = ({ history, streak }) => {
     </div>
   );
 };
-const SectionalProgress = ({ sections }) => (
+interface SectionalProgressProps {
+  sections: Section[];
+}
+
+const SectionalProgress: React.FC<SectionalProgressProps> = ({ sections }) => (
   <div className="space-y-4">
-    {sections.map((section) => {
+    {sections.map((section: Section) => {
       const percentage = Math.round((section.completed / section.total) * 100);
       return (
         <div key={section.subject}>
@@ -192,33 +264,41 @@ const SectionalProgress = ({ sections }) => (
   </div>
 );
 
-const InteractiveGraph = ({
+interface InteractiveGraphProps {
+  data: DailyDataPoint[];
+  total: number;
+  unit: string;
+  strokeColor: string;
+  gradientColor: string;
+}
+
+const InteractiveGraph: React.FC<InteractiveGraphProps> = ({
   data,
   total,
   unit,
   strokeColor,
   gradientColor,
 }) => {
-  const [tooltip, setTooltip] = useState(null);
+  const [tooltip, setTooltip] = useState<TooltipData | null>(null);
   const width = 100;
   const height = 100;
 
   const pathData = data
     .map((point, i) => {
       const x = (i / (data.length - 1)) * width;
-      const y = height - (point.value / total) * height;
+      const y = height - ((point.value || 0) / total) * height;
       return `${i === 0 ? "M" : "L"} ${x} ${y}`;
     })
     .join(" ");
 
-  const handleMouseMove = (e) => {
+  const handleMouseMove = (e: React.MouseEvent<SVGSVGElement>) => {
     const svgRect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - svgRect.left;
     const index = Math.round((x / svgRect.width) * (data.length - 1));
     const point = data[index];
     const pointX = (index / (data.length - 1)) * 100;
-    const pointY = 100 - (point.value / total) * 100;
-    setTooltip({ x: pointX, y: pointY, value: point.value, index });
+    const pointY = 100 - ((point.value || 0) / total) * 100;
+    setTooltip({ x: pointX, y: pointY, value: point.value || 0, index });
   };
 
   return (
@@ -304,14 +384,23 @@ const InteractiveGraph = ({
 
 // --- UPDATED & NEW COMPONENTS ---
 
-const ExamCalendar = ({ exams }) => {
+interface ExamCalendarProps {
+  exams: Exam[];
+}
+
+const ExamCalendar: React.FC<ExamCalendarProps> = ({ exams }) => {
   const [view, setView] = useState("month");
   const [currentDate, setCurrentDate] = useState(new Date());
-  const today = new Date();
 
-  const changeMonth = (offset) =>
+
+  const changeMonth = (offset: number) =>
     setCurrentDate(
       new Date(currentDate.setMonth(currentDate.getMonth() + offset))
+    );
+
+  const changeYear = (offset: number) =>
+    setCurrentDate(
+      new Date(currentDate.setFullYear(currentDate.getFullYear() + offset))
     );
 
   const renderMonthView = () => {
@@ -358,7 +447,7 @@ const ExamCalendar = ({ exams }) => {
           ))}
           {dates.map((date) => {
             const examOnThisDay = exams.find(
-              (e) =>
+              (e: Exam) =>
                 e.date.getDate() === date &&
                 e.date.getMonth() === month &&
                 e.date.getFullYear() === year
@@ -468,7 +557,15 @@ const ExamCalendar = ({ exams }) => {
   );
 };
 
-const CircularProgressChart = ({ percentage, label, color, text, icon }) => {
+interface CircularProgressChartProps {
+  percentage: number;
+  label: string;
+  color: string;
+  text?: string;
+  icon: React.ComponentType<any>;
+}
+
+const CircularProgressChart: React.FC<CircularProgressChartProps> = ({ percentage, label, color, text, icon }) => {
   const Icon = icon;
   const radius = 42;
   const circumference = 2 * Math.PI * radius;
@@ -520,7 +617,12 @@ const CircularProgressChart = ({ percentage, label, color, text, icon }) => {
   );
 };
 
-const LeaderboardPosition = ({ rank, totalStudents }) => {
+interface LeaderboardPositionProps {
+  rank: number;
+  totalStudents: number;
+}
+
+const LeaderboardPosition: React.FC<LeaderboardPositionProps> = ({ rank, totalStudents }) => {
   const percentile = (1 - rank / totalStudents) * 100;
   const topPercentage = 100 - percentile;
 
@@ -569,12 +671,9 @@ const LeaderboardPosition = ({ rank, totalStudents }) => {
 
 // --- Main Dashboard Component ---
 function Stats() {
-  const totalTimeThisPeriod = dashboardData.time.dailyHours.reduce(
-    (acc, curr) => acc + curr.hours,
-    0
-  );
+
   const daysLeft = Math.ceil(
-    (dashboardData.exams[0].date - new Date()) / (1000 * 60 * 60 * 24)
+    (dashboardData.exams[0].date.getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
   );
   const latestScore =
     dashboardData.score.dailyScores[dashboardData.score.dailyScores.length - 1]

@@ -384,11 +384,11 @@ export default function ExamsPage() {
     examGoal,
     
     fetchExamGoal,
-    refreshExamGoal,
+    // refreshExamGoal,
     syncExamGoalFromAuthContext,
     
     isDataLoaded,
-    resetFetchFlags,
+    // resetFetchFlags,
   } = useUser();
   const { refreshUserData } = useAuth();
 
@@ -446,7 +446,7 @@ export default function ExamsPage() {
               };
 
               // Add specific exams from the group
-              examType.group.forEach((examName, index) => {
+              examType.group.forEach((examName) => {
                 const examKey = examName.toLowerCase().replace(/\s+/g, "_");
                 mergedData[examType.value.toLowerCase()].exams[examKey] = {
                   name: examName,
@@ -665,7 +665,7 @@ export default function ExamsPage() {
         ([categoryKey, category]) =>
           Object.entries(category.exams)
             .filter(
-              ([examKey, exam]) =>
+              ([ _, exam]) =>
                 exam.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 exam.description
                   .toLowerCase()
@@ -1310,122 +1310,6 @@ export default function ExamsPage() {
           </div>
         )}
 
-        {/* API Data Debug Info (can be removed in production) */}
-        <div style={styles.searchContainer}>
-          <h3 style={{ ...styles.detailHeading, color: theme.accent }}>
-            API Status & Debug Info
-          </h3>
-          <div style={{ fontSize: "0.9rem", color: theme.secondaryText }}>
-            <div style={{ marginBottom: "0.5rem" }}>
-              <strong>Loading State:</strong>{" "}
-              {isLoading ? "Loading..." : "Loaded"}
-            </div>
-            <div style={{ marginBottom: "0.5rem" }}>
-              <strong>Error State:</strong> {error || "No errors"}
-            </div>
-            <div style={{ marginBottom: "0.5rem" }}>
-              <strong>API Data Count:</strong> {apiExamData.length} exam types
-            </div>
-            <div style={{ marginBottom: "0.5rem" }}>
-              <strong>Exam Goal in State:</strong>{" "}
-              {examGoal ? `${examGoal.exam} (${examGoal.groupType})` : "None"}
-            </div>
-            <div style={{ marginBottom: "0.5rem" }}>
-              <strong>UserContext isDataLoaded:</strong>{" "}
-              {isDataLoaded ? "Yes" : "No"}
-            </div>
-            <div style={{ marginBottom: "0.5rem" }}>
-              <strong>AuthContext localStorage:</strong>{" "}
-              {(() => {
-                try {
-                  const userData = localStorage.getItem("userData");
-                  if (userData) {
-                    const parsed = JSON.parse(userData);
-                    return parsed?.exam && parsed?.group_type
-                      ? `${parsed.exam} (${parsed.group_type})`
-                      : "No exam goal";
-                  }
-                  return "No data";
-                } catch {
-                  return "Error parsing";
-                }
-              })()}
-            </div>
-            <div style={{ marginBottom: "0.5rem" }}>
-              <strong>Fetch Attempted:</strong> Always
-            </div>
-            <div style={{ marginBottom: "1rem" }}>
-              <button
-                onClick={() => {
-                  const synced = syncExamGoalFromAuthContext();
-                  if (synced) {
-                    console.log("✅ Manual sync successful");
-                  } else {
-                    console.log("⚠️ Manual sync failed - no data found");
-                  }
-                }}
-                style={{
-                  backgroundColor: "#10B981",
-                  color: "white",
-                  padding: "0.5rem 1rem",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "0.8rem",
-                }}
-              >
-                Sync Exam Goal
-              </button>
-              <button
-                onClick={() => {
-                  console.log("🔄 Manually fetching exam goal from API...");
-                  fetchExamGoal(true);
-                }}
-                style={{
-                  backgroundColor: "#F59E0B",
-                  color: "white",
-                  padding: "0.5rem 1rem",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "0.8rem",
-                  marginLeft: "0.5rem",
-                }}
-              >
-                Fetch Exam Goal
-              </button>
-              <button
-                onClick={resetFetchFlags}
-                style={{
-                  backgroundColor: "#EF4444",
-                  color: "white",
-                  padding: "0.5rem 1rem",
-                  border: "none",
-                  borderRadius: "4px",
-                  cursor: "pointer",
-                  fontSize: "0.8rem",
-                  marginLeft: "0.5rem",
-                }}
-              >
-                Reset Fetch Flags
-              </button>
-            </div>
-            {apiExamData.length > 0 && (
-              <div style={{ marginTop: "1rem" }}>
-                <strong>Available Exam Types from API:</strong>
-                {apiExamData.map((examType, index) => (
-                  <div
-                    key={index}
-                    style={{ marginTop: "0.5rem", paddingLeft: "1rem" }}
-                  >
-                    <strong>{examType.label}:</strong>{" "}
-                    {examType.group.join(", ")}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
       </main>
     </div>
   );

@@ -18,7 +18,7 @@ import { CircleUser } from "lucide-react";
 export default function ExamInformationPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile, examGoal } = useUser();
+  const { profile } = useUser();
   const testConfig = location.state?.testConfig;
 
   return (

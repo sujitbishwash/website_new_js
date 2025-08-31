@@ -36,6 +36,14 @@ const TimeCard: React.FC<TimeCardProps> = ({ value, label }) => (
   </div>
 );
 
+// Define the type for time left
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
 // --- Main Coming Soon Component ---
 
 interface ComingSoonProps {
@@ -44,25 +52,24 @@ interface ComingSoonProps {
 }
 
 const ComingSoon: React.FC<ComingSoonProps> = ({ targetDate }) => {
-  // Function to calculate time remaining
-  const calculateTimeLeft = () => {
-    const difference = +new Date(targetDate) - +new Date();
-    let timeLeft = {};
 
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    } else {
-      timeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
-    }
-    return timeLeft;
-  };
+// Function to calculate time remaining
+const calculateTimeLeft = (): TimeLeft => {
+  const difference = +new Date(targetDate) - +new Date();
 
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
+  if (difference > 0) {
+    return {
+      days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+      hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+      minutes: Math.floor((difference / 1000 / 60) % 60),
+      seconds: Math.floor((difference / 1000) % 60),
+    };
+  } else {
+    return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+  }
+};
+
+const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft());
   const [email, setEmail] = useState("");
 
   // Effect to update the countdown every second
@@ -110,21 +117,21 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ targetDate }) => {
 
         {/* Countdown Timer Section */}
         <div className="flex justify-center items-center space-x-4 md:space-x-8 my-8 md:my-12">
-          <TimeCard value={timeLeft.days || 0} label="Days" />
+          <TimeCard value={timeLeft.days} label="Days" />
           <div
             className="text-4xl md:text-6xl"
             style={{ color: theme.divider }}
           >
             :
           </div>
-          <TimeCard value={timeLeft.hours || 0} label="Hours" />
+          <TimeCard value={timeLeft.hours} label="Hours" />
           <div
             className="text-4xl md:text-6xl"
             style={{ color: theme.divider }}
           >
             :
           </div>
-          <TimeCard value={timeLeft.minutes || 0} label="Minutes" />
+          <TimeCard value={timeLeft.minutes} label="Minutes" />
           <div
             className="text-4xl md:text-6xl hidden sm:block"
             style={{ color: theme.divider }}
@@ -132,7 +139,7 @@ const ComingSoon: React.FC<ComingSoonProps> = ({ targetDate }) => {
             :
           </div>
           <div className="hidden sm:block">
-            <TimeCard value={timeLeft.seconds || 0} label="Seconds" />
+            <TimeCard value={timeLeft.seconds} label="Seconds" />
           </div>
         </div>
 

@@ -7,8 +7,6 @@ import React, {
   useEffect,
   useRef,
   useState,
-  useCallback,
-  useMemo,
 } from "react";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -25,8 +23,6 @@ import {
   ChevronsRight,
   ChevronUpIcon,
   CircleUser,
-  Fullscreen,
-  Hexagon,
   Maximize,
   Minimize,
   X,
@@ -148,13 +144,6 @@ const InstructionsModal = ({ onClose }: { onClose: () => void }) => (
   </div>
 );
 // --- Type Definitions ---
-
-type QuestionStatus =
-  | "not-visited"
-  | "not-answered"
-  | "answered"
-  | "marked"
-  | "marked-answered";
 type QuestionType =
   | "MCQ"
   | "FillInTheBlank"
@@ -186,44 +175,7 @@ interface ApiQuestion {
 
 // --- Helper Components ---
 
-// Icon for the student in the sidebar
-const UserIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6 mr-3 text-blue-400"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-    />
-  </svg>
-);
 
-// Icon for the fullscreen button (Updated Design)
-const FullscreenIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-5 w-5 ml-2"
-  >
-    <path d="M8 3H5a2 2 0 0 0-2 2v3" />
-    <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
-    <path d="M3 16v3a2 2 0 0 0 2 2h3" />
-    <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
-  </svg>
-);
 
 // --- Custom Hook for detecting outside clicks ---
 const useOutsideClick = (
@@ -248,7 +200,7 @@ const useOutsideClick = (
 const TestMainPage = () => {
   // --- State Management ---
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [allQuestions, setAllQuestions] = useState<{
+  const [allQuestions] = useState<{
     [key in SectionName]?: Question[];
   }>({});
   const [currentSection, setCurrentSection] =
@@ -260,9 +212,7 @@ const TestMainPage = () => {
   const [showSubmitDialog, setShowSubmitDialog] = useState(false);
   const [showTestResultDialog, setShowTestResultDialog] = useState(false);
   const [showInstructionsModal, setShowInstructionsModal] = useState(false);
-  const [apiStatus, setApiStatus] = useState<
-    "loading" | "idle" | "submitting" | "error"
-  >("loading");
+
   const [isTimeLow, setIsTimeLow] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -430,20 +380,7 @@ const TestMainPage = () => {
     )}`;
   };
 
-  const updateQuestionState = useCallback(
-    (section: SectionName, index: number, updates: Partial<Question>) => {
-      setAllQuestions((prev) => {
-        const newSections = { ...prev };
-        const sectionQuestions = [...(newSections[section] || [])];
-        if (sectionQuestions[index]) {
-          sectionQuestions[index] = { ...sectionQuestions[index], ...updates };
-          newSections[section] = sectionQuestions;
-        }
-        return newSections;
-      });
-    },
-    []
-  );
+
 
   // --- Event Handlers ---
   const handleOptionSelect = (optionIndex: number) => {
@@ -517,10 +454,7 @@ const TestMainPage = () => {
     handleSaveAndNext();
   };
 
-  const handleReportQuestion = () => {
-    if (currentQuestion)
-      console.log(`Question ${currentQuestion.id} reported.`);
-  };
+
 
   const handleSectionChange = (section: SectionName) => {
     setCurrentSection(section);
@@ -617,22 +551,7 @@ const TestMainPage = () => {
     }
   };
 
-  // --- Dynamic Styles for Palette ---
-  const getPaletteClass = (status: string) => {
-    switch (status) {
-      case "answered":
-        return "bg-green-600 text-white";
-      case "not-answered":
-        return "bg-red-600 text-white";
-      case "marked":
-        return "bg-purple-600 text-white";
-      case "marked-answered":
-        return 'bg-purple-600 text-white relative after:content-["✔"] after:absolute after:text-green-400 after:text-xs after:-top-1 after:-right-1';
-      case "not-visited":
-      default:
-        return "bg-gray-600 text-muted-foreground";
-    }
-  };
+
 
   const currentQuestion = questions[currentQuestionIndex];
 

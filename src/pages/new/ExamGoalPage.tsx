@@ -3,7 +3,6 @@ import { theme } from "@/styles/theme";
 import { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
-import { useUser } from "../../contexts/UserContext";
 import { examGoalApi, ExamType } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 

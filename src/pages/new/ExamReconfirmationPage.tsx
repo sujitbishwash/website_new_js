@@ -53,7 +53,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [textSize, setTextSize] = useState("text-base");
   const location = useLocation();
-  const { profile, examGoal } = useUser();
+  const { profile } = useUser();
   const testConfig = location.state?.testConfig;
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);

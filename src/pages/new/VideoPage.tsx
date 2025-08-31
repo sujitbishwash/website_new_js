@@ -23,7 +23,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
     Type,
     X,
   } from "lucide-react";
-  import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+  import { useCallback, useEffect, useRef, useState } from "react";
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail, feedbackApi } from "../../lib/api-client";
@@ -160,8 +160,6 @@ import YouTube from "react-youtube";
     isLoadingTranscript,
     chaptersError,
     transcriptError,
-    onFeedbackSubmit,
-    onFeedbackSkip,
   }) => {
     const [activeTab, setActiveTab] = useState("chapters");
     return (
@@ -276,42 +274,12 @@ import YouTube from "react-youtube";
     );
   };
   
-  const AITutorPanel: React.FC<{
+    const AITutorPanel: React.FC<{
     currentMode: LearningMode;
     onModeChange: (mode: LearningMode) => void;
-    videoId: string;
-    chatMessages: Array<{ text: string; isUser: boolean }>;
-    isChatLoading: boolean;
-    chatError: string | null;
-    onSendMessage: (message: string) => void;
-  
     onToggleFullScreen: () => void;
     isLeftColumnVisible: boolean;
-  
-    onToggleVideo: () => void;
-    isVideoVisible: boolean;
     onShare: () => void;
-    // Feedback state for each component
-    chatFeedbackState?: {
-      canSubmitFeedback: boolean | undefined;
-      existingFeedback: any;
-      markAsSubmitted: () => void;
-    };
-    quizFeedbackState?: {
-      canSubmitFeedback: boolean | undefined;
-      existingFeedback: any;
-      markAsSubmitted: () => void;
-    };
-    summaryFeedbackState?: {
-      canSubmitFeedback: boolean | undefined;
-      existingFeedback: any;
-      markAsSubmitted: () => void;
-    };
-    flashcardFeedbackState?: {
-      canSubmitFeedback: boolean | undefined;
-      existingFeedback: any;
-      markAsSubmitted: () => void;
-    };
     // Components to render
     components: {
       chat: React.ReactNode;
@@ -322,20 +290,9 @@ import YouTube from "react-youtube";
   }> = ({
     currentMode,
     onModeChange,
-    videoId,
-    chatMessages,
-    isChatLoading,
-    chatError,
-    onSendMessage,
     onToggleFullScreen,
     isLeftColumnVisible,
-    onToggleVideo,
-    isVideoVisible,
     onShare,
-    chatFeedbackState,
-    quizFeedbackState,
-    summaryFeedbackState,
-    flashcardFeedbackState,
     components,
   }) => {
     const modes: { key: LearningMode; label: string; icon: any }[] = [
@@ -403,7 +360,6 @@ import YouTube from "react-youtube";
     onClose: () => void;
     url: string;
   }> = ({ isOpen, onClose, url }) => {
-    const [copySuccess, setCopySuccess] = useState("");
   
     if (!isOpen) return null;
   
@@ -416,12 +372,10 @@ import YouTube from "react-youtube";
     const copyToClipboard = () => {
       navigator.clipboard.writeText(url).then(
         () => {
-          setCopySuccess("Copied!");
-          setTimeout(() => setCopySuccess(""), 2000);
+          // Copy successful
         },
         () => {
-          setCopySuccess("Failed to copy");
-          setTimeout(() => setCopySuccess(""), 2000);
+          // Copy failed
         }
       );
     };
@@ -502,7 +456,6 @@ import YouTube from "react-youtube";
     
     // Video progress state
     const [videoProgress, setVideoProgress] = useState(0);
-    const [isVideoPlaying, setIsVideoPlaying] = useState(false);
 
     // Chat state management
     const [chatMessages, setChatMessages] = useState<
@@ -522,14 +475,7 @@ import YouTube from "react-youtube";
     // Get video ID from URL params or location state
     const currentVideoId = videoId || location.state?.videoId;
 
-    // Memoize components array to prevent hook recreation
-    const feedbackComponents = useMemo(() => [
-      ComponentName.Video,
-      ComponentName.Chat,
-      ComponentName.Quiz,
-      ComponentName.Summary,
-      ComponentName.Flashcard
-    ], []);
+
 
     // Simple feedback state management
     const [feedbackStates, setFeedbackStates] = useState<{[key: string]: any}>({});
@@ -594,30 +540,7 @@ import YouTube from "react-youtube";
       markFeedbackAsSubmitted(ComponentName.Video);
     }, [markFeedbackAsSubmitted]);
 
-    // Create wrapper objects for feedback state that include markAsSubmitted
-    const chatFeedbackStateWrapper = chatFeedbackState ? {
-      canSubmitFeedback: chatFeedbackState.canSubmitFeedback,
-      existingFeedback: chatFeedbackState.existingFeedback,
-      markAsSubmitted: chatMarkAsSubmitted,
-    } : undefined;
 
-    const quizFeedbackStateWrapper = quizFeedbackState ? {
-      canSubmitFeedback: quizFeedbackState.canSubmitFeedback,
-      existingFeedback: quizFeedbackState.existingFeedback,
-      markAsSubmitted: quizMarkAsSubmitted,
-    } : undefined;
-
-    const summaryFeedbackStateWrapper = summaryFeedbackState ? {
-      canSubmitFeedback: summaryFeedbackState.canSubmitFeedback,
-      existingFeedback: summaryFeedbackState.existingFeedback,
-      markAsSubmitted: summaryMarkAsSubmitted,
-    } : undefined;
-
-    const flashcardFeedbackStateWrapper = flashcardFeedbackState ? {
-      canSubmitFeedback: flashcardFeedbackState.canSubmitFeedback,
-      existingFeedback: flashcardFeedbackState.existingFeedback,
-      markAsSubmitted: flashcardMarkAsSubmitted,
-    } : undefined;
 
     // Components object will be defined after all functions are available
 
@@ -641,10 +564,6 @@ import YouTube from "react-youtube";
             const progress = (currentTime / duration) * 100;
             setVideoProgress(progress);
             
-            // Check if video is playing
-            const playerState = player.getPlayerState();
-            setIsVideoPlaying(playerState === 1); // 1 = playing
-            
             // Auto-show feedback when video reaches 90%
             if (progress >= 90 && !hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current && videoCanSubmitFeedback) {
               openFeedbackModal();
@@ -662,7 +581,6 @@ import YouTube from "react-youtube";
     
     const onYouTubeEnd = useCallback(() => {
       setVideoProgress(100);
-      setIsVideoPlaying(false);
       
       // Show feedback modal when video ends
       if (!hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current) {
@@ -676,7 +594,6 @@ import YouTube from "react-youtube";
       console.log("🔄 YouTube player state changed:", playerState);
       
       // Update playing state
-      setIsVideoPlaying(playerState === 1); // 1 = playing
       
       // Handle video end
       if (playerState === 0) { // 0 = ended
@@ -1093,9 +1010,7 @@ import YouTube from "react-youtube";
       setIsLeftColumnVisible(!isLeftColumnVisible);
     }, [isLeftColumnVisible]);
   
-    const handleToggleVideo = useCallback(() => {
-      setIsVideoVisible(!isVideoVisible);
-    }, [isVideoVisible]);
+
   
     const handleCloseShareModal = useCallback(() => {
       setIsShareModalOpen(false);
@@ -1111,21 +1026,7 @@ import YouTube from "react-youtube";
       // to ensure accurate progress tracking
       if (ytPlayerRef.current && videoDurationRef.current > 0) {
         try {
-          const currentTime = ytPlayerRef.current.getCurrentTime?.() || 0;
-          const duration =
-            ytPlayerRef.current.getDuration?.() || videoDurationRef.current;
-          // const percentage = Math.min(100, (currentTime / duration) * 100); // This line is no longer needed
-          // updateWatchPercentage(percentage); // This function is no longer available
-
-          // Show feedback if user has watched 90% or more
-          // if ( // This block was removed as per the edit hint
-          //   // percentage >= 90 && // This line is no longer needed
-          //   // shouldShowFeedbackOnLeave && // This variable is no longer available
-          //   !feedbackState.hasShownFeedback
-          // ) {
-          //   openFeedbackModal();
-          //   updateFeedbackState("shown");
-          // }
+          // Video interaction detected
         } catch (error) {
           console.warn("Error getting video progress on interaction:", error);
         }
@@ -1214,37 +1115,9 @@ import YouTube from "react-youtube";
               <AITutorPanel
                 currentMode={currentMode}
                 onModeChange={handleModeChange}
-                videoId={currentVideoId}
-                chatMessages={chatMessages}
-                isChatLoading={isChatLoading}
-                chatError={chatError}
-                onSendMessage={handleSendMessage}
                 isLeftColumnVisible={isLeftColumnVisible}
                 onToggleFullScreen={handleToggleFullScreen}
-                onToggleVideo={handleToggleVideo}
-                isVideoVisible={isVideoVisible}
                 onShare={handleShare}
-                // Pass feedback states to AITutorPanel
-                chatFeedbackState={chatFeedbackState ? {
-                  canSubmitFeedback: chatFeedbackState.canSubmitFeedback,
-                  existingFeedback: chatFeedbackState.existingFeedback,
-                  markAsSubmitted: chatMarkAsSubmitted,
-                } : undefined}
-                quizFeedbackState={quizFeedbackState ? {
-                  canSubmitFeedback: quizFeedbackState.canSubmitFeedback,
-                  existingFeedback: quizFeedbackState.existingFeedback,
-                  markAsSubmitted: quizMarkAsSubmitted,
-                } : undefined}
-                summaryFeedbackState={summaryFeedbackState ? {
-                  canSubmitFeedback: summaryFeedbackState.canSubmitFeedback,
-                  existingFeedback: summaryFeedbackState.existingFeedback,
-                  markAsSubmitted: summaryMarkAsSubmitted,
-                } : undefined}
-                flashcardFeedbackState={flashcardFeedbackState ? {
-                  canSubmitFeedback: flashcardFeedbackState.canSubmitFeedback,
-                  existingFeedback: flashcardFeedbackState.existingFeedback,
-                  markAsSubmitted: flashcardMarkAsSubmitted,
-                } : undefined}
                 components={components}
               />
             </div>
@@ -1333,39 +1206,11 @@ import YouTube from "react-youtube";
               <AITutorPanel
                 currentMode={currentMode}
                 onModeChange={handleModeChange}
-                videoId={currentVideoId}
-                chatMessages={chatMessages}
-                isChatLoading={isChatLoading}
-                chatError={chatError}
-                onSendMessage={handleSendMessage}
                 isLeftColumnVisible={isLeftColumnVisible}
                 onToggleFullScreen={() =>
                   setIsLeftColumnVisible(!isLeftColumnVisible)
                 }
-                onToggleVideo={() => setIsVideoVisible(!isVideoVisible)}
-                isVideoVisible={isVideoVisible}
                 onShare={() => setIsShareModalOpen(true)}
-                // Pass feedback states to AITutorPanel
-                chatFeedbackState={chatFeedbackState ? {
-                  canSubmitFeedback: chatFeedbackState.canSubmitFeedback,
-                  existingFeedback: chatFeedbackState.existingFeedback,
-                  markAsSubmitted: chatMarkAsSubmitted,
-                } : undefined}
-                quizFeedbackState={quizFeedbackState ? {
-                  canSubmitFeedback: quizFeedbackState.canSubmitFeedback,
-                  existingFeedback: quizFeedbackState.existingFeedback,
-                  markAsSubmitted: quizMarkAsSubmitted,
-                } : undefined}
-                summaryFeedbackState={summaryFeedbackState ? {
-                  canSubmitFeedback: summaryFeedbackState.canSubmitFeedback,
-                  existingFeedback: summaryFeedbackState.existingFeedback,
-                  markAsSubmitted: summaryMarkAsSubmitted,
-                } : undefined}
-                flashcardFeedbackState={flashcardFeedbackState ? {
-                  canSubmitFeedback: flashcardFeedbackState.canSubmitFeedback,
-                  existingFeedback: flashcardFeedbackState.existingFeedback,
-                  markAsSubmitted: flashcardMarkAsSubmitted,
-                } : undefined}
                 components={components}
               />
             </div>

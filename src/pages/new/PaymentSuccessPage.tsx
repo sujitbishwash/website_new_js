@@ -216,7 +216,6 @@ const CongratulationsCard: React.FC<CongratulationsCardProps> = ({
 
 const PaymentSuccessPage: React.FC = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { profile } = useUser();
   const paymentData = location.state as {
     amount?: number;

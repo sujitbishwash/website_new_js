@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
-import { fetchTestSeriesFormData, testSeriesApi } from "../../lib/api-client";
+import { fetchTestSeriesFormData } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
-import { ChevronRight, Pen } from "lucide-react";
+import { Pen } from "lucide-react";
 
 // --- Type Definitions ---
 interface ChipProps {
@@ -13,15 +13,7 @@ interface ChipProps {
   onClick: (value: string) => void;
   disabled?: boolean;
 }
-interface RadioButtonProps {
-  id: string;
-  name: string;
-  value: string;
-  label: string;
-  checked: boolean;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  disabled?: boolean;
-}
+
 
 interface SubTopic {
   subject: string;
@@ -112,55 +104,12 @@ const Chip: React.FC<ChipProps> = ({
   </button>
 );
 
-// Custom Radio Button Component
-const RadioButton: React.FC<RadioButtonProps> = ({
-  id,
-  name,
-  value,
-  label,
-  checked,
-  onChange,
-  disabled = false,
-}) => (
-  <div className="relative flex items-center">
-    <input
-      id={id}
-      type="radio"
-      name={name}
-      value={value}
-      checked={checked}
-      onChange={onChange}
-      disabled={disabled}
-      className="absolute opacity-0 w-0 h-0"
-    />
-    <label
-      htmlFor={id}
-      className={`flex items-center cursor-pointer py-2 px-3 rounded-lg transition-all duration-300 ease-in-out border
-                ${
-                  disabled
-                    ? "bg-gray-800 border-gray-700 text-gray-500 cursor-not-allowed"
-                    : "border-gray-600"
-                }
-                ${
-                  checked
-                    ? "bg-blue-600 border-blue-500 text-white shadow-lg"
-                    : "bg-gray-700 hover:bg-gray-600 hover:border-gray-500"
-                }`}
-    >
-      <span
-        className={`w-4 h-4 inline-block mr-2 rounded-full border-2 transition-all duration-300 ${
-          checked ? "border-white bg-white" : "border-gray-400 bg-gray-700"
-        }`}
-      ></span>
-      {label}
-    </label>
-  </div>
-);
+
 
 // --- Main Page Component ---
 const TestConfigurationPageComponent = () => {
   const navigate = useNavigate();
-  const { profile, examGoal, isLoading: userLoading } = useUser();
+  const { profile, examGoal } = useUser();
 
   // State to hold user selections
   const [selectedSubject, setSelectedSubject] = useState("");

@@ -18,8 +18,6 @@ const LoginPage: React.FC = () => {
   const {
     isAuthenticated,
     isLoading,
-    hasExamGoal,
-    checkExamGoal,
     checkUserState,
   } = useAuth();
   const navigate = useNavigate();
@@ -471,6 +469,8 @@ const GoogleSignInButton: React.FC = () => {
     setIsLoading(true);
     try {
       const { data, error } = await signInWithGoogle();
+
+      console.log("Google sign-in data:", data);
 
       if (error) {
         console.error("Google sign-in error:", error);
