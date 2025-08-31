@@ -68,19 +68,8 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { profile, isLoading, error, isDataLoaded, isBackgroundLoading } =
+  const { profile, isLoading, error, isDataLoaded } =
     useUser();
-
-  // Debug logging
-  console.log("MoreOptions - Profile:", profile);
-  console.log("MoreOptions - Loading:", isLoading);
-  console.log("MoreOptions - Error:", error);
-  console.log("MoreOptions - Data Loaded:", isDataLoaded);
-  console.log("MoreOptions - Background Loading:", isBackgroundLoading);
-  console.log(
-    "MoreOptions - Email being displayed:",
-    profile?.email || "user@example.com"
-  );
 
 
 

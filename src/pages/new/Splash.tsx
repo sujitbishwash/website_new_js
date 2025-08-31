@@ -223,7 +223,6 @@ const ProgressBar: React.FC<{ duration: number }> = ({ duration }) => (
 export default function Splash() {
   const [currentFeatureIndex, setCurrentFeatureIndex] = useState(0);
 
-  const [isFinalCtaVisible, setIsFinalCtaVisible] = useState(false);
   const slideDuration = 3000; // 7 seconds
   const navigate = useNavigate();
 
@@ -320,13 +319,12 @@ export default function Splash() {
             AI Padhai
           </h1>
         </div>
-        {!isFinalCtaVisible && (
-          <button
-            onClick={handleGetStarted}
-            className="px-4 py-2 text-sm font-semibold rounded-lg text-foreground bg-foreground/10 backdrop-blur-sm border border-foreground/20 hover:bg-white/20 transition-all duration-300 cursor-pointer "
-          >
-            Skip Intro
-          </button>)}
+        <button
+          onClick={handleGetStarted}
+          className="px-4 py-2 text-sm font-semibold rounded-lg text-foreground bg-foreground/10 backdrop-blur-sm border border-foreground/20 hover:bg-white/20 transition-all duration-300 cursor-pointer "
+        >
+          Skip Intro
+        </button>
       </header>
       {/* Slide Content */}
       <div className="w-full h-full flex-grow relative z-10">

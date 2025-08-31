@@ -4,7 +4,7 @@ import { VideoFeedbackPayload, FeedbackChip } from '@/components/feedback/VideoF
 // Mock API functions - replace with actual API calls
 const feedbackApi = {
   // Get feedback suggestions from backend
-  getFeedbackSuggestions: async (videoId: string): Promise<FeedbackChip[]> => {
+  getFeedbackSuggestions: async (): Promise<FeedbackChip[]> => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500));
     
@@ -55,7 +55,7 @@ const feedbackApi = {
   },
 
   // Get user's previous feedback for this video
-  getPreviousFeedback: async (videoId: string): Promise<VideoFeedbackPayload | null> => {
+  getPreviousFeedback: async (): Promise<VideoFeedbackPayload | null> => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 300));
     
@@ -97,7 +97,6 @@ interface UseVideoFeedbackReturn {
 
 export const useVideoFeedback = ({
   videoId,
-  videoTitle,
   onFeedbackSubmitted,
   onFeedbackSkipped,
 }: UseVideoFeedbackOptions): UseVideoFeedbackReturn => {
@@ -115,7 +114,7 @@ export const useVideoFeedback = ({
     
     setIsLoadingSuggestions(true);
     try {
-      const suggestions = await feedbackApi.getFeedbackSuggestions(videoId);
+      const suggestions = await feedbackApi.getFeedbackSuggestions();
       setFeedbackSuggestions(suggestions);
     } catch (error) {
       console.error('Failed to load feedback suggestions:', error);

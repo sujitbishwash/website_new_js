@@ -1,7 +1,6 @@
 import {
   LibraryBig,
   ChevronsLeft,
-  Clock,
   FilePen,
   FileClock,
   Gift,
@@ -14,7 +13,7 @@ import {
 import React, { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg"; // Adjust path as needed
-import { ROUTE_NAMES, ROUTES } from "../../routes/constants";
+import { ROUTES } from "../../routes/constants";
 import MoreOptions from "./MoreOptions";
 
 // --- Type Definitions ---
@@ -72,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { path: ROUTES.REFER_AND_EARN, icon: Gift, label: "Refer and Earn" },
     { path: ROUTES.STATS, icon: GaugeCircle, label: "Stats" },
   ];
-  const SparklesIcon: React.FC<IconProps> = ({ className }) => (
+  const SparklesIcon: React.FC<IconProps> = ({ }) => (
     <svg
       width="20"
       height="20"

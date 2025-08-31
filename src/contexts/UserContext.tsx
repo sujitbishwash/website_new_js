@@ -282,7 +282,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   // Fetch stats from API (when available)
-  const fetchStats = useCallback(async (forceRefresh = false) => {
+  const fetchStats = useCallback(async () => {
 
     try {
       setIsLoading(true);
@@ -322,9 +322,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     await fetchExamGoal(true);
   }, [fetchExamGoal]);
 
-  const refreshStats = useCallback(async () => {
-    await fetchStats(true);
-  }, [fetchStats]);
 
   const refreshAll = useCallback(async () => {
     await fetchUserData(true);
@@ -401,11 +398,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   );
 
 
-
-  // Reset fetch flags (useful for testing or manual refresh)
-  const resetFetchFlags = useCallback(() => {
-    // setHasAttemptedInitialFetch(false);
-  }, []);
 
   // Utility methods
   const isProfileComplete = useCallback(() => {
@@ -490,7 +482,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     fetchStats,
     refreshProfile,
     refreshExamGoal,
-    refreshStats,
     refreshAll,
     updateProfile,
     updateExamGoal,

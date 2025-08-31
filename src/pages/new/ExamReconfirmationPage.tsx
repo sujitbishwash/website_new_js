@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { ROUTES } from "../../routes/constants";
-import { ChevronDown, CircleUser, Hexagon } from "lucide-react";
+import { ChevronDown, CircleUser } from "lucide-react";
 
 // --- Type Definitions ---
 interface ExamDetails {

@@ -336,7 +336,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   Bell,
   CircleAlert,
-  CircleCheck,
   CircleUserRound,
   GaugeCircle,
   KeyRound,
@@ -378,10 +377,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   }, [profile]);
 
   // State for new "General" settings
-  const [accentColor, setAccentColor] = useState("#3b82f6");
   const [language, setLanguage] = useState("Auto-detect");
-  const [spokenLanguage, setSpokenLanguage] = useState("Auto-detect");
-  const [voice, setVoice] = useState("Breeze");
   const [showSuggestions, setShowSuggestions] = useState(true);
   // State for new notification settings
   const [responseNotifications, setResponseNotifications] = useState("Push");

@@ -387,7 +387,7 @@ export default function ExamsPage() {
     // refreshExamGoal,
     syncExamGoalFromAuthContext,
     
-    isDataLoaded,
+    
     // resetFetchFlags,
   } = useUser();
   const { refreshUserData } = useAuth();
