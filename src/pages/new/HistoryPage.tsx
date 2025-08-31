@@ -52,26 +52,40 @@ const CourseCard: React.FC<CourseCardProps> = ({
 
   return (
     <div
-      className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl hover:border-accent border border-border hover:-translate-y-1 cursor-pointer"
+      className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => {
         handleSuggestedVideoClick(youtubeYRL);
       }}
     >
-      <div
-        className="h-[150px] bg-cover bg-center border-b border-divider bg-background "
-        style={{ backgroundImage: `url(${imageUrl})` }}
-      ></div>
-      <div className="p-5 bg-card">
-        <h3 className="mt-0 text-[1.2rem] text-foreground">{title}</h3>
-        <p className="text-sm text-muted-foreground leading-[1.5]">
-          {description}
-        </p>
+      <img
+        src={imageUrl}
+        alt={`Thumbnail for ${title}`}
+        className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
+        onError={(e) => {
+          const target = e.target as HTMLImageElement;
+          target.onerror = null;
+          target.src = "https://placehold.co/600x400/333/FFF?text=Error";
+        }}
+      />
+      <div className="p-4">
+        <h3 className="font-bold text-foreground truncate text-lg">{title}</h3>
+        <p className="text-sm text-muted-foreground mb-4">{hasMetadata?metadata.subject:"Subject"}</p>
+        <div className="w-full bg-muted rounded-full h-2 mb-2">
+          <div
+            className="bg-primary h-2 rounded-full"
+            style={{ width: `75%` }}
+          ></div>
+        </div>
+        <div className="flex justify-between items-center text-xs text-muted-foreground">
+          <span>{75}% Complete</span>
+          <span>Today</span>
+        </div>
       </div>
 
       {/* Metadata Overlay */}
-      {hasMetadata && (
+      {/**hasMetadata && (
         <div
           className={`absolute inset-0 bg-[rgba(22,27,34,0.95)] backdrop-blur-sm text-[#f0f6fc] flex flex-col items-center justify-center text-center opacity-0 invisible transition-opacity duration-300 ease-in-out p-5 ${
             isHovered ? "opacity-100 visible" : ""
@@ -90,7 +104,7 @@ const CourseCard: React.FC<CourseCardProps> = ({
             {metadata.year}
           </div>
         </div>
-      )}
+      )*/}
     </div>
   );
 };
@@ -141,7 +155,9 @@ const HistoryPage = () => {
 
   return (
     <div className="min-h-screen p-10 font-sans text-foreground bg-background mt-10 sm:mt-4">
-      <h1 className="text-center sm:text-left text-3xl mb-10">Your Learning History</h1>
+      <h1 className="text-center sm:text-left text-3xl mb-10">
+        Your Learning History
+      </h1>
       <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-8 mx-auto">
         {learningHistoryData.map((item) => (
           <CourseCard

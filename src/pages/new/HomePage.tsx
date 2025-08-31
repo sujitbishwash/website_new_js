@@ -660,9 +660,9 @@ export default function HomePage() {
                   <p className="text-sm text-muted-foreground mb-4">
                     {item.subject}
                   </p>
-                  <div className="w-full bg-muted rounded-full h-2.5 mb-2">
+                  <div className="w-full bg-muted rounded-full h-2 mb-2">
                     <div
-                      className="bg-primary h-2.5 rounded-full"
+                      className="bg-primary h-2 rounded-full"
                       style={{ width: `${item.progress}%` }}
                     ></div>
                   </div>
