@@ -415,10 +415,9 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
           </button>
         </div>
 
-        <form
-          onSubmit={handleSubmit}
-          
-        ><div className="p-6 space-y-6 overflow-y-auto flex-1">
+        <div
+          className="p-6 space-y-6 overflow-y-auto flex-1"
+        >
           {/* Already Submitted Warning */}
           {!canSubmitFeedback && existingFeedback && (
             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -666,7 +665,8 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
               </ul>
             </div>
           )}
-          </div>
+        </div>
+        
           {/* Action Buttons */}
           <div className="flex-shrink-0 flex justify-end items-center gap-4 p-5 border-t border-border bg-card rounded-b-2xl">
             <button
@@ -678,6 +678,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
             </button>
             <button
               type="submit"
+              onClick={handleSubmit}
               disabled={
                 rating === null ||
                 submissionStatus === "submitting" ||
@@ -697,7 +698,6 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
               )}
             </button>
           </div>
-        </form>
       </div>
     </div>
   );
