@@ -26,7 +26,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
+import { chatApi, videoApi, VideoDetail, feedbackApi } from "../../lib/api-client";
 import YouTube from "react-youtube";
 import { Progress } from "../../components/ui/progress";
   
@@ -718,6 +718,56 @@ import { Progress } from "../../components/ui/progress";
         }
       }
     }, [currentVideoId, resetFeedback]);
+
+    // Fetch feedback states for all components when video loads
+    useEffect(() => {
+      if (currentVideoId && !isFeedbackLoading) {
+        const fetchFeedbackStates = async () => {
+          try {
+            setIsFeedbackLoading(true);
+            setFeedbackError(null);
+            
+            console.log('🔄 Fetching feedback states for components:', [ComponentName.Chat, ComponentName.Quiz, ComponentName.Summary, ComponentName.Flashcard]);
+            
+            const feedbackStatus = await feedbackApi.canSubmitFeedbackMulti(
+              currentVideoId,
+              [ComponentName.Chat, ComponentName.Quiz, ComponentName.Summary, ComponentName.Flashcard],
+              window.location.href
+            );
+            
+            console.log('✅ Received feedback status:', feedbackStatus);
+            
+            // Convert the multi-component response to our local state format
+            const newFeedbackStates: {[key: string]: any} = {};
+            feedbackStatus.components.forEach(component => {
+              newFeedbackStates[component.component] = {
+                canSubmitFeedback: component.can_feedback,
+                existingFeedback: component.existing_feedback,
+                reason: component.reason
+              };
+            });
+            
+            console.log('🔄 Setting feedback states:', newFeedbackStates);
+            setFeedbackStates(newFeedbackStates);
+          } catch (error) {
+            console.error('❌ Failed to fetch feedback states:', error);
+            setFeedbackError(error instanceof Error ? error.message : 'Failed to fetch feedback states');
+            
+            // Set default states on error
+            setFeedbackStates({
+              [ComponentName.Chat]: { canSubmitFeedback: true, existingFeedback: null, reason: "" },
+              [ComponentName.Quiz]: { canSubmitFeedback: true, existingFeedback: null, reason: "" },
+              [ComponentName.Summary]: { canSubmitFeedback: true, existingFeedback: null, reason: "" },
+              [ComponentName.Flashcard]: { canSubmitFeedback: true, existingFeedback: null, reason: "" }
+            });
+          } finally {
+            setIsFeedbackLoading(false);
+          }
+        };
+        
+        fetchFeedbackStates();
+      }
+    }, [currentVideoId]);
   
     // Cleanup progress tracking on unmount
     useEffect(() => {
