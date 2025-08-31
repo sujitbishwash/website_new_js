@@ -28,7 +28,6 @@ import React from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail, feedbackApi } from "../../lib/api-client";
 import YouTube from "react-youtube";
-import { Progress } from "../../components/ui/progress";
   
   declare global {
     interface Window {
@@ -647,7 +646,7 @@ import { Progress } from "../../components/ui/progress";
             setIsVideoPlaying(playerState === 1); // 1 = playing
             
             // Auto-show feedback when video reaches 90%
-            if (progress >= 90 && !hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current) {
+            if (progress >= 90 && !hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current && videoCanSubmitFeedback) {
               openFeedbackModal();
               hasShownFeedbackRef.current = true;
             }
