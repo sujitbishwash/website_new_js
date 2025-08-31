@@ -337,7 +337,7 @@ const ReferralStyles = () => (
 );
 
 // --- FAQ Item Component ---
-const FaqItem = ({ q, a }) => {
+const FaqItem = ({ q, a }: { q: string; a: string }) => {
   const [isOpen, setIsOpen] = useState(false);
   return (
     <div className="faq-item">

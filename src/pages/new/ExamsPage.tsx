@@ -395,7 +395,6 @@ export default function ExamsPage() {
   console.log("👤 ExamsPage: User context data:", { profile, examGoal });
 
   const [examData, setExamData] = useState<ExamData>(enhancedExamData);
-  const [apiExamData, setApiExamData] = useState<ExamType[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [selectedCategoryKey, setSelectedCategoryKey] = useState<string>(
@@ -429,7 +428,6 @@ export default function ExamsPage() {
 
         if (response.data.success && response.data.data) {
           console.log("📚 ExamsPage: API Exam Data:", response.data.data);
-          setApiExamData(response.data.data);
 
           // Merge API data with enhanced data to create comprehensive exam information
           const mergedData = { ...enhancedExamData };
@@ -1065,7 +1063,7 @@ export default function ExamsPage() {
             >
               Search Results ({filteredExams.length})
             </h3>
-            {filteredExams.map((exam, index) => (
+            {filteredExams.map((exam) => (
               <div
                 key={`${exam.categoryKey}-${exam.examKey}`}
                 style={{

@@ -322,6 +322,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     await fetchExamGoal(true);
   }, [fetchExamGoal]);
 
+  const refreshStats = useCallback(async () => {
+    await fetchStats();
+  }, [fetchStats]);
 
   const refreshAll = useCallback(async () => {
     await fetchUserData(true);
@@ -482,6 +485,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     fetchStats,
     refreshProfile,
     refreshExamGoal,
+    refreshStats,
     refreshAll,
     updateProfile,
     updateExamGoal,
