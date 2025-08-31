@@ -227,17 +227,8 @@ const Header: React.FC<HeaderProps> = ({
           )}
         </h1>
         
-        {/* Quick Stats */}
-        {/*
-        {!isLoading && videoDuration > 0 && (
-          <div className="flex items-center gap-4 mt-2 text-xs text-gray-400">
-            <span>Progress: {Math.round(playPercentage)}%</span>
-            <span>Time: {formatTime(currentTime)} / {formatTime(videoDuration)}</span>
-            <span>Remaining: {formatTime(Math.max(0, videoDuration - currentTime))}</span>
-          </div>
-        )}
 
-        */}
+        
       </div>
       <div className="flex items-center gap-2 self-start sm:self-center">
         <button
@@ -298,31 +289,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ src, iframeId }) => {
             <p className="text-sm">Loading video...</p>
           </div>
         </div>
-      )}
-      
-      {/*
-      {hasError && (
-        <div className="absolute inset-0 flex items-center justify-center bg-red-900 z-20">
-          <div className="text-white text-center p-4">
-            <p className="text-sm mb-2">Failed to load video</p>
-            <button 
-              onClick={() => {
-                setHasError(false);
-                setIsLoading(true);
-                // Force a re-render by updating the src
-                const iframe = document.getElementById("yt-player-iframe") as HTMLIFrameElement;
-                if (iframe) {
-                  iframe.src = src;
-                }
-              }}
-              className="px-3 py-1 bg-white text-red-900 rounded text-sm hover:bg-gray-100"
-            >
-              Retry
-            </button>
-          </div>
-        </div>
-      )}
-      */}
+      )}   
       
       <iframe
         ref={iframeRef}
@@ -549,6 +516,7 @@ const AITutorPanel: React.FC<{
     flashcards: (
       <Flashcards 
         // Pass feedback state for Flashcard component
+        videoId={videoId}
         canSubmitFeedback={flashcardFeedbackState?.canSubmitFeedback}
         existingFeedback={flashcardFeedbackState?.existingFeedback}
         markAsSubmitted={flashcardFeedbackState?.markAsSubmitted}
@@ -557,6 +525,7 @@ const AITutorPanel: React.FC<{
     quiz: (
       <Quiz 
         // Pass feedback state for Quiz component
+        videoId={videoId}
         canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
         existingFeedback={quizFeedbackState?.existingFeedback}
         markAsSubmitted={quizFeedbackState?.markAsSubmitted}
@@ -565,6 +534,7 @@ const AITutorPanel: React.FC<{
     summary: (
       <Summary 
         // Pass feedback state for Summary component
+        videoId={videoId}
         canSubmitFeedback={summaryFeedbackState?.canSubmitFeedback}
         existingFeedback={summaryFeedbackState?.existingFeedback}
         markAsSubmitted={summaryFeedbackState?.markAsSubmitted}
@@ -949,13 +919,7 @@ const VideoPage: React.FC = () => {
     markFeedbackAsSubmitted(ComponentName.Flashcard);
   }, [markFeedbackAsSubmitted]);
 
-  // Debug logging for feedback tracker
-  useEffect(() => {
 
-
-      console.log("�� Feedback States:", stableFeedbackStates);
-    }
-  }, [stableFeedbackStates]);
 
   // Debug logging for video feedback state
   useEffect(() => {

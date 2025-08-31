@@ -38,38 +38,6 @@ interface ChatProps {
   markAsSubmitted?: () => void;
 }
 
-// --- SVG Icons ---
-// Using inline SVGs to keep the component self-contained.
-// --- Icon Components (using inline SVG for portability) ---
-
-// commented until usage is confirmed
-/*
-const BrainIcon: React.FC = () => (
-  // Changed icon color from green to blue to match the new theme
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="text-blue-400"
-  >
-    <path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v0A2.5 2.5 0 0 1 9.5 7h-3A2.5 2.5 0 0 1 4 4.5v0A2.5 2.5 0 0 1 6.5 2h3Z" />
-    <path d="M14.5 2A2.5 2.5 0 0 1 17 4.5v0A2.5 2.5 0 0 1 14.5 7h-3a2.5 2.5 0 0 1-2.5-2.5v0A2.5 2.5 0 0 1 11.5 2h3Z" />
-    <path d="M12 12a2.5 2.5 0 0 0-2.5-2.5h-3A2.5 2.5 0 0 0 4 12v3A2.5 2.5 0 0 0 6.5 17.5h3A2.5 2.5 0 0 0 12 15v-3Z" />
-    <path d="M12 12a2.5 2.5 0 0 1 2.5-2.5h3A2.5 2.5 0 0 1 20 12v3a2.5 2.5 0 0 1-2.5 2.5h-3A2.5 2.5 0 0 1 12 15v-3Z" />
-    <path d="M12 7.5V9" />
-    <path d="M12 17.5v1.5" />
-    <path d="m14.5 9.5 1-1" />
-    <path d="m9.5 9.5-1-1" />
-  </svg>
-);
-*/
-
 // --- Components ---
 
 const ChatHeader: React.FC = () => (
@@ -332,11 +300,12 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             p: ({ children, ...props }) => (
               <p
                 {...props}
-                className="mb-5 text-foreground leading-7"
+                className="text-foreground leading-7"
                 style={{
                   fontSize: "0.95rem",
                   lineHeight: "1.8",
-                  marginBottom: "1.5rem",
+                  paddingTop: "0.5rem",
+                  paddingBottom: "0.5rem",
                 }}
               >
                 {children}
@@ -723,7 +692,7 @@ export default function Chat({
           {messages.length > 0 && (
             <>
               {/* Conversation progress indicator */}
-              <div className="px-4 py-2 mb-2">
+              <div className="px-4 py-2 mb-2 sticky top-0 bg-background z-10">
                 <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>Conversation Progress</span>
                   <span className="flex items-center gap-2">
