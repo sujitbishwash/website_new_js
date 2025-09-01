@@ -1,6 +1,8 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import React from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import { quizApi } from "@/lib/api-client";
+import { Question, AnswerOption } from "@/lib/types/learning";
 
 // --- Setup ---
 
@@ -10,61 +12,6 @@ fontLink.href =
   "https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap";
 fontLink.rel = "stylesheet";
 document.head.appendChild(fontLink);
-
-// TypeScript interfaces for our data structures
-interface AnswerOption {
-  answerText: string;
-  isCorrect: boolean;
-}
-
-interface Question {
-  questionText: string;
-  answerOptions: AnswerOption[];
-}
-
-// Centralized theme colors for a polished look
-// theme constants removed (unused)
-
-// --- Data ---
-const quizQuestions: Question[] = [
-  {
-    questionText: "What does CSS stand for?",
-    answerOptions: [
-      { answerText: "Computer Style Sheets", isCorrect: false },
-      { answerText: "Creative Style Sheets", isCorrect: false },
-      { answerText: "Cascading Style Sheets", isCorrect: true },
-      { answerText: "Colorful Style Sheets", isCorrect: false },
-    ],
-  },
-  {
-    questionText: "Which HTML tag is used to define an internal style sheet?",
-    answerOptions: [
-      { answerText: "<script>", isCorrect: false },
-      { answerText: "<style>", isCorrect: true },
-      { answerText: "<css>", isCorrect: false },
-      { answerText: "<link>", isCorrect: false },
-    ],
-  },
-  {
-    questionText:
-      'What is the correct syntax for referring to an external script called "xxx.js"?',
-    answerOptions: [
-      { answerText: '<script src="xxx.js">', isCorrect: true },
-      { answerText: '<script href="xxx.js">', isCorrect: false },
-      { answerText: '<script name="xxx.js">', isCorrect: false },
-      { answerText: '<script file="xxx.js">', isCorrect: false },
-    ],
-  },
-  {
-    questionText: "Which company developed JavaScript?",
-    answerOptions: [
-      { answerText: "Microsoft", isCorrect: false },
-      { answerText: "Google", isCorrect: false },
-      { answerText: "Sun Microsystems", isCorrect: false },
-      { answerText: "Netscape", isCorrect: true },
-    ],
-  },
-];
 
 // --- Reusable Components ---
 
@@ -185,7 +132,7 @@ const QuestionView: React.FC<{
           </div>
         </div>
         <div className="w-full flex flex-col gap-3">
-          {question.answerOptions.map((answerOption, index) => (
+          {question.answerOptions.map((answerOption: AnswerOption, index: number) => (
             <button
               key={index}
               className={getButtonClasses(answerOption, index)}
@@ -214,6 +161,13 @@ interface QuizProps {
   canSubmitFeedback?: boolean | undefined;
   existingFeedback?: any;
   markAsSubmitted?: () => void;
+  // Add test configuration props
+  testConfig?: {
+    subject: string;
+    topics: string[];
+    level: "easy" | "medium" | "hard";
+    language: "en" | "hn";
+  };
 }
 
 const Quiz: React.FC<QuizProps> = ({
@@ -221,14 +175,23 @@ const Quiz: React.FC<QuizProps> = ({
   canSubmitFeedback,
   existingFeedback,
   markAsSubmitted,
+  testConfig,
 }) => {
   // Debug feedback props
   console.log("🔍 Quiz Component Props:", {
     videoId,
     canSubmitFeedback,
     existingFeedback: !!existingFeedback,
-    hasMarkAsSubmitted: !!markAsSubmitted
+    hasMarkAsSubmitted: !!markAsSubmitted,
+    testConfig
   });
+
+  // State for quiz data
+  const [quizQuestions, setQuizQuestions] = React.useState<Question[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+  
+  // Quiz state
   const [currentQuestion, setCurrentQuestion] = React.useState<number>(0);
   const [showScore, setShowScore] = React.useState<boolean>(false);
   const [score, setScore] = React.useState<number>(0);
@@ -236,6 +199,44 @@ const Quiz: React.FC<QuizProps> = ({
   const [selectedAnswerIndex, setSelectedAnswerIndex] = React.useState<
     number | null
   >(null);
+
+  // Fetch quiz data when component mounts or testConfig changes
+  React.useEffect(() => {
+    const fetchQuizData = async () => {
+      if (!testConfig) {
+        setError("No test configuration provided");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        console.log("📚 Fetching quiz data with config:", testConfig);
+        const response = await quizApi.getQuiz(testConfig);
+        
+        // Transform API response to match our Question interface
+        const transformedQuestions: Question[] = response.questions.map((apiQuestion: any) => ({
+          questionText: apiQuestion.content,
+          answerOptions: apiQuestion.option.map((option: string, index: number) => ({
+            answerText: option,
+            isCorrect: apiQuestion.answer === option
+          }))
+        }));
+
+        console.log("📚 Transformed questions:", transformedQuestions);
+        setQuizQuestions(transformedQuestions);
+      } catch (err: any) {
+        console.error("❌ Error fetching quiz data:", err);
+        setError(err.message || "Failed to fetch quiz questions");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchQuizData();
+  }, [testConfig]);
 
   const handleNextQuestion = () => {
     const nextQuestion = currentQuestion + 1;
@@ -330,7 +331,41 @@ const Quiz: React.FC<QuizProps> = ({
     setIsFeedbackModalOpen(false);
   };
 
-  // inline styles removed (unused)
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="bg-background flex flex-col items-center justify-center p-4 text-neutral-100 min-h-[400px]">
+        <div className="text-xl font-semibold text-neutral-400 mb-4">Loading Quiz...</div>
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="bg-background flex flex-col items-center justify-center p-4 text-neutral-100 min-h-[400px]">
+        <div className="text-xl font-semibold text-red-400 mb-4">Error Loading Quiz</div>
+        <div className="text-neutral-400 text-center mb-4">{error}</div>
+        <button
+          onClick={() => window.location.reload()}
+          className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-500"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  // Show no questions state
+  if (quizQuestions.length === 0) {
+    return (
+      <div className="bg-background flex flex-col items-center justify-center p-4 text-neutral-100 min-h-[400px]">
+        <div className="text-xl font-semibold text-neutral-400 mb-4">No Questions Available</div>
+        <div className="text-neutral-400 text-center">No quiz questions were found for the selected configuration.</div>
+      </div>
+    );
+  }
 
   return (
     <div

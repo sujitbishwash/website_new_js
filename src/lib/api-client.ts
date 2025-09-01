@@ -1,9 +1,10 @@
 import axios from "axios";
+import { QuizRequest, QuizResponse } from "./types/learning";
 
 // API configuration
 const API_CONFIG = {
-  baseURL: 'https://api.krishak.in',
-  // baseURL: 'http://localhost:8000',
+  // baseURL: 'https://api.krishak.in',
+  baseURL: 'http://localhost:8000',
   headers: {
     "Content-Type": "application/json",
   },
@@ -480,7 +481,16 @@ interface TestData {
   language: TestLanguage;
 }
 export const quizApi = {
-  startTest: async (testConfig: TestData): Promise<QuestionResponse> => {
+  startTest: async (testConfig: QuizRequest): Promise<QuizResponse> => {
+    const response = await apiRequest<QuizResponse>(
+      "POST",
+      `/test-series/quiz`,
+      testConfig
+    );
+    return response.data;
+  },
+
+  getQuiz: async (testConfig: TestData): Promise<QuestionResponse> => {
     const response = await apiRequest<QuestionResponse>(
       "POST",
       `/test-series/start-test-session`,
@@ -579,6 +589,11 @@ export interface FeedbackListResponse {
 // Feedback chips suggestions response
 export interface FeedbackChipsResponse {
   [rating: string]: string[]; // Rating as key (1-5), array of suggestion strings as value
+}
+
+export const referralApi = {
+  
+
 }
 
 export const feedbackApi = {
