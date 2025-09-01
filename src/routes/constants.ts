@@ -11,6 +11,7 @@ export const ROUTES = {
     EXAM_RECONFIRM: "/exam-reconfirm",
     TEST_MAIN_PAGE: "/test-main-page",
     ANALYSIS: "/analysis",
+    ANALYSIS2: "/analysis2",
 
     // Learning routes
     HISTORY: "/history",
@@ -56,6 +57,7 @@ export const ROUTE_NAMES = {
     [ROUTES.EXAM_RECONFIRM]: "Exam Reconfirmation",
     [ROUTES.TEST_MAIN_PAGE]: "Test Main Page",
     [ROUTES.ANALYSIS]: "Detailed Analysis",
+    [ROUTES.ANALYSIS2]: "Detailed Analysis2",
     [ROUTES.HISTORY]: "History",
     [ROUTES.BOOKS]: "Books",
     [ROUTES.VIDEO_LEARNING]: "Video Learning",
