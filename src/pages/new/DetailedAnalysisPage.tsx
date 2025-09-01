@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useUser } from "../../contexts/UserContext";
+import VideoFeedbackModal from "../../components/feedback/VideoFeedbackModal";
 
 // --- Type Definitions ---
 interface PerformanceMetricProps {
@@ -166,10 +167,57 @@ export default function DetailedAnalysisTestPage() {
     "general-intelligence"
   );
   const { profile, examGoal } = useUser();
+  
+  // Feedback modal state
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
+  const [canSubmitFeedback, setCanSubmitFeedback] = useState(true);
+  const [existingFeedback] = useState<any>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : null);
   };
+
+  // Feedback handlers
+  const markAsSubmitted = useCallback(() => {
+    setCanSubmitFeedback(false);
+  }, []);
+
+  const handleCloseFeedback = useCallback(() => {
+    setIsFeedbackModalOpen(false);
+  }, []);
+
+  const handleFeedbackSubmit = useCallback(async (payload: any) => {
+    console.log("Detailed Analysis feedback submitted:", payload);
+    markAsSubmitted();
+    handleCloseFeedback();
+    
+    if (pendingNavigation) {
+      console.log("🚀 Executing pending navigation after feedback submission");
+      pendingNavigation();
+      setPendingNavigation(null);
+    }
+  }, [markAsSubmitted, handleCloseFeedback, pendingNavigation]);
+
+  const handleFeedbackSkip = useCallback(() => {
+    console.log("Detailed Analysis feedback skipped");
+    handleCloseFeedback();
+    
+    if (pendingNavigation) {
+      console.log("🚀 Executing pending navigation after feedback skip");
+      pendingNavigation();
+      setPendingNavigation(null);
+    }
+  }, [handleCloseFeedback, pendingNavigation]);
+
+  // Auto-open feedback modal after page loads
+  useEffect(() => {
+    console.log("🚀 Attempting to auto-open feedback modal:", canSubmitFeedback);
+    if (canSubmitFeedback) {
+      console.log("✅ Opening feedback modal automatically");
+      setIsFeedbackModalOpen(true);
+    }
+  }, [canSubmitFeedback]);
 
   const reasoningTopicData = [
     {
@@ -275,14 +323,29 @@ export default function DetailedAnalysisTestPage() {
     },
   ];
 
+  // Debug logging for feedback modal state
+  console.log("🔍 Detailed Analysis Feedback Modal State:", {
+    isFeedbackModalOpen,
+    canSubmitFeedback,
+    existingFeedback: !!existingFeedback
+  });
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header with User Info */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Detailed Analysis Report
-          </h1>
+          <div className="flex justify-between items-center mb-2">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Detailed Analysis Report
+            </h1>
+            <button 
+              onClick={() => setIsFeedbackModalOpen(true)}
+              className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Test Feedback
+            </button>
+          </div>
           {profile && (
             <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
@@ -570,6 +633,22 @@ export default function DetailedAnalysisTestPage() {
           </main>
         </div>
       </div>
+
+      {/* Feedback Modal */}
+      <VideoFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={handleCloseFeedback}
+        videoId="detailed-analysis-123"
+        videoTitle="Detailed Analysis Report"
+        playPercentage={100}
+        onSubmit={handleFeedbackSubmit}
+        onSkip={handleFeedbackSkip}
+        onDismiss={handleCloseFeedback}
+        canSubmitFeedback={canSubmitFeedback}
+        existingFeedback={existingFeedback}
+        markAsSubmitted={markAsSubmitted}
+        componentName="Test"
+      />
     </div>
   );
 }

@@ -480,8 +480,42 @@ interface TestData {
   level: TestLevel;
   language: TestLanguage;
 }
+
+// Test Analysis API Response
+export interface TestAnalysisResponse {
+  session_id: string;
+  overall_score: number;
+  total_questions: number;
+  correct_answers: number;
+  section_scores: {
+    [key: string]: {
+      score: number;
+      maxScore: number;
+      color: string;
+    };
+  };
+  leaderboard: Array<{
+    rank: number;
+    name: string;
+    score: number;
+  }>;
+  current_user: {
+    rank: number;
+    name: string;
+    score: number;
+    message: string;
+  };
+  overall_cutoff: number;
+  difficulty_data: {
+    [key: string]: {
+      maxTime: number;
+      user: Array<{ time: number; difficulty: number }>;
+      topper: Array<{ time: number; difficulty: number }>;
+    };
+  };
+}
 export const quizApi = {
-  startTest: async (testConfig: QuizRequest): Promise<QuizResponse> => {
+  getQuiz: async (testConfig: QuizRequest): Promise<QuizResponse> => {
     const response = await apiRequest<QuizResponse>(
       "POST",
       `/test-series/quiz`,
@@ -490,7 +524,7 @@ export const quizApi = {
     return response.data;
   },
 
-  getQuiz: async (testConfig: TestData): Promise<QuestionResponse> => {
+  startTest: async (testConfig: TestData): Promise<QuestionResponse> => {
     const response = await apiRequest<QuestionResponse>(
       "POST",
       `/test-series/start-test-session`,
@@ -503,6 +537,14 @@ export const quizApi = {
     const response = await apiRequest<QuestionResponse>(
       "GET",
       `/test-series/question/${sessionId}`
+    );
+    return response.data;
+  },
+
+  getTestAnalysis: async (sessionId: number): Promise<TestAnalysisResponse> => {
+    const response = await apiRequest<TestAnalysisResponse>(
+      "GET",
+      `/test-series/analysis/${sessionId}`
     );
     return response.data;
   },

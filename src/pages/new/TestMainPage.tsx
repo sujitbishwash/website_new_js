@@ -7,7 +7,6 @@ import React, { useEffect, useRef, useState } from "react";
 
 import { useNavigate, useLocation } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
-import TestResultDialog from "../../components/TestResultDialog";
 import { useUser } from "../../contexts/UserContext";
 import { ROUTES } from "../../routes/constants";
 import {
@@ -481,7 +480,7 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test submitted successfully:", apiResponse);
-        navigate(ROUTES.ANALYSIS);
+        navigate(ROUTES.ANALYSIS2, { state: { sessionId: apiResponse.session_id } });
         //setShowTestResultDialog(true);
       }
     } catch (error) {
@@ -1156,33 +1155,6 @@ const TestMainPage = () => {
         />
       )}
 
-      {/* Test Result Dialog */}
-      {showTestResultDialog && (
-        <TestResultDialog
-          results={{
-            attemptedQuestions: questions.filter((q) => q.answer !== null)
-              .length,
-            correctQuestions: questions.filter((q) => q.answer !== null).length, // This should be calculated based on correct answers
-            totalQuestions: questions.length,
-            positiveMarks: 0, // This should be calculated based on correct answers
-            negativeMarks: 0, // This should be calculated based on incorrect answers
-            totalMarks: 0, // This should be calculated
-            timeTaken: `${Math.floor((600 - timeLeft) / 60)}:${(
-              (600 - timeLeft) %
-              60
-            )
-              .toString()
-              .padStart(2, "0")}`,
-            rank: 1, // This should come from API
-            totalStudents: 100, // This should come from API
-            sessionId: sessionId || undefined, // Add session ID for feedback tracking
-          }}
-          onClose={handleCloseTestResultDialog}
-          navigate={() => {
-            navigate(ROUTES.ANALYSIS);
-          }}
-        />
-      )}
       {showInstructionsModal && (
         <InstructionsModal onClose={() => setShowInstructionsModal(false)} />
       )}

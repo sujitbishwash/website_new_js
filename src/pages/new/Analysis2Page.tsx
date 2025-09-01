@@ -1,8 +1,132 @@
-import React, { useState } from "react";
+import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import React, { useCallback, useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { quizApi, TestAnalysisResponse } from "@/lib/api-client";
+
+// Add proper types for the component props and data
+interface IconProps {
+  path: string;
+  className?: string;
+  solid?: boolean;
+}
+
+interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+interface ScoreData {
+  score: number;
+  maxScore: number;
+  color: string;
+}
+
+interface SectionScores {
+  [key: string]: ScoreData;
+}
+
+interface QuestionDataItem {
+  label: string;
+  value: number;
+  color: string;
+}
+
+interface DifficultyDataPoint {
+  time: number;
+  difficulty: number;
+}
+
+interface DifficultyData {
+  maxTime: number;
+  user: DifficultyDataPoint[];
+  topper: DifficultyDataPoint[];
+}
+
+interface DifficultyDataMap {
+  [key: string]: DifficultyData;
+}
+
+interface TopicData {
+  name: string;
+  accuracy: number;
+  time: string;
+  totalQs: number;
+  attempted: number;
+  correct: number;
+  score: number;
+}
+
+interface SummaryDataItem {
+  score: number;
+  maxScore: number;
+  rank: number;
+  maxRank: number;
+  percentile: number;
+  accuracy: number;
+  time: string;
+  maxTime: string;
+  negativeMarks: number;
+  topics: TopicData[];
+}
+
+interface SummaryData {
+  [key: string]: SummaryDataItem;
+}
+
+interface ComparisonDataItem {
+  you: { [key: string]: number };
+  average: { [key: string]: number };
+  topper: { [key: string]: number };
+}
+
+interface ComparisonData {
+  [key: string]: ComparisonDataItem;
+}
+
+interface TimeDataItem {
+  status: string;
+  userTime: number;
+  topperTime: number;
+  questions: number;
+  color: string;
+}
+
+interface TestResults {
+  sessionId: string;
+  score: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  sectionScores: {
+    [key: string]: {
+      score: number;
+      maxScore: number;
+      color: string;
+    };
+  };
+  leaderboard: Array<{
+    rank: number;
+    name: string;
+    score: number;
+  }>;
+  currentUser: {
+    rank: number;
+    name: string;
+    score: number;
+    message: string;
+  };
+  overallCutoff: number;
+  difficultyData: {
+    [key: string]: {
+      maxTime: number;
+      user: Array<{ time: number; difficulty: number }>;
+      topper: Array<{ time: number; difficulty: number }>;
+    };
+  };
+}
 
 // --- HELPER COMPONENTS & ICONS ---
 
-const Icon = ({ path, className = "w-6 h-6", solid = false }) => (
+const Icon: React.FC<IconProps> = ({ path, className = "w-6 h-6", solid = false }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 24 24"
@@ -45,7 +169,7 @@ const ICONS = {
   x: "M18 6 6 18m0-12 12 12",
 };
 
-const Card = ({ children, className = "" }) => (
+const Card: React.FC<CardProps> = ({ children, className = "" }) => (
   <div
     className={`bg-[#2c2c2e] rounded-2xl p-6 border border-[#38383A] ${className}`}
   >
@@ -152,7 +276,7 @@ const difficultyData = {
   },
 };
 // --- CORE ANALYSIS COMPONENTS ---
-const ScoreDonutChart = ({ data, size = 200 }) => {
+const ScoreDonutChart: React.FC<{ data: SectionScores; size?: number }> = ({ data, size = 200 }) => {
   const scoresArray = Object.entries(data).map(([label, { score, color }]) => {
     const hexMatch = color.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
     return {
@@ -1244,7 +1368,7 @@ const RateTest = () => {
 
 // --- SHARED UTILITY COMPONENTS ---
 
-const SummaryItem = ({ icon, value, label, total }) => (
+const SummaryItem: React.FC<{ icon: React.ReactNode; value: string | number; label: string; total?: string | number }> = ({ icon, value, label, total }) => (
   <div className="flex flex-col items-center justify-center p-2">
     {/**<div className="bg-[#3a3a3c] rounded-full p-3 mb-2 h-">{icon}</div>*/}
     <p className="text-lg font-bold text-white">
@@ -1361,7 +1485,190 @@ const DonutChart2 = ({ data, size = 200 }) => {
 // --- MAIN APP COMPONENT ---
 
 export default function TestAnalysis2() {
+  const navigate = useNavigate();
   const [isShareOpen, setShareOpen] = useState(false);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(true); // Start with modal open
+  const [canSubmitFeedback, setCanSubmitFeedback] = useState(true);
+  const [existingFeedback] = useState<any>(null);
+  const [pendingNavigation, setPendingNavigation] = useState<(() => void) | null>(null);
+  
+  // API data state
+  const [results, setResults] = useState<TestResults | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const location = useLocation();
+  const sessionId = location.state?.sessionId;
+
+  // Fetch test analysis data
+  useEffect(() => {
+    const fetchTestAnalysis = async () => {
+      if (!sessionId) {
+        setError("No session ID provided");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        setIsLoading(true);
+        setError(null);
+        
+        console.log("📊 Fetching test analysis for session:", sessionId);
+        const response = await quizApi.getTestAnalysis(sessionId);
+        
+        // Transform API response to match our interface
+        const transformedResults: TestResults = {
+          sessionId: response.session_id,
+          score: response.overall_score,
+          totalQuestions: response.total_questions,
+          correctAnswers: response.correct_answers,
+          sectionScores: response.section_scores,
+          leaderboard: response.leaderboard,
+          currentUser: response.current_user,
+          overallCutoff: response.overall_cutoff,
+          difficultyData: response.difficulty_data
+        };
+
+        console.log("📊 Transformed test analysis:", transformedResults);
+        setResults(transformedResults);
+      } catch (err: any) {
+        console.error("❌ Error fetching test analysis:", err);
+        setError(err.message || "Failed to fetch test analysis");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchTestAnalysis();
+  }, [sessionId]);
+
+
+  // Simple feedback state management
+  const markAsSubmitted = useCallback(() => {
+    setCanSubmitFeedback(false);
+  }, []);
+
+  const handleCloseFeedback = useCallback(() => {
+    setIsFeedbackModalOpen(false);
+  }, []);
+
+  const handleFeedbackSubmit = useCallback(async (payload: any) => {
+    console.log("Test feedback submitted:", payload);
+    markAsSubmitted();
+    handleCloseFeedback();
+    
+    // Always execute pending navigation after feedback submission
+    if (pendingNavigation) {
+      console.log("🚀 Executing pending navigation after feedback submission");
+      pendingNavigation();
+      setPendingNavigation(null);
+    } else {
+      console.log("🚀 No pending navigation, closing dialog");
+      handleCloseFeedback();
+    }
+  }, [markAsSubmitted, handleCloseFeedback, pendingNavigation]);
+
+  const handleFeedbackSkip = useCallback(() => {
+    console.log("Test feedback skipped");
+    handleCloseFeedback();
+    
+    // Always execute pending navigation after feedback skip
+    if (pendingNavigation) {
+      console.log("🚀 Executing pending navigation after feedback skip");
+      pendingNavigation();
+      setPendingNavigation(null);
+    } else {
+      console.log("🚀 No pending navigation, closing dialog");
+      handleCloseFeedback();
+    }
+  }, [handleCloseFeedback, pendingNavigation]);
+
+  // Auto-open feedback modal after test completion
+  const shouldAutoOpenFeedback = canSubmitFeedback;
+
+  // Open feedback immediately when results are shown if allowed
+  useEffect(() => {
+    console.log("🚀 Attempting to auto-open feedback modal:", shouldAutoOpenFeedback);
+    if (shouldAutoOpenFeedback) {
+      console.log("✅ Opening feedback modal automatically");
+      // Add a small delay to ensure component is fully mounted
+      setTimeout(() => {
+        setIsFeedbackModalOpen(true);
+      }, 100);
+    }
+  }, [shouldAutoOpenFeedback]);
+
+  // Also try to open modal on component mount
+  useEffect(() => {
+    console.log("🚀 Component mounted, opening feedback modal");
+    setIsFeedbackModalOpen(true);
+  }, []);
+
+
+  // Intercept navigation and open feedback first
+  const handleNavigation = useCallback(() => {
+    if (canSubmitFeedback) {
+      // Always store the navigation action and open feedback
+      setPendingNavigation(() => () => navigate('/'));
+      setIsFeedbackModalOpen(true);
+    } else {
+      // No feedback needed, navigate directly
+      navigate('/');
+    }
+  }, [canSubmitFeedback, navigate]);
+
+  // Intercept close and open feedback first
+  const handleClose = useCallback(() => {
+    if (canSubmitFeedback) {
+      // Always store the close action and open feedback
+      setPendingNavigation(() => () => navigate('/'));
+      setIsFeedbackModalOpen(true);
+    } else {
+      // No feedback needed, close directly
+      navigate('/');
+    }
+  }, [canSubmitFeedback, navigate]);
+  
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="bg-[#1d1d1f] min-h-screen font-sans text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-xl font-semibold text-neutral-400 mb-4">Loading Test Analysis...</div>
+          <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error || !results) {
+    return (
+      <div className="bg-[#1d1d1f] min-h-screen font-sans text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-xl font-semibold text-red-400 mb-4">Error Loading Test Analysis</div>
+          <div className="text-neutral-400 text-center mb-4">{error || "No results available"}</div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-500"
+          >
+            Retry
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  
+
+  
+  // Debug logging for feedback modal state
+  console.log("🔍 Feedback Modal State:", {
+    isFeedbackModalOpen,
+    canSubmitFeedback,
+    existingFeedback: !!existingFeedback
+  });
+
   return (
     <div className="bg-[#1d1d1f] min-h-screen font-sans text-white">
       <div className="container mx-auto p-4 md:p-8">
@@ -1377,6 +1684,12 @@ export default function TestAnalysis2() {
           <div className="flex items-center space-x-3">
             <button className="bg-gradient-to-r from-[#007AFF] to-[#0A84FF] text-white font-semibold py-2.5 px-6 rounded-lg hover:opacity-90 transition">
               View Solutions
+            </button>
+            <button 
+              onClick={() => setIsFeedbackModalOpen(true)}
+              className="bg-[#3a3a3c] text-white font-semibold py-2.5 px-6 rounded-lg hover:bg-[#4a4a4c] transition"
+            >
+              Test Feedback
             </button>
             <button className="bg-[#3a3a3c] text-white font-semibold py-2.5 px-6 rounded-lg hover:bg-[#4a4a4c] transition">
               Re-Attempt
@@ -1411,11 +1724,20 @@ export default function TestAnalysis2() {
         </header>
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-white">
-            You did great, {currentUser.name.split(" ")[0]}
+            You did great, {results.currentUser.name.split(" ")[0]}
           </h2>
+          <p className="text-[#8e8e93] mt-2">
+            Score: {results.score} / {results.totalQuestions} | Rank: {results.currentUser.rank}
+          </p>
         </div>
         <div className="space-y-8">
-          <OverallPerformance />
+          <OverallPerformance 
+            sectionScores={results.sectionScores}
+            currentUser={results.currentUser}
+            overallScore={results.score}
+            totalQuestions={results.totalQuestions}
+            correctAnswers={results.correctAnswers}
+          />
 
           <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
@@ -1427,12 +1749,28 @@ export default function TestAnalysis2() {
             </div>
 
             <div className="space-y-8">
-              <YourAttemptStrategy />
-              <Leaderboard />
+              <YourAttemptStrategy difficultyData={results.difficultyData} />
+              <Leaderboard leaderboardData={results.leaderboard} currentUser={results.currentUser} />
             </div>
           </main>
         </div>
       </div>
+
+      {/* Feedback Modal */}
+      <VideoFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={handleCloseFeedback}
+        videoId={results.sessionId?.toString() || "unknown"}
+        videoTitle={`Test Session ${results.sessionId}`}
+        playPercentage={100} // Test is completed
+        onSubmit={handleFeedbackSubmit}
+        onSkip={handleFeedbackSkip}
+        onDismiss={handleCloseFeedback}
+        canSubmitFeedback={canSubmitFeedback}
+        existingFeedback={existingFeedback}
+        markAsSubmitted={markAsSubmitted}
+        componentName="Test"
+      />
     </div>
   );
 }
