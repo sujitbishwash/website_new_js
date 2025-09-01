@@ -1,3 +1,4 @@
+import { Check, Clock, Crown, Info, Star, Target, X } from "lucide-react";
 import React, { useState } from "react";
 
 // --- HELPER COMPONENTS & ICONS ---
@@ -53,6 +54,15 @@ const Card = ({ children, className = "" }) => (
   </div>
 );
 
+const Tooltip = ({ text, children }) => (
+  <div className="relative group flex items-center text-muted-foreground">
+    {children}
+    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-max max-w-xs bg-[#3a3a3c] text-white text-xs rounded py-1.5 px-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-10 shadow-lg">
+      {text}
+    </div>
+  </div>
+);
+
 // --- MOCK DATA ---
 const leaderboardData = [
   { rank: 1, name: "Heena Shaikh", score: 95.25 },
@@ -69,25 +79,17 @@ const leaderboardData = [
 const currentUser = {
   rank: 167,
   name: "Sagen Tiriya",
-  score: 59.75,
+  score: 75,
   message: "Keep Practicing!",
 };
-const questionData = [
-  { label: "Correct", value: 62, color: "#34C759" },
-  { label: "Incorrect", value: 9, color: "#FF3B30" },
-  { label: "Unattempted", value: 29, color: "#636366" },
-];
-const questionData2 = [
-  { label: "english", value: 21, color: "#34C759" },
-  { label: "numerical", value: 23, color: "#FF3B30" },
-  { label: "reasoning", value: 27, color: "#636366" },
-];
 const sectionScores = {
-  "English Language": { score: 21.25, maxScore: 30, color: "text-[#0A84FF]" },
+  "English Language": { score: 15.25, maxScore: 30, color: "text-[#0A84FF]" },
   "Numerical Ability": { score: 18.5, maxScore: 35, color: "text-[#FF3B30]" },
   "Reasoning": { score: 20.0, maxScore: 35, color: "text-[#FFCC00]" },
   "General Awareness": { score: 15.25, maxScore: 40, color: "text-[#34C759]" },
 };
+
+const overallCutoff = 68.5;
 
 const difficultyData = {
   "English Language": {
@@ -152,68 +154,6 @@ const difficultyData = {
   },
 };
 // --- CORE ANALYSIS COMPONENTS ---
-const ScoreDonutChart = ({ data, size = 200 }) => {
-  const scoresArray = Object.entries(data).map(([label, { score, color }]) => {
-    const hexMatch = color.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
-    return {
-      label,
-      value: score,
-      color: hexMatch ? hexMatch[0] : "#FFFFFF", // default to white if color parse fails
-    };
-  });
-
-  const total = scoresArray.reduce((sum, item) => sum + item.value, 0);
-  let cumulative = 0;
-  const strokeWidth = 22;
-  const radius = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * radius;
-
-  return (
-    <div
-      className="relative flex-shrink-0"
-      style={{ width: size, height: size }}
-    >
-      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-        <circle
-          r={radius}
-          cx={size / 2}
-          cy={size / 2}
-          fill="transparent"
-          stroke={"#3a3a3c"}
-          strokeWidth={strokeWidth}
-        />
-        {scoresArray.map((item, index) => {
-          if (item.value <= 0) return null;
-          const dashoffset =
-            circumference - (cumulative / total) * circumference;
-          const dasharray = (item.value / total) * circumference;
-          cumulative += item.value;
-          return (
-            <circle
-              key={index}
-              r={radius}
-              cx={size / 2}
-              cy={size / 2}
-              fill="transparent"
-              stroke={item.color}
-              strokeWidth={strokeWidth}
-              strokeDasharray={`${dasharray} ${circumference - dasharray}`}
-              strokeDashoffset={-dashoffset}
-              transform={`rotate(-90 ${size / 2} ${size / 2})`}
-              className="transition-all duration-500"
-            />
-          );
-        })}
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-sm text-[#8e8e93] font-medium">Total Score</span>
-        <span className="text-5xl font-bold text-white">
-          {total.toFixed(2)}
-        </span>
-      </div>
-    </div>
-  );
-};
 
 const OverallPerformance = () => (
   <Card>
@@ -221,15 +161,22 @@ const OverallPerformance = () => (
       <div className="flex items-center text-2xl font-bold mb-1 text-white ">
         <span className="font-bold text-md">Overall Performance</span>
       </div>
+      <div className="flex items-start space-x-4">
+                 <div className="text-right">
+                     <p className="text-xs text-[#8e8e93] uppercase tracking-wider">Overall Cutoff</p>
+                     <p className="text-2xl font-bold text-[#FFCC00]">{overallCutoff.toFixed(2)}</p>
+                </div>
+                <Tooltip text="A high-level summary of your scores, rank, and percentile in this test.">
+                    <Info />
+                </Tooltip>
+            </div>
+                
     </div>
     <div className="flex justify-center items-center my-6">
       <div className="flex flex-col md:flex-row items-center justify-around gap-6">
-        <div className="flex justify-center">
-          <ScoreDonutChart data={sectionScores} />
-        </div>
-        <DonutChart2 data={questionData2} />
+        <ScoreDonutChart data={sectionScores} />
         <div className="w-full">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center mb-6">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center mb-6">
             {Object.entries(sectionScores).map(([name, data]) => (
               <div key={name} className="bg-[#3a3a3c] p-4 rounded-lg">
                 <p className="text-sm text-[#8e8e93]">{name}</p>
@@ -300,6 +247,7 @@ const SectionalSummary = () => {
       time: "16:25",
       maxTime: "20:00",
       negativeMarks: 5.75,
+      cutoff: 15.0,
       topics: [
         {
           name: "Reading Comprehension",
@@ -349,6 +297,7 @@ const SectionalSummary = () => {
       time: "18:10",
       maxTime: "20:00",
       negativeMarks: 4.25,
+      cutoff: 12.5,
       topics: [
         {
           name: "Data Interpretation",
@@ -398,6 +347,7 @@ const SectionalSummary = () => {
       time: "22:00",
       maxTime: "20:00",
       negativeMarks: 3.5,
+      cutoff: 14.0,
       topics: [
         {
           name: "Puzzles",
@@ -447,6 +397,7 @@ const SectionalSummary = () => {
       time: "10:00",
       maxTime: "15:00",
       negativeMarks: 1.25,
+      cutoff: 10.5,
       topics: [
         {
           name: "Current Affairs",
@@ -503,6 +454,9 @@ const SectionalSummary = () => {
             {data.score}
           </span>
           <span className="text-[#8e8e93]">/{data.maxScore}</span>
+          <p className="text-sm text-[#FFCC00] font-medium mt-1">
+            Sectional Cutoff: {data.cutoff.toFixed(2)}
+          </p>
         </div>
         <div className="bg-[#FF3B30]/10 text-[#FF3B30] font-semibold px-3 py-1 rounded-full text-xs">
           -{data.negativeMarks} Marks
@@ -627,11 +581,11 @@ const PerformanceDeepDive = () => (
 const ComparisonAnalysis = () => {
   const [activeTab, setActiveTab] = useState("Your Score");
   const tabs = [
-    { id: "Your Score", icon: ICONS.star },
-    { id: "Accuracy", icon: ICONS.target },
-    { id: "Correct", icon: ICONS.check },
-    { id: "Incorrect", icon: ICONS.x },
-    { id: "Time Spent", icon: ICONS.clock },
+    { id: "Your Score", icon: <Star /> },
+    { id: "Accuracy", icon: <Target /> },
+    { id: "Correct", icon: <Check /> },
+    { id: "Incorrect", icon: <X /> },
+    { id: "Time Spent", icon: <Clock /> },
   ];
   const comparisonData = {
     "Your Score": {
@@ -772,7 +726,7 @@ const ComparisonAnalysis = () => {
                 : "bg-[#3a3a3c] text-[#8e8e93] hover:bg-[#4a4a4c]"
             }`}
           >
-            <Icon path={tab.icon} className="w-4 h-4" />
+            {tab.icon}
             <span>{tab.id}</span>
           </button>
         ))}
@@ -844,7 +798,7 @@ const ComparisonAnalysis = () => {
 const DifficultyTimeGraph = ({ data, maxTime }) => {
   const width = 320;
   const height = 180;
-  const padding = 25;
+  const padding = 35;
 
   const scaleX = (time) => (time / maxTime) * (width - padding * 2) + padding;
   const scaleY = (difficulty) =>
@@ -861,7 +815,7 @@ const DifficultyTimeGraph = ({ data, maxTime }) => {
 
   const userPath = createPath(data.user);
   const topperPath = createPath(data.topper);
-  const difficultyLevels = ["Easy", "Medium", "Hard"];
+  const difficultyLevels = ["Easy", "Med", "Hard"];
   const timeLabels = Array.from({ length: 5 }, (_, i) =>
     Math.round(i * (maxTime / 4))
   );
@@ -1154,7 +1108,10 @@ const TopperStrategy = () => (
 
 const Leaderboard = () => (
   <Card>
-    <h2 className="text-xl font-bold mb-4 text-white">Leaderboard</h2>
+    <h2 className="text-xl font-bold mb-4 text-white flex items-center">
+      <Crown className="w-5 h-5 mr-2 text-primary" />
+      Leaderboard
+    </h2>
     <div className="space-y-2">
       {leaderboardData.map((user) => (
         <div
@@ -1358,6 +1315,69 @@ const DonutChart2 = ({ data, size = 200 }) => {
   );
 };
 
+const ScoreDonutChart = ({ data, size = 200 }) => {
+  const scoresArray = Object.entries(data).map(([label, { score, color }]) => {
+    const hexMatch = color.match(/#([a-fA-F0-9]{6}|[a-fA-F0-9]{3})/);
+    return {
+      label,
+      value: score,
+      color: hexMatch ? hexMatch[0] : "#FFFFFF", // default to white if color parse fails
+    };
+  });
+
+  const total = scoresArray.reduce((sum, item) => sum + item.value, 0);
+  let cumulative = 0;
+  const strokeWidth = 18;
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+
+  return (
+    <div
+      className="relative flex-shrink-0"
+      style={{ width: size, height: size }}
+    >
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        <circle
+          r={radius}
+          cx={size / 2}
+          cy={size / 2}
+          fill="transparent"
+          stroke={"#3a3a3c"}
+          strokeWidth={strokeWidth}
+        />
+        {scoresArray.map((item, index) => {
+          if (item.value <= 0) return null;
+          const dashoffset =
+            circumference - (cumulative / total) * circumference;
+          const dasharray = (item.value / total) * circumference;
+          cumulative += item.value;
+          return (
+            <circle
+              key={index}
+              r={radius}
+              cx={size / 2}
+              cy={size / 2}
+              fill="transparent"
+              stroke={item.color}
+              strokeWidth={strokeWidth}
+              strokeDasharray={`${dasharray} ${circumference - dasharray}`}
+              strokeDashoffset={-dashoffset}
+              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+              className="transition-all duration-500"
+            />
+          );
+        })}
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-sm text-[#8e8e93] font-medium">Total Score</span>
+        <span className="text-5xl font-bold text-white">
+          {total.toFixed(2)}
+        </span>
+        <span className="text-2xl text-[#8e8e93] font-medium">/100</span>
+      </div>
+    </div>
+  );
+};
 // --- MAIN APP COMPONENT ---
 
 export default function TestAnalysis2() {
