@@ -306,6 +306,16 @@ export const videoApi = {
       "GET",
       `/video/detail?url=${encodeURIComponent(url)}`
     );
+    
+    // Check if response indicates out of syllabus content
+    if (response.status === 204 || (response.data && response.data.topics && response.data.topics.length === 0)) {
+      throw {
+        message: "This content is out of syllabus",
+        status: 204,
+        isOutOfSyllabus: true
+      };
+    }
+    
     return response.data;
   },
 

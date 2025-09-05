@@ -3,6 +3,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import Flashcards from "@/components/learning/Flashcards";
   import Quiz from "@/components/learning/Quiz";
   import Summary from "@/components/learning/Summary";
+  import OutOfSyllabus from "@/components/OutOfSyllabus";
   
   import { ComponentName } from "@/lib/api-client";
   import { ROUTES } from "@/routes/constants";
@@ -465,6 +466,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     const [chaptersError, setChaptersError] = useState<string | null>(null);
     const [transcriptError, setTranscriptError] = useState<string | null>(null);
     const [isLeftColumnVisible, setIsLeftColumnVisible] = useState(true);
+    const [showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
 
     // State for learning mode
     const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
@@ -778,6 +780,12 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           setVideoDetail(details);
         } catch (err: any) {
           console.error("Failed to fetch video details:", err);
+          
+          // Check if it's an out-of-syllabus error
+          if (err.isOutOfSyllabus || err.status === 204) {
+            console.log("Content is out of syllabus, showing OutOfSyllabus modal");
+            setShowOutOfSyllabus(true);
+          }
         } finally {
           setIsLoadingVideo(false);
         }
@@ -1215,6 +1223,28 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           onClose={handleCloseShareModal}
           url={`https://www.youtube.com`}
         />
+
+        {/* OutOfSyllabus Modal */}
+        {showOutOfSyllabus && (
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
+            onClick={(e) => {
+              // Only close if clicking on the backdrop, not on the modal content
+              if (e.target === e.currentTarget) {
+                setShowOutOfSyllabus(false);
+                navigate(ROUTES.DASHBOARD);
+              }
+            }}
+          >
+            <OutOfSyllabus
+              onGoBack={() => {
+                console.log("Closing OutOfSyllabus modal");
+                setShowOutOfSyllabus(false);
+                navigate(ROUTES.DASHBOARD);
+              }}
+            />
+          </div>
+        )}
   
         {/* Debug/Test Controls - Remove in production */}
         {/**process.env.NODE_ENV === "development" && (

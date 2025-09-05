@@ -1,5 +1,5 @@
 import { videoApi } from "@/lib/api-client";
-import { buildVideoLearningRoute } from "@/routes/constants";
+import { buildVideoLearningRoute, ROUTES } from "@/routes/constants";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -44,6 +44,13 @@ const CourseCard: React.FC<CourseCardProps> = ({
 
       navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
+      console.error("Failed to fetch video details:", err);
+      
+      // Check if it's an out-of-syllabus error
+      if (err.isOutOfSyllabus || err.status === 204) {
+        console.log("Content is out of syllabus, redirecting to dashboard");
+        navigate(ROUTES.DASHBOARD);
+      }
     } finally {
     }
   };
