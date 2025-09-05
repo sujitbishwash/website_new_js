@@ -49,46 +49,72 @@ export interface ApiError {
   status: number;
 }
 
-// Generic API request function
+// Generic API request function with retry mechanism
 export const apiRequest = async <T>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   endpoint: string,
   data?: any,
   config?: { headers?: Record<string, string> }
 ): Promise<ApiResponse<T>> => {
-  try {
-    console.log(`🌐 Making ${method} request to:`, endpoint);
-    console.log(`🌐 Request data:`, data);
+  const maxRetries = 2;
+  let lastError: any;
 
-    const response = await apiClient.request({
-      method,
-      url: endpoint,
-      data,
-      headers: config?.headers,
-    });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`🌐 Making ${method} request to:`, endpoint, `(attempt ${attempt}/${maxRetries})`);
+      console.log(`🌐 Request data:`, data);
 
-    console.log(`✅ ${method} ${endpoint} response:`, response.data);
-    console.log(`✅ ${method} ${endpoint} status:`, response.status);
+      const response = await apiClient.request({
+        method,
+        url: endpoint,
+        data,
+        headers: config?.headers,
+      });
 
-    return {
-      data: response.data,
-      status: response.status,
-    };
-  } catch (error: any) {
-    console.error("❌ API Request Error:", {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message,
-      url: error.config?.url,
-      method: error.config?.method,
-    });
+      console.log(`✅ ${method} ${endpoint} response:`, response.data);
+      console.log(`✅ ${method} ${endpoint} status:`, response.status);
 
-    throw {
-      message: error.response?.data?.message || "An error occurred",
-      status: error.response?.status || 500,
-    } as ApiError;
+      return {
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error: any) {
+      lastError = error;
+      console.error(`❌ API Request Error (attempt ${attempt}/${maxRetries}):`, {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        message: error.message,
+        url: error.config?.url,
+        method: error.config?.method,
+      });
+
+      // Don't retry on authentication errors
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log("🔒 Authentication error - not retrying");
+        break;
+      }
+
+      // Don't retry on client errors (4xx except 401/403)
+      if (error.response?.status >= 400 && error.response?.status < 500) {
+        console.log("🚫 Client error - not retrying");
+        break;
+      }
+
+      // Retry on server errors (5xx) and network errors
+      if (attempt < maxRetries) {
+        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+        console.log(`⏳ Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   }
+
+  // If all retries failed, throw the last error
+  throw {
+    message: lastError.response?.data?.message || "An error occurred",
+    status: lastError.response?.status || 500,
+  } as ApiError;
 };
 
 // Auth related API calls
