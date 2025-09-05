@@ -608,6 +608,27 @@ export const quizApi = {
   },
 };
 
+// Video Progress Tracking API
+export interface VideoProgressRequest {
+  video_id: string;         // Required
+  watch_percentage: number; // Required (0-100)
+  total_duration: number;   // Required (in seconds)
+  current_time: number;     // Required (in seconds)
+  page_url: string;         // Required
+}
+
+export interface VideoProgressResponse {
+  success: boolean;
+  message: string;
+  data: {
+    video_id: string;
+    watch_percentage: number;
+    total_duration: number;
+    current_time: number;
+    last_updated: string;
+  };
+}
+
 // Feedback API
 export interface FeedbackRequest {
   component: string;        // Required
@@ -691,6 +712,28 @@ export interface FeedbackChipItem {
 export interface FeedbackChipsResponse {
   [rating: string]: FeedbackChipItem[]; // Rating as key (1-5), array of chip objects as value
 }
+
+// Video Progress Tracking API
+export const videoProgressApi = {
+  // Track video watch progress
+  trackProgress: async (data: VideoProgressRequest): Promise<VideoProgressResponse> => {
+    console.log("📊 Tracking video progress:", data);
+    const response = await apiRequest<VideoProgressResponse>('POST', '/video/progress', data);
+    return response.data;
+  },
+
+  // Get video progress for a specific video
+  getProgress: async (videoId: string): Promise<VideoProgressResponse> => {
+    const response = await apiRequest<VideoProgressResponse>('GET', `/video/progress/${videoId}`);
+    return response.data;
+  },
+
+  // Get all video progress for user
+  getAllProgress: async (): Promise<{ videos: VideoProgressResponse[] }> => {
+    const response = await apiRequest<{ videos: VideoProgressResponse[] }>('GET', '/video/progress');
+    return response.data;
+  },
+};
 
 export const feedbackApi = {
   // Check if user can submit feedback for a single component (legacy)

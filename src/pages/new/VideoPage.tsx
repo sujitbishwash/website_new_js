@@ -26,7 +26,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   } from "lucide-react";
   import { useCallback, useEffect, useRef, useState } from "react";
 import React from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams, useBlocker } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
 import YouTube from "react-youtube";
 import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
@@ -492,6 +492,24 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     // Get video ID from URL params or location state
     const currentVideoId = videoId || location.state?.videoId;
 
+    // React Router navigation blocker
+    const blocker = useBlocker(
+      ({ currentLocation, nextLocation }) =>
+        currentLocation.pathname !== nextLocation.pathname
+    );
+
+    // Handle React Router navigation blocking
+    useEffect(() => {
+      if (blocker.state === "blocked") {
+        const confirmed = window.confirm("Are you sure you want to leave this video? Your progress will be lost.");
+        if (confirmed) {
+          blocker.proceed();
+        } else {
+          blocker.reset();
+        }
+      }
+    }, [blocker]);
+
 
 
     // Simple feedback state management
@@ -666,72 +684,65 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       };
     }, []);
   
-    // Page leaving guard - only trigger when user has watched more than 90%
+    // Navigation guard - show alert on any navigation attempt
     useEffect(() => {
       const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-        if (
-          videoCanSubmitFeedbackRef.current &&
-          !videoExistingFeedback &&
-          !isFeedbackModalOpen &&
-          videoProgress >= 90 // Only prompt if user has watched 90% or more
-        ) {
-          event.preventDefault();
-          event.returnValue =
-            "You have watched most of this video. Would you like to provide feedback before leaving?";
-  
-          // Store state for next visit
-          localStorage.setItem(
-            `feedback_pending_${currentVideoId}`,
-            JSON.stringify({
-              timestamp: Date.now(),
-              watchPercentage: videoProgress, // Use actual video progress
-              videoTitle: videoDetail?.title,
-            })
-          );
-        }
+        // Always show alert when leaving the page
+        event.preventDefault();
+        event.returnValue = "Are you sure you want to leave this video? Your progress will be lost.";
+        return "Are you sure you want to leave this video? Your progress will be lost.";
       };
   
       const handlePopState = (event: PopStateEvent) => {
-        if (
-          videoCanSubmitFeedbackRef.current &&
-          !videoExistingFeedback &&
-          !isFeedbackModalOpen &&
-          videoProgress >= 90 // Only prompt if user has watched 90% or more
-        ) {
-          // Show feedback modal before navigation
-          openFeedbackModal();
-  
-          // Prevent immediate navigation
+        // Show alert for browser back/forward navigation
+        const confirmed = window.confirm("Are you sure you want to leave this video? Your progress will be lost.");
+        if (!confirmed) {
           event.preventDefault();
-  
-          // Store navigation intent
-          localStorage.setItem(
-            `navigation_pending_${currentVideoId}`,
-            JSON.stringify({
-              timestamp: Date.now(),
-              intendedPath: window.location.pathname,
-              intendedHref: window.location.href,
-            })
-          );
+          // Push the current state back to prevent navigation
+          window.history.pushState(null, '', window.location.href);
         }
+      };
+
+      // Handle React Router navigation
+      const handleRouteChange = () => {
+        const confirmed = window.confirm("Are you sure you want to leave this video? Your progress will be lost.");
+        if (!confirmed) {
+          // Prevent navigation by staying on current page
+          return false;
+        }
+        return true;
       };
   
       // Listen for navigation attempts
       window.addEventListener("beforeunload", handleBeforeUnload);
       window.addEventListener("popstate", handlePopState);
+      
+      // Store the route change handler for cleanup
+      const originalPushState = window.history.pushState;
+      const originalReplaceState = window.history.replaceState;
+      
+      // Override history methods to catch programmatic navigation
+      window.history.pushState = function(...args) {
+        if (handleRouteChange()) {
+          originalPushState.apply(this, args);
+        }
+      };
+      
+      window.history.replaceState = function(...args) {
+        if (handleRouteChange()) {
+          originalReplaceState.apply(this, args);
+        }
+      };
   
       return () => {
         window.removeEventListener("beforeunload", handleBeforeUnload);
         window.removeEventListener("popstate", handlePopState);
+        
+        // Restore original history methods
+        window.history.pushState = originalPushState;
+        window.history.replaceState = originalReplaceState;
       };
-    }, [
-      videoCanSubmitFeedbackRef.current,
-      videoExistingFeedback,
-      isFeedbackModalOpen,
-      currentVideoId,
-      videoDetail?.title,
-      openFeedbackModal,
-    ]);
+    }, []);
   
     // Handle feedback completion and navigation
     const handleFeedbackComplete = useCallback(
