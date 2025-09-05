@@ -569,7 +569,11 @@ export enum ComponentName {
   Quiz = "Quiz",
   Summary = "Summary",
   Flashcard = "Flashcard",
-  Test = "Test"
+  Test = "Test",
+  TestAnalysis = "TestAnalysis",
+  VideoRecommendation = "VideoRecommendation",
+  TestRecommentation = "TestRecommentation",
+  SnippetRecommendation = "SnippetRecommendation"
 }
 
 // Check feedback availability response
@@ -611,9 +615,15 @@ export interface FeedbackListResponse {
   size: number;
 }
 
+// Feedback chip item interface
+export interface FeedbackChipItem {
+  label: string;
+  component_type: string;
+}
+
 // Feedback chips suggestions response
 export interface FeedbackChipsResponse {
-  [rating: string]: string[]; // Rating as key (1-5), array of suggestion strings as value
+  [rating: string]: FeedbackChipItem[]; // Rating as key (1-5), array of chip objects as value
 }
 
 export const feedbackApi = {
@@ -626,9 +636,22 @@ export const feedbackApi = {
     return response.data;
   },
 
-  // Get feedback chips suggestions based on rating
-  getFeedbackChips: async (rating?: number): Promise<FeedbackChipsResponse> => {
-    const endpoint = rating ? `/feedback/chips?rating=${rating}` : '/feedback/chips';
+  // Get feedback chips suggestions based on rating and component type
+  getFeedbackChips: async (componentType?: string): Promise<FeedbackChipsResponse> => {
+    let endpoint = '/feedback/feedback-chips';
+    const params = new URLSearchParams();
+    
+    if (componentType) {
+      params.append('component_type', componentType);
+    }
+    
+    if (params.toString()) {
+      endpoint += `?${params.toString()}`;
+    }
+    
+    console.log("🎯 getFeedbackChips - Final endpoint:", endpoint);
+    console.log("🎯 getFeedbackChips - Component type:", componentType);
+    
     const response = await apiRequest<FeedbackChipsResponse>('GET', endpoint);
     return response.data;
   },
