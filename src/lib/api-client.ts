@@ -2,12 +2,15 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  baseURL: 'https://api.krishak.in',
-  // baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
   headers: {
     "Content-Type": "application/json",
   },
 };
+
+// Log the API base URL for debugging
+console.log("🌐 API Base URL:", API_CONFIG.baseURL);
+console.log("🌐 Environment:", import.meta.env.MODE);
 
 // Create axios instance with default config
 const apiClient = axios.create(API_CONFIG);
