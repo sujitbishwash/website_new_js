@@ -27,7 +27,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import { useCallback, useEffect, useRef, useState } from "react";
 import React from "react";
 import { useLocation, useNavigate, useParams, useBlocker } from "react-router-dom";
-import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
+import { chatApi, videoApi, VideoDetail, videoProgressApi } from "../../lib/api-client";
 import YouTube from "react-youtube";
 import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
   
@@ -486,6 +486,8 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     const videoDurationRef = useRef<number>(0);
     const ytPlayerRef = useRef<any>(null);
     const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const lastSavedProgressRef = useRef<number>(0);
+    const progressSaveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     
 
 
@@ -498,17 +500,89 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
         currentLocation.pathname !== nextLocation.pathname
     );
 
+    // Function to save video progress - using same logic as feedback modal
+    const saveVideoProgress = useCallback(async (force = false) => {
+      if (!currentVideoId || !ytPlayerRef.current) return;
+
+      try {
+        const currentTime = ytPlayerRef.current.getCurrentTime();
+        const duration = ytPlayerRef.current.getDuration();
+        
+        // Only save progress if video has been played (currentTime > 0) and duration is available
+        if (duration > 0 && currentTime > 0) {
+          const watchPercentage = (currentTime / duration) * 100;
+          
+          // Only save if progress has changed significantly (5% or more) or if forced
+          const progressDiff = Math.abs(watchPercentage - lastSavedProgressRef.current);
+          if (force || progressDiff >= 5) {
+            try {
+              await videoProgressApi.trackProgress({
+                video_id: currentVideoId,
+                watch_percentage: Math.round(watchPercentage * 100) / 100,
+                total_duration: Math.round(duration),
+                current_position: Math.round(currentTime),
+                page_url: window.location.href,
+              });
+
+              lastSavedProgressRef.current = watchPercentage;
+              console.log("📊 Video progress saved successfully:", {
+                videoId: currentVideoId,
+                watchPercentage: Math.round(watchPercentage * 100) / 100,
+                currentTime: Math.round(currentTime),
+                totalDuration: Math.round(duration)
+              });
+            } catch (apiError: any) {
+              // If API endpoint doesn't exist (404), try alternative approach
+              if (apiError.status === 404) {
+                console.log("⚠️ Video progress API not available, storing locally:", {
+                  videoId: currentVideoId,
+                  watchPercentage: Math.round(watchPercentage * 100) / 100,
+                  currentTime: Math.round(currentTime),
+                  totalDuration: Math.round(duration)
+                });
+                
+                // Store progress in localStorage as fallback
+                const progressData = {
+                  videoId: currentVideoId,
+                  watchPercentage: Math.round(watchPercentage * 100) / 100,
+                  currentTime: Math.round(currentTime),
+                  totalDuration: Math.round(duration),
+                  lastUpdated: new Date().toISOString()
+                };
+                localStorage.setItem(`video_progress_${currentVideoId}`, JSON.stringify(progressData));
+                lastSavedProgressRef.current = watchPercentage;
+              } else {
+                throw apiError;
+              }
+            }
+          } else {
+            console.log("⏸️ Progress change too small, skipping save:", {
+              currentProgress: watchPercentage,
+              lastSaved: lastSavedProgressRef.current,
+              difference: progressDiff
+            });
+          }
+        } else {
+          console.log("⏸️ Skipping progress save - video not played yet:", {
+            currentTime,
+            duration,
+            videoId: currentVideoId
+          });
+        }
+      } catch (error) {
+        console.error("❌ Failed to save video progress:", error);
+      }
+    }, [currentVideoId]);
+
     // Handle React Router navigation blocking
     useEffect(() => {
       if (blocker.state === "blocked") {
-        const confirmed = window.confirm("Are you sure you want to leave this video? Your progress will be lost.");
-        if (confirmed) {
+        // Save progress before allowing navigation (force save)
+        saveVideoProgress(true).then(() => {
           blocker.proceed();
-        } else {
-          blocker.reset();
-        }
+        });
       }
-    }, [blocker]);
+    }, [blocker, saveVideoProgress]);
 
 
 
@@ -563,22 +637,6 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     const summaryFeedbackState = feedbackStates[ComponentName.Summary] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
     const flashcardFeedbackState = feedbackStates[ComponentName.Flashcard] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
 
-    // Debug feedback states (only in development)
-    if (process.env.NODE_ENV === 'development') {
-      console.log("🔍 Feedback States:", {
-        chat: chatFeedbackState,
-        quiz: quizFeedbackState,
-        summary: summaryFeedbackState,
-        flashcard: flashcardFeedbackState,
-        isLoading: isFeedbackLoading,
-        error: feedbackError
-      });
-    }
-
-
-
-
-
     // Components object will be defined after all functions are available
 
     // Local modal state for feedback
@@ -591,6 +649,9 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       const player = event.target;
       console.log("🎯 YouTube player ready!");
       
+      // Store player reference for progress tracking
+      ytPlayerRef.current = player;
+      
       // Start progress tracking interval
       const interval = setInterval(() => {
         try {
@@ -601,11 +662,36 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
             const progress = (currentTime / duration) * 100;
             setVideoProgress(progress);
             
+            // Store duration for progress tracking
+            videoDurationRef.current = duration;
+            
             // Auto-show feedback when video reaches 90%
             if (progress >= 90 && !hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current && videoCanSubmitFeedback) {
               openFeedbackModal();
               hasShownFeedbackRef.current = true;
             }
+            
+            // Save progress more frequently when video is playing (every 10 seconds or 5% change)
+
+            /*
+            if (currentTime > 0) {
+              const watchPercentage = (currentTime / duration) * 100;
+              const progressDiff = Math.abs(watchPercentage - lastSavedProgressRef.current);
+              
+              // Save every 10 seconds or when progress changes by 5% or more
+              if (Math.floor(currentTime) % 10 === 0 || progressDiff >= 5) {
+                // Debounce the save to avoid too many API calls
+                if (progressSaveTimeoutRef.current) {
+                  clearTimeout(progressSaveTimeoutRef.current);
+                }
+                
+                progressSaveTimeoutRef.current = setTimeout(() => {
+                  saveVideoProgress();
+                }, 1000); // 1 second debounce
+              }
+            }
+
+            */
           }
         } catch (error) {
           console.warn("⚠️ Error tracking video progress:", error);
@@ -614,17 +700,20 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       
       // Store interval reference for cleanup
       progressIntervalRef.current = interval;
-    }, [openFeedbackModal]);
+    }, [openFeedbackModal, saveVideoProgress]);
     
-    const onYouTubeEnd = useCallback(() => {
+    const onYouTubeEnd = useCallback(async () => {
       setVideoProgress(100);
+      
+      // Save final progress when video ends (force save)
+      await saveVideoProgress(true);
       
       // Show feedback modal when video ends
       if (!hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current) {
         openFeedbackModal();
         hasShownFeedbackRef.current = true;
       }
-    }, [openFeedbackModal]);
+    }, [openFeedbackModal, saveVideoProgress]);
     
     const onYouTubeStateChange = useCallback((event: any) => {
       const playerState = event.data;
@@ -681,35 +770,33 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           clearInterval(progressIntervalRef.current);
           progressIntervalRef.current = null;
         }
-      };
-    }, []);
-  
-    // Navigation guard - show alert on any navigation attempt
-    useEffect(() => {
-      const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-        // Always show alert when leaving the page
-        event.preventDefault();
-        event.returnValue = "Are you sure you want to leave this video? Your progress will be lost.";
-        return "Are you sure you want to leave this video? Your progress will be lost.";
-      };
-  
-      const handlePopState = (event: PopStateEvent) => {
-        // Show alert for browser back/forward navigation
-        const confirmed = window.confirm("Are you sure you want to leave this video? Your progress will be lost.");
-        if (!confirmed) {
-          event.preventDefault();
-          // Push the current state back to prevent navigation
-          window.history.pushState(null, '', window.location.href);
+        
+        if (progressSaveTimeoutRef.current != null) {
+          clearTimeout(progressSaveTimeoutRef.current);
+          progressSaveTimeoutRef.current = null;
         }
+        
+        // Save final progress before unmounting (force save)
+        saveVideoProgress(true);
+      };
+    }, [saveVideoProgress]);
+  
+    // Navigation guard - save progress on any navigation attempt
+    useEffect(() => {
+      const handleBeforeUnload = async () => {
+        // Save progress before leaving the page (force save)
+        await saveVideoProgress(true);
+      };
+  
+      const handlePopState = async () => {
+        // Save progress before browser back/forward navigation (force save)
+        await saveVideoProgress(true);
       };
 
       // Handle React Router navigation
-      const handleRouteChange = () => {
-        const confirmed = window.confirm("Are you sure you want to leave this video? Your progress will be lost.");
-        if (!confirmed) {
-          // Prevent navigation by staying on current page
-          return false;
-        }
+      const handleRouteChange = async () => {
+        // Save progress before navigation (force save)
+        await saveVideoProgress(true);
         return true;
       };
   
@@ -723,15 +810,15 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       
       // Override history methods to catch programmatic navigation
       window.history.pushState = function(...args) {
-        if (handleRouteChange()) {
+        handleRouteChange().then(() => {
           originalPushState.apply(this, args);
-        }
+        });
       };
       
       window.history.replaceState = function(...args) {
-        if (handleRouteChange()) {
+        handleRouteChange().then(() => {
           originalReplaceState.apply(this, args);
-        }
+        });
       };
   
       return () => {
@@ -742,7 +829,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
         window.history.pushState = originalPushState;
         window.history.replaceState = originalReplaceState;
       };
-    }, []);
+    }, [saveVideoProgress]);
   
     // Handle feedback completion and navigation
     const handleFeedbackComplete = useCallback(

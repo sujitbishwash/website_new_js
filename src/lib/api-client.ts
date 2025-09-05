@@ -613,7 +613,7 @@ export interface VideoProgressRequest {
   video_id: string;         // Required
   watch_percentage: number; // Required (0-100)
   total_duration: number;   // Required (in seconds)
-  current_time: number;     // Required (in seconds)
+  current_position: number;     // Required (in seconds)
   page_url: string;         // Required
 }
 
