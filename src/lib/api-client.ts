@@ -176,6 +176,29 @@ export interface ExamType {
   group: string[];
 }
 
+// Exam details interface
+export interface ExamDetails {
+  id: string;
+  name: string;
+  exam_id: string;
+  description: string;
+  eligibility: string;
+  pattern: string[];
+}
+
+// Exam category interface
+export interface ExamCategory {
+  [examKey: string]: ExamDetails;
+}
+
+// Exam data structure interface
+export interface ExamData {
+  [categoryKey: string]: {
+    displayName: string;
+    exams: ExamCategory;
+  };
+}
+
 export const examGoalApi = {
   getExamTypes: async () => {
     return apiRequest<{ success: boolean; data: ExamType[] }>(
@@ -183,13 +206,22 @@ export const examGoalApi = {
       "/exam-goal/exam-type"
     );
   },
+  getExamDetails: async (exam: string, groupType: string) => {
+    return apiRequest<{ success: boolean; data: ExamDetails[] }>(
+      "GET",
+      "/exam-goal/exam-detail", {
+        exam: exam,
+        group: groupType,
+      } 
+    );
+  },
   addExamGoal: async (exam: string, groupType: string) => {
     return apiRequest<{ success: boolean; message: string }>(
       "POST",
       "/exam-goal/add",
       {
-        exam,
-        group_type: groupType,
+        exam: groupType,
+        group_type: exam,
       }
     );
   },
