@@ -60,6 +60,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     transcriptError: string | null;
     onFeedbackSubmit: () => void;
     onFeedbackSkip: () => void;
+    onFetchTranscript: () => void;
   }
   
   // Learning mode types
@@ -161,6 +162,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     isLoadingTranscript,
     chaptersError,
     transcriptError,
+    onFetchTranscript,
   }) => {
     const [activeTab, setActiveTab] = useState("chapters");
     return (
@@ -257,7 +259,13 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
             </div>
           ) : transcriptError ? (
             <div className="text-center py-6 sm:py-8">
-              <p className="text-xs sm:text-sm text-red-400">{transcriptError}</p>
+              <p className="text-xs sm:text-sm text-red-400 mb-4">{transcriptError}</p>
+              <button
+                onClick={onFetchTranscript}
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
             </div>
           ) : transcript ? (
             <div className="text-xs sm:text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
@@ -265,9 +273,15 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
             </div>
           ) : (
             <div className="text-center text-gray-500 py-6 sm:py-8">
-              <p className="text-xs sm:text-sm">
-                Transcript content would appear here.
+              <p className="text-xs sm:text-sm mb-4">
+                Click the button below to fetch the video transcript.
               </p>
+              <button
+                onClick={onFetchTranscript}
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Fetch Transcript
+              </button>
             </div>
           )}
         </div>
@@ -803,29 +817,25 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       fetchChapters();
     }, [videoDetail?.external_source_id]);
   
-    // Fetch transcript
-    useEffect(() => {
-      const fetchTranscript = async () => {
-        if (!videoDetail?.external_source_id) return;
-  
-        try {
-          setIsLoadingTranscript(true);
-          setTranscriptError(null);
-  
-          const response = await videoApi.getVideoTranscript(
-            videoDetail.external_source_id
-          );
-          setTranscript(response.transcript);
-        } catch (err: any) {
-          console.error("Failed to fetch transcript:", err);
-          setTranscriptError("Failed to load transcript. Please try again.");
-        } finally {
-          setIsLoadingTranscript(false);
-        }
-      };
-  
-      fetchTranscript();
-    }, [videoDetail?.external_source_id]);
+      // Manual transcript fetching function
+  const fetchTranscript = useCallback(async () => {
+    if (!videoDetail?.external_source_id) return;
+
+    try {
+      setIsLoadingTranscript(true);
+      setTranscriptError(null);
+
+      const response = await videoApi.getVideoTranscript(
+        videoDetail.external_source_id
+      );
+      setTranscript(response.transcript);
+    } catch (err: any) {
+      console.error("Failed to fetch transcript:", err);
+      setTranscriptError("Failed to load transcript. Please try again.");
+    } finally {
+      setIsLoadingTranscript(false);
+    }
+  }, [videoDetail?.external_source_id]);
   
     // Initialize chat when videoId changes
     useEffect(() => {
@@ -839,7 +849,12 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       setChatInitialized(false);
       setChatMessages([]);
       setChatError(null);
-  
+      
+      // Reset transcript state when video changes
+      setTranscript("");
+      setTranscriptError(null);
+      setIsLoadingTranscript(false);
+
       // Reset feedback state when video changes
       // setFeedbackState({ // This line was removed as per the edit hint
       //   hasShownFeedback: false,
@@ -945,6 +960,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
           existingFeedback={quizFeedbackState?.existingFeedback}
           markAsSubmitted={quizMarkAsSubmitted}
+          topics={videoDetail?.topics}
         />
       ),
       summary: (
@@ -1060,6 +1076,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
                 transcriptError={transcriptError}
                 onFeedbackSubmit={() => handleFeedbackComplete("submit")}
                 onFeedbackSkip={() => handleFeedbackComplete("skip")}
+                onFetchTranscript={fetchTranscript}
               />
             </div>
             <div

@@ -540,6 +540,26 @@ interface TestData {
   level: TestLevel;
   language: TestLanguage;
 }
+// Quiz API interfaces
+export interface StartTestRequestV2 {
+  topics: string[];
+}
+
+export interface QuizResponse {
+  questions: Question[];
+}
+
+export interface Question {
+  questionText: string;
+  questionType: "MCQ";
+  options: Option[];
+}
+
+export interface Option {
+  text: string;
+  isCorrect: boolean;
+}
+
 export const quizApi = {
   startTest: async (testConfig: TestData): Promise<QuestionResponse> => {
     const response = await apiRequest<QuestionResponse>(
@@ -563,6 +583,16 @@ export const quizApi = {
       "POST",
       "/test-series/submit-test-session",
       data
+    );
+    return response.data;
+  },
+
+  // New API for dynamic quiz generation
+  generateQuiz: async (topics: string[]): Promise<QuizResponse> => {
+    const response = await apiRequest<QuizResponse>(
+      "POST",
+      "/test-series/quiz",
+      { topics }
     );
     return response.data;
   },
