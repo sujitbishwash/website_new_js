@@ -2,7 +2,7 @@ import { X } from "lucide-react";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
-import { examGoalApi, authApi } from "../../lib/api-client";
+import { examGoalApi } from "../../lib/api-client";
 
 
 // --- STYLING ---
@@ -33,7 +33,7 @@ export default function ExamConfigurationModal({
     error: userError,
   } = useUser();
 
-  const { refreshUserData } = useAuth();
+  const { refreshUserData, getUserData } = useAuth();
 
   // Local state
   const [examTypes, setExamTypes] = useState<any[]>([]);
@@ -73,9 +73,9 @@ export default function ExamConfigurationModal({
           setUserGoalError("");
           console.log("🎯 ExamConfigurationModal: Fetching user exam goal...");
           
-          const response = await authApi.getAuthenticatedUser();
+          const response = await getUserData();
           
-          if (response.data.exam_goal) {
+          if (response?.data?.exam_goal) {
             setUserExamGoal({
               exam: response.data.exam_goal.exam || "",
               group_type: response.data.exam_goal.group || ""
@@ -277,9 +277,9 @@ export default function ExamConfigurationModal({
 
         await refreshUserData();
 
-        // Refresh user exam goal data
-        const updatedUserResponse = await authApi.getAuthenticatedUser();
-        if (updatedUserResponse.data.exam_goal) {
+        // Refresh user exam goal data from context
+        const updatedUserResponse = await getUserData();
+        if (updatedUserResponse?.data?.exam_goal) {
           setUserExamGoal({
             exam: updatedUserResponse.data.exam_goal.exam || "",
             group_type: updatedUserResponse.data.exam_goal.group || ""
