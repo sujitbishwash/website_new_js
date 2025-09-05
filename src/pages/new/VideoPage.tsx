@@ -502,18 +502,26 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
 
     // Function to save video progress - using same logic as feedback modal
     const saveVideoProgress = useCallback(async (force = false) => {
-      if (!currentVideoId || !ytPlayerRef.current) return;
+      console.log("💾 saveVideoProgress called:", { force, currentVideoId, hasPlayer: !!ytPlayerRef.current });
+      
+      if (!currentVideoId || !ytPlayerRef.current) {
+        console.log("❌ Cannot save progress - missing videoId or player");
+        return;
+      }
 
       try {
         const currentTime = ytPlayerRef.current.getCurrentTime();
         const duration = ytPlayerRef.current.getDuration();
         
-        // Only save progress if video has been played (currentTime > 0) and duration is available
-        if (duration > 0 && currentTime > 0) {
+        console.log("📊 Video data:", { currentTime, duration, force });
+        
+        // Only save progress if video has been played (currentTime >= 0.1) and duration is available
+        if (duration > 0 && currentTime >= 0.1) {
           const watchPercentage = (currentTime / duration) * 100;
           
           // Only save if progress has changed significantly (5% or more) or if forced
           const progressDiff = Math.abs(watchPercentage - lastSavedProgressRef.current);
+          console.log("Progress diff:", progressDiff);
           if (force || progressDiff >= 5) {
             try {
               await videoProgressApi.trackProgress({
@@ -544,10 +552,14 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
                 // Store progress in localStorage as fallback
                 const progressData = {
                   videoId: currentVideoId,
+                  title: videoDetail?.title || `Video ${currentVideoId}`,
+                  thumbnailUrl: `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`,
                   watchPercentage: Math.round(watchPercentage * 100) / 100,
                   currentTime: Math.round(currentTime),
                   totalDuration: Math.round(duration),
-                  lastUpdated: new Date().toISOString()
+                  lastUpdated: new Date().toISOString(),
+                  subject: videoDetail?.topics?.[0] || 'General',
+                  description: videoDetail?.description || 'Video content'
                 };
                 localStorage.setItem(`video_progress_${currentVideoId}`, JSON.stringify(progressData));
                 lastSavedProgressRef.current = watchPercentage;
@@ -566,7 +578,8 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           console.log("⏸️ Skipping progress save - video not played yet:", {
             currentTime,
             duration,
-            videoId: currentVideoId
+            videoId: currentVideoId,
+            condition: `duration > 0: ${duration > 0}, currentTime >= 0.1: ${currentTime >= 0.1}`
           });
         }
       } catch (error) {
@@ -591,7 +604,6 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
   const {
     feedbackStates,
     isLoading: isFeedbackLoading,
-    error: feedbackError,
     markAsSubmitted
   } = useMultiFeedbackTracker({
     components: [ComponentName.Video, ComponentName.Chat, ComponentName.Quiz, ComponentName.Summary, ComponentName.Flashcard],
@@ -671,27 +683,39 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
               hasShownFeedbackRef.current = true;
             }
             
-            // Save progress more frequently when video is playing (every 10 seconds or 5% change)
-
-            /*
-            if (currentTime > 0) {
+            // Save progress more frequently when video is playing
+            if (currentTime >= 0.1) {
               const watchPercentage = (currentTime / duration) * 100;
               const progressDiff = Math.abs(watchPercentage - lastSavedProgressRef.current);
               
-              // Save every 10 seconds or when progress changes by 5% or more
-              if (Math.floor(currentTime) % 10 === 0 || progressDiff >= 5) {
+              console.log("🎬 Video progress tracking:", {
+                currentTime: currentTime.toFixed(2),
+                duration: duration.toFixed(2),
+                watchPercentage: watchPercentage.toFixed(2),
+                progressDiff: progressDiff.toFixed(2),
+                lastSaved: lastSavedProgressRef.current.toFixed(2)
+              });
+              
+              // Save every 5 seconds or when progress changes by 2% or more
+              const shouldSaveByTime = Math.floor(currentTime) % 5 === 0;
+              const shouldSaveByProgress = progressDiff >= 2;
+              
+              if (shouldSaveByTime || shouldSaveByProgress) {
+                console.log("💾 Should save progress:", { shouldSaveByTime, shouldSaveByProgress });
+                
                 // Debounce the save to avoid too many API calls
                 if (progressSaveTimeoutRef.current) {
                   clearTimeout(progressSaveTimeoutRef.current);
                 }
                 
                 progressSaveTimeoutRef.current = setTimeout(() => {
+                  console.log("💾 Triggering progress save from interval");
                   saveVideoProgress();
-                }, 1000); // 1 second debounce
+                }, 500); // Reduced debounce to 500ms
               }
+            } else {
+              console.log("⏸️ Video not played yet - currentTime:", currentTime.toFixed(2));
             }
-
-            */
           }
         } catch (error) {
           console.warn("⚠️ Error tracking video progress:", error);
@@ -725,7 +749,15 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       if (playerState === 0) { // 0 = ended
         onYouTubeEnd();
       }
-    }, [onYouTubeEnd]);
+      
+      // Save progress when video starts playing (state 1 = playing)
+      if (playerState === 1) {
+        console.log("▶️ Video started playing, saving initial progress");
+        setTimeout(() => {
+          saveVideoProgress(true);
+        }, 2000); // Save after 2 seconds of playing
+      }
+    }, [onYouTubeEnd, saveVideoProgress]);
 
     // Use refs for feedback gates to avoid effect dependencies causing teardown
     const videoCanSubmitFeedbackRef = useRef<boolean>(false);

@@ -8,26 +8,15 @@ const API_CONFIG = {
   },
 };
 
-// Log the API base URL for debugging
-console.log("🌐 API Base URL:", API_CONFIG.baseURL);
-console.log("🌐 Environment:", import.meta.env.MODE);
-
 // Create axios instance with default config
 const apiClient = axios.create(API_CONFIG);
 
 // Add request interceptor to add auth token
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
-  console.log("🔑 Request interceptor - Token exists:", !!token);
-  console.log(
-    "🔑 Request interceptor - Token value:",
-    token ? `${token.substring(0, 20)}...` : "null"
-  );
-  console.log("🔑 Request interceptor - URL:", config.url);
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log("🔑 Request interceptor - Authorization header set");
   } else {
     console.log(
       "🔑 Request interceptor - No token found, request will be unauthorized"
@@ -61,8 +50,6 @@ export const apiRequest = async <T>(
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`🌐 Making ${method} request to:`, endpoint, `(attempt ${attempt}/${maxRetries})`);
-      console.log(`🌐 Request data:`, data);
 
       const response = await apiClient.request({
         method,
@@ -71,23 +58,12 @@ export const apiRequest = async <T>(
         headers: config?.headers,
       });
 
-      console.log(`✅ ${method} ${endpoint} response:`, response.data);
-      console.log(`✅ ${method} ${endpoint} status:`, response.status);
-
       return {
         data: response.data,
         status: response.status,
       };
     } catch (error: any) {
       lastError = error;
-      console.error(`❌ API Request Error (attempt ${attempt}/${maxRetries}):`, {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message,
-        url: error.config?.url,
-        method: error.config?.method,
-      });
 
       // Don't retry on authentication errors
       if (error.response?.status === 401 || error.response?.status === 403) {
@@ -104,7 +80,6 @@ export const apiRequest = async <T>(
       // Retry on server errors (5xx) and network errors
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
-        console.log(`⏳ Retrying in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
@@ -624,8 +599,12 @@ export interface VideoProgressResponse {
     video_id: string;
     watch_percentage: number;
     total_duration: number;
-    current_time: number;
+    current_position: number;
     last_updated: string;
+    title: string;
+    url: string;
+    tags: string[];
+    topics: string[];
   };
 }
 
@@ -757,9 +736,6 @@ export const feedbackApi = {
     if (params.toString()) {
       endpoint += `?${params.toString()}`;
     }
-    
-    console.log("🎯 getFeedbackChips - Final endpoint:", endpoint);
-    console.log("🎯 getFeedbackChips - Component type:", componentType);
     
     const response = await apiRequest<FeedbackChipsResponse>('GET', endpoint);
     return response.data;
