@@ -4,7 +4,6 @@ import {
   Trophy,
   Unlock,
   ArrowRight,
-  Info,
   Clock,
   BookOpen,
   CheckCircle,
@@ -17,6 +16,8 @@ import {
   Sparkle,
   GaugeCircle,
 } from "lucide-react";
+import StatsCard from "@/components/stats/Card";
+import CardContent from "@/components/stats/CardContent";
 
 // --- Dark Mode Color Palette ---
 const colors = {
@@ -160,42 +161,6 @@ const dashboardData: DashboardData = {
     filterName: "Focus Mode Theme",
   },
 };
-
-// --- UI Component Placeholders ---
-interface CardProps {
-  children: ReactNode;
-  className?: string;
-  tooltipText?: string;
-  style?: React.CSSProperties;
-}
-
-const Card: React.FC<CardProps> = ({ children, className = "", tooltipText }) => (
-  <div
-    className={`group transition-all duration-300 relative bg-card rounded-xl shadow-sm border border-border overflow-hidden ${className}`}
-  >
-    {" "}
-    <div className="absolute inset-0 border border-transparent rounded-xl group-hover:border-white/20 transition-all duration-300 pointer-events-none"></div>
-    {tooltipText && (
-      <div className="absolute top-4 right-4 group/info">
-        <Info className="w-4 h-4 transition-colors text-muted-foreground" />
-
-        <div className="border border-border absolute bg-background right-full top-[-0.5rem] ml-0 w-56 p-2 rounded-lg animate-fade-in-up scale-0 group-hover/info:scale-100 transition-scale pointer-events-none z-10 shadow-lg">
-          {tooltipText}
-        </div>
-      </div>
-    )}
-    {children}
-  </div>
-);
-
-interface CardContentProps {
-  children: ReactNode;
-  className?: string;
-}
-
-const CardContent: React.FC<CardContentProps> = ({ children, className = "" }) => (
-  <div className={`p-6 ${className}`}>{children}</div>
-);
 
 
 
@@ -689,7 +654,7 @@ function Stats() {
       </div>
       <div className="max-w-7xl mx-auto space-y-6 md:space-y-0 md:grid md:grid-cols-4 md:gap-6">
         {/* Welcome + Streak */}
-        <Card
+        <StatsCard
           className="md:col-span-4 md:row-span-1"
           tooltipText="Your daily study streak. Consistency is the most important factor for success!"
         >
@@ -713,10 +678,10 @@ function Stats() {
               streak={dashboardData.user.streak}
             />
           </CardContent>
-        </Card>
+        </StatsCard>
 
         {/* Sectional Progress */}
-        <Card
+        <StatsCard
           className="md:col-span-2 md:row-span-1"
           tooltipText="Tracks your progress in mastering topics for each subject. Aim for 100% in all sections before the exam."
         >
@@ -727,11 +692,11 @@ function Stats() {
             </h3>
             <SectionalProgress sections={dashboardData.progress} />
           </CardContent>
-        </Card>
+        </StatsCard>
 
         {/* Performance Analytics */}
 
-        <Card
+        <StatsCard
           className="md:col-span-2 md:row-span-1"
           tooltipText="Attempt %: Questions you tried. Accuracy %: Correct answers from your attempts. Speed %: How fast you answer compared to the ideal time."
         >
@@ -761,9 +726,9 @@ function Stats() {
               />
             </div>
           </CardContent>
-        </Card>
+        </StatsCard>
 
-        <Card
+        <StatsCard
           className="md:col-span-2 md:row-span-1"
           tooltipText="A visual trend of your daily mock test scores over the last 45 days. Hover over the graph to see daily details."
         >
@@ -790,9 +755,9 @@ function Stats() {
               gradientColor={colors.accent}
             />
           </CardContent>
-        </Card>
+        </StatsCard>
 
-        <Card
+        <StatsCard
           className="md:col-span-2 md:row-span-1"
           tooltipText="Tracks the hours you've studied each day for the past 45 days. Consistency is key!"
         >
@@ -816,10 +781,10 @@ function Stats() {
               gradientColor={colors.green}
             />
           </CardContent>
-        </Card>
+        </StatsCard>
 
         {/* Exam Countdown (Full Width) */}
-        <Card
+        <StatsCard
           className="md:col-span-4"
           tooltipText="Your exam calendar. Dates marked in blue are upcoming exams. Today is highlighted with a blue glow."
         >
@@ -840,9 +805,9 @@ function Stats() {
             </div>
             <ExamCalendar exams={dashboardData.exams} />
           </CardContent>
-        </Card>
+        </StatsCard>
 
-        <Card
+        <StatsCard
           className="md:col-span-4"
           tooltipText="This shows your percentile rank compared to all other students on the platform. It helps you understand your competition."
         >
@@ -857,10 +822,10 @@ function Stats() {
               totalStudents={dashboardData.leaderboard.totalStudents}
             />
           </CardContent>
-        </Card>
+        </StatsCard>
 
         {/* AI Remark */}
-        <Card
+        <StatsCard
           className="md:col-span-2"
           tooltipText="A personalized insight generated by AI based on your recent performance data to help you focus on what matters most."
         >
@@ -873,9 +838,9 @@ function Stats() {
               {dashboardData.aiRemark}
             </p>
           </CardContent>
-        </Card>
+        </StatsCard>
 
-        <Card
+        <StatsCard
           className="md:col-span-1 md:row-span-1"
           tooltipText="Your recommended task for today. Completing daily challenges is a great way to build a study habit."
         >
@@ -893,9 +858,9 @@ function Stats() {
               <ArrowRight className="w-4 h-4" />
             </button>
           </CardContent>
-        </Card>
+        </StatsCard>
 
-        <Card
+        <StatsCard
           className="md:col-span-1 md:row-span-1"
           style={{
             backgroundColor: "rgba(52, 199, 89, 0.1)",
@@ -918,7 +883,7 @@ function Stats() {
               {dashboardData.appFilterReward.filterName}
             </p>
           </CardContent>
-        </Card>
+        </StatsCard>
       </div>
     </div>
   );
