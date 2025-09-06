@@ -663,7 +663,7 @@ export default function ExamsPage() {
         ([categoryKey, category]) =>
           Object.entries(category.exams)
             .filter(
-              ([ _, exam]) =>
+              ([, exam]) =>
                 exam.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 exam.description
                   .toLowerCase()

@@ -102,14 +102,7 @@ const longSummaryData: SummarySectionData[] = [
   },
 ];
 
-const mediumSummaryData: SummarySectionData[] = [
-  longSummaryData[0], // Intro
-  longSummaryData[1], // Solar
-];
-
-const smallSummaryData: SummarySectionData[] = [
-  longSummaryData[0], // Intro
-];
+// Removed unused demo data arrays
 
 // --- SVG ICON ---
 const SourceIcon = () => (
@@ -241,7 +234,7 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
     }
   };
 
-  const onSubmit = async (payload: any) => {
+  const onSubmit = async (payload: unknown) => {
     console.log("Summary feedback submitted:", payload);
     
     if (markAsSubmitted) {
@@ -346,11 +339,19 @@ const LoadingSpinner = () => (
 // --- MAIN APP COMPONENT ---
 
 // Add props interface for feedback state
+interface FeedbackData {
+  id: string;
+  rating: number;
+  description: string;
+  date_submitted: string;
+  page_url: string;
+}
+
 interface SummaryProps {
   // Only videoId is required, feedback props are optional
   videoId: string;
   canSubmitFeedback?: boolean | undefined;
-  existingFeedback?: any;
+  existingFeedback?: FeedbackData | null;
   markAsSubmitted?: () => void;
 }
 
@@ -384,8 +385,6 @@ const Summary: React.FC<SummaryProps> = React.memo(({
   // Add ref to track if we've already fetched data for this videoId
   const fetchedVideoIdRef = useRef<string | null>(null);
   const isFetchingRef = useRef<boolean>(false);
-  const retryCountRef = useRef<number>(0);
-  const maxRetries = 2;
 
   // Fetch summary data from API - ULTRA AGGRESSIVE APPROACH
   useEffect(() => {
@@ -433,14 +432,17 @@ const Summary: React.FC<SummaryProps> = React.memo(({
         // Handle different possible response structures
         if (response.sections && Array.isArray(response.sections)) {
           // Transform API response to our component format
-          transformedData = response.sections.map((section: any, index: number) => ({
-            id: `section_${index}`,
-            title: section.title || `Section ${index + 1}`,
-            points: [{
-              id: `point_${index}`,
-              text: section.content || section.text || section.description || "No content available"
-            }]
-          }));
+          transformedData = response.sections.map((section: unknown, index: number) => {
+            const sectionData = section as { title?: string; content?: string; text?: string; description?: string };
+            return {
+              id: `section_${index}`,
+              title: sectionData.title || `Section ${index + 1}`,
+              points: [{
+                id: `point_${index}`,
+                text: sectionData.content || sectionData.text || sectionData.description || "No content available"
+              }]
+            };
+          });
         } else if (response.transcript) {
           // Handle the actual API response format with transcript field
           const transcriptText = response.transcript;
@@ -551,14 +553,17 @@ const Summary: React.FC<SummaryProps> = React.memo(({
           }];
         } else if (Array.isArray(response)) {
           // If response is directly an array
-          transformedData = response.map((item: any, index: number) => ({
-            id: `section_${index}`,
-            title: item.title || `Section ${index + 1}`,
-            points: [{
-              id: `point_${index}`,
-              text: item.content || item.text || item.description || "No content available"
-            }]
-          }));
+          transformedData = response.map((item: unknown, index: number) => {
+            const itemData = item as { title?: string; content?: string; text?: string; description?: string };
+            return {
+              id: `section_${index}`,
+              title: itemData.title || `Section ${index + 1}`,
+              points: [{
+                id: `point_${index}`,
+                text: itemData.content || itemData.text || itemData.description || "No content available"
+              }]
+            };
+          });
         } else {
           // Fallback: create a single section with available data
           transformedData = [{
@@ -579,15 +584,16 @@ const Summary: React.FC<SummaryProps> = React.memo(({
 
         setSummaryData(transformedData);
         console.log("✅ Summary data processed successfully:", transformedData);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { message?: string; status?: number; response?: { data?: unknown } };
         console.error("❌ Error fetching summary:", err);
         console.error("❌ Error details:", {
-          message: err.message,
-          status: err.status,
-          response: err.response?.data
+          message: error.message,
+          status: error.status,
+          response: error.response?.data
         });
         
-        setError(err.message || "Failed to load summary");
+        setError(error.message || "Failed to load summary");
         
         // Fallback to demo data on error
         setSummaryData(longSummaryData);
@@ -605,7 +611,6 @@ const Summary: React.FC<SummaryProps> = React.memo(({
     return () => {
       fetchedVideoIdRef.current = null;
       isFetchingRef.current = false;
-      retryCountRef.current = 0;
     };
   }, [videoId]);
 

@@ -43,11 +43,19 @@ interface ProgressBarProps {
 }
 
 // Add props interface for feedback state
+interface FeedbackData {
+  id: string;
+  rating: number;
+  description: string;
+  date_submitted: string;
+  page_url: string;
+}
+
 interface FlashcardsProps {
   // Only videoId is required, feedback props are optional
   videoId: string;
   canSubmitFeedback?: boolean | undefined;
-  existingFeedback?: any;
+  existingFeedback?: FeedbackData | null;
   markAsSubmitted?: () => void;
 }
 
@@ -250,8 +258,6 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
   // Add ref to track if we've already fetched data for this videoId
   const fetchedVideoIdRef = useRef<string | null>(null);
   const isFetchingRef = useRef<boolean>(false);
-  const retryCountRef = useRef<number>(0);
-  const maxRetries = 2;
 
   // Fetch flashcards data from API - ULTRA AGGRESSIVE APPROACH
   useEffect(() => {
@@ -299,25 +305,35 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
         // Handle different possible response structures
         if (response.cards && Array.isArray(response.cards)) {
           // Transform API response to our component format (actual API structure)
-          transformedCards = response.cards.map((card: any, index: number) => ({
-            id: card.id || index + 1,
-            question: card.question || "No question available",
-            answer: card.answer || "No answer available"
-          }));
-        } else if ((response as any).flashcards && Array.isArray((response as any).flashcards)) {
+          transformedCards = response.cards.map((card: unknown, index: number) => {
+            const cardData = card as { id?: number; question?: string; answer?: string };
+            return {
+              id: cardData.id || index + 1,
+              question: cardData.question || "No question available",
+              answer: cardData.answer || "No answer available"
+            };
+          });
+        } else if ((response as Record<string, unknown>).flashcards && Array.isArray((response as Record<string, unknown>).flashcards)) {
           // Transform API response to our component format (expected structure)
-          transformedCards = (response as any).flashcards.map((card: any, index: number) => ({
-            id: card.id || index + 1,
-            question: card.question || "No question available",
-            answer: card.answer || "No answer available"
-          }));
+          const flashcards = (response as Record<string, unknown>).flashcards as unknown[];
+          transformedCards = flashcards.map((card: unknown, index: number) => {
+            const cardData = card as { id?: number; question?: string; answer?: string };
+            return {
+              id: cardData.id || index + 1,
+              question: cardData.question || "No question available",
+              answer: cardData.answer || "No answer available"
+            };
+          });
         } else if (Array.isArray(response)) {
           // If response is directly an array
-          transformedCards = response.map((card: any, index: number) => ({
-            id: card.id || index + 1,
-            question: card.question || "No question available",
-            answer: card.answer || "No answer available"
-          }));
+          transformedCards = response.map((card: unknown, index: number) => {
+            const cardData = card as { id?: number; question?: string; answer?: string };
+            return {
+              id: cardData.id || index + 1,
+              question: cardData.question || "No question available",
+              answer: cardData.answer || "No answer available"
+            };
+          });
         } else {
           // Fallback: create cards from available data
           transformedCards = [{
@@ -337,15 +353,16 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
         setCurrentIndex(0);
         setIsFlipped(false);
         console.log("✅ Flashcards data processed successfully:", transformedCards);
-      } catch (err: any) {
+      } catch (err: unknown) {
+        const error = err as { message?: string; status?: number; response?: { data?: unknown } };
         console.error("❌ Error fetching flashcards:", err);
         console.error("❌ Error details:", {
-          message: err.message,
-          status: err.status,
-          response: err.response?.data
+          message: error.message,
+          status: error.status,
+          response: error.response?.data
         });
         
-        setError(err.message || "Failed to load flashcards");
+        setError(error.message || "Failed to load flashcards");
         
         // Fallback to demo data on error
         setCards(initialCards);
@@ -363,7 +380,6 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
     return () => {
       fetchedVideoIdRef.current = null;
       isFetchingRef.current = false;
-      retryCountRef.current = 0;
     };
   }, [videoId]);
 
@@ -514,7 +530,7 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
       feedbackMarkAsSubmitted();
     }
   };
-  const handleFeedbackSubmit = async (payload: any) => {
+  const handleFeedbackSubmit = async (payload: unknown) => {
     console.log("Flashcards feedback submitted:", payload);
     if (feedbackMarkAsSubmitted) {
       feedbackMarkAsSubmitted();

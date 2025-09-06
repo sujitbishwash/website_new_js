@@ -71,7 +71,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     { path: ROUTES.REFER_AND_EARN, icon: Gift, label: "Refer and Earn" },
     { path: ROUTES.STATS, icon: GaugeCircle, label: "Stats" },
   ];
-  const SparklesIcon: React.FC<IconProps> = ({ }) => (
+  const SparklesIcon: React.FC<IconProps> = () => (
     <svg
       width="20"
       height="20"

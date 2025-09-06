@@ -676,13 +676,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       markAsSubmitted(ComponentName.Quiz);
     }, [markAsSubmitted]);
 
-    const summaryMarkAsSubmitted = useCallback(() => {
-      markAsSubmitted(ComponentName.Summary);
-    }, [markAsSubmitted]);
-
-    const flashcardMarkAsSubmitted = useCallback(() => {
-      markAsSubmitted(ComponentName.Flashcard);
-    }, [markAsSubmitted]);
+    // Removed unused callback functions
 
     // Create wrapper function for markAsSubmitted to maintain backward compatibility
     const videoMarkAsSubmitted = useCallback(() => {
@@ -819,7 +813,9 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
         if (ytPlayerRef.current) {
           try {
             ytPlayerRef.current.destroy?.();
-          } catch {}
+          } catch {
+            // Ignore destroy errors
+          }
           ytPlayerRef.current = null;
         }
       }
@@ -951,6 +947,8 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           // Try to get video details from API
           const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
           const details = await videoApi.getVideoDetail(videoUrl);
+          console.log("🎯 VideoPage: Fetched video details:", details);
+          console.log("🎯 VideoPage: Video topics:", details.topics);
           setVideoDetail(details);
         } catch (err: any) {
           console.error("Failed to fetch video details:", err);
@@ -1158,16 +1156,20 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
             videoId={currentVideoId || ""}
           />
         ),
-        quiz: (
-          <Quiz 
-            key={`quiz-${currentVideoId}`}
-            videoId={currentVideoId || ""}
-            canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
-            existingFeedback={quizFeedbackState?.existingFeedback}
-            markAsSubmitted={quizMarkAsSubmitted}
-            topics={videoDetail?.topics}
-          />
-        ),
+        quiz: (() => {
+          console.log("🎯 VideoPage: Rendering Quiz with topics:", videoDetail?.topics);
+          const topicsKey = videoDetail?.topics?.join(',') || 'default';
+          return (
+            <Quiz 
+              key={`quiz-${currentVideoId}-${topicsKey}`}
+              videoId={currentVideoId || ""}
+              canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
+              existingFeedback={quizFeedbackState?.existingFeedback}
+              markAsSubmitted={quizMarkAsSubmitted}
+              topics={videoDetail?.topics}
+            />
+          );
+        })(),
         summary: (
           <SummaryWrapper 
             key={`summary-${currentVideoId}`}
@@ -1405,7 +1407,9 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
             try {
               videoMarkAsSubmitted();
               setIsFeedbackModalOpen(false);
-            } catch {}
+            } catch {
+              // Ignore feedback submission errors
+            }
           }}
           onSkip={() => setIsFeedbackModalOpen(false)}
           onDismiss={() => setIsFeedbackModalOpen(false)}

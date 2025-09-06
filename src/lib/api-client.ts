@@ -13,7 +13,7 @@ const API_CONFIG = {
 const apiClient = axios.create(API_CONFIG);
 
 // Global flags to prevent duplicate API calls
-const activeRequests = new Map<string, Promise<any>>();
+const activeRequests = new Map<string, Promise<unknown>>();
 
 // Add request interceptor to add auth token
 apiClient.interceptors.request.use((config) => {
@@ -46,11 +46,11 @@ export interface ApiError {
 export const apiRequest = async <T>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   endpoint: string,
-  data?: any,
+  data?: unknown,
   config?: { headers?: Record<string, string> }
 ): Promise<ApiResponse<T>> => {
   const maxRetries = 2;
-  let lastError: any;
+  let lastError: unknown;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -66,17 +66,18 @@ export const apiRequest = async <T>(
         data: response.data,
         status: response.status,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
+      const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
 
       // Don't retry on authentication errors
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
         console.log("🔒 Authentication error - not retrying");
         break;
       }
 
       // Don't retry on client errors (4xx except 401/403)
-      if (error.response?.status >= 400 && error.response?.status < 500) {
+      if (axiosError.response?.status && axiosError.response.status >= 400 && axiosError.response.status < 500) {
         console.log("🚫 Client error - not retrying");
         break;
       }
@@ -90,9 +91,10 @@ export const apiRequest = async <T>(
   }
 
   // If all retries failed, throw the last error
+  const finalError = lastError as { response?: { status?: number; data?: { message?: string } } };
   throw {
-    message: lastError.response?.data?.message || "An error occurred",
-    status: lastError.response?.status || 500,
+    message: finalError.response?.data?.message || "An error occurred",
+    status: finalError.response?.status || 500,
   } as ApiError;
 };
 
@@ -254,7 +256,7 @@ export interface VideoDetail {
 }
 
 export interface SuggestedVideo {
-  id: number;
+  id: string;
   title: string;
   topic: string;
   thumbnailUrl: string;
@@ -308,15 +310,25 @@ export const videoApi = {
     // Handle the API response structure: { suggested: [...] }
     if (result.suggested && Array.isArray(result.suggested)) {
       // Transform the API response to match our interface
-      return result.suggested.map((video: any) => ({
-        id: video.video_id, // Map video_id to id
-        title: video.title,
-        topic: video.channel_title || "General", // Use channel_title as topic
-        thumbnailUrl: video.thumbnail, // Map thumbnail to thumbnailUrl
-        url: video.url,
-        description: video.channel_title, // Use channel_title as description
-        tags: [video.source_for], // Use source_for as tags
-      }));
+      return result.suggested.map((video: unknown) => {
+        const videoData = video as { 
+          video_id?: string; 
+          title?: string; 
+          channel_title?: string; 
+          thumbnail?: string; 
+          url?: string; 
+          source_for?: string; 
+        };
+        return {
+          id: videoData.video_id || "", // Map video_id to id
+          title: videoData.title || "",
+          topic: videoData.channel_title || "General", // Use channel_title as topic
+          thumbnailUrl: videoData.thumbnail || "", // Map thumbnail to thumbnailUrl
+          url: videoData.url || "",
+          description: videoData.channel_title || "", // Use channel_title as description
+          tags: videoData.source_for ? [videoData.source_for] : [], // Use source_for as tags
+        };
+      });
     }
 
     // Fallback to empty array if structure is unexpected
@@ -350,17 +362,17 @@ export const videoApi = {
     // Check if request is already in progress
     if (activeRequests.has(requestKey)) {
       console.log("🔍 ULTRA AGGRESSIVE: Reusing existing summary request for:", videoId);
-      return activeRequests.get(requestKey)!;
+      return activeRequests.get(requestKey)! as Promise<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }>;
     }
 
-    const requestPromise = (async () => {
+    const requestPromise = (async (): Promise<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }> => {
       try {
-        const response = await apiRequest<{ summary: string; sections: Array<{ title: string; content: string }> }>(
+        const response = await apiRequest<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }>(
           "GET",
           `/video/summary?video_id=${encodeURIComponent(videoId)}`
         );
         return response.data;
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("❌ getVideoSummary API error:", error);
         // Return a fallback structure to prevent component crashes
         return {
@@ -390,17 +402,17 @@ export const videoApi = {
     // Check if request is already in progress
     if (activeRequests.has(requestKey)) {
       console.log("🔍 ULTRA AGGRESSIVE: Reusing existing flashcards request for:", videoId);
-      return activeRequests.get(requestKey)!;
+      return activeRequests.get(requestKey)! as Promise<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }>;
     }
 
-    const requestPromise = (async () => {
+    const requestPromise = (async (): Promise<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }> => {
       try {
         const response = await apiRequest<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }>(
           "GET",
           `/video/flash-card?video_id=${encodeURIComponent(videoId)}`
         );
         return response.data;
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("❌ getVideoFlashcards API error:", error);
         // Return a fallback structure to prevent component crashes
         return {
@@ -711,7 +723,7 @@ export interface FeedbackResponse {
   component: string;         // Required
   description: string;       // Required
   rating: number;           // Required
-  reporter: any;            // Required (Dict)
+  reporter: Record<string, unknown>;            // Required (Dict)
   date_submitted: string;   // Required
   source_id: string;        // Required
   page_url: string;         // Required

@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import React from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
-import { quizApi, Question, Option } from "@/lib/api-client";
+import { quizApi } from "@/lib/api-client";
 
 // --- Setup ---
 
@@ -172,11 +172,19 @@ const QuestionView: React.FC<{
 };
 
 // Add props interface for feedback state
+interface FeedbackData {
+  id: string;
+  rating: number;
+  description: string;
+  date_submitted: string;
+  page_url: string;
+}
+
 interface QuizProps {
   // Optional props to prevent duplicate API calls when passed from parent
   videoId: string;
   canSubmitFeedback?: boolean | undefined;
-  existingFeedback?: any;
+  existingFeedback?: FeedbackData | null;
   markAsSubmitted?: () => void;
   topics?: string[]; // Topics for quiz generation
 }
@@ -193,7 +201,15 @@ const Quiz: React.FC<QuizProps> = ({
   
   // Memoize default topics to prevent infinite re-renders
   const defaultTopics = React.useMemo(() => ["General Knowledge"], []);
-  const memoizedTopics = React.useMemo(() => topics || defaultTopics, [topics, defaultTopics]);
+  const memoizedTopics = React.useMemo(() => {
+    // Use topics from video detail API if available, otherwise fallback to default
+    if (topics && topics.length > 0) {
+      console.log(`🎯 Quiz Component [${componentId}] Using video topics:`, topics);
+      return topics;
+    }
+    console.log(`🎯 Quiz Component [${componentId}] Using default topics:`, defaultTopics);
+    return defaultTopics;
+  }, [topics, defaultTopics, componentId]);
   
   // Quiz state
   const [quizQuestions, setQuizQuestions] = React.useState<QuizQuestion[]>([]);
@@ -221,18 +237,27 @@ const Quiz: React.FC<QuizProps> = ({
     number | null
   >(null);
 
+  // Reset component state when topics change
+  React.useEffect(() => {
+    console.log(`🔄 Quiz Component [${componentId}] Topics changed, resetting state`);
+    setQuizQuestions([]);
+    setCurrentQuestion(0);
+    setShowScore(false);
+    setScore(0);
+    setIsAnswered(false);
+    setSelectedAnswerIndex(null);
+    setQuizError(null);
+    hasAttemptedFetchRef.current = false;
+    setIsLoadingQuiz(true);
+  }, [memoizedTopics, componentId]);
+
   // Fetch quiz questions from API
   React.useEffect(() => {
-    console.log(`🔄 Quiz Component [${componentId}] useEffect triggered`);
+    console.log(`🔄 Quiz Component [${componentId}] useEffect triggered with topics:`, memoizedTopics);
     
-    // Guard to prevent API calls if already attempted or if we already have questions
+    // Guard to prevent API calls if already attempted
     if (hasAttemptedFetchRef.current) {
       console.log(`🚫 Quiz Component [${componentId}] Skipping API call - already attempted`);
-      return;
-    }
-
-    if (quizQuestions.length > 0) {
-      console.log(`🚫 Quiz Component [${componentId}] Skipping API call - questions already exist`);
       return;
     }
 
@@ -246,7 +271,7 @@ const Quiz: React.FC<QuizProps> = ({
         console.log(`✅ Quiz Component [${componentId}] Quiz questions loaded:`, response.questions);
         
         setQuizQuestions(response.questions);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`❌ Quiz Component [${componentId}] Failed to fetch quiz questions:`, error);
         setQuizError("Failed to load quiz questions. Please try again.");
       } finally {
@@ -315,7 +340,7 @@ const Quiz: React.FC<QuizProps> = ({
         const response = await quizApi.generateQuiz(memoizedTopics);
         setQuizQuestions(response.questions);
         setQuizError(null);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("❌ Failed to retry quiz questions:", error);
         setQuizError("Failed to load quiz questions. Please try again.");
       } finally {
@@ -356,7 +381,7 @@ const Quiz: React.FC<QuizProps> = ({
     }
   };
 
-  const handleSubmitFeedback = async (payload: any) => {
+  const handleSubmitFeedback = async (payload: unknown) => {
     console.log("Quiz feedback submitted:", payload);
     if (markAsSubmitted) {
       markAsSubmitted();

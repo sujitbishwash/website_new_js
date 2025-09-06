@@ -206,9 +206,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             } else if (response && response.status >= 200 && response.status < 300) {
               console.log("✅ Background validation successful");
               // Update user data with fresh data from API
-              if (response.data) {
+              if (response.data && response.data.id && response.data.email) {
                 updateLocalStorageUserData(response.data);
-                setUser(response.data);
+                setUser({
+                  id: response.data.id,
+                  email: response.data.email,
+                  name: response.data.name
+                });
               }
             }
             // For other errors (network, server), keep user logged in
