@@ -24,7 +24,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
     Type,
     X,
   } from "lucide-react";
-  import { useCallback, useEffect, useRef, useState } from "react";
+  import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import React from "react";
 import { useLocation, useNavigate, useParams, useBlocker } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail, videoProgressApi } from "../../lib/api-client";
@@ -38,6 +38,25 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     }
   }
   
+  // Wrapper components to prevent unnecessary re-renders
+  const FlashcardsWrapper = React.memo(({ videoId }: { videoId: string }) => {
+    console.log("🔄 FlashcardsWrapper rendered for videoId:", videoId);
+    return (
+      <Flashcards 
+        videoId={videoId}
+      />
+    );
+  });
+
+  const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
+    console.log("🔄 SummaryWrapper rendered for videoId:", videoId);
+    return (
+      <Summary 
+        videoId={videoId}
+      />
+    );
+  });
+
   // Type definitions
   interface IconProps {
     path: string;
@@ -1094,47 +1113,69 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       [currentVideoId]
     );
 
-    // Components object - defined after all functions are available
-    const components = {
-      chat: (
-        <Chat
-          videoId={currentVideoId || ""}
-          messages={chatMessages}
-          isLoading={isChatLoading}
-          error={chatError}
-          onSendMessage={handleSendMessage}
-          isLeftColumnVisible={isLeftColumnVisible}
-          canSubmitFeedback={chatFeedbackState?.canSubmitFeedback}
-          existingFeedback={chatFeedbackState?.existingFeedback}
-          markAsSubmitted={chatMarkAsSubmitted}
-        />
-      ),
-      flashcards: (
-        <Flashcards 
-          videoId={currentVideoId || ""}
-          canSubmitFeedback={flashcardFeedbackState?.canSubmitFeedback}
-          existingFeedback={flashcardFeedbackState?.existingFeedback}
-          markAsSubmitted={flashcardMarkAsSubmitted}
-        />
-      ),
-      quiz: (
-        <Quiz 
-          videoId={currentVideoId || ""}
-          canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
-          existingFeedback={quizFeedbackState?.existingFeedback}
-          markAsSubmitted={quizMarkAsSubmitted}
-          topics={videoDetail?.topics}
-        />
-      ),
-      summary: (
-        <Summary 
-          videoId={currentVideoId || ""}
-          canSubmitFeedback={summaryFeedbackState?.canSubmitFeedback}
-          existingFeedback={summaryFeedbackState?.existingFeedback}
-          markAsSubmitted={summaryMarkAsSubmitted}
-        />
-      ),
-    };
+    // Create refs to track the latest feedback states without causing re-renders
+    const feedbackStatesRef = useRef({
+      chat: chatFeedbackState,
+      flashcards: flashcardFeedbackState,
+      quiz: quizFeedbackState,
+      summary: summaryFeedbackState,
+    });
+
+
+    // Update refs when feedback states change
+    useEffect(() => {
+      feedbackStatesRef.current = {
+        chat: chatFeedbackState,
+        flashcards: flashcardFeedbackState,
+        quiz: quizFeedbackState,
+        summary: summaryFeedbackState,
+      };
+    }, [chatFeedbackState, flashcardFeedbackState, quizFeedbackState, summaryFeedbackState]);
+
+    // Create completely static components that never change
+    // This is the most aggressive approach to prevent any re-renders
+    const components = useMemo(() => {
+      console.log("🔄 Creating STATIC components for videoId:", currentVideoId);
+      
+      return {
+        chat: (
+          <Chat
+            key={`chat-${currentVideoId}`}
+            videoId={currentVideoId || ""}
+            messages={chatMessages}
+            isLoading={isChatLoading}
+            error={chatError}
+            onSendMessage={handleSendMessage}
+            isLeftColumnVisible={isLeftColumnVisible}
+            canSubmitFeedback={chatFeedbackState?.canSubmitFeedback}
+            existingFeedback={chatFeedbackState?.existingFeedback}
+            markAsSubmitted={chatMarkAsSubmitted}
+          />
+        ),
+        flashcards: (
+          <FlashcardsWrapper 
+            key={`flashcards-${currentVideoId}`}
+            videoId={currentVideoId || ""}
+          />
+        ),
+        quiz: (
+          <Quiz 
+            key={`quiz-${currentVideoId}`}
+            videoId={currentVideoId || ""}
+            canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
+            existingFeedback={quizFeedbackState?.existingFeedback}
+            markAsSubmitted={quizMarkAsSubmitted}
+            topics={videoDetail?.topics}
+          />
+        ),
+        summary: (
+          <SummaryWrapper 
+            key={`summary-${currentVideoId}`}
+            videoId={currentVideoId || ""}
+          />
+        ),
+      };
+    }, [currentVideoId]); // ONLY depend on currentVideoId
   
     const handleShare = useCallback(() => {
       setIsShareModalOpen(true);
@@ -1401,52 +1442,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
             />
           </div>
         )}
-  
-        {/* Debug/Test Controls - Remove in production */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="fixed bottom-4 right-4 z-50 space-y-2">
-            <button
-              onClick={() => {
-                console.log("🧪 Manual test button clicked");
-                saveVideoProgress();
-              }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
-            >
-              Test Save Progress
-            </button>
-            <button
-              onClick={() => {
-                console.log("🧪 Test navigation with alert");
-                navigateWithProgress('/dashboard');
-              }}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-            >
-              Test Navigation Alert
-            </button>
-            <button
-              onClick={() => {
-                console.log("🧪 Test browser back");
-                window.history.back();
-              }}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700"
-            >
-              Test Browser Back
-            </button>
-            <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Watch: {Math.round(videoProgress)}%
-            </div>
-            <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Duration: {videoDurationRef.current}s
-            </div>
-            <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Video ID: {currentVideoId}
-            </div>
-            <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Player Ready: {ytPlayerRef.current ? 'Yes' : 'No'}
-            </div>
-          </div>
-        )}
-  
+
   
         <style>{`
                   /* Simple toggle switch styles */

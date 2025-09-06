@@ -11,6 +11,9 @@ const API_CONFIG = {
 // Create axios instance with default config
 const apiClient = axios.create(API_CONFIG);
 
+// Global flags to prevent duplicate API calls
+const activeRequests = new Map<string, Promise<any>>();
+
 // Add request interceptor to add auth token
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
@@ -336,6 +339,90 @@ export const videoApi = {
     );
     return response.data;
   },
+
+  // Video Summary API with global deduplication
+  getVideoSummary: async (
+    videoId: string
+  ): Promise<{ summary: string; sections: Array<{ title: string; content: string }> }> => {
+    const requestKey = `summary-${videoId}`;
+    
+    // Check if request is already in progress
+    if (activeRequests.has(requestKey)) {
+      console.log("🔍 ULTRA AGGRESSIVE: Reusing existing summary request for:", videoId);
+      return activeRequests.get(requestKey)!;
+    }
+
+    const requestPromise = (async () => {
+      try {
+        const response = await apiRequest<{ summary: string; sections: Array<{ title: string; content: string }> }>(
+          "GET",
+          `/video/summary?video_id=${encodeURIComponent(videoId)}`
+        );
+        return response.data;
+      } catch (error: any) {
+        console.error("❌ getVideoSummary API error:", error);
+        // Return a fallback structure to prevent component crashes
+        return {
+          summary: "Summary not available",
+          sections: [{
+            title: "Video Summary",
+            content: "Unable to load summary at this time. Please try again later."
+          }]
+        };
+      } finally {
+        // Remove from active requests when done
+        activeRequests.delete(requestKey);
+      }
+    })();
+
+    // Store the promise to prevent duplicate requests
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
+  },
+
+  // Video Flashcards API with global deduplication
+  getVideoFlashcards: async (
+    videoId: string
+  ): Promise<{ flashcards: Array<{ id: number; question: string; answer: string }> }> => {
+    const requestKey = `flashcards-${videoId}`;
+    
+    // Check if request is already in progress
+    if (activeRequests.has(requestKey)) {
+      console.log("🔍 ULTRA AGGRESSIVE: Reusing existing flashcards request for:", videoId);
+      return activeRequests.get(requestKey)!;
+    }
+
+    const requestPromise = (async () => {
+      try {
+        const response = await apiRequest<{ flashcards: Array<{ id: number; question: string; answer: string }> }>(
+          "GET",
+          `/video/flash-card?video_id=${encodeURIComponent(videoId)}`
+        );
+        return response.data;
+      } catch (error: any) {
+        console.error("❌ getVideoFlashcards API error:", error);
+        // Return a fallback structure to prevent component crashes
+        return {
+          flashcards: [{
+            id: 1,
+            question: "Flashcards not available",
+            answer: "Unable to load flashcards at this time. Please try again later."
+          }]
+        };
+      } finally {
+        // Remove from active requests when done
+        activeRequests.delete(requestKey);
+      }
+    })();
+
+    // Store the promise to prevent duplicate requests
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
+  },
+
+
+
+
 };
 
 interface ChatMessage {
