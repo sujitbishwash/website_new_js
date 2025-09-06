@@ -1158,10 +1158,9 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
         ),
         quiz: (() => {
           console.log("🎯 VideoPage: Rendering Quiz with topics:", videoDetail?.topics);
-          const topicsKey = videoDetail?.topics?.join(',') || 'default';
           return (
             <Quiz 
-              key={`quiz-${currentVideoId}-${topicsKey}`}
+              key={`quiz-${currentVideoId}`}
               videoId={currentVideoId || ""}
               canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
               existingFeedback={quizFeedbackState?.existingFeedback}

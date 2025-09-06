@@ -675,12 +675,32 @@ export const quizApi = {
 
   // New API for dynamic quiz generation
   generateQuiz: async (topics: string[]): Promise<QuizResponse> => {
-    const response = await apiRequest<QuizResponse>(
-      "POST",
-      "/test-series/quiz",
-      { topics }
-    );
-    return response.data;
+    const requestKey = `quiz-${topics.join(',')}`;
+    
+    // Check if there's already an active request for the same topics
+    if (activeRequests.has(requestKey)) {
+      console.log(`🔄 Quiz API: Reusing existing request for topics: ${topics.join(',')}`);
+      return activeRequests.get(requestKey)! as Promise<QuizResponse>;
+    }
+
+    console.log(`🆕 Quiz API: Creating new request for topics: ${topics.join(',')}`);
+    const requestPromise = (async () => {
+      try {
+        const response = await apiRequest<QuizResponse>(
+          "POST",
+          "/test-series/quiz",
+          { topics }
+        );
+        return response.data;
+      } finally {
+        // Clean up the request from active requests
+        activeRequests.delete(requestKey);
+      }
+    })();
+
+    // Store the promise for potential reuse
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
   },
 };
 

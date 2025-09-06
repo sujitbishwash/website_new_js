@@ -196,13 +196,22 @@ const Quiz: React.FC<QuizProps> = ({
   markAsSubmitted,
   topics,
 }) => {
-  // Generate unique component instance ID for debugging
-  const componentId = React.useMemo(() => Math.random().toString(36).substr(2, 9), []);
+  // Generate unique component instance ID for debugging (stable across renders)
+  const componentId = React.useRef(Math.random().toString(36).substr(2, 9)).current;
+  
+  // Debug component mount/unmount
+  React.useEffect(() => {
+    console.log(`🏗️ Quiz Component [${componentId}] MOUNTED with topics:`, topics);
+    return () => {
+      console.log(`🗑️ Quiz Component [${componentId}] UNMOUNTED`);
+    };
+  }, [componentId, topics]);
   
   // Memoize default topics to prevent infinite re-renders
   const defaultTopics = React.useMemo(() => ["General Knowledge"], []);
   const memoizedTopics = React.useMemo(() => {
     // Use topics from video detail API if available, otherwise fallback to default
+    console.log(`🔍 Quiz Component [${componentId}] Topics prop:`, topics);
     if (topics && topics.length > 0) {
       console.log(`🎯 Quiz Component [${componentId}] Using video topics:`, topics);
       return topics;
@@ -237,9 +246,12 @@ const Quiz: React.FC<QuizProps> = ({
     number | null
   >(null);
 
-  // Reset component state when topics change
+  // Fetch quiz questions from API when topics change
   React.useEffect(() => {
-    console.log(`🔄 Quiz Component [${componentId}] Topics changed, resetting state`);
+    console.log(`🔄 Quiz Component [${componentId}] useEffect triggered with topics:`, memoizedTopics);
+    
+    // Reset state when topics change
+    console.log(`🔄 Quiz Component [${componentId}] Resetting state for new topics`);
     setQuizQuestions([]);
     setCurrentQuestion(0);
     setShowScore(false);
@@ -249,17 +261,6 @@ const Quiz: React.FC<QuizProps> = ({
     setQuizError(null);
     hasAttemptedFetchRef.current = false;
     setIsLoadingQuiz(true);
-  }, [memoizedTopics, componentId]);
-
-  // Fetch quiz questions from API
-  React.useEffect(() => {
-    console.log(`🔄 Quiz Component [${componentId}] useEffect triggered with topics:`, memoizedTopics);
-    
-    // Guard to prevent API calls if already attempted
-    if (hasAttemptedFetchRef.current) {
-      console.log(`🚫 Quiz Component [${componentId}] Skipping API call - already attempted`);
-      return;
-    }
 
     const fetchQuizQuestions = async () => {
       try {
@@ -280,7 +281,7 @@ const Quiz: React.FC<QuizProps> = ({
     };
 
     fetchQuizQuestions();
-  }, [memoizedTopics, componentId]); // Only depend on memoizedTopics and componentId
+  }, [memoizedTopics]); // Only depend on memoizedTopics
 
   const handleNextQuestion = () => {
     const nextQuestion = currentQuestion + 1;
