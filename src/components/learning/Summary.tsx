@@ -134,16 +134,26 @@ const SourceIcon = () => (
 
 // --- MODULAR COMPONENTS ---
 
+// Helper function to format text with markdown-like syntax
+const formatText = (text: string) => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+    .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic text
+    .replace(/\n\n/g, '<br/><br/>') // Double newlines
+    .replace(/\n/g, '<br/>'); // Single newlines
+};
+
 const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
   <li className="mb-2">
     <div className="flex items-start">
       <span
         className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-foreground"
       ></span>
-      <p className="text-muted-foreground">
-        {point.text}
-        <SourceIcon />
-      </p>
+      <div 
+        className="text-muted-foreground"
+        dangerouslySetInnerHTML={{ __html: formatText(point.text) }}
+      />
+      <SourceIcon />
     </div>
     {point.subPoints && (
       <ul
@@ -156,10 +166,11 @@ const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
               <span
                 className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-muted-foreground"
               ></span>
-              <p className="text-muted-foreground">
-                {subPoint.text}
-                <SourceIcon />
-              </p>
+              <div 
+                className="text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: formatText(subPoint.text) }}
+              />
+              <SourceIcon />
             </div>
           </li>
         ))}
@@ -174,9 +185,8 @@ const SummarySection: React.FC<{ section: SummarySectionData }> = ({
   <div className="mb-8">
     <h2
       className="text-2xl font-bold mb-4 text-foreground"
-    >
-      {section.title}
-    </h2>
+      dangerouslySetInnerHTML={{ __html: formatText(section.title) }}
+    />
     <ul className="list-none p-0">
       {section.points.map((point) => (
         <SummaryPointItem key={point.id} point={point} />
@@ -431,6 +441,104 @@ const Summary: React.FC<SummaryProps> = React.memo(({
               text: section.content || section.text || section.description || "No content available"
             }]
           }));
+        } else if (response.transcript) {
+          // Handle the actual API response format with transcript field
+          const transcriptText = response.transcript;
+          
+          // Split the transcript into sections based on markdown headers
+          const sections = transcriptText.split(/\n\n\*\*(.*?)\*\*/g);
+          const processedSections: SummarySectionData[] = [];
+          
+          for (let i = 0; i < sections.length; i += 2) {
+            if (sections[i + 1]) {
+              // This is a section with a header
+              const title = sections[i + 1].trim();
+              const content = sections[i + 2] || sections[i].trim();
+              
+              // Split content into points based on bullet points or newlines
+              const points = content
+                .split(/\n\*|\n-|\n\d+\./)
+                .filter((point: string) => point.trim().length > 0)
+                .map((point: string, pointIndex: number) => ({
+                  id: `point_${i}_${pointIndex}`,
+                  text: point.trim().replace(/^\*|\d+\./, '').trim()
+                }));
+
+              processedSections.push({
+                id: `section_${i}`,
+                title: title,
+                points: points.length > 0 ? points : [{
+                  id: `point_${i}`,
+                  text: content.trim()
+                }]
+              });
+            }
+          }
+          
+          // If no sections were created, try to create sections from the content
+          if (processedSections.length === 0) {
+            // Look for common patterns in the transcript
+            const keyTakeawayMatch = transcriptText.match(/\*\*Key Takeaway:\*\*(.*?)(?=\*\*|$)/s);
+            const mainPointsMatch = transcriptText.match(/\*\*Main Points Covered:\*\*(.*?)(?=\*\*|$)/s);
+            const adviceMatch = transcriptText.match(/\*\*Advice for.*?:\*\*(.*?)(?=\*\*|$)/s);
+            
+            if (keyTakeawayMatch) {
+              processedSections.push({
+                id: "key_takeaway",
+                title: "Key Takeaway",
+                points: [{
+                  id: "key_takeaway_point",
+                  text: keyTakeawayMatch[1].trim()
+                }]
+              });
+            }
+            
+            if (mainPointsMatch) {
+              const mainPoints = mainPointsMatch[1]
+                .split(/\n\*|\n-|\n\d+\./)
+                .filter((point: string) => point.trim().length > 0)
+                .map((point: string, index: number) => ({
+                  id: `main_point_${index}`,
+                  text: point.trim().replace(/^\*|\d+\./, '').trim()
+                }));
+              
+              processedSections.push({
+                id: "main_points",
+                title: "Main Points Covered",
+                points: mainPoints
+              });
+            }
+            
+            if (adviceMatch) {
+              const advicePoints = adviceMatch[1]
+                .split(/\n\*|\n-|\n\d+\./)
+                .filter((point: string) => point.trim().length > 0)
+                .map((point: string, index: number) => ({
+                  id: `advice_point_${index}`,
+                  text: point.trim().replace(/^\*|\d+\./, '').trim()
+                }));
+              
+              processedSections.push({
+                id: "advice",
+                title: "Advice for SBI PO Aspirants",
+                points: advicePoints
+              });
+            }
+            
+            // If still no sections, create a single section with the full transcript
+            if (processedSections.length === 0) {
+              processedSections.push({
+                id: "summary",
+                title: "Video Summary",
+                points: [{
+                  id: "summary_point",
+                  text: transcriptText
+                }]
+              });
+            }
+          }
+          
+          transformedData = processedSections;
         } else if (response.summary) {
           // If only summary text is available, create a single section
           transformedData = [{

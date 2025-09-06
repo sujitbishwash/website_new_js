@@ -131,9 +131,14 @@ const Flashcard: React.FC<FlashcardProps> = ({
       >
         {/* Front Face */}
         <div className={baseFaceClass}>
-          <span className="absolute top-6 left-8 text-sm font-semibold text-primary uppercase tracking-wider">
-            Question
-          </span>
+          <div className="absolute top-6 left-8 right-8 flex justify-between items-center">
+            <span className="text-sm font-semibold text-primary uppercase tracking-wider">
+              Question
+            </span>
+            <span className="text-sm font-semibold text-accent">
+              #{card.id}
+            </span>
+          </div>
           <p
             className="text-[clamp(1.25rem,2.5vw,2rem)]
  font-bold text-center text-foreground leading-tight"
@@ -147,9 +152,14 @@ const Flashcard: React.FC<FlashcardProps> = ({
 
         {/* Back Face */}
         <div className={`${baseFaceClass} [transform:rotateY(180deg)]`}>
-          <span className="absolute top-6 left-8 text-sm font-semibold text-primary uppercase tracking-wider">
-            Answer
-          </span>
+          <div className="absolute top-6 left-8 right-8 flex justify-between items-center">
+            <span className="text-sm font-semibold text-primary uppercase tracking-wider">
+              Answer
+            </span>
+            <span className="text-sm font-semibold text-accent">
+              #{card.id}
+            </span>
+          </div>
           <p
             className="text-[clamp(1.25rem,2.5vw,2rem)]
  font-bold text-center text-foreground leading-tight"
@@ -287,9 +297,16 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
         let transformedCards: Card[] = [];
 
         // Handle different possible response structures
-        if (response.flashcards && Array.isArray(response.flashcards)) {
-          // Transform API response to our component format
-          transformedCards = response.flashcards.map((card: any, index: number) => ({
+        if (response.cards && Array.isArray(response.cards)) {
+          // Transform API response to our component format (actual API structure)
+          transformedCards = response.cards.map((card: any, index: number) => ({
+            id: card.id || index + 1,
+            question: card.question || "No question available",
+            answer: card.answer || "No answer available"
+          }));
+        } else if ((response as any).flashcards && Array.isArray((response as any).flashcards)) {
+          // Transform API response to our component format (expected structure)
+          transformedCards = (response as any).flashcards.map((card: any, index: number) => ({
             id: card.id || index + 1,
             question: card.question || "No question available",
             answer: card.answer || "No answer available"

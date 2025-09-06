@@ -343,7 +343,7 @@ export const videoApi = {
   // Video Summary API with global deduplication
   getVideoSummary: async (
     videoId: string
-  ): Promise<{ summary: string; sections: Array<{ title: string; content: string }> }> => {
+  ): Promise<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }> => {
     const requestKey = `summary-${videoId}`;
     
     // Check if request is already in progress
@@ -383,7 +383,7 @@ export const videoApi = {
   // Video Flashcards API with global deduplication
   getVideoFlashcards: async (
     videoId: string
-  ): Promise<{ flashcards: Array<{ id: number; question: string; answer: string }> }> => {
+  ): Promise<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }> => {
     const requestKey = `flashcards-${videoId}`;
     
     // Check if request is already in progress
@@ -394,7 +394,7 @@ export const videoApi = {
 
     const requestPromise = (async () => {
       try {
-        const response = await apiRequest<{ flashcards: Array<{ id: number; question: string; answer: string }> }>(
+        const response = await apiRequest<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }>(
           "GET",
           `/video/flash-card?video_id=${encodeURIComponent(videoId)}`
         );
@@ -403,11 +403,12 @@ export const videoApi = {
         console.error("❌ getVideoFlashcards API error:", error);
         // Return a fallback structure to prevent component crashes
         return {
-          flashcards: [{
+          cards: [{
             id: 1,
             question: "Flashcards not available",
             answer: "Unable to load flashcards at this time. Please try again later."
-          }]
+          }],
+          video_id: videoId
         };
       } finally {
         // Remove from active requests when done
