@@ -175,6 +175,14 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       onClose();
       navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
+      // Check if it's an out-of-syllabus error from getVideoDetail
+      if (err.isOutOfSyllabus || err.status === 204) {
+        console.log("Content is out of syllabus, showing OutOfSyllabus modal");
+        setShowOutOfSyllabus(true);
+        setIsLoading(false);
+        return;
+      }
+      
       setError(
         err.message ||
           "Failed to add video. Please check the URL and try again."
@@ -216,6 +224,14 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       onClose();
       navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
+      // Check if it's an out-of-syllabus error from getVideoDetail
+      if (err.isOutOfSyllabus || err.status === 204) {
+        console.log("Content is out of syllabus, showing OutOfSyllabus modal");
+        setShowOutOfSyllabus(true);
+        setIsLoading(false);
+        return;
+      }
+      
       setError(
         err.message || "Failed to add suggested video. Please try again."
       );
@@ -232,6 +248,10 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     "YouTubeSourceDialog render - showOutOfSyllabus:",
     showOutOfSyllabus
   ); // Debug log
+  
+  // Debug logging for suggested videos
+  console.log("🎬 YouTubeSourceDialog - suggestedVideos:", suggestedVideos);
+  console.log("🎬 YouTubeSourceDialog - suggestedVideos length:", suggestedVideos?.length);
 
   return (
     // Backdrop
@@ -380,7 +400,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       {/* OutOfSyllabus Modal Overlay */}
       {showOutOfSyllabus && (
         <div
-          className="fixed inset-0 z-60 flex items-center justify-center bg-black bg-opacity-50"
+          className="fixed inset-0 z-60 flex items-center justify-center bg-background/30 backdrop-blur-sm"
           onClick={(e) => {
             // Only close if clicking on the backdrop, not on the modal content
             if (e.target === e.currentTarget) {
@@ -393,6 +413,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               console.log("Closing OutOfSyllabus modal"); // Debug log
               setShowOutOfSyllabus(false);
             }}
+            suggestedVideos={suggestedVideos}
           />
         </div>
       )}

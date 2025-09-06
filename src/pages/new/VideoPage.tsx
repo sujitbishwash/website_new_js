@@ -3,6 +3,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import Flashcards from "@/components/learning/Flashcards";
   import Quiz from "@/components/learning/Quiz";
   import Summary from "@/components/learning/Summary";
+  import OutOfSyllabus from "@/components/OutOfSyllabus";
   
   import { ComponentName } from "@/lib/api-client";
   import { ROUTES } from "@/routes/constants";
@@ -25,8 +26,8 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   } from "lucide-react";
   import { useCallback, useEffect, useRef, useState } from "react";
 import React from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { chatApi, videoApi, VideoDetail } from "../../lib/api-client";
+import { useLocation, useNavigate, useParams, useBlocker } from "react-router-dom";
+import { chatApi, videoApi, VideoDetail, videoProgressApi } from "../../lib/api-client";
 import YouTube from "react-youtube";
 import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
   
@@ -43,8 +44,6 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     className?: string;
   }
   
-
-  
   interface Chapter {
     time: string;
     title: string;
@@ -60,6 +59,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     transcriptError: string | null;
     onFeedbackSubmit: () => void;
     onFeedbackSkip: () => void;
+    onFetchTranscript: () => void;
   }
   
   // Learning mode types
@@ -105,14 +105,15 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     videoDetail: VideoDetail | null;
     isLoading: boolean;
     onToggleFullScreen: () => void;
+    onNavigate: (to: string) => void;
   }
   
   const Header: React.FC<HeaderProps> = ({
     videoDetail,
     isLoading,
     onToggleFullScreen,
+    onNavigate,
   }) => {
-    const navigate = useNavigate();
   
     return (
       <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 sm:gap-4">
@@ -128,7 +129,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
         <div className="flex items-center gap-2 self-start sm:self-center">
           <button
             onClick={() => {
-              navigate(ROUTES.PREMIUM);
+              onNavigate(ROUTES.PREMIUM);
             }}
             className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none"
           >
@@ -147,12 +148,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     );
   };
   
-
-  
   // Memoize the VideoPlayer component to prevent re-renders from feedback state changes
-
-  
-
   
   const ContentTabs: React.FC<ContentTabsProps> = ({
     chapters,
@@ -161,6 +157,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     isLoadingTranscript,
     chaptersError,
     transcriptError,
+    onFetchTranscript,
   }) => {
     const [activeTab, setActiveTab] = useState("chapters");
     return (
@@ -257,7 +254,13 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
             </div>
           ) : transcriptError ? (
             <div className="text-center py-6 sm:py-8">
-              <p className="text-xs sm:text-sm text-red-400">{transcriptError}</p>
+              <p className="text-xs sm:text-sm text-red-400 mb-4">{transcriptError}</p>
+              <button
+                onClick={onFetchTranscript}
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Try Again
+              </button>
             </div>
           ) : transcript ? (
             <div className="text-xs sm:text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
@@ -265,9 +268,15 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
             </div>
           ) : (
             <div className="text-center text-gray-500 py-6 sm:py-8">
-              <p className="text-xs sm:text-sm">
-                Transcript content would appear here.
+              <p className="text-xs sm:text-sm mb-4">
+                Click the button below to fetch the video transcript.
               </p>
+              <button
+                onClick={onFetchTranscript}
+                className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Fetch Transcript
+              </button>
             </div>
           )}
         </div>
@@ -451,6 +460,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     const [chaptersError, setChaptersError] = useState<string | null>(null);
     const [transcriptError, setTranscriptError] = useState<string | null>(null);
     const [isLeftColumnVisible, setIsLeftColumnVisible] = useState(true);
+    const [showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
 
     // State for learning mode
     const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
@@ -477,13 +487,157 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     const currentVideoId = videoId || location.state?.videoId;
 
 
+    // Function to save video progress - only called on navigation away from page
+    const saveVideoProgress = useCallback(async () => {
+      console.log("💾 saveVideoProgress called:", { 
+        currentVideoId, 
+        hasPlayer: !!ytPlayerRef.current,
+        playerState: ytPlayerRef.current?.getPlayerState?.() 
+      });
+      
+      if (!currentVideoId || !ytPlayerRef.current) {
+        console.log("❌ Cannot save progress - missing videoId or player");
+        return;
+      }
+
+      try {
+        const currentTime = ytPlayerRef.current.getCurrentTime();
+        const duration = ytPlayerRef.current.getDuration();
+        
+        console.log("📊 Video data on navigation:", { currentTime, duration });
+        
+        // Only save progress if video has been played (currentTime >= 0.1) and duration is available
+        if (duration > 0 && currentTime >= 0.1) {
+          const watchPercentage = (currentTime / duration) * 100;
+          
+          try {
+            await videoProgressApi.trackProgress({
+              video_id: currentVideoId,
+              watch_percentage: Math.round(watchPercentage * 100) / 100,
+              total_duration: Math.round(duration),
+              current_position: Math.round(currentTime),
+              page_url: window.location.href,
+            });
+
+            console.log("📊 Video progress saved successfully on navigation:", {
+              videoId: currentVideoId,
+              watchPercentage: Math.round(watchPercentage * 100) / 100,
+              currentTime: Math.round(currentTime),
+              totalDuration: Math.round(duration)
+            });
+          } catch (apiError: any) {
+            // If API endpoint doesn't exist (404), try alternative approach
+            if (apiError.status === 404) {
+              console.log("⚠️ Video progress API not available, storing locally:", {
+                videoId: currentVideoId,
+                watchPercentage: Math.round(watchPercentage * 100) / 100,
+                currentTime: Math.round(currentTime),
+                totalDuration: Math.round(duration)
+              });
+              
+              // Store progress in localStorage as fallback
+              const progressData = {
+                videoId: currentVideoId,
+                title: videoDetail?.title || `Video ${currentVideoId}`,
+                thumbnailUrl: `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`,
+                watchPercentage: Math.round(watchPercentage * 100) / 100,
+                currentTime: Math.round(currentTime),
+                totalDuration: Math.round(duration),
+                lastUpdated: new Date().toISOString(),
+                subject: videoDetail?.topics?.[0] || 'General',
+                description: videoDetail?.description || 'Video content'
+              };
+              localStorage.setItem(`video_progress_${currentVideoId}`, JSON.stringify(progressData));
+            } else {
+              throw apiError;
+            }
+          }
+        } else {
+          console.log("⏸️ Skipping progress save - video not played yet:", {
+            currentTime,
+            duration,
+            videoId: currentVideoId,
+            condition: `duration > 0: ${duration > 0}, currentTime >= 0.1: ${currentTime >= 0.1}`
+          });
+        }
+      } catch (error) {
+        console.error("❌ Failed to save video progress:", error);
+      }
+    }, [currentVideoId, videoDetail]);
+
+    // Create a wrapped navigate function that shows alert before navigating
+    const navigateWithProgress = useCallback((to: string, options?: any) => {
+      console.log("🧭 Navigate called with alert:", { to, options });
+      /*
+      const confirmed = window.confirm("Are you sure you want to leave this video?");
+      if (confirmed) {
+        console.log("✅ User confirmed, navigating to:", to);
+        navigate(to, options);
+      } else {
+        console.log("❌ User cancelled navigation");
+      }
+        */
+      saveVideoProgress();
+      navigate(to, options);
+    }, [navigate]);
+
+    // React Router navigation blocker
+    const blocker = useBlocker(
+      ({ currentLocation, nextLocation }) => {
+        const isNavigatingAway = currentLocation.pathname !== nextLocation.pathname;
+        console.log("🚧 Navigation blocker triggered:", { 
+          currentPath: currentLocation.pathname, 
+          nextPath: nextLocation.pathname, 
+          isNavigatingAway 
+        });
+        return isNavigatingAway;
+      }
+    );
+
+    // Handle React Router navigation blocking
+    useEffect(() => {
+      if (blocker.state === "blocked") {
+        console.log("🚧 Blocker state is blocked, showing alert...");
+        // Show alert before allowing navigation
+        /*
+        const confirmed = window.confirm("Are you sure you want to leave this video?");
+        if (confirmed) {
+          console.log("✅ User confirmed, proceeding with navigation");
+          blocker.proceed();
+        } else {
+          console.log("❌ User cancelled navigation");
+          blocker.reset();
+        }
+          */
+        saveVideoProgress();
+        blocker.proceed();
+      }
+    }, [blocker]);
+
+    // Track previous location to detect navigation
+    const prevLocationRef = useRef(location.pathname);
+    
+    useEffect(() => {
+      // Check if location has changed
+      if (prevLocationRef.current !== location.pathname) {
+        
+        /*
+        const confirmed = window.confirm("Are you sure you want to leave this video?");
+        if (!confirmed) {
+          // Navigate back to previous location
+          window.history.pushState(null, '', prevLocationRef.current);
+        }
+        */
+        saveVideoProgress();
+        prevLocationRef.current = location.pathname;
+      }
+    }, [location.pathname]);
 
     // Simple feedback state management
       // Use the feedback tracker hook for all components
   const {
     feedbackStates,
     isLoading: isFeedbackLoading,
-    error: feedbackError,
     markAsSubmitted
   } = useMultiFeedbackTracker({
     components: [ComponentName.Video, ComponentName.Chat, ComponentName.Quiz, ComponentName.Summary, ComponentName.Flashcard],
@@ -529,22 +683,6 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     const summaryFeedbackState = feedbackStates[ComponentName.Summary] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
     const flashcardFeedbackState = feedbackStates[ComponentName.Flashcard] || { canSubmitFeedback: true, existingFeedback: null, reason: "" };
 
-    // Debug feedback states (only in development)
-    if (process.env.NODE_ENV === 'development') {
-      console.log("🔍 Feedback States:", {
-        chat: chatFeedbackState,
-        quiz: quizFeedbackState,
-        summary: summaryFeedbackState,
-        flashcard: flashcardFeedbackState,
-        isLoading: isFeedbackLoading,
-        error: feedbackError
-      });
-    }
-
-
-
-
-
     // Components object will be defined after all functions are available
 
     // Local modal state for feedback
@@ -557,7 +695,10 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       const player = event.target;
       console.log("🎯 YouTube player ready!");
       
-      // Start progress tracking interval
+      // Store player reference for progress tracking
+      ytPlayerRef.current = player;
+      
+      // Start progress tracking interval - only track progress, don't save
       const interval = setInterval(() => {
         try {
           const currentTime = player.getCurrentTime();
@@ -567,30 +708,53 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
             const progress = (currentTime / duration) * 100;
             setVideoProgress(progress);
             
+            // Store duration for progress tracking
+            videoDurationRef.current = duration;
+            
             // Auto-show feedback when video reaches 90%
             if (progress >= 90 && !hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current && videoCanSubmitFeedback) {
               openFeedbackModal();
               hasShownFeedbackRef.current = true;
             }
+            
+            // Log progress every 10 seconds for debugging
+            if (currentTime >= 0.1 && Math.floor(currentTime) % 10 === 0) {
+              console.log("🎬 Video progress tracking:", {
+                currentTime: currentTime.toFixed(2),
+                duration: duration.toFixed(2),
+                watchPercentage: progress.toFixed(2),
+                playerState: player.getPlayerState?.()
+              });
+            }
           }
         } catch (error) {
           console.warn("⚠️ Error tracking video progress:", error);
         }
-      }, 500); // Update every 500ms for smooth progress
+      }, 2000); // Update every 2 seconds
       
       // Store interval reference for cleanup
-      progressIntervalRef.current = interval;
-    }, [openFeedbackModal]);
+        progressIntervalRef.current = interval;
+        
+        // Return cleanup function
+        return () => {
+          if (interval) {
+            clearInterval(interval);
+          }
+        };
+    }, [openFeedbackModal, saveVideoProgress]);
     
-    const onYouTubeEnd = useCallback(() => {
+    const onYouTubeEnd = useCallback(async () => {
       setVideoProgress(100);
+      
+      // Save final progress when video ends
+      await saveVideoProgress();
       
       // Show feedback modal when video ends
       if (!hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current) {
         openFeedbackModal();
         hasShownFeedbackRef.current = true;
       }
-    }, [openFeedbackModal]);
+    }, [openFeedbackModal, saveVideoProgress]);
     
     const onYouTubeStateChange = useCallback((event: any) => {
       const playerState = event.data;
@@ -602,7 +766,12 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       if (playerState === 0) { // 0 = ended
         onYouTubeEnd();
       }
-    }, [onYouTubeEnd]);
+      
+      // Log when video starts playing (state 1 = playing)
+      if (playerState === 1) {
+        console.log("▶️ Video started playing");
+      }
+    }, [onYouTubeEnd, saveVideoProgress]);
 
     // Use refs for feedback gates to avoid effect dependencies causing teardown
     const videoCanSubmitFeedbackRef = useRef<boolean>(false);
@@ -640,82 +809,84 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     // The useMultiFeedbackTracker hook automatically fetches feedback states
     // when currentVideoId changes, so we don't need manual fetching here
   
-    // Cleanup progress tracking on unmount
+        // Cleanup progress tracking on unmount
     useEffect(() => {
       return () => {
         if (progressIntervalRef.current != null) {
           clearInterval(progressIntervalRef.current);
           progressIntervalRef.current = null;
         }
+        
+        // Save final progress before unmounting
+        saveVideoProgress();
       };
-    }, []);
+    }, [saveVideoProgress]);
   
-    // Page leaving guard - only trigger when user has watched more than 90%
+    // Navigation guard - show alert on any navigation attempt
     useEffect(() => {
       const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-        if (
-          videoCanSubmitFeedbackRef.current &&
-          !videoExistingFeedback &&
-          !isFeedbackModalOpen &&
-          videoProgress >= 90 // Only prompt if user has watched 90% or more
-        ) {
-          event.preventDefault();
-          event.returnValue =
-            "You have watched most of this video. Would you like to provide feedback before leaving?";
-  
-          // Store state for next visit
-          localStorage.setItem(
-            `feedback_pending_${currentVideoId}`,
-            JSON.stringify({
-              timestamp: Date.now(),
-              watchPercentage: videoProgress, // Use actual video progress
-              videoTitle: videoDetail?.title,
-            })
-          );
-        }
+        // Show alert before leaving the page
+        console.log("🚪 Before unload - showing alert");
+        const message = "Are you sure you want to leave this video?";
+        event.returnValue = message;
+        return message;
       };
-  
-      const handlePopState = (event: PopStateEvent) => {
-        if (
-          videoCanSubmitFeedbackRef.current &&
-          !videoExistingFeedback &&
-          !isFeedbackModalOpen &&
-          videoProgress >= 90 // Only prompt if user has watched 90% or more
-        ) {
-          // Show feedback modal before navigation
-          openFeedbackModal();
-  
-          // Prevent immediate navigation
-          event.preventDefault();
-  
-          // Store navigation intent
-          localStorage.setItem(
-            `navigation_pending_${currentVideoId}`,
-            JSON.stringify({
-              timestamp: Date.now(),
-              intendedPath: window.location.pathname,
-              intendedHref: window.location.href,
-            })
-          );
+
+      const handlePopState = () => {
+        // Show alert before browser back/forward navigation
+        console.log("⬅️ Pop state - showing alert");
+        /*
+        const confirmed = window.confirm("Are you sure you want to leave this video?");
+        if (!confirmed) {
+          // Prevent navigation by pushing current state back
+          window.history.pushState(null, '', window.location.href);
         }
+          */
+        saveVideoProgress();
       };
-  
+
+      // Handle React Router navigation
+      const handleRouteChange = () => {
+        // Show alert before navigation
+        console.log("🔄 Route change - showing alert");
+        /*
+        const confirmed = window.confirm("Are you sure you want to leave this video?");
+        return confirmed;
+        */
+        saveVideoProgress();
+        return true;
+      };
+
       // Listen for navigation attempts
       window.addEventListener("beforeunload", handleBeforeUnload);
       window.addEventListener("popstate", handlePopState);
-  
+      
+      // Store the route change handler for cleanup
+      const originalPushState = window.history.pushState;
+      const originalReplaceState = window.history.replaceState;
+      
+      // Override history methods to catch programmatic navigation
+      window.history.pushState = function(...args) {
+        if (handleRouteChange()) {
+          originalPushState.apply(this, args);
+        }
+      };
+      
+      window.history.replaceState = function(...args) {
+        if (handleRouteChange()) {
+          originalReplaceState.apply(this, args);
+        }
+      };
+
       return () => {
         window.removeEventListener("beforeunload", handleBeforeUnload);
         window.removeEventListener("popstate", handlePopState);
+        
+        // Restore original history methods
+        window.history.pushState = originalPushState;
+        window.history.replaceState = originalReplaceState;
       };
-    }, [
-      videoCanSubmitFeedbackRef.current,
-      videoExistingFeedback,
-      isFeedbackModalOpen,
-      currentVideoId,
-      videoDetail?.title,
-      openFeedbackModal,
-    ]);
+    }, []);
   
     // Handle feedback completion and navigation
     const handleFeedbackComplete = useCallback(
@@ -736,7 +907,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
               data.intendedPath &&
               data.intendedPath !== window.location.pathname
             ) {
-              navigate(data.intendedPath);
+              navigateWithProgress(data.intendedPath);
             }
           } catch (error) {
             console.error("Failed to parse pending navigation:", error);
@@ -764,6 +935,12 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           setVideoDetail(details);
         } catch (err: any) {
           console.error("Failed to fetch video details:", err);
+          
+          // Check if it's an out-of-syllabus error
+          if (err.isOutOfSyllabus || err.status === 204) {
+            console.log("Content is out of syllabus, showing OutOfSyllabus modal");
+            setShowOutOfSyllabus(true);
+          }
         } finally {
           setIsLoadingVideo(false);
         }
@@ -803,29 +980,25 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       fetchChapters();
     }, [videoDetail?.external_source_id]);
   
-    // Fetch transcript
-    useEffect(() => {
-      const fetchTranscript = async () => {
-        if (!videoDetail?.external_source_id) return;
-  
-        try {
-          setIsLoadingTranscript(true);
-          setTranscriptError(null);
-  
-          const response = await videoApi.getVideoTranscript(
-            videoDetail.external_source_id
-          );
-          setTranscript(response.transcript);
-        } catch (err: any) {
-          console.error("Failed to fetch transcript:", err);
-          setTranscriptError("Failed to load transcript. Please try again.");
-        } finally {
-          setIsLoadingTranscript(false);
-        }
-      };
-  
-      fetchTranscript();
-    }, [videoDetail?.external_source_id]);
+      // Manual transcript fetching function
+  const fetchTranscript = useCallback(async () => {
+    if (!videoDetail?.external_source_id) return;
+
+    try {
+      setIsLoadingTranscript(true);
+      setTranscriptError(null);
+
+      const response = await videoApi.getVideoTranscript(
+        videoDetail.external_source_id
+      );
+      setTranscript(response.transcript);
+    } catch (err: any) {
+      console.error("Failed to fetch transcript:", err);
+      setTranscriptError("Failed to load transcript. Please try again.");
+    } finally {
+      setIsLoadingTranscript(false);
+    }
+  }, [videoDetail?.external_source_id]);
   
     // Initialize chat when videoId changes
     useEffect(() => {
@@ -839,7 +1012,12 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       setChatInitialized(false);
       setChatMessages([]);
       setChatError(null);
-  
+      
+      // Reset transcript state when video changes
+      setTranscript("");
+      setTranscriptError(null);
+      setIsLoadingTranscript(false);
+
       // Reset feedback state when video changes
       // setFeedbackState({ // This line was removed as per the edit hint
       //   hasShownFeedback: false,
@@ -945,6 +1123,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
           existingFeedback={quizFeedbackState?.existingFeedback}
           markAsSubmitted={quizMarkAsSubmitted}
+          topics={videoDetail?.topics}
         />
       ),
       summary: (
@@ -1027,6 +1206,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
                 videoDetail={videoDetail}
                 isLoading={isLoadingVideo}
                 onToggleFullScreen={handleToggleFullScreen}
+                onNavigate={navigateWithProgress}
               />
               {/* YouTube Video Player with Progress Tracking */}
               <div className="mb-4">
@@ -1060,6 +1240,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
                 transcriptError={transcriptError}
                 onFeedbackSubmit={() => handleFeedbackComplete("submit")}
                 onFeedbackSkip={() => handleFeedbackComplete("skip")}
+                onFetchTranscript={fetchTranscript}
               />
             </div>
             <div
@@ -1097,7 +1278,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
                 {window.innerWidth > 640 ? (
                   <button
                     onClick={() => {
-                      navigate(ROUTES.PREMIUM);
+                      navigateWithProgress(ROUTES.PREMIUM);
                     }}
                     className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer glow-purple transition-transform transform hover:scale-105 focus:outline-none"
                   >
@@ -1107,7 +1288,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
                 ) : (
                   <button
                     onClick={() => {
-                      navigate(ROUTES.PREMIUM);
+                      navigateWithProgress(ROUTES.PREMIUM);
                     }}
                     className="flex items-center gap-1 rounded-full p-2 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer glow-purple transition-transform transform hover:scale-105 focus:outline-none"
                   >
@@ -1198,42 +1379,74 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           onClose={handleCloseShareModal}
           url={`https://www.youtube.com`}
         />
+
+        {/* OutOfSyllabus Modal */}
+        {showOutOfSyllabus && (
+          <div
+            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
+            onClick={(e) => {
+              // Only close if clicking on the backdrop, not on the modal content
+              if (e.target === e.currentTarget) {
+                setShowOutOfSyllabus(false);
+                navigateWithProgress(ROUTES.DASHBOARD);
+              }
+            }}
+          >
+            <OutOfSyllabus
+              onGoBack={() => {
+                console.log("Closing OutOfSyllabus modal");
+                setShowOutOfSyllabus(false);
+                navigateWithProgress(ROUTES.DASHBOARD);
+              }}
+            />
+          </div>
+        )}
   
         {/* Debug/Test Controls - Remove in production */}
-        {/**process.env.NODE_ENV === "development" && (
+        {process.env.NODE_ENV === "development" && (
           <div className="fixed bottom-4 right-4 z-50 space-y-2">
             <button
-              onClick={handleManualFeedbackTrigger}
+              onClick={() => {
+                console.log("🧪 Manual test button clicked");
+                saveVideoProgress();
+              }}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
             >
-              Test Feedback
+              Test Save Progress
+            </button>
+            <button
+              onClick={() => {
+                console.log("🧪 Test navigation with alert");
+                navigateWithProgress('/dashboard');
+              }}
+              className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+            >
+              Test Navigation Alert
+            </button>
+            <button
+              onClick={() => {
+                console.log("🧪 Test browser back");
+                window.history.back();
+              }}
+              className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700"
+            >
+              Test Browser Back
             </button>
             <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Watch: {Math.round(watchPercentage)}%
+              Watch: {Math.round(videoProgress)}%
             </div>
             <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
               Duration: {videoDurationRef.current}s
             </div>
             <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Session: {sessionStartTime ? Math.floor((Date.now() - sessionStartTime.getTime()) / 1000) : 0}s
+              Video ID: {currentVideoId}
             </div>
             <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Feedback: {feedbackState.hasShownFeedback ? 'Shown' : 'Not shown'}
+              Player Ready: {ytPlayerRef.current ? 'Yes' : 'No'}
             </div>
-            <button
-              onClick={() => handleSetVideoDuration(300)}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-            >
-              Set Duration (300s)
-            </button>
-            <button
-              onClick={() => handleSetProgress(95)}
-              className="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm hover:bg-yellow-700"
-            >
-              Set Progress (95%)
-            </button>
           </div>
-        )*/}
+        )}
+  
   
         <style>{`
                   /* Simple toggle switch styles */
