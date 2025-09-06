@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   BicepsFlexed,
   Check,
-  ChevronLeft,
   Clock,
   Copy,
   Crown,
