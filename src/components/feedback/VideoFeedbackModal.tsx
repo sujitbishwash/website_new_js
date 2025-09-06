@@ -1,6 +1,6 @@
 import { Angry, Frown, Laugh, Meh, Smile, X } from "lucide-react";
-import React, { useState, useEffect, useMemo } from "react";
-import { feedbackApi, FeedbackRequest } from "@/lib/api-client";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { feedbackApi, FeedbackRequest, FeedbackChipsResponse } from "@/lib/api-client";
 
 // --- TYPE DEFINITIONS ---
 
@@ -10,7 +10,11 @@ export type FeedbackComponent =
   | "Quiz"
   | "Summary"
   | "Video"
-  | "Test";
+  | "Test"
+  | "TestAnalysis"
+  | "VideoRecommendation"
+  | "TestRecommentation"
+  | "SnippetRecommendation";
 
 export interface VideoFeedbackPayload {
   rating: number;
@@ -74,18 +78,6 @@ const SmileyIcon: React.FC<{
   return icons[validRating];
 };
 
-// Dynamic feedback chips based on rating
-const getFeedbackChipsForRating = (rating: number): string[] => {
-  const chipsByRating: Record<number, string[]> = {
-    1: ["Not worth my time", "Poor explanation", "Confusing content", "Waste of time", "Audio issues", "Video quality problems"],
-    2: ["Too many errors", "Hard to follow", "Needs improvement", "Below expectations", "Buffering problems", "Missing steps"],
-    3: ["Somewhat useful", "Neither good nor bad", "Average quality", "Could be better", "Too basic", "Too advanced"],
-    4: ["Practical examples", "Worth recommending", "Clear concepts", "Good content", "Great pace", "Well structured"],
-    5: ["Highly recommended", "Very engaging", "Excellent quality", "Outstanding content", "Clear explanation", "Helpful examples"]
-  };
-  
-  return chipsByRating[rating] || [];
-};
 
 // --- MAIN COMPONENT ---
 
@@ -115,6 +107,9 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   const [submissionStatus, setSubmissionStatus] = useState<
     "idle" | "submitting" | "success" | "error"
   >("idle");
+  const [allChips, setAllChips] = useState<FeedbackChipsResponse>({});
+  const [chipsLoading, setChipsLoading] = useState(false);
+  const [chipsError, setChipsError] = useState<string>("");
 
   // Use parent feedback tracker state (no fallback needed since parent always provides state)
   const canSubmitFeedback = parentCanSubmitFeedback ?? true;
@@ -137,6 +132,8 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
       existingFeedback,
       hasExistingFeedback,
       videoId,
+      componentName,
+      componentNameType: typeof componentName,
     });
   }, [
     parentCanSubmitFeedback,
@@ -144,6 +141,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
     existingFeedback,
     hasExistingFeedback,
     videoId,
+    componentName,
   ]);
 
   const isLowRating = useMemo(() => rating !== null && rating <= 3, [rating]);
@@ -152,11 +150,40 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
     [isLowRating, showCommentToggle]
   );
 
-  // Get dynamic chips based on rating
+  // Fetch all feedback chips from API when modal opens
+  const fetchAllFeedbackChips = useCallback(async () => {
+    try {
+      setChipsLoading(true);
+      setChipsError("");
+      
+      // Validate component name
+      const validComponents = ["Chat", "Flashcard", "Quiz", "Summary", "Video", "Test", "TestAnalysis", "VideoRecommendation", "TestRecommentation", "SnippetRecommendation"];
+      const validComponentName = validComponents.includes(componentName) ? componentName : "Video";
+      
+      console.log("🎯 Fetching all feedback chips for component:", validComponentName);
+      
+      const response = await feedbackApi.getFeedbackChips(validComponentName);
+      setAllChips(response);
+      
+      console.log("✅ All feedback chips loaded successfully:", response);
+    } catch (error: any) {
+      console.error("❌ Failed to fetch feedback chips:", error);
+      setChipsError("Failed to load feedback suggestions");
+      setAllChips({});
+    } finally {
+      setChipsLoading(false);
+    }
+  }, [componentName]);
+
+  // Get dynamic chips by filtering all chips based on current rating
   const dynamicChips = useMemo(() => {
     if (!rating) return [];
-    return getFeedbackChipsForRating(rating);
-  }, [rating]);
+    
+    // Get chips for the current rating from allChips
+    const chipsForRating = allChips[rating.toString()] || [];
+    // Extract just the labels from the chip objects
+    return chipsForRating.map(chip => chip.label);
+  }, [rating, allChips]);
 
   useEffect(() => {
     if (nudgeVisible) {
@@ -165,7 +192,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
     }
   }, [nudgeVisible]);
 
-  // Reset form when modal opens/closes
+  // Reset form and fetch chips when modal opens
   useEffect(() => {
     if (isOpen) {
       setRating(initialRating);
@@ -174,8 +201,13 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
       setShowCommentToggle(false);
       setNudgeVisible(false);
       setSubmissionStatus("idle");
+      setAllChips({});
+      setChipsError("");
+      
+      // Fetch all feedback chips for this component
+      fetchAllFeedbackChips();
     }
-  }, [isOpen, initialRating, initialComment]);
+  }, [isOpen, initialRating, initialComment, fetchAllFeedbackChips]);
 
   const handleChipToggle = (chipLabel: string) => {
     setSelectedChips((prev) =>
@@ -229,9 +261,13 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
     setSubmissionStatus("submitting");
 
     try {
+      // Validate component name for API submission
+      const validComponents = ["Chat", "Flashcard", "Quiz", "Summary", "Video", "Test", "TestAnalysis", "VideoRecommendation", "TestRecommentation", "SnippetRecommendation"];
+      const validComponentName = validComponents.includes(componentName) ? componentName : "Video";
+      
       // Transform data for backend API
       const backendPayload: FeedbackRequest = {
-        component: componentName,
+        component: validComponentName,
         description:
           comment.trim() || selectedChips.join(", ") || `Rating: ${rating}/5`,
         rating,
@@ -241,6 +277,11 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
 
       // Send to backend API
       console.log("🚀 Sending feedback to backend:", backendPayload);
+      console.log("🔍 Component validation:", { 
+        original: componentName, 
+        validated: validComponentName,
+        isValid: validComponents.includes(componentName)
+      });
       await feedbackApi.submitFeedback(backendPayload);
       console.log("✅ Feedback sent to backend successfully");
 
@@ -488,11 +529,51 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                   </label>
 
                   {/* Dynamic Feedback Chips based on rating */}
-                  {dynamicChips.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Select up to 3 suggestions:
+                  <div className="space-y-3">
+                    <div className="text-sm text-gray-600 dark:text-gray-400">
+                      Select up to 3 suggestions:
+                    </div>
+                    
+                    {/* Loading state for chips */}
+                    {chipsLoading && (
+                      <div className="flex items-center justify-center py-4">
+                        <div className="flex items-center space-x-2">
+                          <svg
+                            className="animate-spin h-4 w-4 text-blue-500"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            ></circle>
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            ></path>
+                          </svg>
+                          <span className="text-sm text-gray-500 dark:text-gray-400">
+                            Loading suggestions...
+                          </span>
+                        </div>
                       </div>
+                    )}
+
+                    {/* Error state for chips */}
+                    {chipsError && (
+                      <div className="text-sm text-orange-500 dark:text-orange-400">
+                        {chipsError}
+                      </div>
+                    )}
+
+                    {/* Chips display */}
+                    {!chipsLoading && !chipsError && dynamicChips.length > 0 && (
                       <div className="flex flex-wrap gap-2">
                         {dynamicChips.map((chipLabel, index) => (
                           <button
@@ -510,13 +591,21 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                           </button>
                         ))}
                       </div>
-                      {selectedChips.length > 0 && (
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
-                          Selected: {selectedChips.join(', ')}
-                        </div>
-                      )}
-                    </div>
-                  )}
+                    )}
+
+                    {/* No chips available message */}
+                    {!chipsLoading && !chipsError && dynamicChips.length === 0 && (
+                      <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                        No suggestions available for this rating
+                      </div>
+                    )}
+
+                    {selectedChips.length > 0 && (
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                        Selected: {selectedChips.join(', ')}
+                      </div>
+                    )}
+                  </div>
 
                   {/* Comment Textarea */}
                   <div className="relative">

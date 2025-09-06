@@ -4,190 +4,6 @@ import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
 import { examGoalApi } from "../../lib/api-client";
 
-// --- TYPE DEFINITIONS (TypeScript) ---
-// Defines the structure for a single exam's details
-type ExamDetails = {
-  name: string;
-  description: string;
-  eligibility: string;
-  pattern: string[];
-};
-
-// Defines the structure for a category of exams
-type ExamCategory = {
-  [examKey: string]: ExamDetails;
-};
-
-// Defines the overall structure for all exam data
-type ExamData = {
-  [categoryKey: string]: {
-    displayName: string;
-    exams: ExamCategory;
-  };
-};
-
-// --- MOCK DATA ---
-// A comprehensive dataset for various exams.
-// This can be easily replaced with data from an API.
-const examData: ExamData = {
-  ssc: {
-    displayName: "SSC",
-    exams: {
-      cgl: {
-        name: "SSC CGL (Combined Graduate Level)",
-        description:
-          "A national-level exam to recruit candidates for Group B and C posts in various ministries and departments of the Government of India.",
-        eligibility: "Bachelor's Degree from a recognized university.",
-        pattern: [
-          "Tier 1: Computer Based Examination",
-          "Tier 2: Computer Based Examination",
-          "Tier 3: Pen and Paper Mode (Descriptive)",
-          "Tier 4: Computer Proficiency Test/Skill Test",
-        ],
-      },
-      chsl: {
-        name: "SSC CHSL (Combined Higher Secondary Level)",
-        description:
-          "Conducted to recruit candidates for various posts such as LDC, JSA, PA, SA, and DEO in different ministries and departments.",
-        eligibility: "Passed 12th Standard or equivalent examination.",
-        pattern: [
-          "Tier 1: Computer-Based Exam",
-          "Tier 2: Descriptive Paper",
-          "Tier 3: Typing Test/Skill Test",
-        ],
-      },
-      je: {
-        name: "SSC JE (Junior Engineer)",
-        description:
-          "Recruits Junior Engineers for various government departments and organizations.",
-        eligibility:
-          "Diploma or Degree in Engineering in the relevant discipline.",
-        pattern: [
-          "Paper-I: Computer Based Examination (Objective)",
-          "Paper-II: Descriptive Type",
-        ],
-      },
-      gd: {
-        name: "SSC GD Constable",
-        description:
-          "Recruitment of constables (General Duty) in Border Security Force (BSF), Central Industrial Security Force (CISF), etc.",
-        eligibility: "Matriculation or 10th Class pass.",
-        pattern: [
-          "Computer Based Examination (CBE)",
-          "Physical Efficiency Test (PET)",
-          "Physical Standard Test (PST)",
-          "Detailed Medical Examination (DME)",
-        ],
-      },
-    },
-  },
-  bank: {
-    displayName: "Bank",
-    exams: {
-      sbi_po: {
-        name: "SBI PO (Probationary Officer)",
-        description:
-          "A competitive examination to recruit Probationary Officers for the State Bank of India, known for its high standards and career growth.",
-        eligibility:
-          "Graduation in any discipline from a recognised University.",
-        pattern: [
-          "Phase-I: Preliminary Examination (Objective)",
-          "Phase-II: Main Examination (Objective & Descriptive)",
-          "Phase-III: Psychometric Test, Group Exercise & Interview",
-        ],
-      },
-      ibps_po: {
-        name: "IBPS PO (Probationary Officer)",
-        description:
-          "A common written exam for the recruitment of Probationary Officers in multiple public sector banks.",
-        eligibility:
-          "A degree (Graduation) in any discipline from a University recognised by the Govt. Of India.",
-        pattern: [
-          "Prelims: Objective Test",
-          "Mains: Objective & Descriptive Test",
-          "Interview",
-        ],
-      },
-      sbi_clerk: {
-        name: "SBI Clerk (Junior Associate)",
-        description:
-          "Recruits candidates for the clerical cadre in the State Bank of India.",
-        eligibility:
-          "Graduation in any discipline from a recognised University.",
-        pattern: [
-          "Preliminary Examination",
-          "Main Examination",
-          "Test of specified opted local language",
-        ],
-      },
-      ibps_clerk: {
-        name: "IBPS Clerk",
-        description:
-          "A common recruitment process for clerical positions in various public sector banks across India.",
-        eligibility: "A degree (Graduation) in any discipline.",
-        pattern: ["Preliminary Examination", "Main Examination"],
-      },
-    },
-  },
-  class10: {
-    displayName: "Class 10",
-    exams: {
-      cbse: {
-        name: "CBSE Board Exam",
-        description:
-          "Central Board of Secondary Education annual examination for 10th-grade students.",
-        eligibility:
-          "Students who have passed the 9th-grade examination from a CBSE affiliated school.",
-        pattern: [
-          "Mathematics",
-          "Science (Physics, Chemistry, Biology)",
-          "Social Science",
-          "English",
-          "Second Language",
-        ],
-      },
-      icse: {
-        name: "ICSE Board Exam",
-        description:
-          "Indian Certificate of Secondary Education examination, known for its comprehensive syllabus.",
-        eligibility: "Completion of 10 years of formal education.",
-        pattern: [
-          "Group I (Compulsory): English, History, Civics & Geography, Second Language",
-          "Group II (Any 2): Science, Maths, Economics",
-          "Group III (Any 1): Computer Applications, Art",
-        ],
-      },
-    },
-  },
-  railways: {
-    displayName: "Railways",
-    exams: {
-      rrb_ntpc: {
-        name: "RRB NTPC",
-        description:
-          "Recruitment for various non-technical posts in the Indian Railways.",
-        eligibility: "Varies from 12th pass to Graduate depending on the post.",
-        pattern: [
-          "1st Stage CBT",
-          "2nd Stage CBT",
-          "Typing Skill Test/Computer Based Aptitude Test",
-          "Document Verification",
-        ],
-      },
-      rrb_group_d: {
-        name: "RRB Group D",
-        description: "Recruitment for Level 1 posts in the Indian Railways.",
-        eligibility:
-          "10th Pass (or ITI from institutions recognised by NCVT/SCVT).",
-        pattern: [
-          "Computer Based Test (CBT)",
-          "Physical Efficiency Test (PET)",
-          "Document Verification",
-        ],
-      },
-    },
-  },
-};
 
 // --- STYLING ---
 const theme = {
@@ -214,139 +30,243 @@ export default function ExamConfigurationModal({
 }: ExamConfigurationModalProps) {
   // User context hooks
   const {
-    examGoal,
-    fetchExamGoal,
-    syncExamGoalFromAuthContext,
     error: userError,
   } = useUser();
 
-  const { refreshUserData } = useAuth();
+  const { refreshUserData, getUserData } = useAuth();
 
   // Local state
-  const [selectedCategoryKey, setSelectedCategoryKey] = useState<string>(
-    Object.keys(examData)[0]
-  );
-  const [selectedExamKey, setSelectedExamKey] = useState<string>(
-    Object.keys(examData[Object.keys(examData)[0]].exams)[0]
-  );
+  const [examTypes, setExamTypes] = useState<any[]>([]);
+  const [allExamDetails, setAllExamDetails] = useState<any[]>([]);
+  const [selectedExamDetail, setSelectedExamDetail] = useState<any>(null);
+  const [userExamGoal, setUserExamGoal] = useState<{exam: string, group_type: string} | null>(null);
+  const [isLoadingExamTypes, setIsLoadingExamTypes] = useState(false);
+  const [isLoadingExamDetails, setIsLoadingExamDetails] = useState(false);
+  const [isLoadingUserGoal, setIsLoadingUserGoal] = useState(false);
+  const [examTypesError, setExamTypesError] = useState<string>("");
+  const [examDetailsError, setExamDetailsError] = useState<string>("");
+  const [userGoalError, setUserGoalError] = useState<string>("");
+  const [selectedExamType, setSelectedExamType] = useState<string>("");
+  const [selectedGroupType, setSelectedGroupType] = useState<string>("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string>("");
   const [updateError, setUpdateError] = useState<string>("");
 
-  // Memoized values
-  const { categories, currentExams, selectedExamDetails } = useMemo(() => {
-    const categories = Object.keys(examData).map((key) => ({
-      key: key,
-      displayName: examData[key].displayName,
-    }));
-    const currentExams = Object.keys(examData[selectedCategoryKey].exams).map(
-      (key) => ({
-        key: key,
-        name: examData[selectedCategoryKey].exams[key].name,
-      })
-    );
-    const selectedExamDetails =
-      examData[selectedCategoryKey].exams[selectedExamKey];
-    return { categories, currentExams, selectedExamDetails };
-  }, [selectedCategoryKey, selectedExamKey]);
-
-  // Fetch exam goal data when modal opens
-  useEffect(() => {
-    if (isOpen && !examGoal) {
-      console.log(
-        "🎯 ExamConfigurationModal: Modal opened, fetching exam goal..."
-      );
-
-      // First try to sync from AuthContext localStorage
-      const synced = syncExamGoalFromAuthContext();
-      if (synced) {
-        console.log(
-          "✅ ExamConfigurationModal: Successfully synced exam goal from AuthContext"
-        );
-        return;
-      }
-
-      // If no sync, fetch from API
-      fetchExamGoal();
+  // Memoized values for exam types and groups
+  const { availableGroups } = useMemo(() => {
+    if (!selectedExamType || examTypes.length === 0) {
+      return { availableGroups: [] };
     }
-  }, [isOpen, examGoal, fetchExamGoal, syncExamGoalFromAuthContext]);
 
-  // Auto-select category and exam based on user's exam goal
+    const selectedType = examTypes.find(type => type.value === selectedExamType);
+    const availableGroups = selectedType?.group || [];
+
+    return { availableGroups };
+  }, [selectedExamType, examTypes]);
+
+  // Fetch user exam goal data when modal opens
   useEffect(() => {
-    if (examGoal?.exam && Object.keys(examData).length > 0) {
-      const examName = examGoal.exam.toLowerCase();
-      const groupType = examGoal.groupType?.toLowerCase() || "";
+    if (isOpen) {
+      const fetchUserExamGoal = async () => {
+        try {
+          setIsLoadingUserGoal(true);
+          setUserGoalError("");
+          console.log("🎯 ExamConfigurationModal: Fetching user exam goal...");
+          
+          const response = await getUserData();
+          
+          if (response?.data?.exam_goal) {
+            setUserExamGoal({
+              exam: response.data.exam_goal.exam || "",
+              group_type: response.data.exam_goal.group || ""
+            });
+            console.log("✅ ExamConfigurationModal: User exam goal loaded successfully:", response.data.exam_goal);
+          } else {
+            console.log("ℹ️ ExamConfigurationModal: No exam goal found for user");
+            setUserExamGoal(null);
+          }
+        } catch (error: any) {
+          console.error("❌ ExamConfigurationModal: Failed to fetch user exam goal:", error);
+          setUserGoalError("Failed to load user exam goal. Please try again.");
+        } finally {
+          setIsLoadingUserGoal(false);
+        }
+      };
+
+      fetchUserExamGoal();
+    }
+  }, [isOpen]);
+
+  // Fetch exam types and all exam details when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      const fetchInitialData = async () => {
+        try {
+          setIsLoadingExamTypes(true);
+          setIsLoadingExamDetails(true);
+          setExamTypesError("");
+          setExamDetailsError("");
+          console.log("🎯 ExamConfigurationModal: Fetching exam types and details...");
+          
+          // Fetch exam types
+          const examTypesResponse = await examGoalApi.getExamTypes();
+          
+          if (examTypesResponse.data.success) {
+            setExamTypes(examTypesResponse.data.data);
+            console.log("✅ ExamConfigurationModal: Exam types loaded successfully");
+          } else {
+            throw new Error("Failed to load exam types");
+          }
+
+          // Fetch all exam details (we'll use the first exam type and group as a way to get all data)
+          if (examTypesResponse.data.data.length > 0) {
+            const firstExamType = examTypesResponse.data.data[0];
+            if (firstExamType.group && firstExamType.group.length > 0) {
+              const firstGroup = firstExamType.group[0];
+              const examDetailsResponse = await examGoalApi.getExamDetails(firstExamType.value, firstGroup);
+              
+              if (examDetailsResponse.data.success) {
+                setAllExamDetails(examDetailsResponse.data.data);
+                console.log("✅ ExamConfigurationModal: All exam details loaded successfully");
+              } else {
+                throw new Error("Failed to load exam details");
+              }
+            }
+          }
+        } catch (error: any) {
+          console.error("❌ ExamConfigurationModal: Failed to fetch initial data:", error);
+          setExamTypesError("Failed to load exam data. Please try again.");
+        } finally {
+          setIsLoadingExamTypes(false);
+          setIsLoadingExamDetails(false);
+        }
+      };
+
+      fetchInitialData();
+    }
+  }, [isOpen]);
+
+
+
+  // Initialize selected exam type when exam types are loaded
+  useEffect(() => {
+    if (examTypes.length > 0 && !selectedExamType) {
+      setSelectedExamType(examTypes[0].value);
+    }
+  }, [examTypes, selectedExamType]);
+
+  // Initialize selected group type when exam type changes
+  useEffect(() => {
+    if (availableGroups.length > 0 && !selectedGroupType) {
+      setSelectedGroupType(availableGroups[0]);
+    }
+  }, [availableGroups, selectedGroupType]);
+
+  // Function to filter exam details locally
+  const filterExamDetails = useCallback(() => {
+    if (!selectedExamType || !selectedGroupType || allExamDetails.length === 0) {
+      setSelectedExamDetail(null);
+      return;
+    }
+
+    console.log("🎯 ExamConfigurationModal: Filtering exam details for:", {
+      exam: selectedExamType,
+      groupType: selectedGroupType
+    });
+
+    // Filter exam details based on selected exam type and group type
+    const filteredDetails = allExamDetails.filter(exam => 
+      exam.exam_id === selectedExamType && 
+      exam.id.includes(selectedGroupType)
+    );
+
+    if (filteredDetails.length > 0) {
+      setSelectedExamDetail(filteredDetails[0]);
+      console.log("✅ ExamConfigurationModal: Exam detail filtered successfully");
+    } else {
+      setSelectedExamDetail(null);
+      console.log("⚠️ ExamConfigurationModal: No matching exam detail found");
+    }
+  }, [selectedExamType, selectedGroupType, allExamDetails]);
+
+  // Auto-select exam type and group based on user's exam goal
+  useEffect(() => {
+    if (userExamGoal?.exam && examTypes.length > 0) {
+      const examName = userExamGoal.exam.toLowerCase();
+      const groupType = userExamGoal.group_type?.toLowerCase() || "";
 
       console.log(
-        "🎯 ExamConfigurationModal: Auto-selecting exam based on goal:",
+        "🎯 ExamConfigurationModal: Auto-selecting exam based on user goal:",
         {
           examName,
           groupType,
         }
       );
 
-      // Find matching category based on exam goal
-      for (const [categoryKey, category] of Object.entries(examData)) {
-        for (const [examKey, exam] of Object.entries(category.exams)) {
-          if (
-            exam.name.toLowerCase().includes(examName) ||
-            exam.name.toLowerCase().includes(groupType) ||
-            category.displayName.toLowerCase().includes(examName) ||
-            category.displayName.toLowerCase().includes(groupType)
-          ) {
-            console.log("✅ ExamConfigurationModal: Found matching exam:", {
-              categoryKey,
-              examKey,
-              examName: exam.name,
-            });
-            setSelectedCategoryKey(categoryKey);
-            setSelectedExamKey(examKey);
-            return;
-          }
-        }
-      }
-
-      console.log(
-        "⚠️ ExamConfigurationModal: No exact match found for exam goal, keeping default selection"
+      // Find matching exam type based on exam goal
+      const matchingExamType = examTypes.find(type => 
+        type.value.toLowerCase().includes(examName) ||
+        type.label.toLowerCase().includes(examName)
       );
+
+      if (matchingExamType) {
+        setSelectedExamType(matchingExamType.value);
+        
+        // Find matching group type
+        const matchingGroup = matchingExamType.group.find((group: string) =>
+          group.toLowerCase().includes(groupType)
+        );
+        
+        if (matchingGroup) {
+          setSelectedGroupType(matchingGroup);
+        }
+        
+        console.log("✅ ExamConfigurationModal: Found matching exam type:", {
+          examType: matchingExamType.value,
+          groupType: matchingGroup || matchingExamType.group[0]
+        });
+      } else {
+        console.log(
+          "⚠️ ExamConfigurationModal: No exact match found for exam goal, keeping default selection"
+        );
+      }
     }
-  }, [examGoal, examData]);
+  }, [userExamGoal, examTypes]);
+
+  // Filter exam details when exam type or group type changes
+  useEffect(() => {
+    filterExamDetails();
+  }, [filterExamDetails]);
 
   // Event handlers
-  const handleCategoryChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newCategoryKey = e.target.value;
-    setSelectedCategoryKey(newCategoryKey);
-    const firstExamInNewCategory = Object.keys(
-      examData[newCategoryKey].exams
-    )[0];
-    setSelectedExamKey(firstExamInNewCategory);
+  const handleExamTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newExamType = e.target.value;
+    setSelectedExamType(newExamType);
+    setSelectedGroupType(""); // Reset group type when exam type changes
+    setSelectedExamDetail(null); // Clear selected exam detail
   };
 
-  const handleExamChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedExamKey(e.target.value);
+  const handleGroupTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedGroupType(e.target.value);
+    setSelectedExamDetail(null); // Clear selected exam detail
   };
 
   // Update exam goal
   const handleUpdateExamGoal = useCallback(async () => {
-    if (!selectedExamDetails) return;
+    if (!selectedExamType || !selectedGroupType) return;
 
     try {
       setIsUpdating(true);
       setUpdateError("");
       setUpdateMessage("");
 
-      // Get the exam name and category from selected exam
-      const examName = selectedExamDetails.name;
-      const categoryName =
-        examData[selectedCategoryKey]?.displayName || selectedCategoryKey;
-
       console.log("🚀 ExamConfigurationModal: Updating exam goal:", {
-        examName,
-        categoryName,
+        exam: selectedExamType,
+        groupType: selectedGroupType,
       });
 
       // Call the API to update exam goal
-      const response = await examGoalApi.addExamGoal(examName, categoryName);
+      const response = await examGoalApi.addExamGoal(selectedExamType, selectedGroupType);
 
       if (response.data.success) {
         console.log(
@@ -355,11 +275,16 @@ export default function ExamConfigurationModal({
         );
         setUpdateMessage("Exam goal updated successfully!");
 
-
         await refreshUserData();
 
-        // Also refresh exam goal data in UserContext
-        await fetchExamGoal(true); // Force refresh
+        // Refresh user exam goal data from context
+        const updatedUserResponse = await getUserData();
+        if (updatedUserResponse?.data?.exam_goal) {
+          setUserExamGoal({
+            exam: updatedUserResponse.data.exam_goal.exam || "",
+            group_type: updatedUserResponse.data.exam_goal.group || ""
+          });
+        }
 
         // Show success message for 3 seconds
         setTimeout(() => {
@@ -375,10 +300,9 @@ export default function ExamConfigurationModal({
       setIsUpdating(false);
     }
   }, [
-    selectedExamDetails,
-    selectedCategoryKey,
+    selectedExamType,
+    selectedGroupType,
     refreshUserData,
-    fetchExamGoal,
   ]);
 
   // Styles
@@ -572,13 +496,85 @@ export default function ExamConfigurationModal({
 
         {/* Modal Content */}
         <div className="p-6 space-y-6 overflow-y-auto">
-          {/* Current Goal Display */}
-          {/**examGoal && (
-            <div className="bg-background p-4 rounded-lg text-sm">
-              <span className="font-semibold text-foreground">Current Goal:</span>{" "}
-              {examGoal.exam} ({examGoal.groupType})
+          {/* Loading State for Exam Types */}
+          {isLoadingExamTypes && (
+            <div className="flex items-center justify-center py-8">
+              <div className="flex items-center space-x-2">
+                <svg
+                  className="animate-spin h-5 w-5 text-primary"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span className="text-foreground">Loading exam types...</span>
+              </div>
             </div>
-          )*/}
+          )}
+
+          {/* Loading State for Exam Details */}
+          {isLoadingExamDetails && (
+            <div className="flex items-center justify-center py-4">
+              <div className="flex items-center space-x-2">
+                <svg
+                  className="animate-spin h-4 w-4 text-primary"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                <span className="text-foreground text-sm">Loading exam details...</span>
+              </div>
+            </div>
+          )}
+
+          {/* Exam Types Error */}
+          {examTypesError && (
+            <div className="bg-red-500/20 border border-red-500/30 text-red-300 text-sm p-3 rounded-lg">
+              {examTypesError}
+            </div>
+          )}
+
+          {/* Exam Details Error */}
+          {examDetailsError && (
+            <div className="bg-red-500/20 border border-red-500/30 text-red-300 text-sm p-3 rounded-lg">
+              {examDetailsError}
+            </div>
+          )}
+
+          {/* User Goal Error */}
+          {userGoalError && (
+            <div className="bg-red-500/20 border border-red-500/30 text-red-300 text-sm p-3 rounded-lg">
+              {userGoalError}
+            </div>
+          )}
+
           {/* Messages */}
           {updateMessage && (
             <div className="bg-green-500/20 border border-green-500/30 text-green-300 text-sm p-3 rounded-lg">
@@ -598,87 +594,105 @@ export default function ExamConfigurationModal({
             </div>
           )}
 
-          {/* Controls */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label
-                htmlFor="category-select"
-                className="block text-sm font-medium text-muted-foreground"
-              >
-                Exam Category
-              </label>
-              <select
-                id="category-select"
-                value={selectedCategoryKey}
-                onChange={handleCategoryChange}
-                className="w-full bg-input border border-border rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-              >
-                {categories.map((category) => (
-                  <option key={category.key} value={category.key}>
-                    {category.displayName}
-                  </option>
-                ))}
-              </select>
+          {/* Current User Exam Goal Display */}
+          {userExamGoal && (
+            <div className="bg-blue-500/20 border border-blue-500/30 text-blue-300 text-sm p-3 rounded-lg">
+              <span className="font-semibold">Current Goal:</span> {userExamGoal.exam} ({userExamGoal.group_type})
             </div>
-            <div className="space-y-2">
-              <label
-                htmlFor="exam-select"
-                className="block text-sm font-medium text-foreground"
-              >
-                Specific Exam
-              </label>
-              <select
-                id="exam-select"
-                value={selectedExamKey}
-                onChange={handleExamChange}
-                className="w-full bg-input border border-border rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-              >
-                {currentExams.map((exam) => (
-                  <option key={exam.key} value={exam.key}>
-                    {exam.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
+          )}
 
-          {/* Details Card */}
-          {selectedExamDetails && (
+                    {/* Controls - Only show when exam types are loaded */}
+          {!isLoadingExamTypes && !examTypesError && examTypes.length > 0 && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="exam-type-select"
+                    className="block text-sm font-medium text-muted-foreground"
+                  >
+                    Exam Type
+                  </label>
+                  <select
+                    id="exam-type-select"
+                    value={selectedExamType}
+                    onChange={handleExamTypeChange}
+                    className="w-full bg-input border border-border rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
+                  >
+                    {examTypes.map((examType) => (
+                      <option key={examType.value} value={examType.value}>
+                        {examType.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label
+                    htmlFor="group-type-select"
+                    className="block text-sm font-medium text-foreground"
+                  >
+                    Group Type
+                  </label>
+                  <select
+                    id="group-type-select"
+                    value={selectedGroupType}
+                    onChange={handleGroupTypeChange}
+                    disabled={!selectedExamType || availableGroups.length === 0}
+                    className="w-full bg-input border border-border rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {availableGroups.map((group: string) => (
+                      <option key={group} value={group}>
+                        {group}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Details Card - Show when exam detail is loaded */}
+          {!isLoadingExamDetails && !examDetailsError && selectedExamDetail && (
             <div className="bg-background p-5 rounded-lg space-y-4 border border-border animate-fade-in-fast">
-              <h3 className="text-lg font-semibold text-foreground">
-                {selectedExamDetails.name}
+              <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
+                {selectedExamDetail.name}
               </h3>
 
-              <div className="space-y-1">
-                <h4 className="text-sm font-semibold text-muted-foreground">
-                  Description
-                </h4>
-                <p className="text-foreground text-sm leading-relaxed">
-                  {selectedExamDetails.description}
-                </p>
-              </div>
+              {selectedExamDetail.description && (
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
+                    Description
+                  </h4>
+                  <p className="text-foreground text-sm leading-relaxed">
+                    {selectedExamDetail.description}
+                  </p>
+                </div>
+              )}
 
-              <div className="space-y-1">
-                <h4 className="text-sm font-semibold text-muted-foreground">
-                  Eligibility
-                </h4>
-                <p className="text-foreground text-sm leading-relaxed">
-                  {selectedExamDetails.eligibility}
-                </p>
-              </div>
+              {selectedExamDetail.eligibility && (
+                <div className="space-y-1">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
+                    Eligibility
+                  </h4>
+                  <p className="text-foreground text-sm leading-relaxed">
+                    {selectedExamDetail.eligibility}
+                  </p>
+                </div>
+              )}
 
-              <div className="space-y-2">
-                <h4 className="text-sm font-semibold text-muted-foreground">
-                  Exam Pattern
-                </h4>
-                <ul className="list-disc list-inside space-y-1.5 pl-2">
-                  {selectedExamDetails.pattern.map((step, index) => (
-                    <li key={index} className="text-foreground text-sm">
-                      {step}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {selectedExamDetail.pattern && selectedExamDetail.pattern.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-semibold text-muted-foreground">
+                    Exam Pattern
+                  </h4>
+                  <ul className="list-disc list-inside space-y-1.5 pl-2">
+                    {selectedExamDetail.pattern.map((step: string, stepIndex: number) => (
+                      <li key={stepIndex} className="text-foreground text-sm">
+                        {step}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -692,7 +706,7 @@ export default function ExamConfigurationModal({
           </button>
           <button
             onClick={handleUpdateExamGoal}
-            disabled={isUpdating}
+            disabled={isUpdating || isLoadingExamTypes || isLoadingUserGoal || !!examTypesError || !!userGoalError || !selectedExamType || !selectedGroupType}
             className="cursor-pointer px-5 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1d1d1f] transition-all disabled:bg-blue-600/50 disabled:cursor-not-allowed flex items-center"
           >
             {isUpdating && (

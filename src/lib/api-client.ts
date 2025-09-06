@@ -2,8 +2,7 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  baseURL: 'https://api.krishak.in',
-  // baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
   headers: {
     "Content-Type": "application/json",
   },
@@ -12,19 +11,15 @@ const API_CONFIG = {
 // Create axios instance with default config
 const apiClient = axios.create(API_CONFIG);
 
+// Global flags to prevent duplicate API calls
+const activeRequests = new Map<string, Promise<any>>();
+
 // Add request interceptor to add auth token
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
-  console.log("🔑 Request interceptor - Token exists:", !!token);
-  console.log(
-    "🔑 Request interceptor - Token value:",
-    token ? `${token.substring(0, 20)}...` : "null"
-  );
-  console.log("🔑 Request interceptor - URL:", config.url);
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log("🔑 Request interceptor - Authorization header set");
   } else {
     console.log(
       "🔑 Request interceptor - No token found, request will be unauthorized"
@@ -46,46 +41,58 @@ export interface ApiError {
   status: number;
 }
 
-// Generic API request function
+// Generic API request function with retry mechanism
 export const apiRequest = async <T>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   endpoint: string,
   data?: any,
   config?: { headers?: Record<string, string> }
 ): Promise<ApiResponse<T>> => {
-  try {
-    console.log(`🌐 Making ${method} request to:`, endpoint);
-    console.log(`🌐 Request data:`, data);
+  const maxRetries = 2;
+  let lastError: any;
 
-    const response = await apiClient.request({
-      method,
-      url: endpoint,
-      data,
-      headers: config?.headers,
-    });
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
 
-    console.log(`✅ ${method} ${endpoint} response:`, response.data);
-    console.log(`✅ ${method} ${endpoint} status:`, response.status);
+      const response = await apiClient.request({
+        method,
+        url: endpoint,
+        data,
+        headers: config?.headers,
+      });
 
-    return {
-      data: response.data,
-      status: response.status,
-    };
-  } catch (error: any) {
-    console.error("❌ API Request Error:", {
-      status: error.response?.status,
-      statusText: error.response?.statusText,
-      data: error.response?.data,
-      message: error.message,
-      url: error.config?.url,
-      method: error.config?.method,
-    });
+      return {
+        data: response.data,
+        status: response.status,
+      };
+    } catch (error: any) {
+      lastError = error;
 
-    throw {
-      message: error.response?.data?.message || "An error occurred",
-      status: error.response?.status || 500,
-    } as ApiError;
+      // Don't retry on authentication errors
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.log("🔒 Authentication error - not retrying");
+        break;
+      }
+
+      // Don't retry on client errors (4xx except 401/403)
+      if (error.response?.status >= 400 && error.response?.status < 500) {
+        console.log("🚫 Client error - not retrying");
+        break;
+      }
+
+      // Retry on server errors (5xx) and network errors
+      if (attempt < maxRetries) {
+        const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
   }
+
+  // If all retries failed, throw the last error
+  throw {
+    message: lastError.response?.data?.message || "An error occurred",
+    status: lastError.response?.status || 500,
+  } as ApiError;
 };
 
 // Auth related API calls
@@ -176,6 +183,29 @@ export interface ExamType {
   group: string[];
 }
 
+// Exam details interface
+export interface ExamDetails {
+  id: string;
+  name: string;
+  exam_id: string;
+  description: string;
+  eligibility: string;
+  pattern: string[];
+}
+
+// Exam category interface
+export interface ExamCategory {
+  [examKey: string]: ExamDetails;
+}
+
+// Exam data structure interface
+export interface ExamData {
+  [categoryKey: string]: {
+    displayName: string;
+    exams: ExamCategory;
+  };
+}
+
 export const examGoalApi = {
   getExamTypes: async () => {
     return apiRequest<{ success: boolean; data: ExamType[] }>(
@@ -183,13 +213,22 @@ export const examGoalApi = {
       "/exam-goal/exam-type"
     );
   },
+  getExamDetails: async (exam: string, groupType: string) => {
+    return apiRequest<{ success: boolean; data: ExamDetails[] }>(
+      "GET",
+      "/exam-goal/exam-detail", {
+        exam: exam,
+        group: groupType,
+      } 
+    );
+  },
   addExamGoal: async (exam: string, groupType: string) => {
     return apiRequest<{ success: boolean; message: string }>(
       "POST",
       "/exam-goal/add",
       {
-        exam,
-        group_type: groupType,
+        exam: groupType,
+        group_type: exam,
       }
     );
   },
@@ -245,6 +284,16 @@ export const videoApi = {
       "GET",
       `/video/detail?url=${encodeURIComponent(url)}`
     );
+    
+    // Check if response indicates out of syllabus content
+    if (response.status === 204 || (response.data && response.data.topics && response.data.topics.length === 0)) {
+      throw {
+        message: "This content is out of syllabus",
+        status: 204,
+        isOutOfSyllabus: true
+      };
+    }
+    
     return response.data;
   },
 
@@ -290,6 +339,91 @@ export const videoApi = {
     );
     return response.data;
   },
+
+  // Video Summary API with global deduplication
+  getVideoSummary: async (
+    videoId: string
+  ): Promise<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }> => {
+    const requestKey = `summary-${videoId}`;
+    
+    // Check if request is already in progress
+    if (activeRequests.has(requestKey)) {
+      console.log("🔍 ULTRA AGGRESSIVE: Reusing existing summary request for:", videoId);
+      return activeRequests.get(requestKey)!;
+    }
+
+    const requestPromise = (async () => {
+      try {
+        const response = await apiRequest<{ summary: string; sections: Array<{ title: string; content: string }> }>(
+          "GET",
+          `/video/summary?video_id=${encodeURIComponent(videoId)}`
+        );
+        return response.data;
+      } catch (error: any) {
+        console.error("❌ getVideoSummary API error:", error);
+        // Return a fallback structure to prevent component crashes
+        return {
+          summary: "Summary not available",
+          sections: [{
+            title: "Video Summary",
+            content: "Unable to load summary at this time. Please try again later."
+          }]
+        };
+      } finally {
+        // Remove from active requests when done
+        activeRequests.delete(requestKey);
+      }
+    })();
+
+    // Store the promise to prevent duplicate requests
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
+  },
+
+  // Video Flashcards API with global deduplication
+  getVideoFlashcards: async (
+    videoId: string
+  ): Promise<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }> => {
+    const requestKey = `flashcards-${videoId}`;
+    
+    // Check if request is already in progress
+    if (activeRequests.has(requestKey)) {
+      console.log("🔍 ULTRA AGGRESSIVE: Reusing existing flashcards request for:", videoId);
+      return activeRequests.get(requestKey)!;
+    }
+
+    const requestPromise = (async () => {
+      try {
+        const response = await apiRequest<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }>(
+          "GET",
+          `/video/flash-card?video_id=${encodeURIComponent(videoId)}`
+        );
+        return response.data;
+      } catch (error: any) {
+        console.error("❌ getVideoFlashcards API error:", error);
+        // Return a fallback structure to prevent component crashes
+        return {
+          cards: [{
+            id: 1,
+            question: "Flashcards not available",
+            answer: "Unable to load flashcards at this time. Please try again later."
+          }],
+          video_id: videoId
+        };
+      } finally {
+        // Remove from active requests when done
+        activeRequests.delete(requestKey);
+      }
+    })();
+
+    // Store the promise to prevent duplicate requests
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
+  },
+
+
+
+
 };
 
 interface ChatMessage {
@@ -479,6 +613,26 @@ interface TestData {
   level: TestLevel;
   language: TestLanguage;
 }
+// Quiz API interfaces
+export interface StartTestRequestV2 {
+  topics: string[];
+}
+
+export interface QuizResponse {
+  questions: Question[];
+}
+
+export interface Question {
+  questionText: string;
+  questionType: "MCQ";
+  options: Option[];
+}
+
+export interface Option {
+  text: string;
+  isCorrect: boolean;
+}
+
 export const quizApi = {
   startTest: async (testConfig: TestData): Promise<QuestionResponse> => {
     const response = await apiRequest<QuestionResponse>(
@@ -505,7 +659,42 @@ export const quizApi = {
     );
     return response.data;
   },
+
+  // New API for dynamic quiz generation
+  generateQuiz: async (topics: string[]): Promise<QuizResponse> => {
+    const response = await apiRequest<QuizResponse>(
+      "POST",
+      "/test-series/quiz",
+      { topics }
+    );
+    return response.data;
+  },
 };
+
+// Video Progress Tracking API
+export interface VideoProgressRequest {
+  video_id: string;         // Required
+  watch_percentage: number; // Required (0-100)
+  total_duration: number;   // Required (in seconds)
+  current_position: number;     // Required (in seconds)
+  page_url: string;         // Required
+}
+
+export interface VideoProgressResponse {
+  success: boolean;
+  message: string;
+  data: {
+    video_id: string;
+    watch_percentage: number;
+    total_duration: number;
+    current_position: number;
+    last_updated: string;
+    title: string;
+    url: string;
+    tags: string[];
+    topics: string[];
+  };
+}
 
 // Feedback API
 export interface FeedbackRequest {
@@ -534,7 +723,11 @@ export enum ComponentName {
   Quiz = "Quiz",
   Summary = "Summary",
   Flashcard = "Flashcard",
-  Test = "Test"
+  Test = "Test",
+  TestAnalysis = "TestAnalysis",
+  VideoRecommendation = "VideoRecommendation",
+  TestRecommentation = "TestRecommentation",
+  SnippetRecommendation = "SnippetRecommendation"
 }
 
 // Check feedback availability response
@@ -576,10 +769,38 @@ export interface FeedbackListResponse {
   size: number;
 }
 
+// Feedback chip item interface
+export interface FeedbackChipItem {
+  label: string;
+  component_type: string;
+}
+
 // Feedback chips suggestions response
 export interface FeedbackChipsResponse {
-  [rating: string]: string[]; // Rating as key (1-5), array of suggestion strings as value
+  [rating: string]: FeedbackChipItem[]; // Rating as key (1-5), array of chip objects as value
 }
+
+// Video Progress Tracking API
+export const videoProgressApi = {
+  // Track video watch progress
+  trackProgress: async (data: VideoProgressRequest): Promise<VideoProgressResponse> => {
+    console.log("📊 Tracking video progress:", data);
+    const response = await apiRequest<VideoProgressResponse>('POST', '/video/progress', data);
+    return response.data;
+  },
+
+  // Get video progress for a specific video
+  getProgress: async (videoId: string): Promise<VideoProgressResponse> => {
+    const response = await apiRequest<VideoProgressResponse>('GET', `/video/progress/${videoId}`);
+    return response.data;
+  },
+
+  // Get all video progress for user
+  getAllProgress: async (): Promise<{ videos: VideoProgressResponse[] }> => {
+    const response = await apiRequest<{ videos: VideoProgressResponse[] }>('GET', '/video/progress');
+    return response.data;
+  },
+};
 
 export const feedbackApi = {
   // Check if user can submit feedback for a single component (legacy)
@@ -591,9 +812,19 @@ export const feedbackApi = {
     return response.data;
   },
 
-  // Get feedback chips suggestions based on rating
-  getFeedbackChips: async (rating?: number): Promise<FeedbackChipsResponse> => {
-    const endpoint = rating ? `/feedback/chips?rating=${rating}` : '/feedback/chips';
+  // Get feedback chips suggestions based on rating and component type
+  getFeedbackChips: async (componentType?: string): Promise<FeedbackChipsResponse> => {
+    let endpoint = '/feedback/feedback-chips';
+    const params = new URLSearchParams();
+    
+    if (componentType) {
+      params.append('component_type', componentType);
+    }
+    
+    if (params.toString()) {
+      endpoint += `?${params.toString()}`;
+    }
+    
     const response = await apiRequest<FeedbackChipsResponse>('GET', endpoint);
     return response.data;
   },

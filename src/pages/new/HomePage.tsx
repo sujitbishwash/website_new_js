@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSourceModal } from "../../components/YouTubeSourceDialog";
 import { buildVideoLearningRoute, ROUTES } from "../../routes/constants";
+import { useVideoProgress } from "../../hooks/useVideoProgress";
 import {
   BookOpen,
   CirclePlay,
@@ -17,14 +18,6 @@ interface IconProps {
   className?: string;
 }
 
-interface LearningItem {
-  id: string;
-  title: string;
-  subject: string;
-  progress: number;
-  lastStudied: string;
-  thumbnailUrl: string;
-}
 
 interface Topic {
   id: string;
@@ -231,40 +224,6 @@ const BrainIcon: React.FC<IconProps> = ({ className }) => (
 
 
 // --- MOCK DATA ---
-const initialLearningItems: LearningItem[] = [
-  {
-    id: "cl1",
-    title: "Quantum Physics Explained",
-    subject: "Physics",
-    progress: 75,
-    lastStudied: "2 days ago",
-    thumbnailUrl: "https://placehold.co/600x400/0B1C48/FFFFFF?text=Physics",
-  },
-  {
-    id: "cl2",
-    title: "Introduction to Python",
-    subject: "Programming",
-    progress: 40,
-    lastStudied: "Yesterday",
-    thumbnailUrl: "https://placehold.co/600x400/483D8B/FFFFFF?text=Python",
-  },
-  {
-    id: "cl3",
-    title: "World War II History",
-    subject: "History",
-    progress: 90,
-    lastStudied: "Today",
-    thumbnailUrl: "https://placehold.co/600x400/8B4513/FFFFFF?text=History",
-  },
-  {
-    id: "cl4",
-    title: "Calculus I Fundamentals",
-    subject: "Mathematics",
-    progress: 60,
-    lastStudied: "A week ago",
-    thumbnailUrl: "https://placehold.co/600x400/2E8B57/FFFFFF?text=Calculus",
-  },
-];
 
 const initialTopics: Topic[] = [
   {
@@ -355,13 +314,22 @@ const suggestedTests: SuggestedTest[] = [
 
 // --- MAIN COMPONENT ---
 export default function HomePage() {
-  const [learningItems, setLearningItems] = useState(initialLearningItems);
   const [attemptedTests, setAttemptedTests] = useState(initialAttemptedTests);
   const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
   const [suggestedVideos, setSuggestedVideos] = useState<SuggestedVideo[]>([]);
   const [isLoadingVideos, setIsLoadingVideos] = useState(false);
   const [videosError, setVideosError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  // Use video progress hook
+  const {
+    isLoading: isLoadingProgress,
+    error: progressError,
+    refreshProgress,
+    getWatchedVideos,
+    formatDuration,
+    formatLastUpdated
+  } = useVideoProgress();
 
   // Fetch suggested videos when component mounts
   useEffect(() => {
@@ -384,10 +352,8 @@ export default function HomePage() {
     fetchSuggestedVideos();
   }, []);
 
-  const handleRemoveRecord = (id: string, type: "learning" | "test") => {
-    if (type === "learning") {
-      setLearningItems((prev) => prev.filter((item) => item.id !== id));
-    } else if (type === "test") {
+  const handleRemoveRecord = (id: string, type: "test") => {
+    if (type === "test") {
       setAttemptedTests((prev) => prev.filter((item) => item.id !== id));
     }
   };
@@ -401,6 +367,13 @@ export default function HomePage() {
 
       navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
+      console.error("Failed to fetch video details:", err);
+      
+      // Check if it's an out-of-syllabus error
+      if (err.isOutOfSyllabus || err.status === 204) {
+        console.log("Content is out of syllabus, redirecting to dashboard");
+        navigate(ROUTES.DASHBOARD);
+      }
     } finally {
       //setIsLoading(false);
     }
@@ -590,59 +563,124 @@ export default function HomePage() {
 
         {/* Continue Learning Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
-          <h2 className="text-2xl font-bold text-foreground mb-5 flex justify-between items-center">
-            <span>Continue Learning</span>
-            <a
-              href="#"
-              className="text-sm font-medium text-primary hover:opacity-80 transition-colors"
+          <div className="flex justify-between items-center mb-5">
+            <h2 className="text-2xl font-bold text-foreground">
+              Continue Learning
+            </h2>
+            <button
+              onClick={refreshProgress}
+              disabled={isLoadingProgress}
+              className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
-              View all
-            </a>
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-            {learningItems.map((item) => (
-              <div
-                key={item.id}
-                className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1"
+              <RefreshCcw className="w-4 h-4" />
+              Refresh
+            </button>
+          </div>
+
+          {isLoadingProgress ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span className="ml-2 text-muted-foreground">
+                Loading your progress...
+              </span>
+            </div>
+          ) : progressError ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>{progressError}</p>
+              <button
+                onClick={refreshProgress}
+                className="mt-2 text-primary hover:underline"
               >
-                <img
-                  src={item.thumbnailUrl}
-                  alt={`Thumbnail for ${item.title}`}
-                  className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.onerror = null;
-                    target.src =
-                      "https://placehold.co/600x400/333/FFF?text=Error";
-                  }}
-                />
-                <div className="p-4">
-                  <h3 className="font-bold text-foreground truncate text-lg">
-                    {item.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {item.subject}
-                  </p>
-                  <div className="w-full bg-muted rounded-full h-2.5 mb-2">
-                    <div
-                      className="bg-primary h-2.5 rounded-full"
-                      style={{ width: `${item.progress}%` }}
-                    ></div>
+                Try again
+              </button>
+            </div>
+          ) : getWatchedVideos().length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+              {getWatchedVideos().slice(0, 4).map((video) => (
+                <div
+                  key={video.videoId}
+                  onClick={() => navigate(buildVideoLearningRoute(video.videoId))}
+                  className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1"
+                >
+                  <div className="relative">
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={`Thumbnail for ${video.title}`}
+                      className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.onerror = null;
+                        // Try different YouTube thumbnail formats
+                        if (target.src.includes('hqdefault.jpg')) {
+                          target.src = `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`;
+                        } else if (target.src.includes('mqdefault.jpg')) {
+                          target.src = `https://img.youtube.com/vi/${video.videoId}/default.jpg`;
+                        } else {
+                          target.src = "https://placehold.co/600x400/333/FFF?text=No+Thumbnail";
+                        }
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                      <CirclePlay className="h-12 w-12 text-white group-hover:scale-110 transition-all duration-300" />
+                    </div>
+                    <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+                      {formatDuration(video.totalDuration)}
+                    </div>
                   </div>
-                  <div className="flex justify-between items-center text-xs text-muted-foreground">
-                    <span>{item.progress}% Complete</span>
-                    <span>{item.lastStudied}</span>
+                  <div className="p-4">
+                    <h3 className="font-bold text-foreground truncate text-lg mb-2">
+                      {video.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      {video.tags?.[0] || video.subject}
+                    </p>
+                    {video.topics && video.topics.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {video.topics.slice(0, 2).map((topic, index) => (
+                          <span
+                            key={index}
+                            className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full"
+                          >
+                            {topic}
+                          </span>
+                        ))}
+                        {video.topics.length > 2 && (
+                          <span className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded-full">
+                            +{video.topics.length - 2} more
+                          </span>
+                        )}
+                      </div>
+                    )}
+                    <div className="w-full bg-muted rounded-full h-2.5 mb-2">
+                      <div
+                        className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                        style={{ width: `${Math.round(video.watchPercentage)}%` }}
+                      ></div>
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-muted-foreground">
+                      <span>{Math.round(video.watchPercentage)}% Complete</span>
+                      <span>{formatLastUpdated(video.lastUpdated)}</span>
+                    </div>
+                    {video.watchPercentage >= 100 && (
+                      <div className="mt-2 flex items-center text-green-400 text-xs">
+                        <CheckCircleIcon className="h-4 w-4 mr-1" />
+                        Completed
+                      </div>
+                    )}
+                  </div>
+                  <div className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    <CirclePlay className="h-4 w-4" />
                   </div>
                 </div>
-                <button
-                  onClick={() => handleRemoveRecord(item.id, "learning")}
-                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent hover:text-accent-foreground"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <CirclePlay className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium mb-2">No videos in progress</p>
+              <p className="text-sm">Start watching videos to see them here</p>
+            </div>
+          )}
         </div>
 
         {/* Attempted Tests Card */}
