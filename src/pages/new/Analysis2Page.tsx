@@ -18,9 +18,10 @@ import {
   Text,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { theme } from "@/styles/theme";
+import ShareModal from "@/components/modals/ShareModal";
 
 interface LearningPlanStep {
   title: string;
@@ -41,9 +42,7 @@ interface CognitiveSkill {
 // --- MOCK DATA ---
 const userPerformance = {
   user: {
-    rank: 167,
     name: "Sagen Tiriya",
-    score: 75,
     message: "Keep Practicing!",
   },
   leaderboard: [
@@ -70,11 +69,27 @@ const userPerformance = {
     negativeMarks: 5.75,
     cutoff: 15.0,
     cognitiveSkills: [
-      { name: "Conceptual", score: 88, description: "Strong grasp of theories." },
-      { name: "Application", score: 75, description: "Good at applying formulas." },
+      {
+        name: "Conceptual",
+        score: 88,
+        description: "Strong grasp of theories.",
+      },
+      {
+        name: "Application",
+        score: 75,
+        description: "Good at applying formulas.",
+      },
       { name: "Critical", score: 65, description: "Area for improvement." },
-      { name: "Procedural", score: 90, description: "Excellent at following steps." },
-      { name: "Spatial", score: 70, description: "Can visualize problems well." },
+      {
+        name: "Procedural",
+        score: 90,
+        description: "Excellent at following steps.",
+      },
+      {
+        name: "Spatial",
+        score: 70,
+        description: "Can visualize problems well.",
+      },
     ],
     aiSummary:
       "Great work on the Algebra quiz, Alex! Focus on Critical Problem-Solving in Inequalities.",
@@ -90,7 +105,7 @@ const userPerformance = {
   sections: {
     english: {
       key: "english",
-      name: "English Language",
+      name: "English",
       color: "text-[#0A84FF]",
       score: 21.25,
       maxScore: 30,
@@ -103,20 +118,67 @@ const userPerformance = {
       negativeMarks: 5.75,
       cutoff: 15.0,
       topics: [
-        { name: "Reading Comprehension", accuracy: 90, time: "8m 15s", totalQs: 10, attempted: 9, correct: 8, score: 7.75 },
-        { name: "Error Spotting", accuracy: 75, time: "4m 30s", totalQs: 5, attempted: 4, correct: 3, score: 2.75 },
-        { name: "Para Jumbles", accuracy: 60, time: "6m 05s", totalQs: 5, attempted: 5, correct: 3, score: 2.5 },
-        { name: "Fill in the Blanks", accuracy: 95, time: "3m 45s", totalQs: 10, attempted: 10, correct: 9, score: 8.75 },
+        {
+          name: "Reading Comprehension",
+          accuracy: 90,
+          time: "8m 15s",
+          totalQs: 10,
+          attempted: 9,
+          correct: 8,
+          score: 7.75,
+        },
+        {
+          name: "Error Spotting",
+          accuracy: 75,
+          time: "4m 30s",
+          totalQs: 5,
+          attempted: 4,
+          correct: 3,
+          score: 2.75,
+        },
+        {
+          name: "Para Jumbles",
+          accuracy: 60,
+          time: "6m 05s",
+          totalQs: 5,
+          attempted: 5,
+          correct: 3,
+          score: 2.5,
+        },
+        {
+          name: "Fill in the Blanks",
+          accuracy: 95,
+          time: "3m 45s",
+          totalQs: 10,
+          attempted: 10,
+          correct: 9,
+          score: 8.75,
+        },
       ],
       difficultyTrend: {
         maxTime: 20,
-        user: [ { time: 0, difficulty: 1.2 }, { time: 5, difficulty: 1.8 }, { time: 10, difficulty: 2.5 }, { time: 16, difficulty: 2.1 }, ],
-        topper: [ { time: 0, difficulty: 2.0 }, { time: 3, difficulty: 2.5 }, { time: 5, difficulty: 2.8 }, { time: 8, difficulty: 2.6 }, { time: 10, difficulty: 2.2 }, { time: 13, difficulty: 1.9 }, { time: 15, difficulty: 1.5 }, { time: 18, difficulty: 1.4 }, { time: 20, difficulty: 1.3 }, ],
+        user: [
+          { time: 0, difficulty: 1.2 },
+          { time: 5, difficulty: 1.8 },
+          { time: 10, difficulty: 2.5 },
+          { time: 16, difficulty: 2.1 },
+        ],
+        topper: [
+          { time: 0, difficulty: 2.0 },
+          { time: 3, difficulty: 2.5 },
+          { time: 5, difficulty: 2.8 },
+          { time: 8, difficulty: 2.6 },
+          { time: 10, difficulty: 2.2 },
+          { time: 13, difficulty: 1.9 },
+          { time: 15, difficulty: 1.5 },
+          { time: 18, difficulty: 1.4 },
+          { time: 20, difficulty: 1.3 },
+        ],
       },
     },
     numerical: {
       key: "numerical",
-      name: "Numerical Ability",
+      name: "Quant",
       color: "text-[#FF3B30]",
       score: 18.5,
       maxScore: 35,
@@ -129,15 +191,62 @@ const userPerformance = {
       negativeMarks: 4.25,
       cutoff: 12.5,
       topics: [
-        { name: "Data Interpretation", accuracy: 85, time: "9m 20s", totalQs: 10, attempted: 10, correct: 8, score: 7.5 },
-        { name: "Quadratic Equations", accuracy: 90, time: "3m 15s", totalQs: 5, attempted: 5, correct: 4, score: 3.75 },
-        { name: "Simplification", accuracy: 70, time: "4m 05s", totalQs: 10, attempted: 8, correct: 7, score: 6.75 },
-        { name: "Number Series", accuracy: 75, time: "1m 30s", totalQs: 5, attempted: 4, correct: 3, score: 2.75 },
+        {
+          name: "Data Interpretation",
+          accuracy: 85,
+          time: "9m 20s",
+          totalQs: 10,
+          attempted: 10,
+          correct: 8,
+          score: 7.5,
+        },
+        {
+          name: "Quadratic Equations",
+          accuracy: 90,
+          time: "3m 15s",
+          totalQs: 5,
+          attempted: 5,
+          correct: 4,
+          score: 3.75,
+        },
+        {
+          name: "Simplification",
+          accuracy: 70,
+          time: "4m 05s",
+          totalQs: 10,
+          attempted: 8,
+          correct: 7,
+          score: 6.75,
+        },
+        {
+          name: "Number Series",
+          accuracy: 75,
+          time: "1m 30s",
+          totalQs: 5,
+          attempted: 4,
+          correct: 3,
+          score: 2.75,
+        },
       ],
       difficultyTrend: {
         maxTime: 20,
-        user: [ { time: 0, difficulty: 2.0 }, { time: 8, difficulty: 2.8 }, { time: 15, difficulty: 3.0 }, { time: 18, difficulty: 2.5 }, ],
-        topper: [ { time: 0, difficulty: 3.0 }, { time: 3, difficulty: 2.8 }, { time: 5, difficulty: 2.6 }, { time: 7, difficulty: 2.5 }, { time: 10, difficulty: 2.3 }, { time: 12, difficulty: 2.0 }, { time: 15, difficulty: 1.9 }, { time: 18, difficulty: 1.8 }, { time: 20, difficulty: 1.7 }, ],
+        user: [
+          { time: 0, difficulty: 2.0 },
+          { time: 8, difficulty: 2.8 },
+          { time: 15, difficulty: 3.0 },
+          { time: 18, difficulty: 2.5 },
+        ],
+        topper: [
+          { time: 0, difficulty: 3.0 },
+          { time: 3, difficulty: 2.8 },
+          { time: 5, difficulty: 2.6 },
+          { time: 7, difficulty: 2.5 },
+          { time: 10, difficulty: 2.3 },
+          { time: 12, difficulty: 2.0 },
+          { time: 15, difficulty: 1.9 },
+          { time: 18, difficulty: 1.8 },
+          { time: 20, difficulty: 1.7 },
+        ],
       },
     },
     reasoning: {
@@ -155,20 +264,66 @@ const userPerformance = {
       negativeMarks: 3.5,
       cutoff: 14.0,
       topics: [
-        { name: "Puzzles", accuracy: 80, time: "12m 00s", totalQs: 15, attempted: 12, correct: 10, score: 9.5 },
-        { name: "Seating Arrangement", accuracy: 85, time: "6m 10s", totalQs: 10, attempted: 10, correct: 8, score: 7.5 },
-        { name: "Syllogism", accuracy: 95, time: "2m 30s", totalQs: 5, attempted: 5, correct: 5, score: 5.0 },
-        { name: "Blood Relation", accuracy: 75, time: "1m 20s", totalQs: 5, attempted: 4, correct: 3, score: 2.75 },
+        {
+          name: "Puzzles",
+          accuracy: 80,
+          time: "12m 00s",
+          totalQs: 15,
+          attempted: 12,
+          correct: 10,
+          score: 9.5,
+        },
+        {
+          name: "Seating Arrangement",
+          accuracy: 85,
+          time: "6m 10s",
+          totalQs: 10,
+          attempted: 10,
+          correct: 8,
+          score: 7.5,
+        },
+        {
+          name: "Syllogism",
+          accuracy: 95,
+          time: "2m 30s",
+          totalQs: 5,
+          attempted: 5,
+          correct: 5,
+          score: 5.0,
+        },
+        {
+          name: "Blood Relation",
+          accuracy: 75,
+          time: "1m 20s",
+          totalQs: 5,
+          attempted: 4,
+          correct: 3,
+          score: 2.75,
+        },
       ],
       difficultyTrend: {
         maxTime: 22,
-        user: [ { time: 0, difficulty: 2.2 }, { time: 10, difficulty: 3.0 }, { time: 18, difficulty: 2.8 }, { time: 22, difficulty: 2.6 }, ],
-        topper: [ { time: 0, difficulty: 2.5 }, { time: 4, difficulty: 3.0 }, { time: 8, difficulty: 2.9 }, { time: 12, difficulty: 2.4 }, { time: 15, difficulty: 2.1 }, { time: 18, difficulty: 2.0 }, { time: 20, difficulty: 1.9 }, { time: 22, difficulty: 1.8 }, ],
+        user: [
+          { time: 0, difficulty: 2.2 },
+          { time: 10, difficulty: 3.0 },
+          { time: 18, difficulty: 2.8 },
+          { time: 22, difficulty: 2.6 },
+        ],
+        topper: [
+          { time: 0, difficulty: 2.5 },
+          { time: 4, difficulty: 3.0 },
+          { time: 8, difficulty: 2.9 },
+          { time: 12, difficulty: 2.4 },
+          { time: 15, difficulty: 2.1 },
+          { time: 18, difficulty: 2.0 },
+          { time: 20, difficulty: 1.9 },
+          { time: 22, difficulty: 1.8 },
+        ],
       },
     },
     generalAwareness: {
       key: "generalAwareness",
-      name: "General Awareness",
+      name: "G.A.",
       color: "text-[#34C759]",
       score: 15.25,
       maxScore: 40,
@@ -181,51 +336,162 @@ const userPerformance = {
       negativeMarks: 1.25,
       cutoff: 10.5,
       topics: [
-        { name: "Current Affairs", accuracy: 80, time: "4m 00s", totalQs: 15, attempted: 10, correct: 8, score: 7.75 },
-        { name: "Static GK", accuracy: 70, time: "3m 30s", totalQs: 15, attempted: 10, correct: 7, score: 6.75 },
-        { name: "Banking Awareness", accuracy: 75, time: "2m 30s", totalQs: 10, attempted: 4, correct: 3, score: 2.75 },
+        {
+          name: "Current Affairs",
+          accuracy: 80,
+          time: "4m 00s",
+          totalQs: 15,
+          attempted: 10,
+          correct: 8,
+          score: 7.75,
+        },
+        {
+          name: "Static GK",
+          accuracy: 70,
+          time: "3m 30s",
+          totalQs: 15,
+          attempted: 10,
+          correct: 7,
+          score: 6.75,
+        },
+        {
+          name: "Banking Awareness",
+          accuracy: 75,
+          time: "2m 30s",
+          totalQs: 10,
+          attempted: 4,
+          correct: 3,
+          score: 2.75,
+        },
       ],
       difficultyTrend: {
         maxTime: 15,
-        user: [ { time: 0, difficulty: 1.0 }, { time: 3, difficulty: 1.5 }, { time: 7, difficulty: 1.8 }, { time: 10, difficulty: 1.3 }, ],
-        topper: [ { time: 0, difficulty: 1.8 }, { time: 2, difficulty: 1.5 }, { time: 4, difficulty: 1.2 }, { time: 6, difficulty: 1.4 }, { time: 8, difficulty: 1.5 }, { time: 10, difficulty: 1.3 }, { time: 12, difficulty: 1.0 }, { time: 15, difficulty: 0.9 }, ],
+        user: [
+          { time: 0, difficulty: 1.0 },
+          { time: 3, difficulty: 1.5 },
+          { time: 7, difficulty: 1.8 },
+          { time: 10, difficulty: 1.3 },
+        ],
+        topper: [
+          { time: 0, difficulty: 1.8 },
+          { time: 2, difficulty: 1.5 },
+          { time: 4, difficulty: 1.2 },
+          { time: 6, difficulty: 1.4 },
+          { time: 8, difficulty: 1.5 },
+          { time: 10, difficulty: 1.3 },
+          { time: 12, difficulty: 1.0 },
+          { time: 15, difficulty: 0.9 },
+        ],
       },
     },
   },
   comparisons: {
     metrics: ["Your Score", "Accuracy", "Correct", "Incorrect", "Time Spent"],
-    maxValues: { "Your Score": 35, Accuracy: 100, Correct: 35, Incorrect: 10, "Time Spent": 1320, },
+    maxValues: {
+      "Your Score": 35,
+      Accuracy: 100,
+      Correct: 35,
+      Incorrect: 10,
+      "Time Spent": 1320,
+    },
     data: {
       "Your Score": {
-        you: { english: 21.25, numerical: 18.5, reasoning: 20.0, generalAwareness: 15.25, },
-        average: { english: 18.5, numerical: 15.2, reasoning: 17.8, generalAwareness: 12.5, },
-        topper: { english: 28.0, numerical: 32.5, reasoning: 34.75, generalAwareness: 35.0, },
+        you: {
+          english: 21.25,
+          numerical: 18.5,
+          reasoning: 20.0,
+          generalAwareness: 15.25,
+        },
+        average: {
+          english: 18.5,
+          numerical: 15.2,
+          reasoning: 17.8,
+          generalAwareness: 12.5,
+        },
+        topper: {
+          english: 28.0,
+          numerical: 32.5,
+          reasoning: 34.75,
+          generalAwareness: 35.0,
+        },
       },
       Accuracy: {
-        you: { english: 87.32, numerical: 80.15, reasoning: 85.0, generalAwareness: 76.25 },
-        average: { english: 75, numerical: 68, reasoning: 72, generalAwareness: 65, },
-        topper: { english: 98, numerical: 96, reasoning: 99, generalAwareness: 95, },
+        you: {
+          english: 87.32,
+          numerical: 80.15,
+          reasoning: 85.0,
+          generalAwareness: 76.25,
+        },
+        average: {
+          english: 75,
+          numerical: 68,
+          reasoning: 72,
+          generalAwareness: 65,
+        },
+        topper: {
+          english: 98,
+          numerical: 96,
+          reasoning: 99,
+          generalAwareness: 95,
+        },
       },
       Correct: {
-        you: { english: 28, numerical: 22, reasoning: 28, generalAwareness: 28 },
-        average: { english: 19, numerical: 16, reasoning: 18, generalAwareness: 13, },
-        topper: { english: 28, numerical: 33, reasoning: 35, generalAwareness: 35, },
+        you: {
+          english: 28,
+          numerical: 22,
+          reasoning: 28,
+          generalAwareness: 28,
+        },
+        average: {
+          english: 19,
+          numerical: 16,
+          reasoning: 18,
+          generalAwareness: 13,
+        },
+        topper: {
+          english: 28,
+          numerical: 33,
+          reasoning: 35,
+          generalAwareness: 35,
+        },
       },
       Incorrect: {
         you: { english: 4, numerical: 5, reasoning: 5, generalAwareness: 9 },
-        average: { english: 6, numerical: 7, reasoning: 5, generalAwareness: 7 },
+        average: {
+          english: 6,
+          numerical: 7,
+          reasoning: 5,
+          generalAwareness: 7,
+        },
         topper: { english: 1, numerical: 1, reasoning: 0, generalAwareness: 2 },
       },
       "Time Spent": {
-        you: { english: 985, numerical: 1090, reasoning: 1320, generalAwareness: 600, },
-        average: { english: 1020, numerical: 1150, reasoning: 1300, generalAwareness: 720, },
-        topper: { english: 900, numerical: 1050, reasoning: 1200, generalAwareness: 600, },
+        you: {
+          english: 985,
+          numerical: 1090,
+          reasoning: 1320,
+          generalAwareness: 600,
+        },
+        average: {
+          english: 1020,
+          numerical: 1150,
+          reasoning: 1300,
+          generalAwareness: 720,
+        },
+        topper: {
+          english: 900,
+          numerical: 1050,
+          reasoning: 1200,
+          generalAwareness: 600,
+        },
       },
     },
   },
 };
 // --- DATA TRANSFORMATIONS ---
-const allTopics = Object.values(userPerformance.sections).flatMap(s => s.topics);
+const allTopics = Object.values(userPerformance.sections).flatMap(
+  (s) => s.topics
+);
 const totalCorrect = allTopics.reduce((sum, t) => sum + t.correct, 0);
 const totalAttempted = allTopics.reduce((sum, t) => sum + t.attempted, 0);
 const totalQs = allTopics.reduce((sum, t) => sum + t.totalQs, 0);
@@ -249,7 +515,7 @@ const OverallPerformance = () => (
             <div className="grid grid-cols-2 gap-4 text-center mb-6">
               {Object.entries(userPerformance.sections).map(([name, data]) => (
                 <div key={name} className="bg-background-subtle p-4 rounded-lg">
-                  <p className="text-sm text-[#8e8e93]">{name}</p>
+                  <p className="text-sm text-[#8e8e93]">{data.name}</p>
                   <p className={`text-3xl font-bold ${data.color}`}>
                     {data.score.toFixed(2)}{" "}
                     <span className="text-lg text-[#636366]">
@@ -260,33 +526,65 @@ const OverallPerformance = () => (
               ))}
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 text-center">
-                  <SummaryItem value={userPerformance.overall.rank.toLocaleString()} label="Rank" total={userPerformance.overall.maxRank.toLocaleString()} />
-                  <SummaryItem value={userPerformance.overall.percentile.toFixed(2)} label="Percentile" />
-                  <SummaryItem value={userPerformance.overall.accuracy.toFixed(2)} label="Accuracy" />
-                  <SummaryItem value={userPerformance.overall.time} label="Time" total={userPerformance.overall.maxTime} />
+              <SummaryItem
+                value={userPerformance.overall.rank.toLocaleString()}
+                label="Rank"
+                total={userPerformance.overall.maxRank.toLocaleString()}
+              />
+              <SummaryItem
+                value={userPerformance.overall.percentile.toFixed(2)}
+                label="Percentile"
+              />
+              <SummaryItem
+                value={userPerformance.overall.accuracy.toFixed(2)}
+                label="Accuracy"
+              />
+              <SummaryItem
+                value={userPerformance.overall.time}
+                label="Time"
+                total={userPerformance.overall.maxTime}
+              />
+            </div>
+
+            <div className="mt-6">
+              <div className="flex w-full h-2 rounded-full overflow-hidden bg-background-subtle">
+                <div
+                  className="bg-[#34C759]"
+                  style={{ width: `${(totalCorrect / totalQs) * 100}%` }}
+                  title={`Correct: ${totalCorrect}`}
+                ></div>
+                <div
+                  className="bg-[#FF3B30]"
+                  style={{ width: `${(totalIncorrect / totalQs) * 100}%` }}
+                  title={`Incorrect: ${totalIncorrect}`}
+                ></div>
+                <div
+                  className="bg-[#8e8e93]"
+                  style={{ width: `${(totalSkipped / totalQs) * 100}%` }}
+                  title={`Skipped: ${totalSkipped}`}
+                ></div>
+              </div>
+              <div className="flex flex-wrap justify-between text-xs mt-2 px-1 gap-2">
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#34C759]"></div>
+                  <span className="text-[#c7c7cc]">
+                    Correct: <b>{totalCorrect}</b>
+                  </span>
                 </div>
-    
-                <div className="mt-6">
-                    <div className="flex w-full h-2 rounded-full overflow-hidden bg-background-subtle">
-                        <div className="bg-[#34C759]" style={{ width: `${(totalCorrect/totalQs)*100}%` }} title={`Correct: ${totalCorrect}`}></div>
-                        <div className="bg-[#FF3B30]" style={{ width: `${(totalIncorrect/totalQs)*100}%` }} title={`Incorrect: ${totalIncorrect}`}></div>
-                        <div className="bg-[#8e8e93]" style={{ width: `${(totalSkipped/totalQs)*100}%` }} title={`Skipped: ${totalSkipped}`}></div>
-                    </div>
-                    <div className="flex flex-wrap justify-between text-xs mt-2 px-1 gap-2">
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-[#34C759]"></div>
-                            <span className="text-[#c7c7cc]">Correct: <b>{totalCorrect}</b></span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-[#FF3B30]"></div>
-                            <span className="text-[#c7c7cc]">Incorrect: <b>{totalIncorrect}</b></span>
-                        </div>
-                        <div className="flex items-center gap-1.5">
-                            <div className="w-2 h-2 rounded-full bg-[#8e8e93]"></div>
-                            <span className="text-[#c7c7cc]">Skipped: <b>{totalSkipped}</b></span>
-                        </div>
-                    </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#FF3B30]"></div>
+                  <span className="text-[#c7c7cc]">
+                    Incorrect: <b>{totalIncorrect}</b>
+                  </span>
                 </div>
+                <div className="flex items-center gap-1.5">
+                  <div className="w-2 h-2 rounded-full bg-[#8e8e93]"></div>
+                  <span className="text-[#c7c7cc]">
+                    Skipped: <b>{totalSkipped}</b>
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -295,11 +593,15 @@ const OverallPerformance = () => (
 );
 
 const SectionalSummary = () => {
-  const sectionTabs = Object.values(userPerformance.sections).map(s => s.name);
+  const sectionTabs = Object.values(userPerformance.sections).map(
+    (s) => s.name
+  );
   const [activeTab, setActiveTab] = useState(sectionTabs[0]);
   const [isTopicAnalysisOpen, setTopicAnalysisOpen] = useState(true);
 
-  const activeSection = Object.values(userPerformance.sections).find(s => s.name === activeTab);
+  const activeSection = Object.values(userPerformance.sections).find(
+    (s) => s.name === activeTab
+  );
 
   if (!activeSection) return null; // Or a loading/error state
 
@@ -403,7 +705,7 @@ const SectionalSummary = () => {
                     <th scope="col" className="px-4 py-3 text-center">
                       Correct
                     </th>
-                    
+
                     <th scope="col" className="px-4 py-3 text-center">
                       Skipped
                     </th>
@@ -437,8 +739,8 @@ const SectionalSummary = () => {
                       </td>
                       <td className="px-4 py-4 text-center">{topic.time}</td>
                       <td className="px-4 py-4 text-center">{`${topic.correct}/${topic.attempted}`}</td>
-                      
-                       <td className="block text-right relative py-2 md:table-cell md:text-center md:px-4 md:py-4">
+
+                      <td className="block text-right relative py-2 md:table-cell md:text-center md:px-4 md:py-4">
                         <span className="font-bold text-[#8e8e93] md:hidden absolute left-0">
                           Skipped
                         </span>
@@ -477,10 +779,12 @@ const ComparisonAnalysis = () => {
         className="lg:col-span-8"
       >
         <CardContent>
-           <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
+          <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
             Comparison Analysis
           </h3>
-          <p className="text-muted-foreground">Comparison data is not available for the selected metric.</p>
+          <p className="text-muted-foreground">
+            Comparison data is not available for the selected metric.
+          </p>
         </CardContent>
       </StatsCard>
     );
@@ -498,8 +802,8 @@ const ComparisonAnalysis = () => {
       const values = Object.values(groupData);
       return (values.reduce((a, b) => a + b, 0) / values.length).toFixed(2);
     }
-     const total = Object.values(groupData).reduce((a, b) => a + b, 0);
-     return Number.isInteger(total) ? total : total.toFixed(2);
+    const total = Object.values(groupData).reduce((a, b) => a + b, 0);
+    return Number.isInteger(total) ? total : total.toFixed(2);
   };
 
   const yAxisLabels = () => {
@@ -507,7 +811,7 @@ const ComparisonAnalysis = () => {
     for (let i = 4; i >= 0; i--) {
       const value = (maxValue / 4) * i;
       labels.push(
-        <div key={i} className="text-xs text-[#636366]">
+        <div key={i} className="text-md text-[#636366]">
           {activeTab === "Accuracy"
             ? `${Math.floor(value / 60)}%`
             : activeTab === "Time Spent"
@@ -560,20 +864,30 @@ const ComparisonAnalysis = () => {
             <div className="w-full h-56 relative border-b border-solid border-[#38383A]">
               <div className="absolute inset-0 grid grid-rows-4">
                 {[...Array(4)].map((_, i) => (
-                  <div key={i} className="border-t border-dashed border-[#38383A]"></div>
+                  <div
+                    key={i}
+                    className="border-t border-dashed border-[#38383A]"
+                  ></div>
                 ))}
               </div>
               <div className="absolute inset-0 flex justify-around items-end">
                 {Object.keys(chartData).map((groupKey) => (
-                  <div key={groupKey} className="w-1/3 h-full flex items-end justify-center space-x-1 px-1">
+                  <div
+                    key={groupKey}
+                    className="w-1/3 h-full flex items-end justify-center space-x-1 px-1"
+                  >
                     {comparisonSections.map((section) => (
                       <div
                         key={section.key}
                         className={`w-3 sm:w-5 rounded-t-md transition-all duration-500 ${section.color}`}
                         style={{
-                          height: `${(chartData[groupKey][section.key] / maxValue) * 100}%`,
+                          height: `${
+                            (chartData[groupKey][section.key] / maxValue) * 100
+                          }%`,
                         }}
-                        title={`${section.name}: ${chartData[groupKey][section.key]}`}
+                        title={`${section.name}: ${
+                          chartData[groupKey][section.key]
+                        }`}
                       ></div>
                     ))}
                   </div>
@@ -598,7 +912,9 @@ const ComparisonAnalysis = () => {
           {comparisonSections.map((section) => (
             <div key={section.key} className="flex items-center space-x-2">
               <div className={`w-3 h-3 rounded-full ${section.color}`}></div>
-              <span className="text-xs text-[#8e8e93] font-medium">{section.name}</span>
+              <span className="text-xs text-[#8e8e93] font-medium">
+                {section.name}
+              </span>
             </div>
           ))}
         </div>
@@ -641,25 +957,29 @@ const DifficultyTimeGraph = ({ data, maxTime }) => {
               height -
               padding -
               (i * (height - padding * 2.5)) / (difficultyLevels.length - 1);
+            const colorClass = 
+                level === 'Hard' ? 'text-red-500' :
+                level === 'Med' ? 'text-yellow-500' :
+                'text-green-500';
+
             return (
               <g key={level}>
-                {" "}
                 <text
                   x={padding - 8}
                   y={y + 4}
                   textAnchor="end"
-                  className="text-xs fill-current text-[#636366]"
+                  className={`text-[10px] fill-current ${colorClass}`}
                 >
                   {level}
-                </text>{" "}
+                </text>
                 <line
                   x1={padding}
                   y1={y}
                   x2={width - padding}
                   y2={y}
-                  className="stroke-current text-[#38383A]"
+                  className={`stroke-current ${colorClass}`}
                   strokeDasharray="2,2"
-                />{" "}
+                />
               </g>
             );
           })}
@@ -712,13 +1032,17 @@ const DifficultyTimeGraph = ({ data, maxTime }) => {
 };
 
 const YourAttemptStrategy = () => {
-  const sectionTabs = Object.values(userPerformance.sections).map(s => s.name);
+  const sectionTabs = Object.values(userPerformance.sections).map(
+    (s) => s.name
+  );
   const [activeGraphTab, setActiveGraphTab] = useState(sectionTabs[0]);
-  
-  const activeSection = Object.values(userPerformance.sections).find(s => s.name === activeGraphTab);
+
+  const activeSection = Object.values(userPerformance.sections).find(
+    (s) => s.name === activeGraphTab
+  );
   const activeGraphData = activeSection?.difficultyTrend;
 
-  if(!activeGraphData) return null;
+  if (!activeGraphData) return null;
 
   return (
     <StatsCard
@@ -896,7 +1220,10 @@ const ProgressBar: React.FC<{
 const CognitiveSkills: React.FC<{
   skills: CognitiveSkill[];
 }> = ({ skills }) => (
-  <StatsCard className="lg:col-span-4" tooltipText="An analysis of your cognitive abilities based on your test performance.">
+  <StatsCard
+    className="lg:col-span-4"
+    tooltipText="An analysis of your cognitive abilities based on your test performance."
+  >
     <CardContent>
       <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
         Cognitive Skill Profile
@@ -1121,7 +1448,7 @@ const Leaderboard = () => {
           )}
         </div>
       </div>
-      <span className="font-bold text-[#0A84FF] tracking-wider">
+      <span className="font-bold text-primary tracking-wider">
         {user.score.toFixed(2)}
       </span>
     </div>
@@ -1157,22 +1484,22 @@ const Leaderboard = () => {
           <div className="border-t border-1 my-2"></div>
         </div>
         {/* Current User Row */}
-        <div className="flex items-center justify-between text-sm p-3 rounded-lg bg-[#0A84FF]/10 border border-[#0A84FF]/50">
+        <div className="flex items-center justify-between text-sm p-3 rounded-lg bg-accent border border-primary/50">
           <div className="flex items-center space-x-3">
-            <span className="w-8 h-8 rounded-full bg-border-high text-white flex items-center justify-center font-bold text-base flex-shrink-0">
-              {currentUser.rank}
+            <span className="w-9 h-9 rounded-full bg-border-high text-white flex items-center justify-center font-bold text-base flex-shrink-0 bg-gradient-to-b from-slate-600 via-slate-700 to-slate-800ring-2 ring-inset ring-slate-500/50 shadow-lg shadow-slate-700/30">
+              {userPerformance.overall.rank}
             </span>
             <div className="font-semibold text-gray-100 flex items-center space-x-2">
               <p className="font-bold text-lg text-foreground">
                 {currentUser.name}
               </p>
-              <p className=" text-[#0A84FF] font-medium mt-0.5">
+              <p className=" text-primary font-medium mt-0.5">
                 {currentUser.message}
               </p>
             </div>
           </div>
-          <span className="font-bold text-[#0A84FF] tracking-wider">
-            {currentUser.score.toFixed(2)}
+          <span className="font-bold text-primary tracking-wider">
+            {userPerformance.overall.score.toFixed(2)}
           </span>
         </div>
       </CardContent>
@@ -1196,8 +1523,7 @@ const SummaryItem = ({ value, label, total }) => (
   </div>
 );
 
-
-const ScoreDonutChart = ({ data, size = 200, maxScore = 100  }) => {
+const ScoreDonutChart = ({ data, size = 200, maxScore = 100 }) => {
   // Convert the data object into an array suitable for mapping.
   // It also parses the color string to ensure it's a valid hex code.
   const scoresArray = Object.entries(data).map(([label, { score, color }]) => {
@@ -1237,14 +1563,14 @@ const ScoreDonutChart = ({ data, size = 200, maxScore = 100  }) => {
         {/* Map through the scores to create each colored segment */}
         {scoresArray.map((item, index) => {
           if (item.value <= 0) return null; // Don't render segments with no value.
-          
+
           const dasharray = (item.value / maxScore) * circumference;
           // NEW LOGIC: Calculate rotation for each segment instead of using offset.
           const rotation = (cumulative / maxScore) * 360;
-          
+
           // Add the current item's value to the cumulative total for the next iteration.
           cumulative += item.value;
-          
+
           return (
             <circle
               key={index}
@@ -1254,7 +1580,7 @@ const ScoreDonutChart = ({ data, size = 200, maxScore = 100  }) => {
               fill="transparent"
               stroke={item.color}
               strokeWidth={strokeWidth}
-              strokeLinecap="round" 
+              strokeLinecap="round"
               // The dash array now only needs the segment length and the rest of the circle
               strokeDasharray={`${dasharray} ${circumference}`}
               // The transform now rotates each segment into its correct position.
@@ -1277,6 +1603,15 @@ const ScoreDonutChart = ({ data, size = 200, maxScore = 100  }) => {
 
 export default function TestAnalysis2() {
   const [isShareOpen, setShareOpen] = useState(false);
+
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const handleShare = useCallback(() => {
+        setIsShareModalOpen(true);
+      }, []);
+    
+  const handleCloseShareModal = useCallback(() => {
+    setIsShareModalOpen(false);
+  }, []);
   return (
     <div className="p-4 sm:p-6 bg-background min-h-screen font-sans text-foreground mt-10 sm:mt-4">
       {/**<div className="max-w-7xl mx-auto mb-8 text-center">
@@ -1299,12 +1634,12 @@ export default function TestAnalysis2() {
               </button>
               {isShareOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-background-subtle border border-border rounded-lg shadow-xl z-10">
-                  <a
+                  <a onClick={handleShare}
                     href="#"
                     className="flex items-center px-4 py-2 text-sm hover:bg-accent"
                   >
                     <Share className="w-4 h-4 mr-3" />
-                    Share on Twitter
+                    Share
                   </a>
                   <a
                     href="#"
@@ -1348,6 +1683,11 @@ export default function TestAnalysis2() {
 
           <Leaderboard />
           <ReviewAndRelearn />
+          <ShareModal
+            isOpen={isShareModalOpen}
+            onClose={handleCloseShareModal}
+            url={`https://www.youtube.com`}
+          />
         </div>
       </div>
     </div>
