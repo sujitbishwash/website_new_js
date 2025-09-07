@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import React from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import { quizApi } from "@/lib/api-client";
 
 // --- Setup ---
 
@@ -11,60 +12,23 @@ fontLink.href =
 fontLink.rel = "stylesheet";
 document.head.appendChild(fontLink);
 
-// TypeScript interfaces for our data structures
+// TypeScript interfaces for our data structures (using API format)
 interface AnswerOption {
-  answerText: string;
+  text: string;
   isCorrect: boolean;
 }
 
-interface Question {
+interface QuizQuestion {
   questionText: string;
-  answerOptions: AnswerOption[];
+  questionType: "MCQ";
+  options: AnswerOption[];
 }
 
 // Centralized theme colors for a polished look
 // theme constants removed (unused)
 
 // --- Data ---
-const quizQuestions: Question[] = [
-  {
-    questionText: "What does CSS stand for?",
-    answerOptions: [
-      { answerText: "Computer Style Sheets", isCorrect: false },
-      { answerText: "Creative Style Sheets", isCorrect: false },
-      { answerText: "Cascading Style Sheets", isCorrect: true },
-      { answerText: "Colorful Style Sheets", isCorrect: false },
-    ],
-  },
-  {
-    questionText: "Which HTML tag is used to define an internal style sheet?",
-    answerOptions: [
-      { answerText: "<script>", isCorrect: false },
-      { answerText: "<style>", isCorrect: true },
-      { answerText: "<css>", isCorrect: false },
-      { answerText: "<link>", isCorrect: false },
-    ],
-  },
-  {
-    questionText:
-      'What is the correct syntax for referring to an external script called "xxx.js"?',
-    answerOptions: [
-      { answerText: '<script src="xxx.js">', isCorrect: true },
-      { answerText: '<script href="xxx.js">', isCorrect: false },
-      { answerText: '<script name="xxx.js">', isCorrect: false },
-      { answerText: '<script file="xxx.js">', isCorrect: false },
-    ],
-  },
-  {
-    questionText: "Which company developed JavaScript?",
-    answerOptions: [
-      { answerText: "Microsoft", isCorrect: false },
-      { answerText: "Google", isCorrect: false },
-      { answerText: "Sun Microsystems", isCorrect: false },
-      { answerText: "Netscape", isCorrect: true },
-    ],
-  },
-];
+// Quiz questions will be loaded dynamically from API
 
 // --- Reusable Components ---
 
@@ -131,7 +95,7 @@ const Navigation: React.FC<{
 };
 
 const QuestionView: React.FC<{
-  question: Question;
+  question: QuizQuestion;
   questionNumber: number;
   totalQuestions: number;
   isAnswered: boolean;
@@ -185,14 +149,14 @@ const QuestionView: React.FC<{
           </div>
         </div>
         <div className="w-full flex flex-col gap-3">
-          {question.answerOptions.map((answerOption, index) => (
+          {question.options.map((answerOption, index) => (
             <button
               key={index}
               className={getButtonClasses(answerOption, index)}
               onClick={() => onAnswerClick(answerOption.isCorrect, index)}
               disabled={isAnswered}
             >
-              {answerOption.answerText}
+              {answerOption.text}
             </button>
           ))}
         </div>
@@ -208,12 +172,21 @@ const QuestionView: React.FC<{
 };
 
 // Add props interface for feedback state
+interface FeedbackData {
+  id: string;
+  rating: number;
+  description: string;
+  date_submitted: string;
+  page_url: string;
+}
+
 interface QuizProps {
   // Optional props to prevent duplicate API calls when passed from parent
   videoId: string;
   canSubmitFeedback?: boolean | undefined;
-  existingFeedback?: any;
+  existingFeedback?: FeedbackData | null;
   markAsSubmitted?: () => void;
+  topics?: string[]; // Topics for quiz generation (optional to handle API failures)
 }
 
 const Quiz: React.FC<QuizProps> = ({
@@ -221,13 +194,49 @@ const Quiz: React.FC<QuizProps> = ({
   canSubmitFeedback,
   existingFeedback,
   markAsSubmitted,
+  topics,
 }) => {
-  // Debug feedback props
-  console.log("🔍 Quiz Component Props:", {
+  console.log(`🏗️ Quiz Component .................. Topics:`, topics);
+  // Generate unique component instance ID for debugging (stable across renders)
+  const componentId = React.useRef(Math.random().toString(36).substr(2, 9)).current;
+  
+  // Debug component mount/unmount
+  React.useEffect(() => {
+    console.log(`🏗️ Quiz Component [${componentId}] MOUNTED with topics:`, topics);
+    console.log(`🏗️ Quiz Component [${componentId}] Topics type:`, typeof topics);
+    console.log(`🏗️ Quiz Component [${componentId}] Topics is array:`, Array.isArray(topics));
+    return () => {
+      console.log(`🗑️ Quiz Component [${componentId}] UNMOUNTED`);
+    };
+  }, [componentId, topics]);
+  
+  // Memoize topics to prevent infinite re-renders
+  const topicsToUse = React.useMemo(() => {
+    console.log(`🔍 Quiz Component [${componentId}] Deriving topicsToUse. Topics prop:`, topics);
+    return topics && topics.length > 0 ? topics : null;
+  }, [topics, componentId]);
+  
+  console.log(`🔍 Quiz Component [${componentId}] Topics prop:`, topics);
+  console.log(`🎯 Quiz Component [${componentId}] Topics to use:`, topicsToUse);
+  
+  // Quiz state
+  const [quizQuestions, setQuizQuestions] = React.useState<QuizQuestion[]>([]);
+  const [isLoadingQuiz, setIsLoadingQuiz] = React.useState<boolean>(true); // Start as true to show loading initially
+  const [quizError, setQuizError] = React.useState<string | null>(null);
+  const hasAttemptedFetchRef = React.useRef<boolean>(false);
+  const lastTopicsRef = React.useRef<string>("");
+  
+  // Debug feedback props (moved after state declarations)
+  console.log(`🔍 Quiz Component [${componentId}] Props:`, {
     videoId,
     canSubmitFeedback,
     existingFeedback: !!existingFeedback,
-    hasMarkAsSubmitted: !!markAsSubmitted
+    hasMarkAsSubmitted: !!markAsSubmitted,
+    originalTopics: topics,
+    topicsToUse: topicsToUse,
+    isLoadingQuiz,
+    hasAttemptedFetch: hasAttemptedFetchRef.current,
+    quizQuestionsLength: quizQuestions.length
   });
   const [currentQuestion, setCurrentQuestion] = React.useState<number>(0);
   const [showScore, setShowScore] = React.useState<boolean>(false);
@@ -236,6 +245,80 @@ const Quiz: React.FC<QuizProps> = ({
   const [selectedAnswerIndex, setSelectedAnswerIndex] = React.useState<
     number | null
   >(null);
+
+  // Fetch quiz questions from API when topics change
+  React.useEffect(() => {
+    // Don't fetch if no topics available
+    if (!topicsToUse) {
+      console.log(`🔄 Quiz Component [${componentId}] No topics available, skipping API call`);
+      setIsLoadingQuiz(false);
+      setQuizError("No topics available for quiz generation.");
+      return;
+    }
+
+    const topicsKey = JSON.stringify(topicsToUse);
+    
+    // Prevent infinite calls by checking if topics actually changed
+    if (lastTopicsRef.current === topicsKey) {
+      console.log(`🔄 Quiz Component [${componentId}] Topics unchanged, skipping API call`);
+      return;
+    }
+    
+    console.log(`🔄 Quiz Component [${componentId}] useEffect triggered with topics:`, topicsToUse);
+    console.log(`🔄 Quiz Component [${componentId}] Topics length:`, topicsToUse?.length);
+    console.log(`🔄 Quiz Component [${componentId}] Topics content:`, JSON.stringify(topicsToUse));
+    console.log(`🔄 Quiz Component [${componentId}] Previous topics:`, lastTopicsRef.current);
+    console.log(`🔄 Quiz Component [${componentId}] New topics:`, topicsKey);
+    
+    // Update the last topics ref
+    lastTopicsRef.current = topicsKey;
+    
+    // Reset state when topics change
+    console.log(`🔄 Quiz Component [${componentId}] Resetting state for new topics`);
+    setQuizQuestions([]);
+    setCurrentQuestion(0);
+    setShowScore(false);
+    setScore(0);
+    setIsAnswered(false);
+    setSelectedAnswerIndex(null);
+    setQuizError(null);
+    hasAttemptedFetchRef.current = false;
+    setIsLoadingQuiz(true);
+
+    const fetchQuizQuestions = async () => {
+      try {
+        hasAttemptedFetchRef.current = true;
+        setQuizError(null);
+        console.log(`🎯 Quiz Component [${componentId}] About to call quizApi.generateQuiz with topics:`, topicsToUse);
+        console.log(`🎯 Quiz Component [${componentId}] API base URL:`, import.meta.env.VITE_API_BASE_URL);
+        
+        const response = await quizApi.generateQuiz(topicsToUse);
+        console.log(`✅ Quiz Component [${componentId}] Quiz questions loaded successfully:`, response);
+        console.log(`✅ Quiz Component [${componentId}] Questions count:`, response.questions?.length);
+        
+        setQuizQuestions(response.questions);
+      } catch (error: unknown) {
+        console.error(`❌ Quiz Component [${componentId}] Failed to fetch quiz questions:`, error);
+        console.error(`❌ Quiz Component [${componentId}] Error details:`, {
+          message: (error as any)?.message,
+          status: (error as any)?.status,
+          stack: (error as any)?.stack
+        });
+        
+        // Check if it's an authentication error
+        const errorStatus = (error as any)?.status;
+        if (errorStatus === 401 || errorStatus === 403) {
+          setQuizError("Please log in to access quiz questions.");
+        } else {
+          setQuizError("Failed to load quiz questions. Please try again.");
+        }
+      } finally {
+        setIsLoadingQuiz(false);
+      }
+    };
+
+    fetchQuizQuestions();
+  }, [topicsToUse, componentId]); // Depend on topicsToUse and componentId
 
   const handleNextQuestion = () => {
     const nextQuestion = currentQuestion + 1;
@@ -283,6 +366,33 @@ const Quiz: React.FC<QuizProps> = ({
     setSelectedAnswerIndex(null);
   };
 
+  const retryQuiz = () => {
+    if (!topicsToUse) {
+      setQuizError("No topics available for quiz generation.");
+      return;
+    }
+    
+    setQuizError(null);
+    setQuizQuestions([]); // Clear existing questions
+    hasAttemptedFetchRef.current = false; // Reset attempt flag
+    setIsLoadingQuiz(true);
+    // The useEffect will trigger again when topics change or we can manually refetch
+    const fetchQuizQuestions = async () => {
+      try {
+        hasAttemptedFetchRef.current = true;
+        const response = await quizApi.generateQuiz(topicsToUse);
+        setQuizQuestions(response.questions);
+        setQuizError(null);
+      } catch (error: unknown) {
+        console.error("❌ Failed to retry quiz questions:", error);
+        setQuizError("Failed to load quiz questions. Please try again.");
+      } finally {
+        setIsLoadingQuiz(false);
+      }
+    };
+    fetchQuizQuestions();
+  };
+
   // Feedback handling for quiz completion
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
 
@@ -314,7 +424,7 @@ const Quiz: React.FC<QuizProps> = ({
     }
   };
 
-  const handleSubmitFeedback = async (payload: any) => {
+  const handleSubmitFeedback = async (payload: unknown) => {
     console.log("Quiz feedback submitted:", payload);
     if (markAsSubmitted) {
       markAsSubmitted();
@@ -331,6 +441,61 @@ const Quiz: React.FC<QuizProps> = ({
   };
 
   // inline styles removed (unused)
+
+  // Loading state
+  if (isLoadingQuiz) {
+    return (
+      <div className="bg-background flex flex-col items-center justify-center p-4 text-neutral-100 min-h-[400px]">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
+          <p className="text-lg font-semibold text-foreground">Loading Quiz...</p>
+          <p className="text-sm text-muted-foreground mt-2">
+            {topicsToUse ? `Generating questions for: ${topicsToUse.join(", ")}` : "Waiting for topics..."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (quizError) {
+    return (
+      <div className="bg-background flex flex-col items-center justify-center p-4 text-neutral-100 min-h-[400px]">
+        <div className="text-center">
+          <div className="text-red-400 text-6xl mb-4">⚠️</div>
+          <p className="text-lg font-semibold text-foreground mb-2">Failed to Load Quiz</p>
+          <p className="text-sm text-muted-foreground mb-4">{quizError}</p>
+          <button
+            onClick={retryQuiz}
+            className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // No questions state
+  if (quizQuestions.length === 0) {
+    return (
+      <div className="bg-background flex flex-col items-center justify-center p-4 text-neutral-100 min-h-[400px]">
+        <div className="text-center">
+          <div className="text-gray-400 text-6xl mb-4">📝</div>
+          <p className="text-lg font-semibold text-foreground mb-2">No Questions Available</p>
+          <p className="text-sm text-muted-foreground mb-4">
+            No quiz questions were generated for the selected topics.
+          </p>
+          <button
+            onClick={retryQuiz}
+            className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div

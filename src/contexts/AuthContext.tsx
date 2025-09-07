@@ -188,43 +188,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           const parsedUser = JSON.parse(userData);
           console.log("👤 Parsed user data:", parsedUser.email);
 
-          // Validate token by making an API call
-          console.log("🔍 Validating token with API...");
-          const response = await getUserData();
+          // Set user immediately from localStorage (optimistic approach)
+          setUser(parsedUser);
+          console.log("✅ User set from localStorage, will validate in background");
 
-          console.log("📡 API response:", response);
+          // Validate token in background without blocking UI
+          console.log("🔍 Validating token with API in background...");
+          try {
+            const response = await getUserData();
+            console.log("📡 Background API validation response:", response);
 
-          // More flexible validation - check if the request was successful (status 200-299)
-          // and if we got any response data, even if it's null
-          if (response && response.status >= 200 && response.status < 300) {
-            // Token is valid, set user
-            console.log("✅ Token is valid, setting user");
-            setUser(parsedUser);
-            return true;
-          } else {
-            // Token is invalid, clear storage
-            console.log("❌ Invalid token found, clearing storage");
-            logout();
-            return false;
+            // Only logout if we get a clear authentication error
+            if (response && (response.status === 401 || response.status === 403)) {
+              console.log("🔒 Authentication error detected, clearing storage");
+              logout();
+              return false;
+            } else if (response && response.status >= 200 && response.status < 300) {
+              console.log("✅ Background validation successful");
+              // Update user data with fresh data from API
+              if (response.data && response.data.id && response.data.email) {
+                updateLocalStorageUserData(response.data);
+                setUser({
+                  id: response.data.id,
+                  email: response.data.email,
+                  name: response.data.name
+                });
+              }
+            }
+            // For other errors (network, server), keep user logged in
+          } catch (validationError: any) {
+            console.log("🌐 Background validation failed, keeping user logged in:", validationError.message);
+            // Don't logout on validation errors - keep user logged in
           }
+
+          return true;
         } catch (error: any) {
-          console.error("❌ Error validating token:", error);
-          // Don't clear storage on network errors, only on authentication errors
+          console.error("❌ Error in checkAuth:", error);
+          // Only logout on clear authentication errors, not on parsing errors
           if (error.status === 401 || error.status === 403) {
             console.log("🔒 Authentication error, clearing storage");
             logout();
             return false;
           } else {
-            console.log("🌐 Network error, keeping authentication data");
-            // For network errors, assume token is still valid
-            // Parse user data again for network error case
+            console.log("🌐 Non-auth error, keeping user logged in");
+            // For any other errors, keep user logged in
             try {
               const parsedUser = JSON.parse(userData);
               setUser(parsedUser);
               return true;
             } catch (parseError) {
               console.error("❌ Error parsing user data:", parseError);
-              logout();
+              // Even if parsing fails, don't logout - just return false
               return false;
             }
           }
@@ -457,13 +471,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (!response || response.status < 200 || response.status >= 300) {
         console.log("❌ API call failed or unauthorized");
 
-        // If it's an authentication error (401/403), user is logged out
+        // Only logout on clear authentication errors
         if (response?.status === 401 || response?.status === 403) {
           console.log("🔒 Authentication error - user logged out");
           // Clear authentication data
           logout();
+          return {
+            hasName: false,
+            hasExamGoal: false,
+            nextStep: "personal-details",
+          };
         }
 
+        // For other errors (network, server), don't logout - use fallback data
+        console.log("🌐 Non-auth error, using fallback data");
         return {
           hasName: false,
           hasExamGoal: false,
@@ -531,7 +552,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     } catch (error) {
       console.error("❌ Error checking user state:", error);
 
-      // If it's an authentication error, clear auth data
+      // Only logout on clear authentication errors
       if (error && typeof error === "object" && "status" in error) {
         const apiError = error as any;
         if (apiError.status === 401 || apiError.status === 403) {
@@ -539,9 +560,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             "🔒 Authentication error in catch block - clearing auth data"
           );
           logout();
+          return {
+            hasName: false,
+            hasExamGoal: false,
+            nextStep: "personal-details",
+          };
         }
       }
 
+      // For other errors, don't logout - use fallback data
+      console.log("🌐 Non-auth error in catch block, using fallback data");
       // Fallback to personal details page
       return {
         hasName: false,

@@ -13,6 +13,14 @@ interface MessageType {
   isUser: boolean;
 }
 
+interface FeedbackData {
+  id: string;
+  rating: number;
+  description: string;
+  date_submitted: string;
+  page_url: string;
+}
+
 interface ChatProps {
   videoId: string;
   messages: Array<{ text: string; isUser: boolean }>;
@@ -22,7 +30,7 @@ interface ChatProps {
   isLeftColumnVisible: boolean;
   // Optional props to prevent duplicate API calls when passed from parent
   canSubmitFeedback?: boolean | undefined;
-  existingFeedback?: any;
+  existingFeedback?: FeedbackData | null;
   markAsSubmitted?: () => void;
 }
 
@@ -520,7 +528,7 @@ export default function Chat({
     }
   };
 
-  const handleFeedbackSubmit = async (payload: any) => {
+  const handleFeedbackSubmit = async (payload: unknown) => {
     console.log("Chat feedback submitted:", payload);
     
     if (markAsSubmitted) {

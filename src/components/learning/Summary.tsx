@@ -1,6 +1,7 @@
 import { ChevronDown } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import { videoApi } from "@/lib/api-client";
 
 // Star Rating Component with Animation
 
@@ -101,14 +102,7 @@ const longSummaryData: SummarySectionData[] = [
   },
 ];
 
-const mediumSummaryData: SummarySectionData[] = [
-  longSummaryData[0], // Intro
-  longSummaryData[1], // Solar
-];
-
-const smallSummaryData: SummarySectionData[] = [
-  longSummaryData[0], // Intro
-];
+// Removed unused demo data arrays
 
 // --- SVG ICON ---
 const SourceIcon = () => (
@@ -133,16 +127,26 @@ const SourceIcon = () => (
 
 // --- MODULAR COMPONENTS ---
 
+// Helper function to format text with markdown-like syntax
+const formatText = (text: string) => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
+    .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic text
+    .replace(/\n\n/g, '<br/><br/>') // Double newlines
+    .replace(/\n/g, '<br/>'); // Single newlines
+};
+
 const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
   <li className="mb-2">
     <div className="flex items-start">
       <span
         className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-foreground"
       ></span>
-      <p className="text-muted-foreground">
-        {point.text}
-        <SourceIcon />
-      </p>
+      <div 
+        className="text-muted-foreground"
+        dangerouslySetInnerHTML={{ __html: formatText(point.text) }}
+      />
+      <SourceIcon />
     </div>
     {point.subPoints && (
       <ul
@@ -155,10 +159,11 @@ const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
               <span
                 className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-muted-foreground"
               ></span>
-              <p className="text-muted-foreground">
-                {subPoint.text}
-                <SourceIcon />
-              </p>
+              <div 
+                className="text-muted-foreground"
+                dangerouslySetInnerHTML={{ __html: formatText(subPoint.text) }}
+              />
+              <SourceIcon />
             </div>
           </li>
         ))}
@@ -173,9 +178,8 @@ const SummarySection: React.FC<{ section: SummarySectionData }> = ({
   <div className="mb-8">
     <h2
       className="text-2xl font-bold mb-4 text-foreground"
-    >
-      {section.title}
-    </h2>
+      dangerouslySetInnerHTML={{ __html: formatText(section.title) }}
+    />
     <ul className="list-none p-0">
       {section.points.map((point) => (
         <SummaryPointItem key={point.id} point={point} />
@@ -230,7 +234,7 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
     }
   };
 
-  const onSubmit = async (payload: any) => {
+  const onSubmit = async (payload: unknown) => {
     console.log("Summary feedback submitted:", payload);
     
     if (markAsSubmitted) {
@@ -335,65 +339,280 @@ const LoadingSpinner = () => (
 // --- MAIN APP COMPONENT ---
 
 // Add props interface for feedback state
+interface FeedbackData {
+  id: string;
+  rating: number;
+  description: string;
+  date_submitted: string;
+  page_url: string;
+}
+
 interface SummaryProps {
-  // Optional props to prevent duplicate API calls when passed from parent
+  // Only videoId is required, feedback props are optional
   videoId: string;
   canSubmitFeedback?: boolean | undefined;
-  existingFeedback?: any;
+  existingFeedback?: FeedbackData | null;
   markAsSubmitted?: () => void;
 }
 
-const Summary: React.FC<SummaryProps> = ({
+const Summary: React.FC<SummaryProps> = React.memo(({
   videoId,
   canSubmitFeedback,
   existingFeedback,
   markAsSubmitted,
 }) => {
   // Debug feedback props
-  console.log("🔍 Summary Component Props:", {
+  console.log("🔍 Summary Component - Mounted/Re-rendered with props:", {
     videoId,
     canSubmitFeedback,
     existingFeedback: !!existingFeedback,
-    hasMarkAsSubmitted: !!markAsSubmitted
+    hasMarkAsSubmitted: !!markAsSubmitted,
+    timestamp: new Date().toISOString()
   });
+
+  // Temporarily disable feedback to prevent re-renders
+  const feedbackCanSubmitFeedback = false;
+  const feedbackExistingFeedback = null;
+  const feedbackMarkAsSubmitted = () => {};
 
   const [summaryData, setSummaryData] = useState<SummarySectionData[] | null>(
     null
   );
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [summaryLength, setSummaryLength] = useState<SummaryLength>("long");
 
-  useEffect(() => {
-    const fetchSummaryData = () => {
-      setIsLoading(true);
+  // Add ref to track if we've already fetched data for this videoId
+  const fetchedVideoIdRef = useRef<string | null>(null);
+  const isFetchingRef = useRef<boolean>(false);
 
-      setTimeout(() => {
-        try {
-          // In a real app, you'd fetch based on the length:
-          // `https://api.example.com/summary?length=${summaryLength}`
-          switch (summaryLength) {
-            case "small":
-              setSummaryData(smallSummaryData);
-              break;
-            case "medium":
-              setSummaryData(mediumSummaryData);
-              break;
-            case "long":
-              setSummaryData(longSummaryData);
-              break;
-            default:
-              setSummaryData(longSummaryData);
-          }
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setIsLoading(false);
+  // Fetch summary data from API - ULTRA AGGRESSIVE APPROACH
+  useEffect(() => {
+    const fetchSummaryData = async () => {
+      // ULTRA AGGRESSIVE: Only fetch if we haven't fetched this videoId before
+      if (!videoId || fetchedVideoIdRef.current === videoId) {
+        console.log("🔍 ULTRA AGGRESSIVE: Skipping summary fetch - already fetched:", { 
+          videoId, 
+          fetchedVideoId: fetchedVideoIdRef.current
+        });
+        return;
+      }
+
+      // ULTRA AGGRESSIVE: Set fetching flag immediately
+      if (isFetchingRef.current) {
+        console.log("🔍 ULTRA AGGRESSIVE: Already fetching summary, skipping");
+        return;
+      }
+
+      if (!videoId) {
+        console.log("🔍 No videoId provided, using demo data");
+        setSummaryData(longSummaryData);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("🔍 ULTRA AGGRESSIVE: Starting summary fetch for videoId:", videoId);
+      isFetchingRef.current = true;
+      fetchedVideoIdRef.current = videoId; // Mark as fetched IMMEDIATELY
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await videoApi.getVideoSummary(videoId);
+        
+        console.log("📊 Raw API response:", response);
+        
+        // Check if response has the expected structure
+        if (!response) {
+          throw new Error("Empty response from API");
         }
-      }, 1000); // Shortened delay
+
+        let transformedData: SummarySectionData[] = [];
+
+        // Handle different possible response structures
+        if (response.sections && Array.isArray(response.sections)) {
+          // Transform API response to our component format
+          transformedData = response.sections.map((section: unknown, index: number) => {
+            const sectionData = section as { title?: string; content?: string; text?: string; description?: string };
+            return {
+              id: `section_${index}`,
+              title: sectionData.title || `Section ${index + 1}`,
+              points: [{
+                id: `point_${index}`,
+                text: sectionData.content || sectionData.text || sectionData.description || "No content available"
+              }]
+            };
+          });
+        } else if (response.transcript) {
+          // Handle the actual API response format with transcript field
+          const transcriptText = response.transcript;
+          
+          // Split the transcript into sections based on markdown headers
+          const sections = transcriptText.split(/\n\n\*\*(.*?)\*\*/g);
+          const processedSections: SummarySectionData[] = [];
+          
+          for (let i = 0; i < sections.length; i += 2) {
+            if (sections[i + 1]) {
+              // This is a section with a header
+              const title = sections[i + 1].trim();
+              const content = sections[i + 2] || sections[i].trim();
+              
+              // Split content into points based on bullet points or newlines
+              const points = content
+                .split(/\n\*|\n-|\n\d+\./)
+                .filter((point: string) => point.trim().length > 0)
+                .map((point: string, pointIndex: number) => ({
+                  id: `point_${i}_${pointIndex}`,
+                  text: point.trim().replace(/^\*|\d+\./, '').trim()
+                }));
+
+              processedSections.push({
+                id: `section_${i}`,
+                title: title,
+                points: points.length > 0 ? points : [{
+                  id: `point_${i}`,
+                  text: content.trim()
+                }]
+              });
+            }
+          }
+          
+          // If no sections were created, try to create sections from the content
+          if (processedSections.length === 0) {
+            // Look for common patterns in the transcript
+            const keyTakeawayMatch = transcriptText.match(/\*\*Key Takeaway:\*\*(.*?)(?=\*\*|$)/s);
+            const mainPointsMatch = transcriptText.match(/\*\*Main Points Covered:\*\*(.*?)(?=\*\*|$)/s);
+            const adviceMatch = transcriptText.match(/\*\*Advice for.*?:\*\*(.*?)(?=\*\*|$)/s);
+            
+            if (keyTakeawayMatch) {
+              processedSections.push({
+                id: "key_takeaway",
+                title: "Key Takeaway",
+                points: [{
+                  id: "key_takeaway_point",
+                  text: keyTakeawayMatch[1].trim()
+                }]
+              });
+            }
+            
+            if (mainPointsMatch) {
+              const mainPoints = mainPointsMatch[1]
+                .split(/\n\*|\n-|\n\d+\./)
+                .filter((point: string) => point.trim().length > 0)
+                .map((point: string, index: number) => ({
+                  id: `main_point_${index}`,
+                  text: point.trim().replace(/^\*|\d+\./, '').trim()
+                }));
+              
+              processedSections.push({
+                id: "main_points",
+                title: "Main Points Covered",
+                points: mainPoints
+              });
+            }
+            
+            if (adviceMatch) {
+              const advicePoints = adviceMatch[1]
+                .split(/\n\*|\n-|\n\d+\./)
+                .filter((point: string) => point.trim().length > 0)
+                .map((point: string, index: number) => ({
+                  id: `advice_point_${index}`,
+                  text: point.trim().replace(/^\*|\d+\./, '').trim()
+                }));
+              
+              processedSections.push({
+                id: "advice",
+                title: "Advice for SBI PO Aspirants",
+                points: advicePoints
+              });
+            }
+            
+            // If still no sections, create a single section with the full transcript
+            if (processedSections.length === 0) {
+              processedSections.push({
+                id: "summary",
+                title: "Video Summary",
+                points: [{
+                  id: "summary_point",
+                  text: transcriptText
+                }]
+              });
+            }
+          }
+          
+          transformedData = processedSections;
+        } else if (response.summary) {
+          // If only summary text is available, create a single section
+          transformedData = [{
+            id: "summary",
+            title: "Video Summary",
+            points: [{
+              id: "summary_point",
+              text: response.summary
+            }]
+          }];
+        } else if (Array.isArray(response)) {
+          // If response is directly an array
+          transformedData = response.map((item: unknown, index: number) => {
+            const itemData = item as { title?: string; content?: string; text?: string; description?: string };
+            return {
+              id: `section_${index}`,
+              title: itemData.title || `Section ${index + 1}`,
+              points: [{
+                id: `point_${index}`,
+                text: itemData.content || itemData.text || itemData.description || "No content available"
+              }]
+            };
+          });
+        } else {
+          // Fallback: create a single section with available data
+          transformedData = [{
+            id: "summary",
+            title: "Video Summary",
+            points: [{
+              id: "summary_point",
+              text: JSON.stringify(response) || "No summary content available"
+            }]
+          }];
+        }
+
+        // If still no data, use demo data
+        if (transformedData.length === 0) {
+          console.log("⚠️ No valid summary data found, using demo data");
+          transformedData = longSummaryData;
+        }
+
+        setSummaryData(transformedData);
+        console.log("✅ Summary data processed successfully:", transformedData);
+      } catch (err: unknown) {
+        const error = err as { message?: string; status?: number; response?: { data?: unknown } };
+        console.error("❌ Error fetching summary:", err);
+        console.error("❌ Error details:", {
+          message: error.message,
+          status: error.status,
+          response: error.response?.data
+        });
+        
+        setError(error.message || "Failed to load summary");
+        
+        // Fallback to demo data on error
+        setSummaryData(longSummaryData);
+      } finally {
+        setIsLoading(false);
+        isFetchingRef.current = false;
+      }
     };
 
     fetchSummaryData();
-  }, [summaryLength]); // Re-run the effect when summaryLength changes
+  }, [videoId]); // Only fetch when videoId changes
+
+  // Reset refs when component unmounts or videoId changes
+  useEffect(() => {
+    return () => {
+      fetchedVideoIdRef.current = null;
+      isFetchingRef.current = false;
+    };
+  }, [videoId]);
 
 
 
@@ -407,17 +626,32 @@ const Summary: React.FC<SummaryProps> = ({
         
         {isLoading ? (
           <LoadingSpinner />
+        ) : error ? (
+          <div className="text-center py-8">
+            <div className="text-red-400 mb-4">
+              <p className="text-lg font-semibold">Failed to load summary</p>
+              <p className="text-sm">{error}</p>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
         ) : (
           <div className="space-y-6">
             {summaryData?.map((section, index) => (
               <SummarySection key={index} section={section} />
             ))}
-            <SummaryFeedback videoId={videoId} canSubmitFeedback={canSubmitFeedback} existingFeedback={existingFeedback} markAsSubmitted={markAsSubmitted} />
+            <SummaryFeedback videoId={videoId} canSubmitFeedback={feedbackCanSubmitFeedback} existingFeedback={feedbackExistingFeedback} markAsSubmitted={feedbackMarkAsSubmitted} />
           </div>
         )}
       </div>
     </div>
   );
-};
+});
+
+Summary.displayName = 'Summary';
 
 export default Summary;

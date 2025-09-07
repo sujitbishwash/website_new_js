@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
+import { useAuth } from "../../contexts/AuthContext";
 
 // --- ICONS (using SVG for self-containment) ---
 const UserIcon = ({ className }: { className?: string }) => (
@@ -228,6 +229,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 const PersonalInfoForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { getUserData } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     gender: "",
@@ -279,14 +281,15 @@ const PersonalInfoForm: React.FC = () => {
     };
   }, [isFormCompleted, formData, location.pathname]);
 
-  // --- Fetch User Data from API ---
+  // --- Fetch User Data from Context (Optimized) ---
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setIsLoadingUserData(true);
-        console.log("🔍 Fetching user data from /ums/me API...");
+        console.log("🔍 PersonalDetails: Using cached user data from AuthContext...");
 
-        const response = await authApi.getAuthenticatedUser();
+        // Use getUserData from AuthContext instead of direct API call
+        const response = await getUserData();
 
         if (
           response &&
@@ -295,7 +298,7 @@ const PersonalInfoForm: React.FC = () => {
           response.data
         ) {
           const userData = response.data;
-          console.log("📋 User data received:", userData);
+          console.log("📋 PersonalDetails: User data received from context:", userData);
 
           // Populate form with existing user data if available
           const updatedFormData: FormData = {
@@ -305,19 +308,19 @@ const PersonalInfoForm: React.FC = () => {
           };
 
           setFormData(updatedFormData);
-          console.log("✅ Form populated with user data:", updatedFormData);
+          console.log("✅ PersonalDetails: Form populated with user data:", updatedFormData);
         } else {
-          console.log("⚠️ No user data found or API error");
+          console.log("⚠️ PersonalDetails: No user data found in context");
         }
       } catch (error) {
-        console.error("❌ Error fetching user data:", error);
+        console.error("❌ PersonalDetails: Error fetching user data:", error);
       } finally {
         setIsLoadingUserData(false);
       }
     };
 
     fetchUserData();
-  }, []);
+  }, [getUserData]);
 
   // --- Real-time Age Calculation ---
   useEffect(() => {
@@ -331,7 +334,7 @@ const PersonalInfoForm: React.FC = () => {
           calculatedAge--;
         }
         setAge(calculatedAge >= 0 ? calculatedAge : null);
-      } catch (error) {
+      } catch {
         setAge(null);
       }
     } else {

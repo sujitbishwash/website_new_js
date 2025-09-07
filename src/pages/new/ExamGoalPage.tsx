@@ -132,7 +132,7 @@ const ExamGoalSelector: FC = () => {
           // Transform API data to match our interface
           const transformedData: ExamData = {};
           response.data.data.forEach((examType: ExamType) => {
-            transformedData[examType.label] = examType.group;
+            transformedData[examType.value] = examType.group;
           });
           setExamData(transformedData);
         } else {

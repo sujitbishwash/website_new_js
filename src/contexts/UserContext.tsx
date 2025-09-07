@@ -453,14 +453,12 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     // Start background sync when component mounts
     console.log("🚀 UserProvider mounted - starting background profile sync");
 
-    // Perform initial profile fetch immediately
+    // Perform initial profile fetch immediately (optimized - single API call)
     const initialFetch = async () => {
-      console.log("📡 Performing initial profile fetch...");
+      console.log("📡 Performing initial profile and exam goal fetch in one call...");
+      // Both fetchUserData and fetchExamGoal use the same getUserData() call
+      // So we only need to call one of them, and it will update both profile and exam goal
       await fetchUserData();
-
-      // Also fetch exam goal data on mount
-      console.log("🎯 Performing initial exam goal fetch...");
-      await fetchExamGoal();
     };
 
     initialFetch();
@@ -468,7 +466,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     isAuthenticated,
     authLoading,
     fetchUserData,
-    fetchExamGoal,
   ]);
 
   const value: UserContextType = {
