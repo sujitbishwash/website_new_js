@@ -541,8 +541,8 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test submitted successfully:", apiResponse);
-        navigate(ROUTES.ANALYSIS);
-        //setShowTestResultDialog(true);
+        navigate(ROUTES.ANALYSIS2, { state: { sessionId: apiResponse.session_id || sessionId } });
+        // setShowTestResultDialog(true);
       }
     } catch (error) {
       console.error("Failed to submit test:", error);
@@ -560,7 +560,7 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test auto-submitted successfully:", apiResponse);
-        setShowTestResultDialog(true);
+        navigate(ROUTES.ANALYSIS2, { state: { sessionId: apiResponse.session_id || sessionId } });
       }
     } catch (error) {
       console.error("Failed to auto-submit test:", error);
@@ -1235,7 +1235,7 @@ const TestMainPage = () => {
           }}
           onClose={handleCloseTestResultDialog}
           navigate={() => {
-            navigate(ROUTES.ANALYSIS2);
+            navigate(ROUTES.ANALYSIS2, { state: { sessionId } });
           }}
         />
       )}

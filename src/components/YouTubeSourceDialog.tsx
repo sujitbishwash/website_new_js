@@ -255,7 +255,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   );
 
   return (
-    // Backdrop
+    <>
+    {/* Backdrop */}
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
       {/* Modal Panel */}
       <div
@@ -389,7 +390,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           <div className="mt-8 flex justify-end space-x-4">
             <button
               onClick={navigateToHome}
-              className={`rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border, focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer`}
+              className={`rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer`}
             >
               Go to Home
             </button>
@@ -427,7 +428,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           />
         </div>
       )}
-    </div>
+    </>
   );
 };
 
