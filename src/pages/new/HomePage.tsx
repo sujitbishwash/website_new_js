@@ -417,8 +417,8 @@ export default function HomePage() {
 
         {/* Recommended Videos Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
-          <div className="flex items-start justify-between mb-5">
-            <h2 className="text-2xl font-bold text-foreground">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-md sm:text-2xl font-bold text-foreground">
               Recommended Videos
             </h2>
             <button
