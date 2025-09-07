@@ -1179,7 +1179,7 @@ const TestMainPage = () => {
           }}
           onClose={handleCloseTestResultDialog}
           navigate={() => {
-            navigate(ROUTES.ANALYSIS);
+            navigate(ROUTES.ANALYSIS2);
           }}
         />
       )}

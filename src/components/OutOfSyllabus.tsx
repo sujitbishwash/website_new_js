@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import { useAuth } from "../contexts/AuthContext";
+import { Annoyed, X } from "lucide-react";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -95,45 +96,7 @@ const CustomStyles = `
   }
 `;
 
-// --- Icon Components ---
-const LightbulbIcon: React.FC = () => (
-  <div className="animate-icon-wobble mb-4">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="48"
-      height="48"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={theme.accent}
-      strokeWidth="1.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M9 18h6" />
-      <path d="M10 22h4" />
-      <path d="M12 2a7 7 0 0 0-5.657 11.343A5 5 0 0 1 12 22a5 5 0 0 1 5.657-8.657A7 7 0 0 0 12 2z" />
-    </svg>
-  </div>
-);
 
-
-const BookIcon: React.FC<{ className?: string }> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="20"
-    height="20"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-  </svg>
-);
 
 // --- Main App Component ---
 
@@ -146,7 +109,7 @@ const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack, suggestedVideos
   const [isVisible, setIsVisible] = useState(true);
   const [isClosing, setIsClosing] = useState(false);
   const [userExamGoal, setUserExamGoal] = useState<{ exam: string; group: string } | null>(null);
-  
+  const modalRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { getUserData } = useAuth();
 
@@ -204,84 +167,48 @@ const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack, suggestedVideos
       onGoBack(); // Call the onGoBack function after animation
     }, 500); // This duration should match the fadeOut animation time
   };
-
-  // Main container classes
-  const appContainerClasses = `flex justify-center items-center min-h-screen p-4 bg-cover bg-center ${
-    isClosing ? "animate-fade-out" : "animate-drop-in"
-  }`;
-
-  // Message box classes
-  const messageBoxClasses = `bg-gray-800 p-8 rounded-2xl shadow-2xl w-[90%] max-w-[500px] text-center relative backdrop-blur-3xl ${
-    isClosing ? "animate-fade-out" : "animate-drop-in"
-  }`;
-
-
-  const closeButtonClasses = "absolute top-3 right-3 bg-transparent border-none text-gray-400 text-3xl cursor-pointer leading-none";
-
+const navigateToHome = () => {
+    handleClose();
+    navigate(ROUTES.DASHBOARD);
+  };
   if (!isVisible) {
     return null; // Don't render anything if the box is closed
   }
 
   return (
-    <div 
-      className={appContainerClasses}
-      style={{
-        backgroundImage: "url('https://source.unsplash.com/1600x900/?abstract,dark')",
-      }}
-    >
-      <div className={`${messageBoxClasses} max-w-4xl w-[95%] max-h-[90vh] overflow-y-auto`}>
-        <button
-          className={closeButtonClasses}
-          onClick={handleClose}
-          aria-label="Close"
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
+      <div
+        ref={modalRef}
+          className={`relative w-full max-w-lg bg-card text-primary rounded-2xl shadow-2xl border border-border flex flex-col max-h-[80vh] ${isClosing ? "animate-fade-out" : "animate-drop-in"}`}
         >
-          &times;
+        <button
+          onClick={handleClose}
+          className="absolute top-3 right-3 p-2 text-border-high rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+        >
+          <X />
         </button>
-        
         {/* Header Section */}
-        <div className="text-center mb-6">
-          <LightbulbIcon />
-          <h3 className="text-blue-400 mt-0 text-2xl font-bold mb-2">
-            Content Not Relevant
-          </h3>
-          <p className="text-gray-300 text-lg">
-            The video you entered is not relevant to your exam preparation.
-          </p>
-        </div>
-
-        {/* Exam Goal Section */}
+          <div className="text-center p-8 border-b border-border">
+            <h2 className="text-2xl font-semibold text-neutral-100 mb-1">
+              Content Not Relevant
+            </h2>
+            <p className="text-neutral-400 max-w-md mx-auto mb-4">
+              This video doesn't seem to be relevant for your selected exam.
+            </p>
+            {/* Exam Goal Section */}
         {userExamGoal && (
-          <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 rounded-xl p-6 mb-6 border border-blue-500/30 shadow-lg">
-            <div className="flex items-center mb-4">
-              <div className="bg-blue-500/20 p-2 rounded-lg mr-3">
-                <BookIcon className="text-blue-400" />
-              </div>
-              <h4 className="text-blue-300 font-bold text-xl">Your Exam Goal</h4>
+            <div className="bg-blue-500/20 border border-blue-500/30 text-blue-300 text-sm p-3 rounded-lg">
+              <span className="font-semibold">Current Goal:</span> {userExamGoal.exam} ({userExamGoal.group})
             </div>
-            <div className="flex items-center justify-center space-x-8">
-              <div className="text-center">
-                <div className="bg-blue-600/20 px-4 py-2 rounded-lg border border-blue-400/30">
-                  <p className="text-blue-200 text-xs font-medium uppercase tracking-wide mb-1">Exam</p>
-                  <p className="text-white font-bold text-lg">{userExamGoal.exam}</p>
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="bg-purple-600/20 px-4 py-2 rounded-lg border border-purple-400/30">
-                  <p className="text-purple-200 text-xs font-medium uppercase tracking-wide mb-1">Group</p>
-                  <p className="text-white font-bold text-lg">{userExamGoal.group}</p>
-                </div>
-              </div>
-            </div>
+          )}
           </div>
-        )}
+          
+        <div className="p-6 overflow-y-auto">
+        
 
         {/* Suggested Videos Section */}
-        <div className="mb-6">
           <div className="flex items-center mb-4">
-            <div className="bg-purple-500/20 p-2 rounded-lg mr-3">
-              <BookIcon className="text-purple-400" />
-            </div>
-            <h4 className="text-gray-200 font-bold text-xl">Suggested Videos for Your Preparation</h4>
+            <h3 className="text-sm font-medium text-muted-foreground">Suggested Videos for Your Preparation</h3>
           </div>
 
           {suggestedVideos.length === 0 ? (
@@ -291,16 +218,16 @@ const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack, suggestedVideos
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {suggestedVideos.slice(0, 6).map((video) => (
+              {suggestedVideos.slice(0, 3).map((video) => (
                 <div
                   key={video.id}
                   onClick={() => handleSuggestedVideoClick(video)}
-                  className="group cursor-pointer overflow-hidden rounded-lg border border-gray-600 bg-gray-700/30 transition-all hover:bg-gray-600/50 hover:shadow-lg hover:border-purple-400 hover:scale-105"
+                      className="group cursor-pointer overflow-hidden rounded-lg border border-border bg-none transition-all hover:bg-accent hover:shadow-lg hover:border-primary"
                 >
                   <img
                     src={video.thumbnailUrl}
                     alt={`Thumbnail for ${video.title}`}
-                    className="h-32 w-full object-cover transition-transform group-hover:scale-110"
+                    className="h-24 w-full object-cover transition-transform group-hover:scale-105"
                     onError={(e) => {
                       const target = e.target as HTMLImageElement;
                       target.onerror = null;
@@ -322,16 +249,16 @@ const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack, suggestedVideos
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-center space-x-4 pt-4 border-t border-gray-600">
+        <div className=" flex justify-end items-center gap-4 p-5 border-t border-border bg-card rounded-b-2xl">
           <button
-            onClick={() => navigate(ROUTES.DASHBOARD)}
-            className="px-6 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-lg transition-colors"
+            onClick={navigateToHome}
+            className="rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border, focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer"
           >
-            Go to Dashboard
+            Go to Home
           </button>
           <button
             onClick={handleClose}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg transition-colors"
+            className="rounded-lg bg-border-medium px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border-medium  cursor-pointer disabled:bg-border-border disabled:cursor-not-allowed"
           >
             Try Another Video
           </button>
