@@ -949,8 +949,8 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
           console.log("🎯 VideoPage: Calling videoApi.getVideoDetail with URL:", videoUrl);
           const details = await videoApi.getVideoDetail(videoUrl);
-          console.log("🎯 VideoPage: Fetched video details:", details);
-          console.log("🎯 VideoPage: Video topics:", details.topics);
+          console.log("🎯 VideoPage: Fetched video details...............................:", details);
+          console.log("🎯 VideoPage: Video topics: .....................................", details.topics);
           setVideoDetail(details);
         } catch (err: any) {
           console.error("Failed to fetch video details:", err);

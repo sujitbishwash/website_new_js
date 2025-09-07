@@ -211,13 +211,10 @@ const Quiz: React.FC<QuizProps> = ({
   }, [componentId, topics]);
   
   // Memoize topics to prevent infinite re-renders
-  const defaultTopics = React.useMemo(() => ["General Knowledge"], []);
   const topicsToUse = React.useMemo(() => {
-    if (topics && topics.length > 0) {
-      return topics;
-    }
-    return defaultTopics;
-  }, [topics, defaultTopics]);
+    console.log(`🔍 Quiz Component [${componentId}] Deriving topicsToUse. Topics prop:`, topics);
+    return topics && topics.length > 0 ? topics : null;
+  }, [topics, componentId]);
   
   console.log(`🔍 Quiz Component [${componentId}] Topics prop:`, topics);
   console.log(`🎯 Quiz Component [${componentId}] Topics to use:`, topicsToUse);
@@ -251,6 +248,14 @@ const Quiz: React.FC<QuizProps> = ({
 
   // Fetch quiz questions from API when topics change
   React.useEffect(() => {
+    // Don't fetch if no topics available
+    if (!topicsToUse) {
+      console.log(`🔄 Quiz Component [${componentId}] No topics available, skipping API call`);
+      setIsLoadingQuiz(false);
+      setQuizError("No topics available for quiz generation.");
+      return;
+    }
+
     const topicsKey = JSON.stringify(topicsToUse);
     
     // Prevent infinite calls by checking if topics actually changed
@@ -362,6 +367,11 @@ const Quiz: React.FC<QuizProps> = ({
   };
 
   const retryQuiz = () => {
+    if (!topicsToUse) {
+      setQuizError("No topics available for quiz generation.");
+      return;
+    }
+    
     setQuizError(null);
     setQuizQuestions([]); // Clear existing questions
     hasAttemptedFetchRef.current = false; // Reset attempt flag
@@ -440,7 +450,7 @@ const Quiz: React.FC<QuizProps> = ({
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
           <p className="text-lg font-semibold text-foreground">Loading Quiz...</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Generating questions for: {topicsToUse.join(", ")}
+            {topicsToUse ? `Generating questions for: ${topicsToUse.join(", ")}` : "Waiting for topics..."}
           </p>
         </div>
       </div>
