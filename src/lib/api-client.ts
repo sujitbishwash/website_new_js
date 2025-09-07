@@ -731,6 +731,15 @@ export const quizApi = {
     return response.data;
   },
 
+  // Fetch test analysis by session id
+  testAnalysis: async (sessionId: number): Promise<Record<string, unknown>> => {
+    const response = await apiRequest<Record<string, unknown>>(
+      "GET",
+      `/test-series/analysis/${encodeURIComponent(sessionId)}`
+    );
+    return response.data;
+  },
+
   // Enhanced submit test with comprehensive metadata
   submitTestEnhanced: async (
     sessionId: number, 
