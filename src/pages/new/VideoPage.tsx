@@ -1251,78 +1251,93 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       }
     }, [handleVideoInteraction]);
   
+  // Show loading screen while video details are being fetched
+  if (isLoadingVideo) {
     return (
-      <div className="bg-background text-foreground min-h-screen font-sans">
-        <div className="mx-auto hidden w-full h-full sm:block">
-          <main className="grid grid-cols-1 xl:grid-cols-5">
-            <div
-              className={`p-4 xl:col-span-3 overflow-y-auto h-[100vh] ${
-                isLeftColumnVisible ? "" : "hidden"
-              }`}
-            >
-              <Header
-                videoDetail={videoDetail}
-                isLoading={isLoadingVideo}
-                onToggleFullScreen={handleToggleFullScreen}
-                onNavigate={navigateWithProgress}
-              />
-              {/* YouTube Video Player with Progress Tracking */}
-              <div className="mb-4">
-                <YouTube
-                  videoId={currentVideoId}
-                  onReady={onYouTubeReady}
-                  onEnd={onYouTubeEnd}
-                  onStateChange={onYouTubeStateChange}
-                  className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg w-full h-full"
-                  opts={{
-                    height: '100%',
-                    width: '100%',
-                    playerVars: {
-                      autoplay: 0,
-                      controls: 1,
-                      modestbranding: 1,
-                      rel: 0,
-                      showinfo: 0,
-                    },
-                  }}
-                />
-                
-             
-              </div>
-              <ContentTabs
-                chapters={chapters}
-                transcript={transcript}
-                isLoadingChapters={isLoadingChapters}
-                isLoadingTranscript={isLoadingTranscript}
-                chaptersError={chaptersError}
-                transcriptError={transcriptError}
-                onFeedbackSubmit={() => handleFeedbackComplete("submit")}
-                onFeedbackSkip={() => handleFeedbackComplete("skip")}
-                onFetchTranscript={fetchTranscript}
-              />
-            </div>
-            <div
-              className={`${
-                isLeftColumnVisible ? "xl:col-span-2" : "xl:col-span-5"
-              } w-full h-[100vh]`}
-            >
-              <AITutorPanel
-                currentMode={currentMode}
-                onModeChange={handleModeChange}
-                isLeftColumnVisible={isLeftColumnVisible}
-                onToggleFullScreen={handleToggleFullScreen}
-                onShare={handleShare}
-                components={components}
-              />
-            </div>
-          </main>
+      <div className="bg-background text-foreground min-h-screen font-sans flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-primary mb-6"></div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Loading Video</h2>
+          <p className="text-muted-foreground">
+            Fetching video details and preparing your learning experience...
+          </p>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-background text-foreground min-h-screen font-sans">
+      <div className="mx-auto hidden w-full h-full sm:block">
+        <main className="grid grid-cols-1 xl:grid-cols-5">
+          <div
+            className={`p-4 xl:col-span-3 overflow-y-auto h-[100vh] ${
+              isLeftColumnVisible ? "" : "hidden"
+            }`}
+          >
+            <Header
+              videoDetail={videoDetail}
+              isLoading={isLoadingVideo}
+              onToggleFullScreen={handleToggleFullScreen}
+              onNavigate={navigateWithProgress}
+            />
+            {/* YouTube Video Player with Progress Tracking */}
+            <div className="mb-4">
+              <YouTube
+                videoId={currentVideoId}
+                onReady={onYouTubeReady}
+                onEnd={onYouTubeEnd}
+                onStateChange={onYouTubeStateChange}
+                className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg w-full h-full"
+                opts={{
+                  height: '100%',
+                  width: '100%',
+                  playerVars: {
+                    autoplay: 0,
+                    controls: 1,
+                    modestbranding: 1,
+                    rel: 0,
+                    showinfo: 0,
+                  },
+                }}
+              />
+              
+         
+            </div>
+            <ContentTabs
+              chapters={chapters}
+              transcript={transcript}
+              isLoadingChapters={isLoadingChapters}
+              isLoadingTranscript={isLoadingTranscript}
+              chaptersError={chaptersError}
+              transcriptError={transcriptError}
+              onFeedbackSubmit={() => handleFeedbackComplete("submit")}
+              onFeedbackSkip={() => handleFeedbackComplete("skip")}
+              onFetchTranscript={fetchTranscript}
+            />
+          </div>
+          <div
+            className={`${
+              isLeftColumnVisible ? "xl:col-span-2" : "xl:col-span-5"
+            } w-full h-[100vh]`}
+          >
+            <AITutorPanel
+              currentMode={currentMode}
+              onModeChange={handleModeChange}
+              isLeftColumnVisible={isLeftColumnVisible}
+              onToggleFullScreen={handleToggleFullScreen}
+              onShare={handleShare}
+              components={components}
+            />
+          </div>
+        </main>
+      </div>
         <div className="sm:hidden">
           <div className="flex flex-col h-[100vh]">
             <header className="flex flex-row mb-2 gap-3 justify-between p-4 items-center ">
               <div className="flex-1 min-w-0 overflow-ellipsis">
                 <h1 className="text-md text-gray-500 truncate px-14 ">
-                  ( videoDetail?.title || "Video Title Not Available" )
+                  {videoDetail?.title || "Video Title Not Available"}
                 </h1>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-center">

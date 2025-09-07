@@ -1,12 +1,14 @@
 import { buildVideoLearningRoute } from "@/routes/constants";
 import { useNavigate } from "react-router-dom";
 import { useVideoProgress } from "../../hooks/useVideoProgress";
+import { useState } from "react";
 
 // --- Type Definitions ---
 
 // --- Main Page Component ---
 const HistoryPage = () => {
   const navigate = useNavigate();
+  const [loadingVideoId, setLoadingVideoId] = useState<string | null>(null);
   
   // Use video progress hook
   const {
@@ -20,6 +22,18 @@ const HistoryPage = () => {
 
   // Get all watched videos (including completed ones)
   const allWatchedVideos = getWatchedVideos();
+
+  const handleVideoClick = async (videoId: string) => {
+    try {
+      setLoadingVideoId(videoId);
+      // Navigate directly since we already have the videoId
+      navigate(buildVideoLearningRoute(videoId));
+    } catch (err: any) {
+      console.error("Failed to navigate to video:", err);
+    } finally {
+      setLoadingVideoId(null);
+    }
+  };
 
   return (
     <div className="min-h-screen p-10 font-sans text-foreground bg-background mt-10 sm:mt-4">
@@ -61,8 +75,10 @@ const HistoryPage = () => {
           {allWatchedVideos.map((video) => (
             <div
               key={video.videoId}
-              onClick={() => navigate(buildVideoLearningRoute(video.videoId))}
-              className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1"
+              onClick={() => handleVideoClick(video.videoId)}
+              className={`group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1 ${
+                loadingVideoId === video.videoId ? 'opacity-50 pointer-events-none' : ''
+              }`}
             >
               <div className="relative">
                 <img
@@ -139,6 +155,11 @@ const HistoryPage = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
+              {loadingVideoId === video.videoId && (
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                </div>
+              )}
             </div>
           ))}
         </div>

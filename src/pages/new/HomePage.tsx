@@ -319,6 +319,7 @@ export default function HomePage() {
   const [suggestedVideos, setSuggestedVideos] = useState<SuggestedVideo[]>([]);
   const [isLoadingVideos, setIsLoadingVideos] = useState(false);
   const [videosError, setVideosError] = useState<string | null>(null);
+  const [loadingVideoId, setLoadingVideoId] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Use video progress hook
@@ -360,7 +361,8 @@ export default function HomePage() {
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
     try {
-      //setIsLoading(true);
+      // Show loading state while fetching video details
+      setIsLoadingVideos(true);
 
       // If validation passes, fetch video details
       const details = await videoApi.getVideoDetail(video.url);
@@ -375,7 +377,19 @@ export default function HomePage() {
         navigate(ROUTES.DASHBOARD);
       }
     } finally {
-      //setIsLoading(false);
+      setIsLoadingVideos(false);
+    }
+  };
+
+  const handleContinueLearningVideoClick = async (videoId: string) => {
+    try {
+      setLoadingVideoId(videoId);
+      // Navigate directly since we already have the videoId
+      navigate(buildVideoLearningRoute(videoId));
+    } catch (err: any) {
+      console.error("Failed to navigate to video:", err);
+    } finally {
+      setLoadingVideoId(null);
     }
   };
   return (
@@ -453,7 +467,7 @@ export default function HomePage() {
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <span className="ml-2 text-muted-foreground">
-                Loading videos...
+                {suggestedVideos.length > 0 ? "Loading video details..." : "Loading videos..."}
               </span>
             </div>
           ) : videosError ? (
@@ -599,8 +613,10 @@ export default function HomePage() {
               {getWatchedVideos().slice(0, 4).map((video) => (
                 <div
                   key={video.videoId}
-                  onClick={() => navigate(buildVideoLearningRoute(video.videoId))}
-                  className="group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1"
+                  onClick={() => handleContinueLearningVideoClick(video.videoId)}
+                  className={`group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1 ${
+                    loadingVideoId === video.videoId ? 'opacity-50 pointer-events-none' : ''
+                  }`}
                 >
                   <div className="relative">
                     <img
@@ -671,6 +687,11 @@ export default function HomePage() {
                   <div className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
                     <CirclePlay className="h-4 w-4" />
                   </div>
+                  {loadingVideoId === video.videoId && (
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
