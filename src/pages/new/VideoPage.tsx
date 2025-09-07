@@ -942,10 +942,12 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     useEffect(() => {
       const fetchVideoDetails = async () => {
         try {
+          console.log("🎯 VideoPage: Starting to fetch video details for videoId:", currentVideoId);
           setIsLoadingVideo(true);
   
           // Try to get video details from API
           const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
+          console.log("🎯 VideoPage: Calling videoApi.getVideoDetail with URL:", videoUrl);
           const details = await videoApi.getVideoDetail(videoUrl);
           console.log("🎯 VideoPage: Fetched video details:", details);
           console.log("🎯 VideoPage: Video topics:", details.topics);
@@ -957,13 +959,22 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           if (err.isOutOfSyllabus || err.status === 204) {
             console.log("Content is out of syllabus, showing OutOfSyllabus modal");
             setShowOutOfSyllabus(true);
+          } else {
+            // For other errors, set a fallback video detail with default topics
+            console.log("🎯 VideoPage: Video detail API failed, using fallback with default topics");
+            
           }
         } finally {
           setIsLoadingVideo(false);
         }
       };
   
-      fetchVideoDetails();
+      if (currentVideoId) {
+        fetchVideoDetails();
+      } else {
+        console.log("🎯 VideoPage: No currentVideoId, skipping video detail fetch");
+        setIsLoadingVideo(false);
+      }
     }, [currentVideoId]);
   
     // Fetch chapters
@@ -1158,6 +1169,10 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
         ),
         quiz: (() => {
           console.log("🎯 VideoPage: Rendering Quiz with topics:", videoDetail?.topics);
+          console.log("🎯 VideoPage: VideoDetail exists:", !!videoDetail);
+          console.log("🎯 VideoPage: isLoadingVideo:", isLoadingVideo);
+          console.log("🎯 VideoPage: VideoDetail topics:", videoDetail?.topics);
+          
           return (
             <Quiz 
               key={`quiz-${currentVideoId}`}
