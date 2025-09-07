@@ -1141,10 +1141,11 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       };
     }, [chatFeedbackState, flashcardFeedbackState, quizFeedbackState, summaryFeedbackState]);
 
-    // Create completely static components that never change
-    // This is the most aggressive approach to prevent any re-renders
+    // Create components that update when videoDetail changes
     const components = useMemo(() => {
-      console.log("🔄 Creating STATIC components for videoId:", currentVideoId);
+      console.log("🔄 Creating components for videoId:", currentVideoId);
+      console.log("🔄 VideoDetail in components:", videoDetail);
+      console.log("🔄 VideoDetail topics in components:", videoDetail?.topics);
       
       return {
         chat: (
@@ -1191,7 +1192,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           />
         ),
       };
-    }, [currentVideoId]); // ONLY depend on currentVideoId
+    }, [currentVideoId, videoDetail]); // Depend on both currentVideoId and videoDetail
   
     const handleShare = useCallback(() => {
       setIsShareModalOpen(true);
