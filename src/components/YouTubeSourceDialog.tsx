@@ -36,8 +36,6 @@ const LinkIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-
-
 const LoadingIcon: React.FC<IconProps> = ({ className }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -135,8 +133,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     }
   };
 
-
-
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newUrl = e.target.value;
     setUrl(newUrl);
@@ -184,7 +180,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         setIsLoading(false);
         return;
       }
-      
+
       setError(
         err.message ||
           "Failed to add video. Please check the URL and try again."
@@ -233,7 +229,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         setLoadingVideoId(null);
         return;
       }
-      
+
       setError(
         err.message || "Failed to add suggested video. Please try again."
       );
@@ -250,36 +246,38 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     "YouTubeSourceDialog render - showOutOfSyllabus:",
     showOutOfSyllabus
   ); // Debug log
-  
+
   // Debug logging for suggested videos
   console.log("🎬 YouTubeSourceDialog - suggestedVideos:", suggestedVideos);
-  console.log("🎬 YouTubeSourceDialog - suggestedVideos length:", suggestedVideos?.length);
+  console.log(
+    "🎬 YouTubeSourceDialog - suggestedVideos length:",
+    suggestedVideos?.length
+  );
 
   return (
     // Backdrop
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
       {/* Modal Panel */}
       <div
         ref={modalRef}
-          className="relative w-full max-w-lg rounded-2xl shadow-2xl bg-card flex flex-col md:flex-row overflow-hidden animate-slide-in"
-        >
+        className="relative w-full max-w-lg bg-card text-primary rounded-2xl shadow-2xl border border-border flex flex-col max-h-[70vh]"
+      >
         <button
           onClick={onClose}
           className="absolute top-3 right-3 p-2 text-border-high rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
         >
           <X />
-        </button>
-        <div className="p-6 sm:p-8">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <h2 className="flex items-center text-lg font-semibold text-foreground">
-              <LinkIcon className="mr-3 h-5 w-5 text-muted-foreground" />
-              YouTube, Website, Etc.
-            </h2>
-          </div>
+        </button>{" "}
+        {/* Header */}
+        <div className="text-center p-4 border-b border-border">
+          <h2 className="flex items-center text-lg font-semibold text-foreground">
+            <LinkIcon className="mr-3 h-5 w-5 text-muted-foreground" />
+            YouTube, Website, Etc.
+          </h2>
+        </div>
+        <div className="p-4 sm:p-6 overflow-y-auto">
           {/* Body */}
 
-          <div className="mt-6">
             <label
               htmlFor="url-input"
               className="text-sm text-muted-foreground"

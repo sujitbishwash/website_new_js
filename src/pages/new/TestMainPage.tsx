@@ -4,11 +4,7 @@ import {
   SubmitTestResponse,
   SubmittedAnswer,
 } from "@/lib/api-client";
-import React, {
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { useNavigate, useLocation } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
@@ -178,8 +174,6 @@ interface ApiQuestion {
 
 // --- Helper Components ---
 
-
-
 // --- Custom Hook for detecting outside clicks ---
 const useOutsideClick = (
   ref: React.RefObject<HTMLElement | null>,
@@ -222,10 +216,11 @@ const TestMainPage = () => {
   const [textSize, setTextSize] = useState("text-base");
   const [language, setLanguage] = useState("English");
   const [isFooterCollapsed, setIsFooterCollapsed] = useState(true);
+  const [isDesktopAsideCollapsed, setIsDesktopAsideCollapsed] = useState(false);
 
   const location = useLocation();
   const navigate = useNavigate();
-    const { profile, examGoal } = useUser();
+  const { profile, examGoal } = useUser();
 
   const [sessionId, setSessionId] = useState<number | null>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
@@ -351,7 +346,8 @@ const TestMainPage = () => {
 
   // --- Effects ---
 
-  {/*}
+  {
+    /*}
   // Get session ID from URL parameters (optional enhancement)
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -363,7 +359,8 @@ const TestMainPage = () => {
       }
     }
   }, []);
-  */}
+  */
+  }
 
   // Fetch questions on component mount
   useEffect(() => {
@@ -416,8 +413,6 @@ const TestMainPage = () => {
       "0"
     )}`;
   };
-
-
 
   // --- Event Handlers ---
   const handleOptionSelect = (optionIndex: number) => {
@@ -514,8 +509,6 @@ const TestMainPage = () => {
     handleSaveAndNext();
   };
 
-
-
   const handleSectionChange = (section: SectionName) => {
     setCurrentSection(section);
     setCurrentQuestionIndex(0); // Reset index when changing section
@@ -607,8 +600,6 @@ const TestMainPage = () => {
       );
     }
   };
-
-
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -855,9 +846,12 @@ const TestMainPage = () => {
         {/* Sidebar */}
         <aside
           ref={asideRef}
-          className={`w-3/4 lg:w-80 xl:w-96 bg-card/90 backdrop-blur-sm p-4 sm:p-3 flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out ${
+          className={`w-3/4 bg-card/90 backdrop-blur-sm flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out ${
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-          } lg:translate-x-0 fixed lg:relative top-0 right-0 h-full lg:h-auto z-30 lg:z-0 border-l`}
+          } lg:translate-x-0 ${isDesktopAsideCollapsed 
+                    ? 'lg:w-0 lg:p-0 lg:border-l-0' 
+                    : 'lg:w-80 xl:w-96 p-4 sm:p-3'
+                } fixed lg:relative top-0 right-0 h-full lg:h-auto z-30 lg:z-0 border-l`}
         >
           <button
             className="lg:hidden text-foreground absolute top-4 right-4 z-40"
@@ -865,7 +859,16 @@ const TestMainPage = () => {
           >
             <X />
           </button>
-
+          <button
+            onClick={() => setIsDesktopAsideCollapsed(!isDesktopAsideCollapsed)}
+            className={`hidden lg:flex items-center justify-center absolute top-1/2 -translate-y-1/2 bg-foreground hover:bg-muted-foreground text-background w-8 h-16 rounded-l-md z-40 transition-all duration-300 ease-in-out
+                ${isDesktopAsideCollapsed
+                    ? 'right-0'
+                    : 'right-[20rem] xl:right-[24rem]'
+                }`}
+        >
+            {isDesktopAsideCollapsed ? <ChevronLeft /> : <ChevronRight />}
+          </button>
           {/* User Profile Section */}
 
           <div className="flex-shrink-0 bg-background-subtle p-4 rounded-lg mb-3 flex items-center gap-4 border text-foreground ">
@@ -910,7 +913,7 @@ const TestMainPage = () => {
             <div className="grid grid-cols-6 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-3 justify-items-center">
               {questions.map((q, index) => {
                 const buttonProps = {
-                  number: index+1,
+                  number: index + 1,
                   onClick: () => handlePaletteClick(index),
                   size: 40,
                 };
@@ -1232,7 +1235,7 @@ const TestMainPage = () => {
           }}
           onClose={handleCloseTestResultDialog}
           navigate={() => {
-            navigate(ROUTES.ANALYSIS);
+            navigate(ROUTES.ANALYSIS2);
           }}
         />
       )}
