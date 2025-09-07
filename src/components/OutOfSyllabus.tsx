@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import { useAuth } from "../contexts/AuthContext";
-import { Annoyed, X } from "lucide-react";
+import { X } from "lucide-react";
 
 // Centralized theme colors for easy customization
 const theme = {

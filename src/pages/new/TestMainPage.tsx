@@ -2,6 +2,7 @@ import {
   quizApi,
   SubmitTestRequest,
   SubmitTestResponse,
+  SubmittedAnswer,
 } from "@/lib/api-client";
 import React, {
   useEffect,
@@ -162,6 +163,8 @@ interface Question {
   status: string;
   answer: number | null;
   questionType: QuestionType;
+  timeSpent?: number; // Track time spent on each question in seconds
+  questionStartTime?: Date; // Track when user first visited this question
 }
 
 // API Response mapping interface
@@ -227,6 +230,7 @@ const TestMainPage = () => {
   const [sessionId, setSessionId] = useState<number | null>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [questionStartTime, setQuestionStartTime] = useState<Date>(new Date());
 
   const [questions, setQuestions] = useState<Question[]>([]);
 
@@ -253,6 +257,8 @@ const TestMainPage = () => {
     status: "not-visited",
     answer: null,
     questionType: apiQuestion.questionType as QuestionType,
+    timeSpent: 0,
+    questionStartTime: undefined,
   });
 
   // Fetch questions from API
@@ -298,17 +304,48 @@ const TestMainPage = () => {
       throw new Error("Session ID is required to submit test");
     }
 
-    const submitData: SubmitTestRequest = {
-      session_id: sessionId,
-      answers: questions.map((q) => ({
-        question_id: q.id,
-        selected_option: q.answer !== null ? q.options[q.answer] : null,
-        answer: q.answer !== null ? q.options[q.answer] : null,
-      })),
-    };
+    // Calculate final time spent on current question
+    const now = new Date();
+    const finalTimeSpent = Math.floor((now.getTime() - questionStartTime.getTime()) / 1000);
+    const updatedQuestions = [...questions];
+    updatedQuestions[currentQuestionIndex].timeSpent = (updatedQuestions[currentQuestionIndex].timeSpent || 0) + finalTimeSpent;
 
-    const response = await quizApi.submitTest(submitData);
-    console.log("Successfully submitted test to API:", response);
+    // Convert questions to the enhanced format with answer_order
+    const submittedAnswers = updatedQuestions.map((q, index) => ({
+      question_id: q.id,
+      selected_option: q.answer !== null ? q.options[q.answer] : null,
+      answer_order: index + 1, // API requires this field
+      time_taken: q.timeSpent || 0, // Time taken in seconds
+    }));
+
+    // Calculate test metadata
+    const totalTimeTaken = 600 - timeLeft; // Total time taken in seconds
+    const testStartTime = new Date(Date.now() - totalTimeTaken * 1000);
+    
+    // Log the exact request format for debugging
+    const requestData = {
+      session_id: sessionId,
+      answers: submittedAnswers,
+      metadata: {
+        total_time: totalTimeTaken,
+        start_time: testStartTime.toISOString(),
+        end_time: now.toISOString(),
+      }
+    };
+    
+    console.log("🚀 Submitting test with data (answer_order format):", JSON.stringify(requestData, null, 2));
+    
+    const response = await quizApi.submitTestEnhanced(
+      sessionId,
+      submittedAnswers,
+      {
+        total_time: totalTimeTaken,
+        start_time: testStartTime.toISOString(),
+        end_time: now.toISOString(),
+      }
+    );
+    
+    console.log("✅ Successfully submitted test to API:", response);
     return response;
   };
 
@@ -398,13 +435,36 @@ const TestMainPage = () => {
 
   const navigateToQuestion = (index: number) => {
     if (index < 0 || index >= questions.length) return;
+    
+    const now = new Date();
+    
+    // Track time spent on current question before navigating away
+    if (index !== currentQuestionIndex) {
+      const currentQuestion = questions[currentQuestionIndex];
+      if (currentQuestion.questionStartTime) {
+        const timeSpent = Math.floor((now.getTime() - currentQuestion.questionStartTime.getTime()) / 1000);
+        const newQuestions = [...questions];
+        newQuestions[currentQuestionIndex].timeSpent = (newQuestions[currentQuestionIndex].timeSpent || 0) + timeSpent;
+        setQuestions(newQuestions);
+      }
+    }
+    
     const currentStatus = questions[currentQuestionIndex].status;
     if (currentStatus === "not-visited") {
       const newQuestions = [...questions];
       newQuestions[currentQuestionIndex].status = "not-answered";
       setQuestions(newQuestions);
     }
+    
     setCurrentQuestionIndex(index);
+    
+    // Set start time for the new question if not already set
+    const newQuestions = [...questions];
+    if (!newQuestions[index].questionStartTime) {
+      newQuestions[index].questionStartTime = now;
+      setQuestions(newQuestions);
+    }
+    setQuestionStartTime(now);
   };
 
   /**const handleSaveAndNext = () => {
@@ -518,12 +578,8 @@ const TestMainPage = () => {
   };
 
   const handlePaletteClick = (index: number) => {
-    if (questions[currentQuestionIndex].status === "not-visited") {
-      const newQuestions = [...questions];
-      newQuestions[currentQuestionIndex].status = "not-answered";
-      setQuestions(newQuestions);
-    }
-    setCurrentQuestionIndex(index);
+    // Use the same navigation logic with time tracking
+    navigateToQuestion(index);
   };
 
   const handleLanguageChange = (lang: string) => {
