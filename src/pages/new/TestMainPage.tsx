@@ -197,11 +197,16 @@ const useOutsideClick = (
 const TestMainPage = () => {
   // --- State Management ---
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [allQuestions] = useState<{
+  const [allQuestions, setAllQuestions] = useState<{
     [key in SectionName]?: Question[];
   }>({});
   const [currentSection, setCurrentSection] =
     useState<SectionName>("english language");
+  const [sectionTabs, setSectionTabs] = useState<{ id: SectionName; label: string }[]>([
+    { id: "english language", label: "English Language" },
+    { id: "numerical ability", label: "Numerical Ability" },
+    { id: "reasoning ability", label: "Reasoning Ability" },
+  ]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -268,19 +273,43 @@ const TestMainPage = () => {
         topics: testConfig.sub_topic,
       });
 
-      if (response && response.questions) {
-        const mappedQuestions = response.questions
+      if (response && (response as any).sections) {
+        // New grouped sections payload
+        const v3 = response as any;
+        const sections = v3.sections as Record<string, any>;
+        const normalized: { [key in SectionName]?: Question[] } = {} as any;
+        const tabs: { id: SectionName; label: string }[] = [];
+        Object.values(sections).forEach((sec: any) => {
+          const key = (sec.key || sec.name || '').toLowerCase();
+          let sectionName: SectionName | undefined;
+          if (key.includes('english')) sectionName = 'english language';
+          else if (key.includes('apt') || key.includes('num')) sectionName = 'numerical ability';
+          else if (key.includes('reason')) sectionName = 'reasoning ability';
+          if (sectionName) {
+            normalized[sectionName] = (sec.questions || []).map(mapApiQuestionToQuestion);
+            tabs.push({ id: sectionName, label: sec.name || sectionName });
+          }
+        });
+        // Set current flat list from first available section for UI rendering
+        const initialSection: SectionName = (tabs[0]?.id as SectionName) || (Object.keys(normalized)[0] as SectionName) || 'english language';
+        setAllQuestions(normalized);
+        setCurrentSection(initialSection);
+        setQuestions(normalized[initialSection] || []);
+        if (tabs.length) setSectionTabs(tabs);
+        setSessionId(v3.session_id);
+        // Configure timer if provided
+        if (typeof v3.total_time === 'number') {
+          setTimeLeft(v3.total_time);
+        }
+      } else if (response && (response as any).questions) {
+        // Legacy flat payload
+        const mappedQuestions = (response as any).questions
           .map(mapApiQuestionToQuestion)
-          .sort((a, b) => a.id - b.id);
-
+          .sort((a: Question, b: Question) => a.id - b.id);
         setQuestions(mappedQuestions);
-        setSessionId(response.session_id);
-        console.log(
-          "Successfully fetched questions from API:",
-          mappedQuestions.length
-        );
+        setSessionId((response as any).session_id);
       } else {
-        throw new Error("Invalid response format from API");
+        throw new Error('Invalid response format from API');
       }
     } catch (apiError) {
       console.error("Failed to fetch questions:", apiError);
@@ -715,26 +744,20 @@ const TestMainPage = () => {
         >
           <div className="flex-shrink-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-              {/* Section Tabs */}
+              {/* Section Tabs (dynamic from API) */}
               <div className="w-full sm:w-auto">
                 <nav className="flex gap-1 sm:gap-2" aria-label="Tabs">
-                  {(
-                    [
-                      "english language",
-                      "numerical ability",
-                      "reasoning ability",
-                    ] as SectionName[]
-                  ).map((section) => (
+                  {sectionTabs.map((tab) => (
                     <button
-                      key={section}
-                      onClick={() => handleSectionChange(section)}
+                      key={tab.id}
+                      onClick={() => handleSectionChange(tab.id)}
                       className={`flex-1 sm:flex-none whitespace-nowrap py-2 px-3 font-medium text-xs sm:text-sm rounded-t-lg transition-colors capitalize ${
-                        currentSection === section
+                        currentSection === tab.id
                           ? "bg-card text-foreground"
                           : "bg-background-subtle text-border hover:bg-blue-400/20 hover:text-border-medium"
                       }`}
                     >
-                      {section}
+                      {tab.label}
                     </button>
                   ))}
                 </nav>
@@ -908,7 +931,7 @@ const TestMainPage = () => {
 
           <div className="flex-grow bg-background-subtle p-4 rounded-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-background-subtle border">
             <h3 className="font-bold mb-4 text-foreground capitalize">
-              {currentSection}
+              {sectionTabs.find((t) => t.id === currentSection)?.label || currentSection}
             </h3>
             <div className="grid grid-cols-6 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-3 justify-items-center">
               {questions.map((q, index) => {

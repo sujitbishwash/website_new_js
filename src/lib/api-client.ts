@@ -574,6 +574,27 @@ export interface QuestionResponse {
   }[];
 }
 
+// New grouped sections response (v3)
+export interface SectionQuestions {
+  key: string;
+  name: string;
+  questions: {
+    questionId: number;
+    questionType: string;
+    content: string;
+    option: string[];
+    answer: string | null;
+  }[];
+}
+
+export interface StartTestSessionResponseV3 {
+  session_id: number;
+  sections: Record<string, SectionQuestions>;
+  total_questions: number;
+  total_marks: number;
+  total_time: number; // seconds
+}
+
 // Enhanced interfaces for comprehensive test submission
 export interface SubmittedAnswer {
   question_id: number;
@@ -706,12 +727,13 @@ export interface Option {
 
 export const quizApi = {
   startTest: async (testConfig: TestData): Promise<QuestionResponse> => {
-    const response = await apiRequest<QuestionResponse>(
+    // Accept either legacy flat questions or new grouped-sections payload
+    const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
       "POST",
       `/test-series/start-test-session`,
       testConfig
     );
-    return response.data;
+    return response.data as any;
   },
 
   getQuestions: async (sessionId: number): Promise<QuestionResponse> => {
