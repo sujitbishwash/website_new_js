@@ -348,7 +348,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                 </div>
               ) : (
                 <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  {suggestedVideos.map((video) => (
+                  {suggestedVideos.slice(0, 3).map((video) => (
                     <div
                       key={video.id}
                       onClick={() => handleSuggestedVideoClick(video)}
