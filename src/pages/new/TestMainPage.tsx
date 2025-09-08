@@ -810,12 +810,6 @@ const TestMainPage = () => {
                       >
                         English
                       </div>
-                      <div
-                        onClick={() => handleLanguageChange("Hindi")}
-                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-blue-400/20"
-                      >
-                        Hindi
-                      </div>
                     </div>
                   )}
                 </div>
@@ -825,7 +819,7 @@ const TestMainPage = () => {
             {/* Question Info */}
             <div className="flex justify-between items-center mb-2 text-sm text-foreground px-2">
               <h2 className="text-lg font-semibold text-foreground">
-                Question No. {currentQuestion.id}
+                Question No. {currentQuestionIndex + 1}
               </h2>
               <div>
                 <span>Marks: </span>
