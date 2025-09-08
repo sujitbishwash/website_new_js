@@ -12,8 +12,7 @@ import {
 } from 'lucide-react';
 import { 
   quizApi, 
-  SubmitTestResponse, 
-  QuestionResponse 
+  SubmitTestResponse 
 } from '@/lib/api-client';
 import { ROUTES } from '@/routes/constants';
 import { useUser } from '@/contexts/UserContext';
@@ -49,7 +48,7 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
   const [testResults, setTestResults] = useState<SubmitTestResponse | null>(null);
 
   // Timer state
-  const [testStartTime, setTestStartTime] = useState<Date>(new Date());
+  // const testStartTime = new Date();
   const [testDuration] = useState(3600); // 1 hour default
   const [timerMetadata, setTimerMetadata] = useState<TimerMetadata | null>(null);
 
@@ -77,19 +76,19 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
       console.log('🚀 Initializing test with config:', testConfig);
 
       // Start test session
-      const response: QuestionResponse = await quizApi.startTest({
+      const response = await quizApi.startTest({
         subject: 'general-knowledge',
         topics: testConfig.topics || ['general-knowledge'],
         level: testConfig.level || 'medium',
         language: testConfig.language || 'en'
       });
 
-      if (!response || !response.questions) {
+      if (!response || !(response as any).questions) {
         throw new Error('Invalid response from server');
       }
 
       // Convert API questions to our format
-      const convertedQuestions: Question[] = response.questions.map((q, index) => ({
+      const convertedQuestions: Question[] = (response as any).questions.map((q: any) => ({
         id: q.questionId,
         question: q.content,
         options: q.option,
@@ -108,10 +107,10 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
         is_marked_for_review: false,
       }));
 
-      setSessionId(response.session_id);
+      setSessionId((response as any).session_id);
       setQuestions(convertedQuestions);
       setAnswers(initialAnswers);
-      setTestStartTime(new Date());
+      // setTestStartTime(new Date());
       setPageState('test');
 
       console.log('✅ Test initialized successfully:', {
@@ -168,12 +167,12 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
   }, []);
 
   // Handle timer updates
-  const handleTimerUpdate = useCallback((timeElapsed: number, metadata: TimerMetadata) => {
+  const handleTimerUpdate = useCallback((_timeElapsed: number, metadata: TimerMetadata) => {
     setTimerMetadata(metadata);
   }, []);
 
   // Handle timer expiration
-  const handleTimerExpired = useCallback((metadata: TimerMetadata) => {
+  const handleTimerExpired = useCallback((_metadata: TimerMetadata) => {
     console.log('⏰ Test time expired, auto-submitting...');
     setShowSubmissionForm(true);
   }, []);
@@ -373,7 +372,6 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
               onQuestionChange={handleQuestionChange}
               onMarkForReview={handleMarkForReview}
               onClearAnswer={handleClearAnswer}
-              showTimer={true}
               questionTimer={true}
             />
           </div>

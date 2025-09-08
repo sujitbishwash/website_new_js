@@ -47,15 +47,7 @@ export const TestRouteExample: React.FC = () => {
 // Example 4: Programmatic navigation to test
 export const NavigateToTestExample: React.FC = () => {
   const navigateToTest = () => {
-    // Example of navigating to test with test configuration
-    const testConfig = {
-      topics: ['mathematics', 'science'],
-      level: 'medium',
-      language: 'en'
-    };
-    
-    // This would be used with React Router's navigate function
-    // navigate('/test', { state: { testConfig } });
+    // Example: navigate('/test', { state: { testConfig: { topics: ['mathematics'], level: 'medium', language: 'en' } } });
   };
 
   return (

@@ -10,13 +10,9 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import { theme } from "@/styles/theme";
   import {
     BookOpen,
-    Clipboard,
     Ellipsis,
     Eye,
     EyeOff,
-    Facebook,
-    Instagram,
-    Linkedin,
     MessageCircle,
     MessageCircleQuestion,
     StickyNote,

@@ -1,9 +1,4 @@
-import {
-  quizApi,
-  SubmitTestRequest,
-  SubmitTestResponse,
-  SubmittedAnswer,
-} from "@/lib/api-client";
+import { quizApi, SubmitTestResponse } from "@/lib/api-client";
 import React, { useEffect, useRef, useState } from "react";
 
 import { useNavigate, useLocation } from "react-router-dom";

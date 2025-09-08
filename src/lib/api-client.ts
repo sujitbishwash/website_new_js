@@ -726,7 +726,9 @@ export interface Option {
 }
 
 export const quizApi = {
-  startTest: async (testConfig: TestData): Promise<QuestionResponse> => {
+  startTest: async (
+    testConfig: TestData
+  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
     // Accept either legacy flat questions or new grouped-sections payload
     const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
       "POST",

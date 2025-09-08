@@ -129,14 +129,14 @@ export const TestTimer: React.FC<TestTimerProps> = ({
   };
 
   // Reset timer
-  const handleReset = () => {
-    setTimeElapsed(0);
-    setIsRunning(false);
-    setIsPaused(false);
-    setStartTime(autoStart ? new Date() : null);
-    setPauseStartTime(null);
-    setTotalPauseDuration(0);
-  };
+  // const handleReset = () => {
+  //   setTimeElapsed(0);
+  //   setIsRunning(false);
+  //   setIsPaused(false);
+  //   setStartTime(autoStart ? new Date() : null);
+  //   setPauseStartTime(null);
+  //   setTotalPauseDuration(0);
+  // };
 
   return (
     <div className={`flex items-center gap-3 ${className}`}>

@@ -2,7 +2,6 @@ import React from 'react';
 import { 
   CheckCircle, 
   XCircle, 
-  Clock, 
   Trophy, 
   Target, 
   TrendingUp,

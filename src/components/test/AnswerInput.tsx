@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, Clock, CheckCircle, Circle, AlertCircle } from 'lucide-react';
-import { TestTimer, TimerMetadata } from './TestTimer';
 
 export interface Question {
   id: number;
@@ -29,7 +28,6 @@ interface AnswerInputProps {
   onQuestionChange: (index: number) => void;
   onMarkForReview: (questionIndex: number) => void;
   onClearAnswer: (questionIndex: number) => void;
-  showTimer?: boolean;
   questionTimer?: boolean;
   className?: string;
 }
@@ -42,11 +40,9 @@ export const AnswerInput: React.FC<AnswerInputProps> = ({
   onQuestionChange,
   onMarkForReview,
   onClearAnswer,
-  showTimer = true,
   questionTimer = true,
   className = '',
 }) => {
-  const [questionStartTime, setQuestionStartTime] = useState<Date>(new Date());
   const [questionTimeElapsed, setQuestionTimeElapsed] = useState(0);
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -55,7 +51,6 @@ export const AnswerInput: React.FC<AnswerInputProps> = ({
   // Track time spent on current question
   useEffect(() => {
     const now = new Date();
-    setQuestionStartTime(now);
     setQuestionTimeElapsed(0);
     
     // Set question start time if not already set
