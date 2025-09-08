@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
+import { useAuth } from "../../contexts/AuthContext";
 
 // --- ICONS (using SVG for self-containment) ---
 const UserIcon = ({ className }: { className?: string }) => (
@@ -228,6 +229,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
 const PersonalInfoForm: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { getUserData } = useAuth();
   const [formData, setFormData] = useState<FormData>({
     name: "",
     gender: "",
@@ -332,7 +334,7 @@ const PersonalInfoForm: React.FC = () => {
           calculatedAge--;
         }
         setAge(calculatedAge >= 0 ? calculatedAge : null);
-      } catch (error) {
+      } catch {
         setAge(null);
       }
     } else {

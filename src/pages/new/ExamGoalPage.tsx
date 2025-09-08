@@ -176,7 +176,7 @@ const ExamGoalSelector: FC = () => {
       setIsSubmitting(true);
 
       // commenting until the API is ready
-      const response = await examGoalApi.addExamGoal(specificExam, examType);
+      const response = await examGoalApi.addExamGoal(examType, specificExam);
       console.log("📡 API Response:", response);
 
       if (response.data.success) {

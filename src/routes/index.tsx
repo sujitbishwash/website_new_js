@@ -17,7 +17,6 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import OnboardingRoute from "../components/OnboardingRoute";
 import RootLayout from "../components/RootLayout";
 
-import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
 import ExamInformationPage from "../pages/new/ExamInformationPage";
 import ExamReconfirmationPage from "../pages/new/ExamReconfirmationPage";
 import HistoryPage from "../pages/new/HistoryPage";
@@ -91,7 +90,7 @@ export const routes = [
           },
           {
             path: "analysis",
-            element: <DetailedAnalysisPage />,
+            element: <TestAnalysis2 />,
             name: "Detailed Analysis",
             description: "View detailed test analysis and results",
           },

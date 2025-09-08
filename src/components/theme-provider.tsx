@@ -55,7 +55,9 @@ export function ThemeProvider({
       ) as ColorThemeName | null;
       // Small timeout lets the classList settle before applying CSS vars
       setTimeout(() => applyColorTheme(saved || "slate"), 0);
-    } catch {}
+    } catch {
+      // Ignore localStorage errors
+    }
   }, [theme]);
 
   // Initialize color palette on mount from localStorage

@@ -1,8 +1,4 @@
-import {
-  quizApi,
-  SubmitTestRequest,
-  SubmitTestResponse,
-} from "@/lib/api-client";
+import { quizApi, SubmitTestResponse } from "@/lib/api-client";
 import React, { useEffect, useRef, useState } from "react";
 
 import { useNavigate, useLocation } from "react-router-dom";
@@ -158,6 +154,8 @@ interface Question {
   status: string;
   answer: number | null;
   questionType: QuestionType;
+  timeSpent?: number; // Track time spent on each question in seconds
+  questionStartTime?: Date; // Track when user first visited this question
 }
 
 // API Response mapping interface
@@ -194,11 +192,16 @@ const useOutsideClick = (
 const TestMainPage = () => {
   // --- State Management ---
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [allQuestions] = useState<{
+  const [allQuestions, setAllQuestions] = useState<{
     [key in SectionName]?: Question[];
   }>({});
   const [currentSection, setCurrentSection] =
     useState<SectionName>("english language");
+  const [sectionTabs, setSectionTabs] = useState<{ id: SectionName; label: string }[]>([
+    { id: "english language", label: "English Language" },
+    { id: "numerical ability", label: "Numerical Ability" },
+    { id: "reasoning ability", label: "Reasoning Ability" },
+  ]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [timeLeft, setTimeLeft] = useState(600); // 10 minutes in seconds
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -222,6 +225,7 @@ const TestMainPage = () => {
   const [sessionId, setSessionId] = useState<number | null>(null);
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [questionStartTime, setQuestionStartTime] = useState<Date>(new Date());
 
   const [questions, setQuestions] = useState<Question[]>([]);
 
@@ -248,6 +252,8 @@ const TestMainPage = () => {
     status: "not-visited",
     answer: null,
     questionType: apiQuestion.questionType as QuestionType,
+    timeSpent: 0,
+    questionStartTime: undefined,
   });
 
   // Fetch questions from API
@@ -262,19 +268,43 @@ const TestMainPage = () => {
         topics: testConfig.sub_topic,
       });
 
-      if (response && response.questions) {
-        const mappedQuestions = response.questions
+      if (response && (response as any).sections) {
+        // New grouped sections payload
+        const v3 = response as any;
+        const sections = v3.sections as Record<string, any>;
+        const normalized: { [key in SectionName]?: Question[] } = {} as any;
+        const tabs: { id: SectionName; label: string }[] = [];
+        Object.values(sections).forEach((sec: any) => {
+          const key = (sec.key || sec.name || '').toLowerCase();
+          let sectionName: SectionName | undefined;
+          if (key.includes('english')) sectionName = 'english language';
+          else if (key.includes('apt') || key.includes('num')) sectionName = 'numerical ability';
+          else if (key.includes('reason')) sectionName = 'reasoning ability';
+          if (sectionName) {
+            normalized[sectionName] = (sec.questions || []).map(mapApiQuestionToQuestion);
+            tabs.push({ id: sectionName, label: sec.name || sectionName });
+          }
+        });
+        // Set current flat list from first available section for UI rendering
+        const initialSection: SectionName = (tabs[0]?.id as SectionName) || (Object.keys(normalized)[0] as SectionName) || 'english language';
+        setAllQuestions(normalized);
+        setCurrentSection(initialSection);
+        setQuestions(normalized[initialSection] || []);
+        if (tabs.length) setSectionTabs(tabs);
+        setSessionId(v3.session_id);
+        // Configure timer if provided
+        if (typeof v3.total_time === 'number') {
+          setTimeLeft(v3.total_time);
+        }
+      } else if (response && (response as any).questions) {
+        // Legacy flat payload
+        const mappedQuestions = (response as any).questions
           .map(mapApiQuestionToQuestion)
-          .sort((a, b) => a.id - b.id);
-
+          .sort((a: Question, b: Question) => a.id - b.id);
         setQuestions(mappedQuestions);
-        setSessionId(response.session_id);
-        console.log(
-          "Successfully fetched questions from API:",
-          mappedQuestions.length
-        );
+        setSessionId((response as any).session_id);
       } else {
-        throw new Error("Invalid response format from API");
+        throw new Error('Invalid response format from API');
       }
     } catch (apiError) {
       console.error("Failed to fetch questions:", apiError);
@@ -293,17 +323,48 @@ const TestMainPage = () => {
       throw new Error("Session ID is required to submit test");
     }
 
-    const submitData: SubmitTestRequest = {
-      session_id: sessionId,
-      answers: questions.map((q) => ({
-        question_id: q.id,
-        selected_option: q.answer !== null ? q.options[q.answer] : null,
-        answer: q.answer !== null ? q.options[q.answer] : null,
-      })),
-    };
+    // Calculate final time spent on current question
+    const now = new Date();
+    const finalTimeSpent = Math.floor((now.getTime() - questionStartTime.getTime()) / 1000);
+    const updatedQuestions = [...questions];
+    updatedQuestions[currentQuestionIndex].timeSpent = (updatedQuestions[currentQuestionIndex].timeSpent || 0) + finalTimeSpent;
 
-    const response = await quizApi.submitTest(submitData);
-    console.log("Successfully submitted test to API:", response);
+    // Convert questions to the enhanced format with answer_order
+    const submittedAnswers = updatedQuestions.map((q, index) => ({
+      question_id: q.id,
+      selected_option: q.answer !== null ? q.options[q.answer] : null,
+      answer_order: index + 1, // API requires this field
+      time_taken: q.timeSpent || 0, // Time taken in seconds
+    }));
+
+    // Calculate test metadata
+    const totalTimeTaken = 600 - timeLeft; // Total time taken in seconds
+    const testStartTime = new Date(Date.now() - totalTimeTaken * 1000);
+    
+    // Log the exact request format for debugging
+    const requestData = {
+      session_id: sessionId,
+      answers: submittedAnswers,
+      metadata: {
+        total_time: totalTimeTaken,
+        start_time: testStartTime.toISOString(),
+        end_time: now.toISOString(),
+      }
+    };
+    
+    console.log("🚀 Submitting test with data (answer_order format):", JSON.stringify(requestData, null, 2));
+    
+    const response = await quizApi.submitTestEnhanced(
+      sessionId,
+      submittedAnswers,
+      {
+        total_time: totalTimeTaken,
+        start_time: testStartTime.toISOString(),
+        end_time: now.toISOString(),
+      }
+    );
+    
+    console.log("✅ Successfully submitted test to API:", response);
     return response;
   };
 
@@ -393,13 +454,36 @@ const TestMainPage = () => {
 
   const navigateToQuestion = (index: number) => {
     if (index < 0 || index >= questions.length) return;
+    
+    const now = new Date();
+    
+    // Track time spent on current question before navigating away
+    if (index !== currentQuestionIndex) {
+      const currentQuestion = questions[currentQuestionIndex];
+      if (currentQuestion.questionStartTime) {
+        const timeSpent = Math.floor((now.getTime() - currentQuestion.questionStartTime.getTime()) / 1000);
+        const newQuestions = [...questions];
+        newQuestions[currentQuestionIndex].timeSpent = (newQuestions[currentQuestionIndex].timeSpent || 0) + timeSpent;
+        setQuestions(newQuestions);
+      }
+    }
+    
     const currentStatus = questions[currentQuestionIndex].status;
     if (currentStatus === "not-visited") {
       const newQuestions = [...questions];
       newQuestions[currentQuestionIndex].status = "not-answered";
       setQuestions(newQuestions);
     }
+    
     setCurrentQuestionIndex(index);
+    
+    // Set start time for the new question if not already set
+    const newQuestions = [...questions];
+    if (!newQuestions[index].questionStartTime) {
+      newQuestions[index].questionStartTime = now;
+      setQuestions(newQuestions);
+    }
+    setQuestionStartTime(now);
   };
 
   /**const handleSaveAndNext = () => {
@@ -481,8 +565,8 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test submitted successfully:", apiResponse);
-        navigate(ROUTES.ANALYSIS);
-        //setShowTestResultDialog(true);
+        navigate(ROUTES.ANALYSIS2, { state: { sessionId: apiResponse.session_id || sessionId } });
+        // setShowTestResultDialog(true);
       }
     } catch (error) {
       console.error("Failed to submit test:", error);
@@ -500,7 +584,7 @@ const TestMainPage = () => {
 
       if (apiResponse) {
         console.log("Test auto-submitted successfully:", apiResponse);
-        setShowTestResultDialog(true);
+        navigate(ROUTES.ANALYSIS2, { state: { sessionId: apiResponse.session_id || sessionId } });
       }
     } catch (error) {
       console.error("Failed to auto-submit test:", error);
@@ -511,12 +595,8 @@ const TestMainPage = () => {
   };
 
   const handlePaletteClick = (index: number) => {
-    if (questions[currentQuestionIndex].status === "not-visited") {
-      const newQuestions = [...questions];
-      newQuestions[currentQuestionIndex].status = "not-answered";
-      setQuestions(newQuestions);
-    }
-    setCurrentQuestionIndex(index);
+    // Use the same navigation logic with time tracking
+    navigateToQuestion(index);
   };
 
   const handleLanguageChange = (lang: string) => {
@@ -659,26 +739,20 @@ const TestMainPage = () => {
         >
           <div className="flex-shrink-0">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
-              {/* Section Tabs */}
+              {/* Section Tabs (dynamic from API) */}
               <div className="w-full sm:w-auto">
                 <nav className="flex gap-1 sm:gap-2" aria-label="Tabs">
-                  {(
-                    [
-                      "english language",
-                      "numerical ability",
-                      "reasoning ability",
-                    ] as SectionName[]
-                  ).map((section) => (
+                  {sectionTabs.map((tab) => (
                     <button
-                      key={section}
-                      onClick={() => handleSectionChange(section)}
+                      key={tab.id}
+                      onClick={() => handleSectionChange(tab.id)}
                       className={`flex-1 sm:flex-none whitespace-nowrap py-2 px-3 font-medium text-xs sm:text-sm rounded-t-lg transition-colors capitalize ${
-                        currentSection === section
+                        currentSection === tab.id
                           ? "bg-card text-foreground"
                           : "bg-background-subtle text-border hover:bg-blue-400/20 hover:text-border-medium"
                       }`}
                     >
-                      {section}
+                      {tab.label}
                     </button>
                   ))}
                 </nav>
@@ -736,12 +810,6 @@ const TestMainPage = () => {
                       >
                         English
                       </div>
-                      <div
-                        onClick={() => handleLanguageChange("Hindi")}
-                        className="block px-4 py-2 text-sm text-muted-foreground hover:bg-blue-400/20"
-                      >
-                        Hindi
-                      </div>
                     </div>
                   )}
                 </div>
@@ -751,7 +819,7 @@ const TestMainPage = () => {
             {/* Question Info */}
             <div className="flex justify-between items-center mb-2 text-sm text-foreground px-2">
               <h2 className="text-lg font-semibold text-foreground">
-                Question No. {currentQuestion.id}
+                Question No. {currentQuestionIndex + 1}
               </h2>
               <div>
                 <span>Marks: </span>
@@ -852,7 +920,7 @@ const TestMainPage = () => {
 
           <div className="flex-grow bg-background-subtle p-4 rounded-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-background-subtle border">
             <h3 className="font-bold mb-4 text-foreground capitalize">
-              {currentSection}
+              {sectionTabs.find((t) => t.id === currentSection)?.label || currentSection}
             </h3>
             <div className="grid grid-cols-6 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-3 justify-items-center">
               {questions.map((q, index) => {
@@ -1179,7 +1247,7 @@ const TestMainPage = () => {
           }}
           onClose={handleCloseTestResultDialog}
           navigate={() => {
-            navigate(ROUTES.ANALYSIS2);
+            navigate(ROUTES.ANALYSIS2, { state: { sessionId } });
           }}
         />
       )}

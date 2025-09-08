@@ -10,13 +10,9 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import { theme } from "@/styles/theme";
   import {
     BookOpen,
-    Clipboard,
     Ellipsis,
     Eye,
     EyeOff,
-    Facebook,
-    Instagram,
-    Linkedin,
     MessageCircle,
     MessageCircleQuestion,
     StickyNote,
@@ -24,7 +20,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
     Type,
     X,
   } from "lucide-react";
-  import { useCallback, useEffect, useRef, useState } from "react";
+  import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import React from "react";
 import { useLocation, useNavigate, useParams, useBlocker } from "react-router-dom";
 import { chatApi, videoApi, VideoDetail, videoProgressApi } from "../../lib/api-client";
@@ -39,6 +35,25 @@ import ShareModal from "@/components/modals/ShareModal";
     }
   }
   
+  // Wrapper components to prevent unnecessary re-renders
+  const FlashcardsWrapper = React.memo(({ videoId }: { videoId: string }) => {
+    console.log("🔄 FlashcardsWrapper rendered for videoId:", videoId);
+    return (
+      <Flashcards 
+        videoId={videoId}
+      />
+    );
+  });
+
+  const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
+    console.log("🔄 SummaryWrapper rendered for videoId:", videoId);
+    return (
+      <Summary 
+        videoId={videoId}
+      />
+    );
+  });
+
   // Type definitions
   interface IconProps {
     path: string;
@@ -583,13 +598,7 @@ import ShareModal from "@/components/modals/ShareModal";
       markAsSubmitted(ComponentName.Quiz);
     }, [markAsSubmitted]);
 
-    const summaryMarkAsSubmitted = useCallback(() => {
-      markAsSubmitted(ComponentName.Summary);
-    }, [markAsSubmitted]);
-
-    const flashcardMarkAsSubmitted = useCallback(() => {
-      markAsSubmitted(ComponentName.Flashcard);
-    }, [markAsSubmitted]);
+    // Removed unused callback functions
 
     // Create wrapper function for markAsSubmitted to maintain backward compatibility
     const videoMarkAsSubmitted = useCallback(() => {
@@ -726,7 +735,9 @@ import ShareModal from "@/components/modals/ShareModal";
         if (ytPlayerRef.current) {
           try {
             ytPlayerRef.current.destroy?.();
-          } catch {}
+          } catch {
+            // Ignore destroy errors
+          }
           ytPlayerRef.current = null;
         }
       }
@@ -853,11 +864,15 @@ import ShareModal from "@/components/modals/ShareModal";
     useEffect(() => {
       const fetchVideoDetails = async () => {
         try {
+          console.log("🎯 VideoPage: Starting to fetch video details for videoId:", currentVideoId);
           setIsLoadingVideo(true);
   
           // Try to get video details from API
           const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
+          console.log("🎯 VideoPage: Calling videoApi.getVideoDetail with URL:", videoUrl);
           const details = await videoApi.getVideoDetail(videoUrl);
+          console.log("🎯 VideoPage: Fetched video details...............................:", details);
+          console.log("🎯 VideoPage: Video topics: .....................................", details.topics);
           setVideoDetail(details);
         } catch (err: any) {
           console.error("Failed to fetch video details:", err);
@@ -866,13 +881,22 @@ import ShareModal from "@/components/modals/ShareModal";
           if (err.isOutOfSyllabus || err.status === 204) {
             console.log("Content is out of syllabus, showing OutOfSyllabus modal");
             setShowOutOfSyllabus(true);
+          } else {
+            // For other errors, set a fallback video detail with default topics
+            console.log("🎯 VideoPage: Video detail API failed, using fallback with default topics");
+            
           }
         } finally {
           setIsLoadingVideo(false);
         }
       };
   
-      fetchVideoDetails();
+      if (currentVideoId) {
+        fetchVideoDetails();
+      } else {
+        console.log("🎯 VideoPage: No currentVideoId, skipping video detail fetch");
+        setIsLoadingVideo(false);
+      }
     }, [currentVideoId]);
   
     // Fetch chapters
@@ -1020,47 +1044,77 @@ import ShareModal from "@/components/modals/ShareModal";
       [currentVideoId]
     );
 
-    // Components object - defined after all functions are available
-    const components = {
-      chat: (
-        <Chat
-          videoId={currentVideoId || ""}
-          messages={chatMessages}
-          isLoading={isChatLoading}
-          error={chatError}
-          onSendMessage={handleSendMessage}
-          isLeftColumnVisible={isLeftColumnVisible}
-          canSubmitFeedback={chatFeedbackState?.canSubmitFeedback}
-          existingFeedback={chatFeedbackState?.existingFeedback}
-          markAsSubmitted={chatMarkAsSubmitted}
-        />
-      ),
-      flashcards: (
-        <Flashcards 
-          videoId={currentVideoId || ""}
-          canSubmitFeedback={flashcardFeedbackState?.canSubmitFeedback}
-          existingFeedback={flashcardFeedbackState?.existingFeedback}
-          markAsSubmitted={flashcardMarkAsSubmitted}
-        />
-      ),
-      quiz: (
-        <Quiz 
-          videoId={currentVideoId || ""}
-          canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
-          existingFeedback={quizFeedbackState?.existingFeedback}
-          markAsSubmitted={quizMarkAsSubmitted}
-          topics={videoDetail?.topics}
-        />
-      ),
-      summary: (
-        <Summary 
-          videoId={currentVideoId || ""}
-          canSubmitFeedback={summaryFeedbackState?.canSubmitFeedback}
-          existingFeedback={summaryFeedbackState?.existingFeedback}
-          markAsSubmitted={summaryMarkAsSubmitted}
-        />
-      ),
-    };
+    // Create refs to track the latest feedback states without causing re-renders
+    const feedbackStatesRef = useRef({
+      chat: chatFeedbackState,
+      flashcards: flashcardFeedbackState,
+      quiz: quizFeedbackState,
+      summary: summaryFeedbackState,
+    });
+
+
+    // Update refs when feedback states change
+    useEffect(() => {
+      feedbackStatesRef.current = {
+        chat: chatFeedbackState,
+        flashcards: flashcardFeedbackState,
+        quiz: quizFeedbackState,
+        summary: summaryFeedbackState,
+      };
+    }, [chatFeedbackState, flashcardFeedbackState, quizFeedbackState, summaryFeedbackState]);
+
+    // Create components that update when videoDetail changes
+    const components = useMemo(() => {
+      console.log("🔄 Creating components for videoId:", currentVideoId);
+      console.log("🔄 VideoDetail in components:", videoDetail);
+      console.log("🔄 VideoDetail topics in components:", videoDetail?.topics);
+      
+      return {
+        chat: (
+          <Chat
+            key={`chat-${currentVideoId}`}
+            videoId={currentVideoId || ""}
+            messages={chatMessages}
+            isLoading={isChatLoading}
+            error={chatError}
+            onSendMessage={handleSendMessage}
+            isLeftColumnVisible={isLeftColumnVisible}
+            canSubmitFeedback={chatFeedbackState?.canSubmitFeedback}
+            existingFeedback={chatFeedbackState?.existingFeedback}
+            markAsSubmitted={chatMarkAsSubmitted}
+          />
+        ),
+        flashcards: (
+          <FlashcardsWrapper 
+            key={`flashcards-${currentVideoId}`}
+            videoId={currentVideoId || ""}
+          />
+        ),
+        quiz: (() => {
+          console.log("🎯 VideoPage: Rendering Quiz with topics:", videoDetail?.topics);
+          console.log("🎯 VideoPage: VideoDetail exists:", !!videoDetail);
+          console.log("🎯 VideoPage: isLoadingVideo:", isLoadingVideo);
+          console.log("🎯 VideoPage: VideoDetail topics:", videoDetail?.topics);
+          
+          return (
+            <Quiz 
+              key={`quiz-${currentVideoId}`}
+              videoId={currentVideoId || ""}
+              canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
+              existingFeedback={quizFeedbackState?.existingFeedback}
+              markAsSubmitted={quizMarkAsSubmitted}
+              topics={videoDetail?.topics}
+            />
+          );
+        })(),
+        summary: (
+          <SummaryWrapper 
+            key={`summary-${currentVideoId}`}
+            videoId={currentVideoId || ""}
+          />
+        ),
+      };
+    }, [currentVideoId, videoDetail]); // Depend on both currentVideoId and videoDetail
   
     const handleShare = useCallback(() => {
       setIsShareModalOpen(true);
@@ -1119,78 +1173,93 @@ import ShareModal from "@/components/modals/ShareModal";
       }
     }, [handleVideoInteraction]);
   
+  // Show loading screen while video details are being fetched
+  if (isLoadingVideo) {
     return (
-      <div className="bg-background text-foreground min-h-screen font-sans">
-        <div className="mx-auto hidden w-full h-full sm:block">
-          <main className="grid grid-cols-1 xl:grid-cols-5">
-            <div
-              className={`p-4 xl:col-span-3 overflow-y-auto h-[100vh] ${
-                isLeftColumnVisible ? "" : "hidden"
-              }`}
-            >
-              <Header
-                videoDetail={videoDetail}
-                isLoading={isLoadingVideo}
-                onToggleFullScreen={handleToggleFullScreen}
-                onNavigate={navigateWithProgress}
-              />
-              {/* YouTube Video Player with Progress Tracking */}
-              <div className="mb-4">
-                <YouTube
-                  videoId={currentVideoId}
-                  onReady={onYouTubeReady}
-                  onEnd={onYouTubeEnd}
-                  onStateChange={onYouTubeStateChange}
-                  className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg w-full h-full"
-                  opts={{
-                    height: '100%',
-                    width: '100%',
-                    playerVars: {
-                      autoplay: 0,
-                      controls: 1,
-                      modestbranding: 1,
-                      rel: 0,
-                      showinfo: 0,
-                    },
-                  }}
-                />
-                
-             
-              </div>
-              <ContentTabs
-                chapters={chapters}
-                transcript={transcript}
-                isLoadingChapters={isLoadingChapters}
-                isLoadingTranscript={isLoadingTranscript}
-                chaptersError={chaptersError}
-                transcriptError={transcriptError}
-                onFeedbackSubmit={() => handleFeedbackComplete("submit")}
-                onFeedbackSkip={() => handleFeedbackComplete("skip")}
-                onFetchTranscript={fetchTranscript}
-              />
-            </div>
-            <div
-              className={`${
-                isLeftColumnVisible ? "xl:col-span-2" : "xl:col-span-5"
-              } w-full h-[100vh]`}
-            >
-              <AITutorPanel
-                currentMode={currentMode}
-                onModeChange={handleModeChange}
-                isLeftColumnVisible={isLeftColumnVisible}
-                onToggleFullScreen={handleToggleFullScreen}
-                onShare={handleShare}
-                components={components}
-              />
-            </div>
-          </main>
+      <div className="bg-background text-foreground min-h-screen font-sans flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-primary mb-6"></div>
+          <h2 className="text-2xl font-bold text-foreground mb-2">Loading Video</h2>
+          <p className="text-muted-foreground">
+            Fetching video details and preparing your learning experience...
+          </p>
         </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-background text-foreground min-h-screen font-sans">
+      <div className="mx-auto hidden w-full h-full sm:block">
+        <main className="grid grid-cols-1 xl:grid-cols-5">
+          <div
+            className={`p-4 xl:col-span-3 overflow-y-auto h-[100vh] ${
+              isLeftColumnVisible ? "" : "hidden"
+            }`}
+          >
+            <Header
+              videoDetail={videoDetail}
+              isLoading={isLoadingVideo}
+              onToggleFullScreen={handleToggleFullScreen}
+              onNavigate={navigateWithProgress}
+            />
+            {/* YouTube Video Player with Progress Tracking */}
+            <div className="mb-4">
+              <YouTube
+                videoId={currentVideoId}
+                onReady={onYouTubeReady}
+                onEnd={onYouTubeEnd}
+                onStateChange={onYouTubeStateChange}
+                className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg w-full h-full"
+                opts={{
+                  height: '100%',
+                  width: '100%',
+                  playerVars: {
+                    autoplay: 0,
+                    controls: 1,
+                    modestbranding: 1,
+                    rel: 0,
+                    showinfo: 0,
+                  },
+                }}
+              />
+              
+         
+            </div>
+            <ContentTabs
+              chapters={chapters}
+              transcript={transcript}
+              isLoadingChapters={isLoadingChapters}
+              isLoadingTranscript={isLoadingTranscript}
+              chaptersError={chaptersError}
+              transcriptError={transcriptError}
+              onFeedbackSubmit={() => handleFeedbackComplete("submit")}
+              onFeedbackSkip={() => handleFeedbackComplete("skip")}
+              onFetchTranscript={fetchTranscript}
+            />
+          </div>
+          <div
+            className={`${
+              isLeftColumnVisible ? "xl:col-span-2" : "xl:col-span-5"
+            } w-full h-[100vh]`}
+          >
+            <AITutorPanel
+              currentMode={currentMode}
+              onModeChange={handleModeChange}
+              isLeftColumnVisible={isLeftColumnVisible}
+              onToggleFullScreen={handleToggleFullScreen}
+              onShare={handleShare}
+              components={components}
+            />
+          </div>
+        </main>
+      </div>
         <div className="sm:hidden">
           <div className="flex flex-col h-[100vh]">
             <header className="flex flex-row mb-2 gap-3 justify-between p-4 items-center ">
               <div className="flex-1 min-w-0 overflow-ellipsis">
                 <h1 className="text-md text-gray-500 truncate px-14 ">
-                  ( videoDetail?.title || "Video Title Not Available" )
+                  {videoDetail?.title || "Video Title Not Available"}
                 </h1>
               </div>
               <div className="flex items-center gap-2 self-start sm:self-center">
@@ -1290,7 +1359,9 @@ import ShareModal from "@/components/modals/ShareModal";
             try {
               videoMarkAsSubmitted();
               setIsFeedbackModalOpen(false);
-            } catch {}
+            } catch {
+              // Ignore feedback submission errors
+            }
           }}
           onSkip={() => setIsFeedbackModalOpen(false)}
           onDismiss={() => setIsFeedbackModalOpen(false)}
@@ -1327,52 +1398,7 @@ import ShareModal from "@/components/modals/ShareModal";
             />
           </div>
         )}
-  
-        {/* Debug/Test Controls - Remove in production */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="fixed bottom-4 right-4 z-50 space-y-2">
-            <button
-              onClick={() => {
-                console.log("🧪 Manual test button clicked");
-                saveVideoProgress();
-              }}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700"
-            >
-              Test Save Progress
-            </button>
-            <button
-              onClick={() => {
-                console.log("🧪 Test navigation with alert");
-                navigateWithProgress('/dashboard');
-              }}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
-            >
-              Test Navigation Alert
-            </button>
-            <button
-              onClick={() => {
-                console.log("🧪 Test browser back");
-                window.history.back();
-              }}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm hover:bg-orange-700"
-            >
-              Test Browser Back
-            </button>
-            <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Watch: {Math.round(videoProgress)}%
-            </div>
-            <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Duration: {videoDurationRef.current}s
-            </div>
-            <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Video ID: {currentVideoId}
-            </div>
-            <div className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs">
-              Player Ready: {ytPlayerRef.current ? 'Yes' : 'No'}
-            </div>
-          </div>
-        )}
-  
+
   
         <style>{`
                   /* Simple toggle switch styles */

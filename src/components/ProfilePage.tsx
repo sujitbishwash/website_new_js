@@ -573,6 +573,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 isEditing={isEditing}
                 onChange={handleInputChange}
               />
+              {/* Password field removed - not needed for now */}
               {false && (
                 <div>
                   <label className="block text-sm font-medium text-foreground">

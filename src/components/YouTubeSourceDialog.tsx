@@ -69,8 +69,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState("");
   const [showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
-  const [userExamGoal, setUserExamGoal] = useState<{ exam: string; group: string } | null>(null);
-    const { getUserData } = useAuth();
 
   // Effect to handle clicks outside the modal
   useEffect(() => {
@@ -123,6 +121,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       setUrl("");
       setError("");
       setIsLoading(false);
+      setLoadingVideoId(null);
     }
   }, [isOpen]);
 
@@ -220,7 +219,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
     try {
-      setIsLoading(true);
+      setLoadingVideoId(video.id);
       setError("");
 
       // First validate the URL
@@ -230,11 +229,11 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         if (validationResult.isOutOfSyllabus) {
           // Show OutOfSyllabus modal
           setShowOutOfSyllabus(true);
-          setIsLoading(false);
+          setLoadingVideoId(null);
           return;
         } else {
           setError(validationResult.message || "Invalid URL");
-          setIsLoading(false);
+          setLoadingVideoId(null);
           return;
         }
       }
@@ -249,7 +248,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       if (err.isOutOfSyllabus || err.status === 204) {
         console.log("Content is out of syllabus, showing OutOfSyllabus modal");
         setShowOutOfSyllabus(true);
-        setIsLoading(false);
+        setLoadingVideoId(null);
         return;
       }
 
@@ -257,7 +256,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         err.message || "Failed to add suggested video. Please try again."
       );
     } finally {
-      setIsLoading(false);
+      setLoadingVideoId(null);
     }
   };
 
@@ -278,7 +277,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   );
 
   return (
-    // Backdrop
+    <>
+    {/* Backdrop */}
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
       {/* Modal Panel */}
       <div
@@ -373,7 +373,9 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                     <div
                       key={video.id}
                       onClick={() => handleSuggestedVideoClick(video)}
-                      className="group cursor-pointer overflow-hidden rounded-lg border border-border bg-none transition-all hover:bg-accent hover:shadow-lg hover:border-primary"
+                      className={`group relative overflow-hidden rounded-lg border border-border bg-none transition-all hover:bg-accent hover:shadow-lg hover:border-primary ${
+                        loadingVideoId === video.id ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
+                      }`}
                     >
                       <img
                         src={video.thumbnailUrl}
@@ -394,27 +396,37 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                           {video.topic}
                         </p>
                       </div>
+                      {loadingVideoId === video.id && (
+                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
               )}
             </div>
-        </div>
-        {/* Footer */}
-        <div className="flex justify-end items-center gap-4 p-5 border-t border-border bg-card rounded-b-2xl">
-          <button
-            onClick={navigateToHome}
-            className="rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border, focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer"
-          >
-            Go to Home
-          </button>
-          <button
-            onClick={handleAdd}
-            disabled={!url.trim() || isLoading}
-            className="rounded-lg bg-border-medium px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border-medium  cursor-pointer disabled:bg-border-border disabled:cursor-not-allowed"
-          >
-            {isLoading ? "Adding..." : "Add"}
-          </button>
+          </div>
+
+          {/* Footer */}
+          <div className="mt-8 flex justify-end space-x-4">
+            <button
+              onClick={navigateToHome}
+              className={`rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer`}
+            >
+              Go to Home
+            </button>
+            <button
+              onClick={handleAdd}
+              disabled={!url.trim() || isLoading}
+              className={`rounded-lg bg-border-medium px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border-medium focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer disabled:bg-border-border disabled:cursor-not-allowed flex items-center gap-2 ${!url.trim() || isLoading ? "bg-border-border cursor-not-allowed" : "bg-primary"}`}
+            >
+              {isLoading && (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              )}
+              {isLoading ? "Loading video..." : "Add"}
+            </button>
+          </div>
         </div>
       </div>
 
@@ -437,7 +449,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             suggestedVideos={suggestedVideos}
           />
         </div>
-      )*/}
+      )}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
+  // baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
   baseURL: 'https://api.krishak.in',
   headers: {
     "Content-Type": "application/json",
@@ -11,12 +12,23 @@ const API_CONFIG = {
 // Create axios instance with default config
 const apiClient = axios.create(API_CONFIG);
 
+// Global flags to prevent duplicate API calls
+const activeRequests = new Map<string, Promise<unknown>>();
+
 // Add request interceptor to add auth token
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
 
+  console.log("🔑 Request interceptor - Checking auth token:", {
+    hasToken: !!token,
+    tokenLength: token?.length,
+    url: config.url,
+    method: config.method
+  });
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
+    console.log("🔑 Request interceptor - Token added to request");
   } else {
     console.log(
       "🔑 Request interceptor - No token found, request will be unauthorized"
@@ -42,14 +54,22 @@ export interface ApiError {
 export const apiRequest = async <T>(
   method: "GET" | "POST" | "PUT" | "DELETE",
   endpoint: string,
-  data?: any,
+  data?: unknown,
   config?: { headers?: Record<string, string> }
 ): Promise<ApiResponse<T>> => {
   const maxRetries = 2;
-  let lastError: any;
+  let lastError: unknown;
+
+  console.log(`🌐 API Request: ${method} ${endpoint}`, {
+    data,
+    config,
+    baseURL: API_CONFIG.baseURL,
+    fullURL: `${API_CONFIG.baseURL}${endpoint}`
+  });
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
+      console.log(`🌐 API Request: Attempt ${attempt}/${maxRetries} for ${method} ${endpoint}`);
 
       const response = await apiClient.request({
         method,
@@ -58,21 +78,33 @@ export const apiRequest = async <T>(
         headers: config?.headers,
       });
 
+      console.log(`✅ API Request: Success for ${method} ${endpoint}`, {
+        status: response.status,
+        data: response.data
+      });
+
       return {
         data: response.data,
         status: response.status,
       };
-    } catch (error: any) {
+    } catch (error: unknown) {
       lastError = error;
+      const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
+
+      console.error(`❌ API Request: Error for ${method} ${endpoint} (attempt ${attempt})`, {
+        error,
+        status: axiosError.response?.status,
+        data: axiosError.response?.data
+      });
 
       // Don't retry on authentication errors
-      if (error.response?.status === 401 || error.response?.status === 403) {
+      if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
         console.log("🔒 Authentication error - not retrying");
         break;
       }
 
       // Don't retry on client errors (4xx except 401/403)
-      if (error.response?.status >= 400 && error.response?.status < 500) {
+      if (axiosError.response?.status && axiosError.response.status >= 400 && axiosError.response.status < 500) {
         console.log("🚫 Client error - not retrying");
         break;
       }
@@ -80,15 +112,18 @@ export const apiRequest = async <T>(
       // Retry on server errors (5xx) and network errors
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
+        console.log(`⏳ API Request: Retrying in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
   }
 
   // If all retries failed, throw the last error
+  const finalError = lastError as { response?: { status?: number; data?: { message?: string } } };
+  console.error(`💥 API Request: All retries failed for ${method} ${endpoint}`, finalError);
   throw {
-    message: lastError.response?.data?.message || "An error occurred",
-    status: lastError.response?.status || 500,
+    message: finalError.response?.data?.message || "An error occurred",
+    status: finalError.response?.status || 500,
   } as ApiError;
 };
 
@@ -224,8 +259,8 @@ export const examGoalApi = {
       "POST",
       "/exam-goal/add",
       {
-        exam: groupType,
-        group_type: exam,
+        exam: exam,
+        group_type: groupType,
       }
     );
   },
@@ -250,7 +285,7 @@ export interface VideoDetail {
 }
 
 export interface SuggestedVideo {
-  id: number;
+  id: string;
   title: string;
   topic: string;
   thumbnailUrl: string;
@@ -304,15 +339,25 @@ export const videoApi = {
     // Handle the API response structure: { suggested: [...] }
     if (result.suggested && Array.isArray(result.suggested)) {
       // Transform the API response to match our interface
-      return result.suggested.map((video: any) => ({
-        id: video.video_id, // Map video_id to id
-        title: video.title,
-        topic: video.channel_title || "General", // Use channel_title as topic
-        thumbnailUrl: video.thumbnail, // Map thumbnail to thumbnailUrl
-        url: video.url,
-        description: video.channel_title, // Use channel_title as description
-        tags: [video.source_for], // Use source_for as tags
-      }));
+      return result.suggested.map((video: unknown) => {
+        const videoData = video as { 
+          video_id?: string; 
+          title?: string; 
+          channel_title?: string; 
+          thumbnail?: string; 
+          url?: string; 
+          source_for?: string; 
+        };
+        return {
+          id: videoData.video_id || "", // Map video_id to id
+          title: videoData.title || "",
+          topic: videoData.channel_title || "General", // Use channel_title as topic
+          thumbnailUrl: videoData.thumbnail || "", // Map thumbnail to thumbnailUrl
+          url: videoData.url || "",
+          description: videoData.channel_title || "", // Use channel_title as description
+          tags: videoData.source_for ? [videoData.source_for] : [], // Use source_for as tags
+        };
+      });
     }
 
     // Fallback to empty array if structure is unexpected
@@ -336,6 +381,91 @@ export const videoApi = {
     );
     return response.data;
   },
+
+  // Video Summary API with global deduplication
+  getVideoSummary: async (
+    videoId: string
+  ): Promise<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }> => {
+    const requestKey = `summary-${videoId}`;
+    
+    // Check if request is already in progress
+    if (activeRequests.has(requestKey)) {
+      console.log("🔍 ULTRA AGGRESSIVE: Reusing existing summary request for:", videoId);
+      return activeRequests.get(requestKey)! as Promise<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }>;
+    }
+
+    const requestPromise = (async (): Promise<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }> => {
+      try {
+        const response = await apiRequest<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }>(
+          "GET",
+          `/video/summary?video_id=${encodeURIComponent(videoId)}`
+        );
+        return response.data;
+      } catch (error: unknown) {
+        console.error("❌ getVideoSummary API error:", error);
+        // Return a fallback structure to prevent component crashes
+        return {
+          summary: "Summary not available",
+          sections: [{
+            title: "Video Summary",
+            content: "Unable to load summary at this time. Please try again later."
+          }]
+        };
+      } finally {
+        // Remove from active requests when done
+        activeRequests.delete(requestKey);
+      }
+    })();
+
+    // Store the promise to prevent duplicate requests
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
+  },
+
+  // Video Flashcards API with global deduplication
+  getVideoFlashcards: async (
+    videoId: string
+  ): Promise<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }> => {
+    const requestKey = `flashcards-${videoId}`;
+    
+    // Check if request is already in progress
+    if (activeRequests.has(requestKey)) {
+      console.log("🔍 ULTRA AGGRESSIVE: Reusing existing flashcards request for:", videoId);
+      return activeRequests.get(requestKey)! as Promise<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }>;
+    }
+
+    const requestPromise = (async (): Promise<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }> => {
+      try {
+        const response = await apiRequest<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }>(
+          "GET",
+          `/video/flash-card?video_id=${encodeURIComponent(videoId)}`
+        );
+        return response.data;
+      } catch (error: unknown) {
+        console.error("❌ getVideoFlashcards API error:", error);
+        // Return a fallback structure to prevent component crashes
+        return {
+          cards: [{
+            id: 1,
+            question: "Flashcards not available",
+            answer: "Unable to load flashcards at this time. Please try again later."
+          }],
+          video_id: videoId
+        };
+      } finally {
+        // Remove from active requests when done
+        activeRequests.delete(requestKey);
+      }
+    })();
+
+    // Store the promise to prevent duplicate requests
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
+  },
+
+
+
+
 };
 
 interface ChatMessage {
@@ -444,7 +574,57 @@ export interface QuestionResponse {
   }[];
 }
 
+// New grouped sections response (v3)
+export interface SectionQuestions {
+  key: string;
+  name: string;
+  questions: {
+    questionId: number;
+    questionType: string;
+    content: string;
+    option: string[];
+    answer: string | null;
+  }[];
+}
+
+export interface StartTestSessionResponseV3 {
+  session_id: number;
+  sections: Record<string, SectionQuestions>;
+  total_questions: number;
+  total_marks: number;
+  total_time: number; // seconds
+}
+
+// Enhanced interfaces for comprehensive test submission
+export interface SubmittedAnswer {
+  question_id: number;
+  selected_option?: string | null;
+  answer_order: number; // API requires this field
+  time_taken?: number; // Time taken in seconds
+}
+
 export interface SubmitTestRequest {
+  session_id: number;
+  answers: SubmittedAnswer[];
+  metadata?: {
+    total_time?: number;
+    start_time?: string;
+    end_time?: string;
+    [key: string]: any;
+  };
+}
+
+export interface SubmitTestResponse {
+  session_id: number;
+  score: number;
+  total: number;
+  total_marks_scored: number;
+  attempt: number;
+  message: string;
+}
+
+// Legacy interface for backward compatibility
+export interface LegacySubmitTestRequest {
   session_id: number;
   answers: {
     question_id: number;
@@ -453,7 +633,7 @@ export interface SubmitTestRequest {
   }[];
 }
 
-export interface SubmitTestResponse {
+export interface LegacySubmitTestResponse {
   session_id: number;
   score: number;
   total: number;
@@ -546,13 +726,16 @@ export interface Option {
 }
 
 export const quizApi = {
-  startTest: async (testConfig: TestData): Promise<QuestionResponse> => {
-    const response = await apiRequest<QuestionResponse>(
+  startTest: async (
+    testConfig: TestData
+  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+    // Accept either legacy flat questions or new grouped-sections payload
+    const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
       "POST",
       `/test-series/start-test-session`,
       testConfig
     );
-    return response.data;
+    return response.data as any;
   },
 
   getQuestions: async (sessionId: number): Promise<QuestionResponse> => {
@@ -572,14 +755,88 @@ export const quizApi = {
     return response.data;
   },
 
-  // New API for dynamic quiz generation
-  generateQuiz: async (topics: string[]): Promise<QuizResponse> => {
-    const response = await apiRequest<QuizResponse>(
-      "POST",
-      "/test-series/quiz",
-      { topics }
+  // Fetch test analysis by session id
+  testAnalysis: async (sessionId: number): Promise<Record<string, unknown>> => {
+    const response = await apiRequest<Record<string, unknown>>(
+      "GET",
+      `/test-series/analysis/${encodeURIComponent(sessionId)}`
     );
     return response.data;
+  },
+
+  // Enhanced submit test with comprehensive metadata
+  submitTestEnhanced: async (
+    sessionId: number, 
+    answers: SubmittedAnswer[], 
+    metadata?: { total_time?: number; start_time?: string; end_time?: string }
+  ): Promise<SubmitTestResponse> => {
+    const submitData: SubmitTestRequest = {
+      session_id: sessionId,
+      answers,
+      metadata
+    };
+    
+    console.log("🚀 Enhanced Test Submission:", {
+      sessionId,
+      answersCount: answers.length,
+      metadata,
+      submitData
+    });
+    
+    const response = await apiRequest<SubmitTestResponse>(
+      "POST",
+      "/test-series/submit-test-session",
+      submitData
+    );
+    
+    console.log("✅ Enhanced Test Submission Success:", response.data);
+    return response.data;
+  },
+
+  // New API for dynamic quiz generation
+  generateQuiz: async (topics: string[]): Promise<QuizResponse> => {
+    const requestKey = `quiz-${topics.join(',')}`;
+    
+    console.log(`🆕 Quiz API: generateQuiz called with topics:`, topics);
+    console.log(`🆕 Quiz API: Request key:`, requestKey);
+    console.log(`🆕 Quiz API: API base URL:`, API_CONFIG.baseURL);
+    
+    // Check if there's already an active request for the same topics
+
+    /*
+    if (activeRequests.has(requestKey)) {
+      console.log(`🔄 Quiz API: Reusing existing request for topics: ${topics.join(',')}`);
+      return activeRequests.get(requestKey)! as Promise<QuizResponse>;
+    }
+      */
+
+    console.log(`🆕 Quiz API: Creating new request for topics: ${topics.join(',')}`);
+    const requestPromise = (async () => {
+      try {
+        console.log(`🆕 Quiz API: About to make API request to /test-series/quiz`);
+        console.log(`🆕 Quiz API: Request payload:`, { topics });
+        
+        const response = await apiRequest<QuizResponse>(
+          "POST",
+          "/test-series/quiz",
+          { topics }
+        );
+        
+        console.log(`✅ Quiz API: Response received:`, response);
+        return response.data;
+      } catch (error) {
+        console.error(`❌ Quiz API: Error in generateQuiz:`, error);
+        throw error;
+      } finally {
+        // Clean up the request from active requests
+        activeRequests.delete(requestKey);
+        console.log(`🧹 Quiz API: Cleaned up request key:`, requestKey);
+      }
+    })();
+
+    // Store the promise for potential reuse
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
   },
 };
 
@@ -622,7 +879,7 @@ export interface FeedbackResponse {
   component: string;         // Required
   description: string;       // Required
   rating: number;           // Required
-  reporter: any;            // Required (Dict)
+  reporter: Record<string, unknown>;            // Required (Dict)
   date_submitted: string;   // Required
   source_id: string;        // Required
   page_url: string;         // Required

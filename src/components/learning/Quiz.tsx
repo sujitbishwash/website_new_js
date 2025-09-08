@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import React from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
-import { quizApi, Question, Option } from "@/lib/api-client";
+import { quizApi } from "@/lib/api-client";
 
 // --- Setup ---
 
@@ -172,13 +172,21 @@ const QuestionView: React.FC<{
 };
 
 // Add props interface for feedback state
+interface FeedbackData {
+  id: string;
+  rating: number;
+  description: string;
+  date_submitted: string;
+  page_url: string;
+}
+
 interface QuizProps {
   // Optional props to prevent duplicate API calls when passed from parent
   videoId: string;
   canSubmitFeedback?: boolean | undefined;
-  existingFeedback?: any;
+  existingFeedback?: FeedbackData | null;
   markAsSubmitted?: () => void;
-  topics?: string[]; // Topics for quiz generation
+  topics?: string[]; // Topics for quiz generation (optional to handle API failures)
 }
 
 const Quiz: React.FC<QuizProps> = ({
@@ -188,18 +196,35 @@ const Quiz: React.FC<QuizProps> = ({
   markAsSubmitted,
   topics,
 }) => {
-  // Generate unique component instance ID for debugging
-  const componentId = React.useMemo(() => Math.random().toString(36).substr(2, 9), []);
+  console.log(`🏗️ Quiz Component .................. Topics:`, topics);
+  // Generate unique component instance ID for debugging (stable across renders)
+  const componentId = React.useRef(Math.random().toString(36).substr(2, 9)).current;
   
-  // Memoize default topics to prevent infinite re-renders
-  const defaultTopics = React.useMemo(() => ["General Knowledge"], []);
-  const memoizedTopics = React.useMemo(() => topics || defaultTopics, [topics, defaultTopics]);
+  // Debug component mount/unmount
+  React.useEffect(() => {
+    console.log(`🏗️ Quiz Component [${componentId}] MOUNTED with topics:`, topics);
+    console.log(`🏗️ Quiz Component [${componentId}] Topics type:`, typeof topics);
+    console.log(`🏗️ Quiz Component [${componentId}] Topics is array:`, Array.isArray(topics));
+    return () => {
+      console.log(`🗑️ Quiz Component [${componentId}] UNMOUNTED`);
+    };
+  }, [componentId, topics]);
+  
+  // Memoize topics to prevent infinite re-renders
+  const topicsToUse = React.useMemo(() => {
+    console.log(`🔍 Quiz Component [${componentId}] Deriving topicsToUse. Topics prop:`, topics);
+    return topics && topics.length > 0 ? topics : null;
+  }, [topics, componentId]);
+  
+  console.log(`🔍 Quiz Component [${componentId}] Topics prop:`, topics);
+  console.log(`🎯 Quiz Component [${componentId}] Topics to use:`, topicsToUse);
   
   // Quiz state
   const [quizQuestions, setQuizQuestions] = React.useState<QuizQuestion[]>([]);
   const [isLoadingQuiz, setIsLoadingQuiz] = React.useState<boolean>(true); // Start as true to show loading initially
   const [quizError, setQuizError] = React.useState<string | null>(null);
   const hasAttemptedFetchRef = React.useRef<boolean>(false);
+  const lastTopicsRef = React.useRef<string>("");
   
   // Debug feedback props (moved after state declarations)
   console.log(`🔍 Quiz Component [${componentId}] Props:`, {
@@ -208,7 +233,7 @@ const Quiz: React.FC<QuizProps> = ({
     existingFeedback: !!existingFeedback,
     hasMarkAsSubmitted: !!markAsSubmitted,
     originalTopics: topics,
-    memoizedTopics: memoizedTopics,
+    topicsToUse: topicsToUse,
     isLoadingQuiz,
     hasAttemptedFetch: hasAttemptedFetchRef.current,
     quizQuestionsLength: quizQuestions.length
@@ -221,41 +246,79 @@ const Quiz: React.FC<QuizProps> = ({
     number | null
   >(null);
 
-  // Fetch quiz questions from API
+  // Fetch quiz questions from API when topics change
   React.useEffect(() => {
-    console.log(`🔄 Quiz Component [${componentId}] useEffect triggered`);
-    
-    // Guard to prevent API calls if already attempted or if we already have questions
-    if (hasAttemptedFetchRef.current) {
-      console.log(`🚫 Quiz Component [${componentId}] Skipping API call - already attempted`);
+    // Don't fetch if no topics available
+    if (!topicsToUse) {
+      console.log(`🔄 Quiz Component [${componentId}] No topics available, skipping API call`);
+      setIsLoadingQuiz(false);
+      setQuizError("No topics available for quiz generation.");
       return;
     }
 
-    if (quizQuestions.length > 0) {
-      console.log(`🚫 Quiz Component [${componentId}] Skipping API call - questions already exist`);
+    const topicsKey = JSON.stringify(topicsToUse);
+    
+    // Prevent infinite calls by checking if topics actually changed
+    if (lastTopicsRef.current === topicsKey) {
+      console.log(`🔄 Quiz Component [${componentId}] Topics unchanged, skipping API call`);
       return;
     }
+    
+    console.log(`🔄 Quiz Component [${componentId}] useEffect triggered with topics:`, topicsToUse);
+    console.log(`🔄 Quiz Component [${componentId}] Topics length:`, topicsToUse?.length);
+    console.log(`🔄 Quiz Component [${componentId}] Topics content:`, JSON.stringify(topicsToUse));
+    console.log(`🔄 Quiz Component [${componentId}] Previous topics:`, lastTopicsRef.current);
+    console.log(`🔄 Quiz Component [${componentId}] New topics:`, topicsKey);
+    
+    // Update the last topics ref
+    lastTopicsRef.current = topicsKey;
+    
+    // Reset state when topics change
+    console.log(`🔄 Quiz Component [${componentId}] Resetting state for new topics`);
+    setQuizQuestions([]);
+    setCurrentQuestion(0);
+    setShowScore(false);
+    setScore(0);
+    setIsAnswered(false);
+    setSelectedAnswerIndex(null);
+    setQuizError(null);
+    hasAttemptedFetchRef.current = false;
+    setIsLoadingQuiz(true);
 
     const fetchQuizQuestions = async () => {
       try {
         hasAttemptedFetchRef.current = true;
         setQuizError(null);
-        console.log(`🎯 Quiz Component [${componentId}] Fetching quiz questions for topics:`, memoizedTopics);
+        console.log(`🎯 Quiz Component [${componentId}] About to call quizApi.generateQuiz with topics:`, topicsToUse);
+        console.log(`🎯 Quiz Component [${componentId}] API base URL:`, import.meta.env.VITE_API_BASE_URL);
         
-        const response = await quizApi.generateQuiz(memoizedTopics);
-        console.log(`✅ Quiz Component [${componentId}] Quiz questions loaded:`, response.questions);
+        const response = await quizApi.generateQuiz(topicsToUse);
+        console.log(`✅ Quiz Component [${componentId}] Quiz questions loaded successfully:`, response);
+        console.log(`✅ Quiz Component [${componentId}] Questions count:`, response.questions?.length);
         
         setQuizQuestions(response.questions);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error(`❌ Quiz Component [${componentId}] Failed to fetch quiz questions:`, error);
-        setQuizError("Failed to load quiz questions. Please try again.");
+        console.error(`❌ Quiz Component [${componentId}] Error details:`, {
+          message: (error as any)?.message,
+          status: (error as any)?.status,
+          stack: (error as any)?.stack
+        });
+        
+        // Check if it's an authentication error
+        const errorStatus = (error as any)?.status;
+        if (errorStatus === 401 || errorStatus === 403) {
+          setQuizError("Please log in to access quiz questions.");
+        } else {
+          setQuizError("Failed to load quiz questions. Please try again.");
+        }
       } finally {
         setIsLoadingQuiz(false);
       }
     };
 
     fetchQuizQuestions();
-  }, [memoizedTopics, componentId]); // Only depend on memoizedTopics and componentId
+  }, [topicsToUse, componentId]); // Depend on topicsToUse and componentId
 
   const handleNextQuestion = () => {
     const nextQuestion = currentQuestion + 1;
@@ -304,6 +367,11 @@ const Quiz: React.FC<QuizProps> = ({
   };
 
   const retryQuiz = () => {
+    if (!topicsToUse) {
+      setQuizError("No topics available for quiz generation.");
+      return;
+    }
+    
     setQuizError(null);
     setQuizQuestions([]); // Clear existing questions
     hasAttemptedFetchRef.current = false; // Reset attempt flag
@@ -312,10 +380,10 @@ const Quiz: React.FC<QuizProps> = ({
     const fetchQuizQuestions = async () => {
       try {
         hasAttemptedFetchRef.current = true;
-        const response = await quizApi.generateQuiz(memoizedTopics);
+        const response = await quizApi.generateQuiz(topicsToUse);
         setQuizQuestions(response.questions);
         setQuizError(null);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("❌ Failed to retry quiz questions:", error);
         setQuizError("Failed to load quiz questions. Please try again.");
       } finally {
@@ -356,7 +424,7 @@ const Quiz: React.FC<QuizProps> = ({
     }
   };
 
-  const handleSubmitFeedback = async (payload: any) => {
+  const handleSubmitFeedback = async (payload: unknown) => {
     console.log("Quiz feedback submitted:", payload);
     if (markAsSubmitted) {
       markAsSubmitted();
@@ -382,7 +450,7 @@ const Quiz: React.FC<QuizProps> = ({
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400 mb-4"></div>
           <p className="text-lg font-semibold text-foreground">Loading Quiz...</p>
           <p className="text-sm text-muted-foreground mt-2">
-            Generating questions for: {memoizedTopics.join(", ")}
+            {topicsToUse ? `Generating questions for: ${topicsToUse.join(", ")}` : "Waiting for topics..."}
           </p>
         </div>
       </div>

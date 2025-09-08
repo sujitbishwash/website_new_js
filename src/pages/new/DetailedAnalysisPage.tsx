@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { quizApi } from "@/lib/api-client";
 import { useUser } from "../../contexts/UserContext";
 
 // --- Type Definitions ---
@@ -165,13 +167,59 @@ export default function DetailedAnalysisTestPage() {
   const [openSection, setOpenSection] = useState<string | null>(
     "general-intelligence"
   );
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [analysis, setAnalysis] = useState<Record<string, any> | null>(null);
+  const location = useLocation();
   const { profile, examGoal } = useUser();
+
+  // Resolve sessionId from router state or query param
+  const sessionId = useMemo(() => {
+    const fromState = (location.state as any)?.sessionId;
+    if (fromState) return Number(fromState);
+    const params = new URLSearchParams(location.search);
+    const fromQuery = params.get("sessionId");
+    return fromQuery ? Number(fromQuery) : undefined;
+  }, [location.state, location.search]);
+
+  useEffect(() => {
+    const fetchAnalysis = async () => {
+      if (!sessionId || Number.isNaN(sessionId)) return;
+      setIsLoading(true);
+      setError(null);
+      try {
+        const data = await quizApi.testAnalysis(sessionId);
+        setAnalysis(data || {});
+      } catch (e: any) {
+        setError(e?.message || "Failed to load analysis");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAnalysis();
+  }, [sessionId]);
 
   const toggleSection = (section: string) => {
     setOpenSection(openSection === section ? null : null);
   };
 
-  const reasoningTopicData = [
+  // Derive values from analysis with safe fallbacks
+  const overall = (analysis as any)?.overall || {};
+  const overallScore = overall.score ?? "132.5";
+  const overallTotal = overall.total ?? "200";
+  const overallRank = overall.rank ?? "15";
+  const overallOutOf = overall.out_of ?? "2500";
+  const overallPercentile = overall.percentile ?? "99.40%";
+  const overallAccuracy = overall.accuracy ?? "82.35%";
+  const attempted = overall.attempted ?? "85";
+  const totalQuestions = overall.total_questions ?? "100";
+  const correct = overall.correct ?? "70";
+  const incorrect = overall.incorrect ?? "15";
+  const skipped = overall.skipped ?? "15";
+  const timeTaken = overall.time_taken ?? "55:10";
+  const timeAllowed = overall.time_allowed ?? "60:00";
+
+  const reasoningTopicData = (analysis as any)?.subjects?.reasoning?.topics || [
     {
       topic: "Analogy",
       attempted: 3,
@@ -223,7 +271,7 @@ export default function DetailedAnalysisTestPage() {
     },
   ];
 
-  const awarenessTopicData = [
+  const awarenessTopicData = (analysis as any)?.subjects?.awareness?.topics || [
     {
       topic: "History",
       attempted: 4,
@@ -275,6 +323,29 @@ export default function DetailedAnalysisTestPage() {
     },
   ];
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading analysis...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+        <div className="max-w-md w-full bg-white p-6 rounded-lg border border-gray-200 shadow-sm text-center">
+          <h2 className="text-lg font-semibold text-gray-800 mb-2">Unable to load analysis</h2>
+          <p className="text-sm text-red-600 mb-4">{error}</p>
+          <p className="text-xs text-gray-500">Please check your network and try again.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -322,70 +393,70 @@ export default function DetailedAnalysisTestPage() {
                   <PerformanceMetric
                     icon={<ScoreIcon />}
                     label="Score"
-                    value="132.5"
-                    subValue="/ 200"
+                    value={String(overallScore)}
+                    subValue={`/ ${overallTotal}`}
                     colorClass="text-emerald-500"
                   />
                   <PerformanceMetric
                     icon={<RankIcon />}
                     label="Rank"
-                    value="15"
-                    subValue="/ 2500"
+                    value={String(overallRank)}
+                    subValue={`/ ${overallOutOf}`}
                     colorClass="text-sky-500"
                   />
                   <PerformanceMetric
                     icon={<PercentileIcon />}
                     label="Percentile"
-                    value="99.40%"
+                    value={String(overallPercentile)}
                     colorClass="text-amber-500"
                   />
                   <PerformanceMetric
                     icon={<AccuracyIcon />}
                     label="Accuracy"
-                    value="82.35%"
+                    value={String(overallAccuracy)}
                     colorClass="text-violet-500"
                   />
                   <PerformanceMetric
                     icon={<ScoreIcon />}
                     label="Attempted"
-                    value="85"
-                    subValue="/ 100"
+                    value={String(attempted)}
+                    subValue={`/ ${totalQuestions}`}
                   />
                   <PerformanceMetric
                     icon={<ScoreIcon />}
                     label="Correct"
-                    value="70"
+                    value={String(correct)}
                     colorClass="text-green-500"
                   />
                   <PerformanceMetric
                     icon={<ScoreIcon />}
                     label="Incorrect"
-                    value="15"
+                    value={String(incorrect)}
                     colorClass="text-red-500"
                   />
                   <PerformanceMetric
                     icon={<ScoreIcon />}
                     label="Skipped"
-                    value="15"
+                    value={String(skipped)}
                   />
                 </div>
                 <div className="mt-6 pt-4 border-t border-gray-200">
                   <PerformanceMetric
                     icon={<ScoreIcon />}
                     label="Time Taken"
-                    value="55:10"
-                    subValue="/ 60:00"
+                    value={String(timeTaken)}
+                    subValue={`/ ${String(timeAllowed)}`}
                   />
                 </div>
                 <div className="mt-6">
                   <div className="flex items-center justify-between text-sm mb-1">
                     <p className="text-gray-600 font-medium">
                       Overall Score Percentage:{" "}
-                      <span className="font-bold text-gray-800">70.80%</span>
+                      <span className="font-bold text-gray-800">{String(overall.percentage ?? "70.80%")}</span>
                     </p>
                   </div>
                   <ProgressBar
-                    percentage={70.8}
+                    percentage={Number(overall.percentage_value ?? 70.8)}
                     color="bg-gradient-to-r from-sky-400 to-indigo-500"
                   />
                 </div>
@@ -440,7 +511,7 @@ export default function DetailedAnalysisTestPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {reasoningTopicData.map((item, index) => (
+                    {reasoningTopicData.map((item: any, index: number) => (
                       <tr
                         key={index}
                         className="border-t border-gray-200 odd:bg-white even:bg-slate-50/50"
@@ -525,7 +596,7 @@ export default function DetailedAnalysisTestPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {awarenessTopicData.map((item, index) => (
+                    {awarenessTopicData.map((item: any, index: number) => (
                       <tr
                         key={index}
                         className="border-t border-gray-200 odd:bg-white even:bg-slate-50/50"

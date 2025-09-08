@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { videoProgressApi, VideoProgressResponse } from '@/lib/api-client';
+import { videoProgressApi } from '@/lib/api-client';
 
 interface VideoProgressData {
   videoId: string;
@@ -97,7 +97,7 @@ export const useVideoProgress = () => {
             tags: data.tags || [],
             url: data.url
           };
-        } catch (parseError) {
+        } catch {
           console.warn(`Failed to parse localStorage data for key: ${key}`);
           return null;
         }

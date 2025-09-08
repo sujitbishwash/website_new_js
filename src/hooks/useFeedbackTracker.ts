@@ -380,12 +380,18 @@ export const useFeedbackChips = (rating?: number) => {
     setError(null);
     
     try {
-      const response = await feedbackApi.getFeedbackChips(rating);
-      setChips(response);
+      const response = await feedbackApi.getFeedbackChips(rating?.toString());
+      // Convert FeedbackChipItem[] to string[] for each rating
+      const convertedChips: { [rating: string]: string[] } = {};
+      Object.entries(response).forEach(([key, items]) => {
+        convertedChips[key] = items.map(item => item.label);
+      });
+      setChips(convertedChips);
       console.log(`🎯 Fetched feedback chips${rating ? ` for rating ${rating}` : ' for all ratings'}:`, response);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const error = err as { message?: string };
       console.error(`❌ Error fetching feedback chips:`, err);
-      setError(err.message || 'Failed to fetch feedback chips');
+      setError(error.message || 'Failed to fetch feedback chips');
     } finally {
       setIsLoading(false);
     }

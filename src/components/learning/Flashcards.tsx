@@ -1,8 +1,20 @@
 import { ArrowLeft, ArrowRight, Shuffle } from "lucide-react";
 import React, { useCallback, useEffect, useState, useMemo, memo, useRef } from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import { videoApi } from "@/lib/api-client";
 
 // Centralized theme colors for a more refined design
+
+const theme = {
+  background: "#111827",
+  cardBackground: "#1F2937",
+  inputBackground: "#374151",
+  primaryText: "#FFFFFF",
+  secondaryText: "#9CA3AF",
+  mutedText: "#6B7280",
+  accent: "#60A5FA",
+  divider: "#4B5563",
+};
 
 // --- TYPE DEFINITIONS ---
 interface Card {
@@ -31,11 +43,19 @@ interface ProgressBarProps {
 }
 
 // Add props interface for feedback state
+interface FeedbackData {
+  id: string;
+  rating: number;
+  description: string;
+  date_submitted: string;
+  page_url: string;
+}
+
 interface FlashcardsProps {
-  // Optional props to prevent duplicate API calls when passed from parent
+  // Only videoId is required, feedback props are optional
   videoId: string;
   canSubmitFeedback?: boolean | undefined;
-  existingFeedback?: any;
+  existingFeedback?: FeedbackData | null;
   markAsSubmitted?: () => void;
 }
 
@@ -119,9 +139,14 @@ const Flashcard: React.FC<FlashcardProps> = ({
       >
         {/* Front Face */}
         <div className={baseFaceClass}>
-          <span className="absolute top-6 left-8 text-sm font-semibold text-primary uppercase tracking-wider">
-            Question
-          </span>
+          <div className="absolute top-6 left-8 right-8 flex justify-between items-center">
+            <span className="text-sm font-semibold text-primary uppercase tracking-wider">
+              Question
+            </span>
+            <span className="text-sm font-semibold text-accent">
+              #{card.id}
+            </span>
+          </div>
           <p
             className="text-[clamp(1.25rem,2.5vw,2rem)]
  font-bold text-center text-foreground leading-tight"
@@ -135,9 +160,14 @@ const Flashcard: React.FC<FlashcardProps> = ({
 
         {/* Back Face */}
         <div className={`${baseFaceClass} [transform:rotateY(180deg)]`}>
-          <span className="absolute top-6 left-8 text-sm font-semibold text-primary uppercase tracking-wider">
-            Answer
-          </span>
+          <div className="absolute top-6 left-8 right-8 flex justify-between items-center">
+            <span className="text-sm font-semibold text-primary uppercase tracking-wider">
+              Answer
+            </span>
+            <span className="text-sm font-semibold text-accent">
+              #{card.id}
+            </span>
+          </div>
           <p
             className="text-[clamp(1.25rem,2.5vw,2rem)]
  font-bold text-center text-foreground leading-tight"
@@ -199,7 +229,7 @@ const Navigation: React.FC<NavigationProps> = ({
 
 // --- MAIN APP COMPONENT ---
 
-const Flashcards: React.FC<FlashcardsProps> = ({
+const Flashcards: React.FC<FlashcardsProps> = React.memo(({
   videoId,
   canSubmitFeedback,
   existingFeedback,
@@ -207,21 +237,151 @@ const Flashcards: React.FC<FlashcardsProps> = ({
 }) => {
   // Debug component mounting (only in development)
   useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log("🔍 Flashcards Component - Mounted with props:", {
-        videoId,
-        canSubmitFeedback,
-        existingFeedback: !!existingFeedback,
-        hasMarkAsSubmitted: !!markAsSubmitted
-      });
-    }
-  }, [videoId, canSubmitFeedback, existingFeedback, markAsSubmitted]);
+    console.log("🔍 Flashcards Component - Mounted/Re-rendered with props:", {
+      videoId,
+      canSubmitFeedback,
+      existingFeedback: !!existingFeedback,
+      hasMarkAsSubmitted: !!markAsSubmitted,
+      timestamp: new Date().toISOString()
+    });
+  }, [videoId]); // Only depend on videoId
+  
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const [animationDirection, setAnimationDirection] = useState<
     "left" | "right" | "none"
   >("none");
+
+  // Add ref to track if we've already fetched data for this videoId
+  const fetchedVideoIdRef = useRef<string | null>(null);
+  const isFetchingRef = useRef<boolean>(false);
+
+  // Fetch flashcards data from API - ULTRA AGGRESSIVE APPROACH
+  useEffect(() => {
+    const fetchFlashcards = async () => {
+      // ULTRA AGGRESSIVE: Only fetch if we haven't fetched this videoId before
+      if (!videoId || fetchedVideoIdRef.current === videoId) {
+        console.log("🔍 ULTRA AGGRESSIVE: Skipping fetch - already fetched:", { 
+          videoId, 
+          fetchedVideoId: fetchedVideoIdRef.current
+        });
+        return;
+      }
+
+      // ULTRA AGGRESSIVE: Set fetching flag immediately
+      if (isFetchingRef.current) {
+        console.log("🔍 ULTRA AGGRESSIVE: Already fetching, skipping");
+        return;
+      }
+
+      if (!videoId) {
+        console.log("🔍 No videoId provided, using demo data");
+        setCards(initialCards);
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("🔍 ULTRA AGGRESSIVE: Starting fetch for videoId:", videoId);
+      isFetchingRef.current = true;
+      fetchedVideoIdRef.current = videoId; // Mark as fetched IMMEDIATELY
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await videoApi.getVideoFlashcards(videoId);
+        
+        console.log("📊 Raw flashcards API response:", response);
+        
+        // Check if response has the expected structure
+        if (!response) {
+          throw new Error("Empty response from API");
+        }
+
+        let transformedCards: Card[] = [];
+
+        // Handle different possible response structures
+        if (response.cards && Array.isArray(response.cards)) {
+          // Transform API response to our component format (actual API structure)
+          transformedCards = response.cards.map((card: unknown, index: number) => {
+            const cardData = card as { id?: number; question?: string; answer?: string };
+            return {
+              id: cardData.id || index + 1,
+              question: cardData.question || "No question available",
+              answer: cardData.answer || "No answer available"
+            };
+          });
+        } else if ((response as Record<string, unknown>).flashcards && Array.isArray((response as Record<string, unknown>).flashcards)) {
+          // Transform API response to our component format (expected structure)
+          const flashcards = (response as Record<string, unknown>).flashcards as unknown[];
+          transformedCards = flashcards.map((card: unknown, index: number) => {
+            const cardData = card as { id?: number; question?: string; answer?: string };
+            return {
+              id: cardData.id || index + 1,
+              question: cardData.question || "No question available",
+              answer: cardData.answer || "No answer available"
+            };
+          });
+        } else if (Array.isArray(response)) {
+          // If response is directly an array
+          transformedCards = response.map((card: unknown, index: number) => {
+            const cardData = card as { id?: number; question?: string; answer?: string };
+            return {
+              id: cardData.id || index + 1,
+              question: cardData.question || "No question available",
+              answer: cardData.answer || "No answer available"
+            };
+          });
+        } else {
+          // Fallback: create cards from available data
+          transformedCards = [{
+            id: 1,
+            question: "No flashcards available",
+            answer: "Please try again later or contact support"
+          }];
+        }
+
+        // If still no data, use demo data
+        if (transformedCards.length === 0) {
+          console.log("⚠️ No valid flashcards data found, using demo data");
+          transformedCards = initialCards;
+        }
+
+        setCards(transformedCards);
+        setCurrentIndex(0);
+        setIsFlipped(false);
+        console.log("✅ Flashcards data processed successfully:", transformedCards);
+      } catch (err: unknown) {
+        const error = err as { message?: string; status?: number; response?: { data?: unknown } };
+        console.error("❌ Error fetching flashcards:", err);
+        console.error("❌ Error details:", {
+          message: error.message,
+          status: error.status,
+          response: error.response?.data
+        });
+        
+        setError(error.message || "Failed to load flashcards");
+        
+        // Fallback to demo data on error
+        setCards(initialCards);
+      } finally {
+        setIsLoading(false);
+        isFetchingRef.current = false;
+      }
+    };
+
+    fetchFlashcards();
+  }, [videoId]); // Only fetch when videoId changes
+
+  // Reset refs when component unmounts or videoId changes
+  useEffect(() => {
+    return () => {
+      fetchedVideoIdRef.current = null;
+      isFetchingRef.current = false;
+    };
+  }, [videoId]);
 
   const handleFlip = () => {
     setIsFlipped((prev) => !prev);
@@ -281,19 +441,12 @@ const Flashcards: React.FC<FlashcardsProps> = ({
     };
   }, [handleNavigate]);
 
-  // Feedback tracking for Flashcards
+  // Feedback tracking for Flashcards - DISABLED to prevent re-renders
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-  {/*
-  const {
-    canSubmitFeedback,
-    existingFeedback,
-    markAsSubmitted,
-  } = useFeedbackTracker({
-    component: ComponentName.Flashcard,
-    sourceId: "flashcards",
-    pageUrl: window.location.href,
-  });
-  */}
+  // Temporarily disable feedback to prevent re-renders
+  const feedbackCanSubmitFeedback = false;
+  const feedbackExistingFeedback = null;
+  const feedbackMarkAsSubmitted = () => {};
 
   useEffect(() => {
     // Only open feedback modal if:
@@ -305,8 +458,8 @@ const Flashcards: React.FC<FlashcardsProps> = ({
     if (
       cards.length > 0 &&
       currentIndex === cards.length - 1 &&
-      canSubmitFeedback === true && // Must be explicitly true
-      !existingFeedback &&
+      feedbackCanSubmitFeedback && // Must be explicitly true
+      !feedbackExistingFeedback &&
       !isFeedbackModalOpen
     ) {
       console.log("🎯 Opening Flashcards feedback modal - user completed all cards");
@@ -316,17 +469,17 @@ const Flashcards: React.FC<FlashcardsProps> = ({
         cardsLength: cards.length,
         currentIndex,
         isLastCard: currentIndex === cards.length - 1,
-        canSubmitFeedback,
-        existingFeedback: !!existingFeedback,
+        canSubmitFeedback: feedbackCanSubmitFeedback,
+        existingFeedback: !!feedbackExistingFeedback,
         isFeedbackModalOpen,
         shouldOpen: cards.length > 0 &&
                    currentIndex === cards.length - 1 &&
-                   (canSubmitFeedback !== false) &&
-                   !existingFeedback &&
+                   feedbackCanSubmitFeedback &&
+                   !feedbackExistingFeedback &&
                    !isFeedbackModalOpen
       });
     }
-  }, [cards.length, currentIndex, canSubmitFeedback, existingFeedback, isFeedbackModalOpen]);
+  }, [cards.length, currentIndex, feedbackCanSubmitFeedback, feedbackExistingFeedback, isFeedbackModalOpen]);
 
   // Debug logging for feedback state - only log when there are actual changes
   const prevDebugState = useRef({
@@ -342,10 +495,10 @@ const Flashcards: React.FC<FlashcardsProps> = ({
     const currentState = {
       cardsLength: cards.length,
       currentIndex,
-      canSubmitFeedback,
-      existingFeedback: !!existingFeedback,
+      canSubmitFeedback: feedbackCanSubmitFeedback,
+      existingFeedback: !!feedbackExistingFeedback,
       isFeedbackModalOpen,
-      markAsSubmittedExists: !!markAsSubmitted
+      markAsSubmittedExists: !!feedbackMarkAsSubmitted
     };
 
     // Only log if state actually changed and we have cards
@@ -356,13 +509,13 @@ const Flashcards: React.FC<FlashcardsProps> = ({
         ...currentState,
         shouldOpenModal: cards.length > 0 && 
                         currentIndex === cards.length - 1 && 
-                        (canSubmitFeedback !== false) && 
-                        !existingFeedback && 
+                        feedbackCanSubmitFeedback && 
+                        !feedbackExistingFeedback && 
                         !isFeedbackModalOpen
       });
       prevDebugState.current = currentState;
     }
-  }, [cards.length, currentIndex, canSubmitFeedback, existingFeedback, isFeedbackModalOpen, markAsSubmitted]);
+  }, [cards.length, currentIndex, feedbackCanSubmitFeedback, feedbackExistingFeedback, isFeedbackModalOpen, feedbackMarkAsSubmitted]);
 
   const handleFeedbackClose = () => {
     console.log("🔍 Flashcards feedback modal closing - setting isFeedbackModalOpen to false");
@@ -373,29 +526,59 @@ const Flashcards: React.FC<FlashcardsProps> = ({
     console.log("🔍 Flashcards feedback modal dismissed by user");
     setIsFeedbackModalOpen(false);
     // Mark that user has dismissed the feedback request
-    if (markAsSubmitted) {
-      markAsSubmitted();
+    if (feedbackMarkAsSubmitted) {
+      feedbackMarkAsSubmitted();
     }
   };
-  const handleFeedbackSubmit = async (payload: any) => {
+  const handleFeedbackSubmit = async (payload: unknown) => {
     console.log("Flashcards feedback submitted:", payload);
-    if (markAsSubmitted) {
-      markAsSubmitted();
+    if (feedbackMarkAsSubmitted) {
+      feedbackMarkAsSubmitted();
     }
     setIsFeedbackModalOpen(false);
   };
   const handleFeedbackSkip = () => {
     console.log("Flashcards feedback skipped");
-    if (markAsSubmitted) {
-      markAsSubmitted();
+    if (feedbackMarkAsSubmitted) {
+      feedbackMarkAsSubmitted();
     }
     setIsFeedbackModalOpen(false);
   };
 
+  // Loading component
+  const FlashcardsLoadingSpinner = () => (
+    <div className="flex justify-center items-center p-10">
+      <div
+        className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-accent"
+        style={{ borderColor: `${theme.accent} transparent` }}
+      ></div>
+      <p className="ml-4 text-lg">
+        Loading Flashcards...
+      </p>
+    </div>
+  );
+
+  
+
   return (
     <div className="bg-background font-sans text-foreground w-full max-w-full p-4 border-border box-border flex flex-col gap-5 justify-start items-center">
       <div className="w-full max-w-2xl">
-        {cards.length > 0 ? (
+        {isLoading ? (
+          <FlashcardsLoadingSpinner />
+        ) : error ? (
+          <div className="text-center py-8">
+            <div className="text-red-400 mb-4">
+              <p className="text-lg font-semibold">Failed to load flashcards</p>
+              <p className="text-sm">{error}</p>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : cards.length > 0 ? (
           <div className="flex flex-col ">
             <ProgressBar current={currentIndex} total={cards.length} />
             <Flashcard
@@ -414,7 +597,7 @@ const Flashcards: React.FC<FlashcardsProps> = ({
             />
             
             {/* Manual feedback trigger - only show if feedback can be submitted and no existing feedback */}
-            {canSubmitFeedback === true && !existingFeedback && (
+            {feedbackCanSubmitFeedback && !feedbackExistingFeedback && (
               <div className="mt-4 flex justify-center">
                 <button
                   onClick={() => {
@@ -438,20 +621,25 @@ const Flashcards: React.FC<FlashcardsProps> = ({
               onSubmit={handleFeedbackSubmit}
               onSkip={handleFeedbackSkip}
               onDismiss={handleFeedbackDismiss}
-              canSubmitFeedback={canSubmitFeedback}
-              existingFeedback={existingFeedback}
-              markAsSubmitted={markAsSubmitted}
+              canSubmitFeedback={feedbackCanSubmitFeedback}
+              existingFeedback={feedbackExistingFeedback}
+              markAsSubmitted={feedbackMarkAsSubmitted}
               componentName="Flashcard"
             />
           </div>
         ) : (
-          <div className="no-cards-message">
-            <p>No flashcards in this deck!</p>
+          <div className="text-center py-8">
+            <p className="text-lg text-muted-foreground">No flashcards available for this video!</p>
+            <p className="text-sm text-muted-foreground mt-2">
+              Try watching more of the video or check back later.
+            </p>
           </div>
         )}
       </div>
     </div>
   );
-};
+});
+
+Flashcards.displayName = 'Flashcards';
 
 export default Flashcards;
