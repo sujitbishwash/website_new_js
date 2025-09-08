@@ -1,19 +1,17 @@
-import React from 'react';
-
 /**
  * A helper function to generate a lighter or darker shade of a given hex color.
  * @param {string} color - The base hex color (e.g., '#4285F4').
  * @param {number} percent - The percentage to lighten or darken. Negative for darker, positive for lighter.
  * @returns {string} The new hex color.
  */
-const generateShade = (color, percent) => {
+const generateShade = (color: string, percent: number): string => {
   let R = parseInt(color.substring(1, 3), 16);
   let G = parseInt(color.substring(3, 5), 16);
   let B = parseInt(color.substring(5, 7), 16);
 
-  R = parseInt(R * (100 + percent) / 100, 10);
-  G = parseInt(G * (100 + percent) / 100, 10);
-  B = parseInt(B * (100 + percent) / 100, 10);
+  R = Math.round((R * (100 + percent)) / 100);
+  G = Math.round((G * (100 + percent)) / 100);
+  B = Math.round((B * (100 + percent)) / 100);
 
   R = (R < 255) ? R : 255;
   G = (G < 255) ? G : 255;
@@ -37,7 +35,12 @@ const generateShade = (color, percent) => {
  * @param {number} props.number - The number to display inside the badge.
  * @param {string} [props.color='#4285F4'] - The background color of the badge. Defaults to Google Blue.
  */
-const RankBadge = ({ number, color = '#FFD60A' }) => {
+interface RankBadgeProps {
+  number: number;
+  color?: string;
+}
+
+const RankBadge: React.FC<RankBadgeProps> = ({ number, color = '#FFD60A' }) => {
     const darkShade = generateShade(color, -30);
     const darkerShade = generateShade(color, -15);
     const lighterShade = generateShade(color, 30);
