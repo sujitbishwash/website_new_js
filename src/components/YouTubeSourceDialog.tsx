@@ -3,7 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import OutOfSyllabus from "./OutOfSyllabus";
-import { X } from "lucide-react";
+import { AlertCircle, AlertTriangle, X } from "lucide-react";
+import { getUserData } from "@/lib/utils";
+import { useAuth } from "@/contexts/AuthContext";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -67,6 +69,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState("");
   const [showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
+  const [userExamGoal, setUserExamGoal] = useState<{ exam: string; group: string } | null>(null);
+    const { getUserData } = useAuth();
 
   // Effect to handle clicks outside the modal
   useEffect(() => {
@@ -92,6 +96,26 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose, showOutOfSyllabus]);
+
+  
+    // Fetch user exam goal when component mounts
+    useEffect(() => {
+      const fetchExamGoal = async () => {
+        try {
+          const response = await getUserData();
+          if (response?.data?.exam_goal) {
+            setUserExamGoal({
+              exam: response.data.exam_goal.exam || "",
+              group: response.data.exam_goal.group || ""
+            });
+          }
+        } catch (error) {
+          console.error("Failed to fetch exam goal:", error);
+        }
+      };
+  
+      fetchExamGoal();
+    }, [getUserData]);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -132,6 +156,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   };
 
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if(showOutOfSyllabus){setShowOutOfSyllabus(false);}
     const newUrl = e.target.value;
     setUrl(newUrl);
     setError("");
@@ -294,7 +319,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
             {/* Error Message */}
             {error && <div className="mt-2 text-sm text-red-400">{error}</div>}
-
+            {showOutOfSyllabus && userExamGoal && url.length>0 && <div className="mt-2 text-sm flex text-red-400 gap-2 items-center"><AlertTriangle className="text-red-400" />This video is outside the syllabus for your selected Exam Goal: {userExamGoal.exam}</div>}
             {/* Separator */}
             <div className="my-6 flex items-center" aria-hidden="true">
               <div className="w-full border-t border-border-high" />
@@ -394,7 +419,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       </div>
 
       {/* OutOfSyllabus Modal Overlay */}
-      {showOutOfSyllabus && (
+      {/**showOutOfSyllabus && (
         <div
           className="fixed inset-0 z-60 flex items-center justify-center bg-background/30 backdrop-blur-sm"
           onClick={(e) => {
@@ -412,7 +437,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             suggestedVideos={suggestedVideos}
           />
         </div>
-      )}
+      )*/}
     </div>
   );
 };

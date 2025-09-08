@@ -1,13 +1,14 @@
 import { buildVideoLearningRoute } from "@/routes/constants";
 import { useNavigate } from "react-router-dom";
 import { useVideoProgress } from "../../hooks/useVideoProgress";
+import { History, RefreshCcw } from "lucide-react";
 
 // --- Type Definitions ---
 
 // --- Main Page Component ---
 const HistoryPage = () => {
   const navigate = useNavigate();
-  
+
   // Use video progress hook
   const {
     isLoading,
@@ -15,27 +16,27 @@ const HistoryPage = () => {
     refreshProgress,
     getWatchedVideos,
     formatDuration,
-    formatLastUpdated
+    formatLastUpdated,
   } = useVideoProgress();
 
   // Get all watched videos (including completed ones)
   const allWatchedVideos = getWatchedVideos();
 
   return (
-    <div className="min-h-screen p-10 font-sans text-foreground bg-background mt-10 sm:mt-4">
+    <div className="min-h-screen p-4 sm:p-8 font-sans text-foreground bg-background pt-16 sm:pt-12">
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-center sm:text-left text-3xl">
-          Your Learning History
+        <h1 className="text-left text-3xl">
+          <span className="hidden sm:inline">Your Learning </span>
+          History
         </h1>
+
         <button
           onClick={refreshProgress}
           disabled={isLoading}
-          className="flex items-center gap-2 px-4 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-card rounded-lg border border-border"
+          className="flex items-center gap-2 p-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-card rounded-lg border border-border"
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Refresh
+          <RefreshCcw />
+          <span className="hidden sm:inline">Refresh </span>
         </button>
       </div>
 
@@ -73,18 +74,23 @@ const HistoryPage = () => {
                     const target = e.target as HTMLImageElement;
                     target.onerror = null;
                     // Try different YouTube thumbnail formats
-                    if (target.src.includes('hqdefault.jpg')) {
+                    if (target.src.includes("hqdefault.jpg")) {
                       target.src = `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`;
-                    } else if (target.src.includes('mqdefault.jpg')) {
+                    } else if (target.src.includes("mqdefault.jpg")) {
                       target.src = `https://img.youtube.com/vi/${video.videoId}/default.jpg`;
                     } else {
-                      target.src = "https://placehold.co/600x400/333/FFF?text=No+Thumbnail";
+                      target.src =
+                        "https://placehold.co/600x400/333/FFF?text=No+Thumbnail";
                     }
                   }}
                 />
                 <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                  <svg className="h-12 w-12 text-white group-hover:scale-110 transition-all duration-300" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z"/>
+                  <svg
+                    className="h-12 w-12 text-white group-hover:scale-110 transition-all duration-300"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M8 5v14l11-7z" />
                   </svg>
                 </div>
                 <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs font-medium">
@@ -127,30 +133,50 @@ const HistoryPage = () => {
                 </div>
                 {video.watchPercentage >= 100 && (
                   <div className="mt-2 flex items-center text-green-400 text-xs">
-                    <svg className="h-4 w-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="h-4 w-4 mr-1"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                     Completed
                   </div>
                 )}
               </div>
               <div className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
                 </svg>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-muted-foreground">
-          <svg className="h-16 w-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <p className="text-xl font-medium mb-2">No learning history yet</p>
-          <p className="text-sm mb-6">Start watching videos to build your learning history</p>
+        <div className="flex flex-col items-center justify-center text-center h-full flex-grow pt-16">
+          <History className="h-16 w-16 mx-auto mb-4 opacity-50" />
+          <p className="text-xl font-medium mb-2">No Learning History Yet</p>
+          <p className="text-muted-foreground max-w-xs mb-8">
+            Start watching videos to build your learning history
+          </p>
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate("/")}
             className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
           >
             Start Learning
