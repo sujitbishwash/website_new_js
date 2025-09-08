@@ -2,8 +2,8 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  // baseURL: 'https://api.krishak.in',
+  // baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  baseURL: 'https://api.krishak.in',
   headers: {
     "Content-Type": "application/json",
   },
@@ -259,8 +259,8 @@ export const examGoalApi = {
       "POST",
       "/exam-goal/add",
       {
-        exam: groupType,
-        group_type: exam,
+        exam: exam,
+        group_type: groupType,
       }
     );
   },
