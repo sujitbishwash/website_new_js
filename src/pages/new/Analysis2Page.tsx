@@ -27,6 +27,7 @@ import { quizApi } from "@/lib/api-client";
 import { theme } from "@/styles/theme";
 import ShareModal from "@/components/modals/ShareModal";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import RankBadge from "@/components/stats/RankBadge";
 
 interface LearningPlanStep {
   title: string;
@@ -1429,17 +1430,17 @@ const Leaderboard = () => {
   const getBadgeClasses = (rank) => {
     switch (rank) {
       case 1: // Gold
-        return "bg-gradient-to-b from-yellow-300 via-yellow-500 to-amber-500 text-yellow-900 font-bold ring-2 ring-inset ring-yellow-600/50 shadow-lg shadow-yellow-500/30";
+        return "#FFD60A";
       case 2: // Silver
-        return "bg-gradient-to-b from-slate-100 via-slate-300 to-gray-400 text-slate-800 font-bold ring-2 ring-inset ring-gray-400/50 shadow-lg shadow-slate-400/30";
+        return "#C0C0C0";
       case 3: // Bronze
-        return "bg-gradient-to-b from-orange-400 via-amber-600 to-orange-700 text-amber-900 font-bold ring-2 ring-inset ring-amber-600/50 shadow-lg shadow-amber-600/30";
+        return "#CD7F32";
       default:
         if (rank >= 4 && rank <= 10) {
           // Iron
-          return "bg-gradient-to-b from-slate-600 via-slate-700 to-slate-800 text-slate-200 ring-2 ring-inset ring-slate-500/50 shadow-lg shadow-slate-700/30";
+          return "#43464B";
         }
-        return "bg-[#3a3a3c] text-gray-200"; // Default
+        return "#5A5A5A"; // Default
     }
   };
 
@@ -1447,16 +1448,11 @@ const Leaderboard = () => {
   const UserRow = ({ user }: { user: any }) => (
     <div
       key={user.rank}
-      className="flex items-center justify-between text-lg py-2 px-3 rounded-lg hover:bg-accent transition-colors duration-200"
+      className="flex items-center justify-between text-lg  rounded-lg hover:bg-accent transition-colors duration-200"
     >
       <div className="flex items-center space-x-3">
-        <span
-          className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-base flex-shrink-0 transition-all duration-300 ${getBadgeClasses(
-            user.rank
-          )}`}
-        >
-          {user.rank}
-        </span>
+        
+          <RankBadge color={getBadgeClasses(user.rank)} number={user.rank}/>
         <div className="font-semibold text-foreground flex items-center">
           {user.name}
           {user.rank === 1 && (
@@ -1502,9 +1498,7 @@ const Leaderboard = () => {
         {/* Current User Row */}
         <div className="flex items-center justify-between text-sm p-3 rounded-lg bg-accent border border-primary/50">
           <div className="flex items-center space-x-3">
-            <span className="w-9 h-9 rounded-full bg-border-high text-white flex items-center justify-center font-bold text-base flex-shrink-0 bg-gradient-to-b from-slate-600 via-slate-700 to-slate-800ring-2 ring-inset ring-slate-500/50 shadow-lg shadow-slate-700/30">
-              {userPerformance.overall.rank}
-            </span>
+            <RankBadge color={getBadgeClasses(userPerformance.overall.rank)} number={userPerformance.overall.rank}/>
             <div className="font-semibold text-gray-100 flex items-center space-x-2">
               <p className="font-bold text-lg text-foreground">
                 {currentUser.name}
