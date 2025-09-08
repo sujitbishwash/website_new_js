@@ -71,6 +71,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     exam: string;
     group: string;
   } | null>(null);
+  const [loadingVideoId, setLoadingVideoId] = useState<string | null>(null);
 
   const { getUserData } = useAuth();
   // Effect to handle clicks outside the modal

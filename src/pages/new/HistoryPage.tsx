@@ -1,14 +1,15 @@
 import { buildVideoLearningRoute } from "@/routes/constants";
 import { useNavigate } from "react-router-dom";
 import { useVideoProgress } from "../../hooks/useVideoProgress";
-import { useState } from "react";
 import { History, RefreshCcw } from "lucide-react";
+import { useState } from "react";
 
 // --- Type Definitions ---
 
 // --- Main Page Component ---
 const HistoryPage = () => {
   const navigate = useNavigate();
+  const [loadingVideoId, setLoadingVideoId] = useState<string | null>(null);
   // Use video progress hook
   const {
     isLoading,
