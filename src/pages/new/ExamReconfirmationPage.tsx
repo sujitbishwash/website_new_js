@@ -178,13 +178,13 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
         {/* The student info section has been removed as requested. */}
       </div>
       {/* Footer Buttons */}
-      <footer className="flex-shrink-0 p-6 border-t border-border space-y-4">
+      <footer className="flex-shrink-0 p-2 sm:p-6 border-t border-border space-y-4">
         {/* Language Note */}
-        <div className="text-destructive">
+        <div className="text-destructive hidden sm:block">
           <p>{examDetails.languageNote}</p>
         </div>
         {/* Confirmation Checkbox */}
-        <div className="flex items-start space-x-4 mb-8">
+        <div className="flex items-start space-x-4 mb-4">
           <input
             type="checkbox"
             id="confirmation"

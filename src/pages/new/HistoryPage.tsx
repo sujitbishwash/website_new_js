@@ -36,9 +36,9 @@ const HistoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-8 font-sans text-foreground bg-background pt-16 sm:pt-12">
+    <div className="min-h-screen p-4 sm:p-8 text-foreground bg-background pt-16 sm:pt-12">
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-left text-3xl">
+        <h1 className="text-left text-3xl font-semibold">
           <span className="hidden sm:inline">Your Learning </span>
           History
         </h1>
@@ -46,15 +46,15 @@ const HistoryPage = () => {
         <button
           onClick={refreshProgress}
           disabled={isLoading}
-          className="flex items-center gap-2 p-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer bg-card rounded-lg border border-border"
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary bg-foreground/10 border border-primary/20 rounded-full hover:bg-foreground/20 disabled:opacity-50 disabled:cursor-wait transition-colors cursor-pointer"
         >
-          <RefreshCcw />
+          <RefreshCcw  className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           <span className="hidden sm:inline">Refresh </span>
         </button>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center pt-32">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <span className="ml-3 text-muted-foreground text-lg">
             Loading your learning history...
@@ -190,10 +190,10 @@ const HistoryPage = () => {
         </div>
       ) : (
         <div className="flex flex-col items-center justify-center text-center h-full flex-grow pt-16">
-          <History className="h-16 w-16 mx-auto mb-4 opacity-50" />
+          <History className="h-20 w-20 mx-auto mb-6 text-border" />
           <p className="text-xl font-medium mb-2">No Learning History Yet</p>
           <p className="text-muted-foreground max-w-xs mb-8">
-            Start watching videos to build your learning history
+            Start watching videos to build history.
           </p>
           <button
             onClick={() => navigate("/")}

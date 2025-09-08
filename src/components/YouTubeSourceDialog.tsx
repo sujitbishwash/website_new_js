@@ -421,7 +421,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             </div>
           </div>
           {/* Footer */}
-          <div className="mt-8 flex justify-end space-x-4">
+          <div className="p-4 flex justify-end space-x-4">
             <button
               onClick={navigateToHome}
               className={`rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer`}
@@ -431,10 +431,10 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             <button
               onClick={handleAdd}
               disabled={!url.trim() || isLoading}
-              className={`rounded-lg bg-border-medium px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border-medium focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer disabled:bg-border-border disabled:cursor-not-allowed flex items-center gap-2 ${
+              className={`rounded-lg bg-border-medium px-5 py-2.5 text-sm font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer disabled:bg-border-border disabled:cursor-not-allowed flex items-center gap-2 ${
                 !url.trim() || isLoading
                   ? "bg-border-border cursor-not-allowed"
-                  : "bg-primary"
+                  : "bg-primary hover:bg-primary/80"
               }`}
             >
               {isLoading && (

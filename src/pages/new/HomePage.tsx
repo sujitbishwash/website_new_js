@@ -10,14 +10,13 @@ import {
   Clipboard,
   ClipboardList,
   FileUp,
-  RefreshCcw
+  RefreshCcw,
 } from "lucide-react";
 
 // --- Type Definitions ---
 interface IconProps {
   className?: string;
 }
-
 
 interface Topic {
   id: string;
@@ -102,8 +101,6 @@ const XCircleIcon: React.FC<IconProps> = ({ className }) => (
     />
   </svg>
 );
-
-
 
 const CodeBracketIcon: React.FC<IconProps> = ({ className }) => (
   <svg
@@ -222,7 +219,6 @@ const BrainIcon: React.FC<IconProps> = ({ className }) => (
   </svg>
 );
 
-
 // --- MOCK DATA ---
 
 const initialTopics: Topic[] = [
@@ -329,7 +325,7 @@ export default function HomePage() {
     refreshProgress,
     getWatchedVideos,
     formatDuration,
-    formatLastUpdated
+    formatLastUpdated,
   } = useVideoProgress();
 
   // Fetch suggested videos when component mounts
@@ -370,7 +366,7 @@ export default function HomePage() {
       navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
       console.error("Failed to fetch video details:", err);
-      
+
       // Check if it's an out-of-syllabus error
       if (err.isOutOfSyllabus || err.status === 204) {
         console.log("Content is out of syllabus, redirecting to dashboard");
@@ -394,7 +390,6 @@ export default function HomePage() {
   };
   return (
     <div className="min-h-full bg-background text-foreground font-sans mt-6 sm:p-6">
-      
       <div className="container mx-auto sm:px-6 lg:px-8 py-12 max-w-5xl">
         {/* Header Card */}
         <div className="bg-card rounded-xl p-6 mb-10 shadow-2xl border border-border">
@@ -408,7 +403,9 @@ export default function HomePage() {
             <div className="group flex items-center space-x-4 p-4 bg-card/80 rounded-lg transition-all duration-300 cursor-not-allowed border border-border">
               <FileUp className="h-8 w-8 text-gray transition-transform text-muted-foreground" />
               <div>
-                <h2 className="font-semibold text-muted-foreground">Upload File</h2>
+                <h2 className="font-semibold text-muted-foreground">
+                  Upload File
+                </h2>
                 <p className="text-xs text-muted-foreground">PDF, DOC, TXT</p>
               </div>
             </div>
@@ -458,7 +455,6 @@ export default function HomePage() {
               className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               <RefreshCcw className="w-4 h-4" />
-
               Refresh
             </button>
           </div>
@@ -467,7 +463,9 @@ export default function HomePage() {
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               <span className="ml-2 text-muted-foreground">
-                {suggestedVideos.length > 0 ? "Loading video details..." : "Loading videos..."}
+                {suggestedVideos.length > 0
+                  ? "Loading video details..."
+                  : "Loading videos..."}
               </span>
             </div>
           ) : videosError ? (
@@ -518,7 +516,7 @@ export default function HomePage() {
 
         {/* Recommended Reading Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
-          <h2 className="text-2xl font-bold text-foreground mb-5">
+          <h2 className="text-md sm:text-2xl font-bold text-foreground mb-5">
             Recommended Reading
           </h2>
           <div className="space-y-4">
@@ -546,7 +544,7 @@ export default function HomePage() {
 
         {/* Recommended Tests Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
-          <h2 className="text-2xl font-bold text-foreground mb-5">
+          <h2 className="text-md sm:text-2xl font-bold text-foreground mb-5">
             Recommended Tests
           </h2>
           <div className="space-y-4">
@@ -578,7 +576,7 @@ export default function HomePage() {
         {/* Continue Learning Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
           <div className="flex justify-between items-center mb-5">
-            <h2 className="text-2xl font-bold text-foreground">
+            <h2 className="text-md sm:text-2xl font-bold text-foreground">
               Continue Learning
             </h2>
             <button
@@ -610,90 +608,101 @@ export default function HomePage() {
             </div>
           ) : getWatchedVideos().length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
-              {getWatchedVideos().slice(0, 4).map((video) => (
-                <div
-                  key={video.videoId}
-                  onClick={() => handleContinueLearningVideoClick(video.videoId)}
-                  className={`group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1 ${
-                    loadingVideoId === video.videoId ? 'opacity-50 pointer-events-none' : ''
-                  }`}
-                >
-                  <div className="relative">
-                    <img
-                      src={video.thumbnailUrl}
-                      alt={`Thumbnail for ${video.title}`}
-                      className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.onerror = null;
-                        // Try different YouTube thumbnail formats
-                        if (target.src.includes('hqdefault.jpg')) {
-                          target.src = `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`;
-                        } else if (target.src.includes('mqdefault.jpg')) {
-                          target.src = `https://img.youtube.com/vi/${video.videoId}/default.jpg`;
-                        } else {
-                          target.src = "https://placehold.co/600x400/333/FFF?text=No+Thumbnail";
-                        }
-                      }}
-                    />
-                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                      <CirclePlay className="h-12 w-12 text-white group-hover:scale-110 transition-all duration-300" />
+              {getWatchedVideos()
+                .slice(0, 4)
+                .map((video) => (
+                  <div
+                    key={video.videoId}
+                    onClick={() =>
+                      handleContinueLearningVideoClick(video.videoId)
+                    }
+                    className={`group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1 ${
+                      loadingVideoId === video.videoId
+                        ? "opacity-50 pointer-events-none"
+                        : ""
+                    }`}
+                  >
+                    <div className="relative">
+                      <img
+                        src={video.thumbnailUrl}
+                        alt={`Thumbnail for ${video.title}`}
+                        className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.onerror = null;
+                          // Try different YouTube thumbnail formats
+                          if (target.src.includes("hqdefault.jpg")) {
+                            target.src = `https://img.youtube.com/vi/${video.videoId}/mqdefault.jpg`;
+                          } else if (target.src.includes("mqdefault.jpg")) {
+                            target.src = `https://img.youtube.com/vi/${video.videoId}/default.jpg`;
+                          } else {
+                            target.src =
+                              "https://placehold.co/600x400/333/FFF?text=No+Thumbnail";
+                          }
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
+                        <CirclePlay className="h-12 w-12 text-white group-hover:scale-110 transition-all duration-300" />
+                      </div>
+                      <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs font-medium">
+                        {formatDuration(video.totalDuration)}
+                      </div>
                     </div>
-                    <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs font-medium">
-                      {formatDuration(video.totalDuration)}
+                    <div className="p-4">
+                      <h3 className="font-bold text-foreground truncate text-lg mb-2">
+                        {video.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {video.tags?.[0] || video.subject}
+                      </p>
+                      {video.topics && video.topics.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-3">
+                          {video.topics.slice(0, 2).map((topic, index) => (
+                            <span
+                              key={index}
+                              className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full"
+                            >
+                              {topic}
+                            </span>
+                          ))}
+                          {video.topics.length > 2 && (
+                            <span className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded-full">
+                              +{video.topics.length - 2} more
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className="w-full bg-muted rounded-full h-2.5 mb-2">
+                        <div
+                          className="bg-primary h-2.5 rounded-full transition-all duration-300"
+                          style={{
+                            width: `${Math.round(video.watchPercentage)}%`,
+                          }}
+                        ></div>
+                      </div>
+                      <div className="flex justify-between items-center text-xs text-muted-foreground">
+                        <span>
+                          {Math.round(video.watchPercentage)}% Complete
+                        </span>
+                        <span>{formatLastUpdated(video.lastUpdated)}</span>
+                      </div>
+                      {video.watchPercentage >= 100 && (
+                        <div className="mt-2 flex items-center text-green-400 text-xs">
+                          <CheckCircleIcon className="h-4 w-4 mr-1" />
+                          Completed
+                        </div>
+                      )}
                     </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-foreground truncate text-lg mb-2">
-                      {video.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {video.tags?.[0] || video.subject}
-                    </p>
-                    {video.topics && video.topics.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mb-3">
-                        {video.topics.slice(0, 2).map((topic, index) => (
-                          <span
-                            key={index}
-                            className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full"
-                          >
-                            {topic}
-                          </span>
-                        ))}
-                        {video.topics.length > 2 && (
-                          <span className="px-2 py-1 text-xs bg-muted text-muted-foreground rounded-full">
-                            +{video.topics.length - 2} more
-                          </span>
-                        )}
+                    <div className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                      <CirclePlay className="h-4 w-4" />
+                    </div>
+                    {loadingVideoId === video.videoId && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
                       </div>
                     )}
-                    <div className="w-full bg-muted rounded-full h-2.5 mb-2">
-                      <div
-                        className="bg-primary h-2.5 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.round(video.watchPercentage)}%` }}
-                      ></div>
-                    </div>
-                    <div className="flex justify-between items-center text-xs text-muted-foreground">
-                      <span>{Math.round(video.watchPercentage)}% Complete</span>
-                      <span>{formatLastUpdated(video.lastUpdated)}</span>
-                    </div>
-                    {video.watchPercentage >= 100 && (
-                      <div className="mt-2 flex items-center text-green-400 text-xs">
-                        <CheckCircleIcon className="h-4 w-4 mr-1" />
-                        Completed
-                      </div>
-                    )}
                   </div>
-                  <div className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
-                    <CirclePlay className="h-4 w-4" />
-                  </div>
-                  {loadingVideoId === video.videoId && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                    </div>
-                  )}
-                </div>
-              ))}
+                ))}
             </div>
           ) : (
             <div className="text-center py-8 text-muted-foreground">
@@ -706,14 +715,16 @@ export default function HomePage() {
 
         {/* Attempted Tests Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
-          <h2 className="text-2xl font-bold text-foreground mb-5 flex justify-between items-center">
+          <h2 className="text-md sm:text-2xl font-bold text-foreground mb-5 flex justify-between items-center">
             <span>Attempted Tests</span>
-            <a
-              href="#"
-              className="text-sm font-medium text-primary hover:opacity-80 transition-colors"
+            <span
+              onClick={() => {
+                navigate(ROUTES.ATTEMPTED_TESTS);
+              }}
+              className="text-sm font-medium text-primary hover:opacity-80 transition-colors cursor-pointer"
             >
               View all
-            </a>
+            </span>
           </h2>
           <div className="space-y-4">
             {attemptedTests.map((test) => (
@@ -723,8 +734,9 @@ export default function HomePage() {
               >
                 <div className="flex-shrink-0 text-center w-24">
                   <p
-                    className={`text-4xl font-bold ${test.score >= 80 ? "text-green-400" : "text-yellow-400"
-                      }`}
+                    className={`text-4xl font-bold ${
+                      test.score >= 80 ? "text-green-400" : "text-yellow-400"
+                    }`}
                   >
                     {test.score}%
                   </p>
@@ -769,7 +781,7 @@ export default function HomePage() {
 
         {/* Explore Topics Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 shadow-2xl border border-border">
-          <h2 className="text-2xl font-bold text-foreground mb-5">
+          <h2 className="text-md sm:text-2xl font-bold text-foreground mb-5">
             Explore Topics
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">

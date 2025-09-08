@@ -109,7 +109,7 @@ export default function ExamInformationPage() {
       </main>
 
       {/* Footer with Navigation Buttons - This part will not scroll */}
-      <footer className="flex-shrink-0 flex justify-between items-center p-6 border-t border-border">
+      <footer className="flex-shrink-0 flex justify-between items-center p-2 sm:p-6 border-t border-border gap-2">
         <button
           onClick={() =>
             navigate(ROUTES.TEST_SERIES, {
@@ -118,7 +118,7 @@ export default function ExamInformationPage() {
               },
             })
           }
-          className="px-6 py-2 font-semibold text-white bg-border-high hover:bg-border-medium rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-border-medium"
+          className="w-full sm:w-auto px-6 py-2 font-semibold text-white bg-border-high hover:bg-border-medium rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-border-medium"
         >
           Back
         </button>
@@ -128,7 +128,7 @@ export default function ExamInformationPage() {
               state: { testConfig: testConfig },
             })
           }
-          className="px-8 py-2 font-bold text-white bg-primary hover:bg-primary/80 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary"
+          className="w-full sm:w-auto px-6 py-2 font-bold text-white bg-primary hover:bg-primary/80 rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-primary"
         >
           Next
         </button>
