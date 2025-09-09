@@ -7,7 +7,7 @@ const AuthCallbackPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
-  const { checkUserState, checkAuth, refreshUserData } = useAuth();
+  const { login, checkUserState } = useAuth();
   const hasRunRef = useRef(false);
 
   useEffect(() => {
@@ -42,39 +42,27 @@ const AuthCallbackPage: React.FC = () => {
           return;
         }
 
-        // Update AuthContext state
-        console.log("🔄 Updating AuthContext state...");
-        await checkAuth();
-
-        // Small delay to ensure token is properly stored
-        await new Promise((resolve) => setTimeout(resolve, 100));
-
-        try {
-          // Force refresh user data to ensure we have the latest data
-          console.log("🔄 Force refreshing user data...");
-          await refreshUserData();
-
-          // Use the stored user data from AuthContext to determine where to navigate
-          console.log("🔍 About to call checkUserState...");
-          const userState = await checkUserState();
-          console.log("User state:", userState);
-
-          // Navigate based on user state
-          if (userState.nextStep === "dashboard") {
-            console.log("User has exam goal, redirecting to dashboard");
-            navigate(ROUTES.DASHBOARD, { replace: true });
-          } else if (userState.nextStep === "exam-goal") {
-            console.log("Redirecting to exam goal page");
-            navigate(ROUTES.EXAM_GOAL, { replace: true });
-          } else {
-            console.log("Redirecting to personal details page");
-            navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
-          }
-        } catch (error) {
-          console.error("Error checking user state:", error);
-          // Fallback to personal details page if API fails
+        // Use AuthContext login function to properly set the authentication state
+        console.log("🔑 Using AuthContext login function to set authentication state");
+        await login(tokenFromQuery);
+        
+        // Now check user state to determine proper redirect destination
+        console.log("🔍 Checking user state to determine redirect destination...");
+        const userState = await checkUserState();
+        console.log("👤 User state:", userState);
+        
+        // Navigate based on user state
+        if (userState.nextStep === "dashboard") {
+          console.log("✅ User has complete profile, redirecting to dashboard");
+          navigate(ROUTES.HOME, { replace: true });
+        } else if (userState.nextStep === "exam-goal") {
+          console.log("🎯 User needs exam goal, redirecting to exam goal page");
+          navigate(ROUTES.EXAM_GOAL, { replace: true });
+        } else {
+          console.log("📝 User needs personal details, redirecting to personal details page");
           navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
+        return;
       } catch (error) {
         console.error("Auth callback error:", error);
         setError("An unexpected error occurred.");

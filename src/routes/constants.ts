@@ -2,7 +2,6 @@
 export const ROUTES = {
     // Main routes
     HOME: "/",
-    DASHBOARD: "/home",
     SPLASH: "/splash",
 
     // Test related routes
@@ -50,7 +49,6 @@ export const ROUTES = {
 // Route names for navigation
 export const ROUTE_NAMES = {
     [ROUTES.HOME]: "Home",
-    [ROUTES.DASHBOARD]: "Home",
     [ROUTES.SPLASH]: "Welcome",
     [ROUTES.TEST_SERIES]: "Test Series",
     [ROUTES.EXAM_INFO]: "Exam Information",
