@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROUTES } from "../../routes/constants";
@@ -8,8 +8,16 @@ const AuthCallbackPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const { checkUserState, checkAuth, refreshUserData } = useAuth();
+  const hasRunRef = useRef(false);
 
   useEffect(() => {
+    // Prevent multiple executions
+    if (hasRunRef.current) {
+      console.log("⏭️ AuthCallbackPage: effect already executed, skipping");
+      return;
+    }
+    hasRunRef.current = true;
+
     const handleAuthCallback = async () => {
       try {
         // Check for token in query parameters first
@@ -77,7 +85,7 @@ const AuthCallbackPage: React.FC = () => {
     };
 
     handleAuthCallback();
-  }, [navigate, searchParams, checkAuth, refreshUserData, checkUserState]);
+  }, [navigate, searchParams]); // Removed function dependencies to prevent re-runs
 
   return (
     <div

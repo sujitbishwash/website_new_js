@@ -162,7 +162,10 @@ export const authApi = {
   googleLogin: async () => {
     // For OAuth flows, we need to redirect the entire page, not make an AJAX request
     // This avoids CORS issues with Google's OAuth endpoint
-    const redirectUrl = `${API_CONFIG.baseURL}/ums/auth/login`;
+    // Determine environment for backend routing (Vite)
+    const mode: string = import.meta.env.MODE;
+    const envParam = mode === 'production' ? 'prod' : 'dev';
+    const redirectUrl = `${API_CONFIG.baseURL}/ums/auth/login?env=${envParam}`;
     window.location.href = redirectUrl;
 
     // Return a promise that resolves immediately since we're redirecting
