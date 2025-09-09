@@ -260,7 +260,7 @@ export default function ExamConfigurationModal({
       setUpdateError("");
       setUpdateMessage("");
 
-      console.log("🚀 ExamConfigurationModal: Updating exam goal:", {
+      console.log("🚀 ExamConfigurationModal: Updating exam goal:.....................s", {
         exam: selectedExamType,
         groupType: selectedGroupType,
       });

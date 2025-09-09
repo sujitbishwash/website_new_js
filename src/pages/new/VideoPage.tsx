@@ -10,13 +10,9 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import { theme } from "@/styles/theme";
   import {
     BookOpen,
-    Clipboard,
     Ellipsis,
     Eye,
     EyeOff,
-    Facebook,
-    Instagram,
-    Linkedin,
     MessageCircle,
     MessageCircleQuestion,
     StickyNote,
@@ -30,6 +26,7 @@ import { useLocation, useNavigate, useParams, useBlocker } from "react-router-do
 import { chatApi, videoApi, VideoDetail, videoProgressApi } from "../../lib/api-client";
 import YouTube from "react-youtube";
 import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
+import ShareModal from "@/components/modals/ShareModal";
   
   declare global {
     interface Window {
@@ -384,82 +381,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
     );
   };
   
-  const ShareModal: React.FC<{
-    isOpen: boolean;
-    onClose: () => void;
-    url: string;
-  }> = ({ isOpen, onClose, url }) => {
-  
-    if (!isOpen) return null;
-  
-    const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
-      if (e.target === e.currentTarget) {
-        onClose();
-      }
-    };
-  
-    const copyToClipboard = () => {
-      navigator.clipboard.writeText(url).then(
-        () => {
-          // Copy successful
-        },
-        () => {
-          // Copy failed
-        }
-      );
-    };
-  
-    return (
-      <div
-        className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4"
-        onClick={handleBackdropClick}
-      >
-        <div className="relative bg-card rounded-xl shadow-lg p-6 w-full max-w-md m-4 border border-border">
-          <div className=" flex justify-between items-center mb-4">
-            <h2 className="text-xl font-bold">Share Public Link</h2>
-  
-            <button
-              onClick={onClose}
-              className="absolute top-3 right-3 p-2 text-foreground rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
-            >
-              <X />
-            </button>
-          </div>
-          <div className="space-y-4">
-            <div className="flex items-center space-x-2 bg-background border border-border rounded-lg p-2">
-              <input
-                type="text"
-                readOnly
-                value={url}
-                className="flex-1 bg-transparent text-muted-foreground focus:outline-none"
-              />
-              <button
-                onClick={copyToClipboard}
-                className="flex items-center gap-2 bg-primary p-2 rounded-md text-sm font-semibold hover:bg-primary/70"
-              >
-                <Clipboard className="text-white" />
-              </button>
-            </div>
-            <div className="text-center text-muted-foreground text-sm">
-              Or share on social media
-            </div>
-            <div className="flex justify-center gap-4">
-              {/* Add your social media icons here */}
-              <button className="p-3 border border-border rounded-full hover:bg-blue-300 cursor-pointer">
-                <Facebook className="w-6 h-6 text-foreground" />
-              </button>
-              <button className="p-3 border border-border rounded-full hover:bg-blue-200 cursor-pointer">
-                <Linkedin className="w-6 h-6 text-foreground" />
-              </button>
-              <button className="p-3 border border-border rounded-full hover:bg-pink-200 cursor-pointer">
-                <Instagram className="w-6 h-6 text-foreground" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  };
+
   
   // --- Main App Component ---
   const VideoPage: React.FC = () => {
@@ -1097,25 +1019,48 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
   
     const handleSendMessage = useCallback(
       async (message: string) => {
-        if (!message.trim() || !currentVideoId) return;
+        console.log("🚀 handleSendMessage called with:", message);
+        console.log("🚀 currentVideoId:", currentVideoId);
+        
+        if (!message.trim() || !currentVideoId) {
+          console.log("❌ Early return - empty message or no videoId");
+          return;
+        }
   
         // Add user message immediately
         const userMessage = { text: message, isUser: true };
-        setChatMessages((prev) => [...prev, userMessage]);
+        console.log("📝 Adding user message:", userMessage);
+        setChatMessages((prev) => {
+          const newMessages = [...prev, userMessage];
+          console.log("📝 Updated chat messages:", newMessages);
+          return newMessages;
+        });
   
         setIsChatLoading(true);
         setChatError(null);
+        console.log("⏳ Set loading to true, calling API...");
   
         try {
           const response = await chatApi.sendMessage(currentVideoId, message);
+          console.log("✅ API response received:", response);
           const assistantMessage = { text: response.content, isUser: false };
-          setChatMessages((prev) => [...prev, assistantMessage]);
+          console.log("🤖 Adding assistant message:", assistantMessage);
+          setChatMessages((prev) => {
+            const newMessages = [...prev, assistantMessage];
+            console.log("🤖 Final chat messages:", newMessages);
+            return newMessages;
+          });
         } catch (err) {
-          console.error("Failed to send message:", err);
+          console.error("❌ Failed to send message:", err);
           setChatError("Failed to send message. Please try again.");
           // Remove the user message if sending failed
-          setChatMessages((prev) => prev.slice(0, -1));
+          setChatMessages((prev) => {
+            const newMessages = prev.slice(0, -1);
+            console.log("🔄 Removed user message after error:", newMessages);
+            return newMessages;
+          });
         } finally {
+          console.log("🏁 Set loading to false");
           setIsChatLoading(false);
         }
       },
@@ -1146,6 +1091,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
       console.log("🔄 Creating components for videoId:", currentVideoId);
       console.log("🔄 VideoDetail in components:", videoDetail);
       console.log("🔄 VideoDetail topics in components:", videoDetail?.topics);
+      console.log("🔄 Chat messages in components:", chatMessages.length);
       
       return {
         chat: (
@@ -1192,7 +1138,18 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
           />
         ),
       };
-    }, [currentVideoId, videoDetail]); // Depend on both currentVideoId and videoDetail
+    }, [
+      currentVideoId, 
+      videoDetail, 
+      chatMessages, 
+      isChatLoading, 
+      chatError, 
+      isLeftColumnVisible,
+      chatFeedbackState,
+      chatMarkAsSubmitted,
+      quizFeedbackState,
+      quizMarkAsSubmitted
+    ]); // Include all dependencies that affect component rendering
   
     const handleShare = useCallback(() => {
       setIsShareModalOpen(true);
@@ -1463,7 +1420,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
               // Only close if clicking on the backdrop, not on the modal content
               if (e.target === e.currentTarget) {
                 setShowOutOfSyllabus(false);
-                navigateWithProgress(ROUTES.DASHBOARD);
+                navigateWithProgress(ROUTES.HOME);
               }
             }}
           >
@@ -1471,7 +1428,7 @@ import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
               onGoBack={() => {
                 console.log("Closing OutOfSyllabus modal");
                 setShowOutOfSyllabus(false);
-                navigateWithProgress(ROUTES.DASHBOARD);
+                navigateWithProgress(ROUTES.HOME);
               }}
             />
           </div>

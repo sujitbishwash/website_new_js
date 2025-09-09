@@ -17,7 +17,6 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import OnboardingRoute from "../components/OnboardingRoute";
 import RootLayout from "../components/RootLayout";
 
-import DetailedAnalysisPage from "../pages/new/DetailedAnalysisPage";
 import ExamInformationPage from "../pages/new/ExamInformationPage";
 import ExamReconfirmationPage from "../pages/new/ExamReconfirmationPage";
 import HistoryPage from "../pages/new/HistoryPage";
@@ -30,6 +29,7 @@ import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
 import Stats  from "../pages/new/Stats";
 import VideoPage from "@/pages/new/VideoPage";
+import TestAnalysis2 from "@/pages/new/Analysis2Page";
 
 // Route configuration object for easy maintenance
 export const routes = [
@@ -90,8 +90,15 @@ export const routes = [
           },
           {
             path: "analysis",
-            element: <DetailedAnalysisPage />,
+            element: <TestAnalysis2 />,
             name: "Detailed Analysis",
+            description: "View detailed test analysis and results",
+          },
+          
+          {
+            path: "analysis2",
+            element: <TestAnalysis2 />,
+            name: "Detailed Analysis2",
             description: "View detailed test analysis and results",
           },
           {

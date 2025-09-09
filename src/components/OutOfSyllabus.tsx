@@ -169,7 +169,7 @@ const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack, suggestedVideos
   };
 const navigateToHome = () => {
     handleClose();
-    navigate(ROUTES.DASHBOARD);
+    navigate(ROUTES.HOME);
   };
   if (!isVisible) {
     return null; // Don't render anything if the box is closed
