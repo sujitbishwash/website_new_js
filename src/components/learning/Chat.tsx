@@ -36,6 +36,22 @@ interface ChatProps {
 
 // --- Components ---
 
+// Typing indicator component with animated dots
+const TypingIndicator: React.FC = () => (
+  <div className="flex justify-center mb-6">
+    <div className="px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 text-foreground rounded-bl-none border border-blue-600/30 backdrop-blur-sm">
+      <div className="flex items-center space-x-3">
+        <div className="flex items-center space-x-1">
+          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms', animationDuration: '1.4s' }}></div>
+          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '200ms', animationDuration: '1.4s' }}></div>
+          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '400ms', animationDuration: '1.4s' }}></div>
+        </div>
+        <span className="text-sm text-blue-200 font-medium">AI is thinking...</span>
+      </div>
+    </div>
+  </div>
+);
+
 const ChatHeader: React.FC = () => (
   <div className="text-center p-6 md:p-8">
     <div className="inline-block p-6 bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-full mb-6 border border-blue-600/30 shadow-lg backdrop-blur-sm">
@@ -119,17 +135,18 @@ const Message: React.FC<MessageType> = ({ text, isUser }) => {
   );
 };
 
-const MessageList: React.FC<{ messages: MessageType[] }> = ({ messages }) => {
+const MessageList: React.FC<{ messages: MessageType[]; isLoading: boolean }> = ({ messages, isLoading }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   console.log("📋 MessageList rendered with messages:", messages.length);
   console.log("📋 MessageList messages:", messages);
+  console.log("📋 MessageList isLoading:", isLoading);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  useEffect(scrollToBottom, [messages]);
+  useEffect(scrollToBottom, [messages, isLoading]);
 
   return (
     <div className="flex-1 overflow-y-auto space-y-2 pr-2 py-4">
@@ -139,6 +156,7 @@ const MessageList: React.FC<{ messages: MessageType[] }> = ({ messages }) => {
           <Message key={index} text={msg.text} isUser={msg.isUser} />
         );
       })}
+      {isLoading && <TypingIndicator />}
       <div ref={messagesEndRef} />
     </div>
   );
@@ -416,16 +434,19 @@ const ChatInput: React.FC<{
       <div
         className={`bg-card border border-border rounded-2xl p-2 flex flex-col ${
           isLeftColumnVisible ? "w-full" : "sm:w-[50vw]"
-        }`}
+        } ${isLoading ? 'animate-pulse border-blue-400/50' : ''}`}
       >
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="Ask a question..."
+          placeholder={isLoading ? "AI is thinking..." : "Ask a question..."}
           rows={1}
           style={{ minHeight: "40px", maxHeight: "200px" }}
-          className="w-full bg-gray text-foreground placeholder-gray-400 focus:outline-none p-2 sm:pl-4 sm:pr-4 text-sm sm:text-base min-w-0"
+          disabled={isLoading}
+          className={`w-full bg-gray text-foreground placeholder-gray-400 focus:outline-none p-2 sm:pl-4 sm:pr-4 text-sm sm:text-base min-w-0 ${
+            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
         />
         <div className="flex items-center justify-end gap-1">
           {/**<div className="flex items-center justify-between mt-2">
@@ -461,10 +482,18 @@ const ChatInput: React.FC<{
             <button
               onClick={handleSend}
               type="submit"
-              className="p-2 text-white bg-border-medium rounded-full hover:bg-border-high disabled:bg-border disabled:text-border cursor-pointer"
-              disabled={isLoading}
+              className={`p-2 text-white rounded-full transition-all duration-200 ${
+                isLoading 
+                  ? 'bg-blue-500/50 cursor-not-allowed animate-pulse' 
+                  : 'bg-border-medium hover:bg-border-high cursor-pointer'
+              }`}
+              disabled={isLoading || !inputValue.trim()}
             >
-              <ArrowUp />
+              {isLoading ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <ArrowUp />
+              )}
             </button>
           </div>
         </div>
@@ -598,7 +627,7 @@ export default function Chat({
           )}
           {messages.length > 0 && (
             <>
-              <MessageList messages={messages} />
+              <MessageList messages={messages} isLoading={isLoading} />
             </>
           )}
           {error && (
