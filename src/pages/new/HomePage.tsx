@@ -374,7 +374,7 @@ export default function HomePage() {
       // Check if it's an out-of-syllabus error
       if (err.isOutOfSyllabus || err.status === 204) {
         console.log("Content is out of syllabus, redirecting to dashboard");
-        navigate(ROUTES.DASHBOARD);
+        navigate(ROUTES.HOME);
       }
     } finally {
       setIsLoadingVideos(false);

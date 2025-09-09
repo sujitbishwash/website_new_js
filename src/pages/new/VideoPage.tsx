@@ -1420,7 +1420,7 @@ import ShareModal from "@/components/modals/ShareModal";
               // Only close if clicking on the backdrop, not on the modal content
               if (e.target === e.currentTarget) {
                 setShowOutOfSyllabus(false);
-                navigateWithProgress(ROUTES.DASHBOARD);
+                navigateWithProgress(ROUTES.HOME);
               }
             }}
           >
@@ -1428,7 +1428,7 @@ import ShareModal from "@/components/modals/ShareModal";
               onGoBack={() => {
                 console.log("Closing OutOfSyllabus modal");
                 setShowOutOfSyllabus(false);
-                navigateWithProgress(ROUTES.DASHBOARD);
+                navigateWithProgress(ROUTES.HOME);
               }}
             />
           </div>

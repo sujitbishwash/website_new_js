@@ -203,7 +203,7 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
 
   // Handle go to dashboard
   const handleGoToDashboard = useCallback(() => {
-    navigate(ROUTES.DASHBOARD);
+    navigate(ROUTES.HOME);
   }, [navigate]);
 
   // Handle view analysis
