@@ -2,8 +2,8 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  // baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  baseURL: 'https://api.krishak.in',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  // baseURL: 'https://api.krishak.in',
   headers: {
     "Content-Type": "application/json",
   },
@@ -491,7 +491,7 @@ export const chatApi = {
   getChatHistory: async (videoId: string): Promise<ChatHistoryResponse> => {
     const response = await apiRequest<ChatHistoryResponse>(
       "GET",
-      `/ai_agent/history?vedio_id=${encodeURIComponent(videoId)}`
+      `/ai_agent/history?video_id=${encodeURIComponent(videoId)}`
     );
     return response.data;
   },
@@ -500,7 +500,7 @@ export const chatApi = {
     const response = await apiRequest<ChatStartResponse>(
       "POST",
       "/ai_agent/start",
-      { vedio_id: videoId }
+      { video_id: videoId }
     );
     return response.data;
   },
@@ -513,7 +513,7 @@ export const chatApi = {
       "POST",
       "/ai_agent/send",
       {
-        vedio_id: videoId,
+        video_id: videoId,
         message: message,
       }
     );
