@@ -57,8 +57,15 @@ export default function ExamConfigurationModal({
       return { availableGroups: [] };
     }
 
-    const selectedType = examTypes.find(type => type.value === selectedExamType);
+    // Find the selected exam type by matching the label (since we're using labels in the dropdown)
+    const selectedType = examTypes.find(type => type.label === selectedExamType);
     const availableGroups = selectedType?.group || [];
+
+    console.log("🎯 ExamConfigurationModal: Available groups calculation:", {
+      selectedExamType,
+      selectedType,
+      availableGroups
+    });
 
     return { availableGroups };
   }, [selectedExamType, examTypes]);
@@ -145,7 +152,7 @@ export default function ExamConfigurationModal({
   // Initialize selected exam type when exam types are loaded
   useEffect(() => {
     if (examTypes.length > 0 && !selectedExamType) {
-      setSelectedExamType(examTypes[0].value);
+      setSelectedExamType(examTypes[0].label);
     }
   }, [examTypes, selectedExamType]);
 
@@ -163,14 +170,18 @@ export default function ExamConfigurationModal({
       return;
     }
 
+    // Find the exam type value from the selected label
+    const selectedExamTypeValue = examTypes.find(type => type.label === selectedExamType)?.value;
+
     console.log("🎯 ExamConfigurationModal: Filtering exam details for:", {
-      exam: selectedExamType,
+      examLabel: selectedExamType,
+      examValue: selectedExamTypeValue,
       groupType: selectedGroupType
     });
 
     // Filter exam details based on selected exam type and group type
     const filteredDetails = allExamDetails.filter(exam => 
-      exam.exam_id === selectedExamType && 
+      exam.exam_id === selectedExamTypeValue && 
       exam.id.includes(selectedGroupType)
     );
 
@@ -181,7 +192,7 @@ export default function ExamConfigurationModal({
       setSelectedExamDetail(null);
       console.log("⚠️ ExamConfigurationModal: No matching exam detail found");
     }
-  }, [selectedExamType, selectedGroupType, allExamDetails]);
+  }, [selectedExamType, selectedGroupType, allExamDetails, examTypes]);
 
   // Auto-select exam type and group based on user's exam goal
   useEffect(() => {
@@ -204,7 +215,7 @@ export default function ExamConfigurationModal({
       );
 
       if (matchingExamType) {
-        setSelectedExamType(matchingExamType.value);
+        setSelectedExamType(matchingExamType.label); // Use label instead of value
         
         // Find matching group type
         const matchingGroup = matchingExamType.group.find((group: string) =>
@@ -216,7 +227,7 @@ export default function ExamConfigurationModal({
         }
         
         console.log("✅ ExamConfigurationModal: Found matching exam type:", {
-          examType: matchingExamType.value,
+          examType: matchingExamType.label,
           groupType: matchingGroup || matchingExamType.group[0]
         });
       } else {
@@ -253,13 +264,17 @@ export default function ExamConfigurationModal({
       setUpdateError("");
       setUpdateMessage("");
 
-      console.log("🚀 ExamConfigurationModal: Updating exam goal:.....................s", {
-        exam: selectedExamType,
+      // Find the exam type value from the selected label
+      const selectedExamTypeValue = examTypes.find(type => type.label === selectedExamType)?.value;
+
+      console.log("🚀 ExamConfigurationModal: Updating exam goal:", {
+        examLabel: selectedExamType,
+        examValue: selectedExamTypeValue,
         groupType: selectedGroupType,
       });
 
       // Call the API to update exam goal
-      const response = await examGoalApi.addExamGoal(selectedExamType, selectedGroupType);
+      const response = await examGoalApi.addExamGoal(selectedExamTypeValue || selectedExamType, selectedGroupType);
 
       if (response.data.success) {
         console.log(
@@ -295,6 +310,7 @@ export default function ExamConfigurationModal({
   }, [
     selectedExamType,
     selectedGroupType,
+    examTypes,
     refreshUserData,
   ]);
 
