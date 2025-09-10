@@ -196,28 +196,14 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
   markAsSubmitted,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-
-  // Debug modal state changes
-  useEffect(() => {
-    console.log("🔍 Summary modal state changed:", { isOpen, canSubmitFeedback, existingFeedback: !!existingFeedback });
-  }, [isOpen, canSubmitFeedback, existingFeedback]);
-
-  console.log(canSubmitFeedback, existingFeedback, markAsSubmitted);
   
 
   const open = () => {
-    console.log("🔍 Summary feedback button clicked:", {
-      canSubmitFeedback,
-      existingFeedback: !!existingFeedback,
-      hasMarkAsSubmitted: !!markAsSubmitted
-    });
-    console.log("🔍 Setting modal to open - isOpen will be:", true);
     setIsOpen(true);
   };
   const close = () => setIsOpen(false);
   
   const handleDismiss = () => {
-    console.log("🔍 Summary feedback modal dismissed by user");
     setIsOpen(false);
     // Mark that user has dismissed the feedback request
     if (markAsSubmitted) {
@@ -226,7 +212,6 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
   };
 
   const handleSkip = () => {
-    console.log("🔍 Summary feedback skipped");
     setIsOpen(false);
     // Mark that user has skipped the feedback request
     if (markAsSubmitted) {
@@ -235,7 +220,6 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
   };
 
   const onSubmit = async (payload: unknown) => {
-    console.log("Summary feedback submitted:", payload);
     
     if (markAsSubmitted) {
       markAsSubmitted();
@@ -361,14 +345,6 @@ const Summary: React.FC<SummaryProps> = React.memo(({
   existingFeedback,
   markAsSubmitted,
 }) => {
-  // Debug feedback props
-  console.log("🔍 Summary Component - Mounted/Re-rendered with props:", {
-    videoId,
-    canSubmitFeedback,
-    existingFeedback: !!existingFeedback,
-    hasMarkAsSubmitted: !!markAsSubmitted,
-    timestamp: new Date().toISOString()
-  });
 
   // Temporarily disable feedback to prevent re-renders
   const feedbackCanSubmitFeedback = false;
@@ -391,27 +367,20 @@ const Summary: React.FC<SummaryProps> = React.memo(({
     const fetchSummaryData = async () => {
       // ULTRA AGGRESSIVE: Only fetch if we haven't fetched this videoId before
       if (!videoId || fetchedVideoIdRef.current === videoId) {
-        console.log("🔍 ULTRA AGGRESSIVE: Skipping summary fetch - already fetched:", { 
-          videoId, 
-          fetchedVideoId: fetchedVideoIdRef.current
-        });
         return;
       }
 
       // ULTRA AGGRESSIVE: Set fetching flag immediately
       if (isFetchingRef.current) {
-        console.log("🔍 ULTRA AGGRESSIVE: Already fetching summary, skipping");
         return;
       }
 
       if (!videoId) {
-        console.log("🔍 No videoId provided, using demo data");
         setSummaryData(longSummaryData);
         setIsLoading(false);
         return;
       }
 
-      console.log("🔍 ULTRA AGGRESSIVE: Starting summary fetch for videoId:", videoId);
       isFetchingRef.current = true;
       fetchedVideoIdRef.current = videoId; // Mark as fetched IMMEDIATELY
       setIsLoading(true);
@@ -419,8 +388,6 @@ const Summary: React.FC<SummaryProps> = React.memo(({
 
       try {
         const response = await videoApi.getVideoSummary(videoId);
-        
-        console.log("📊 Raw API response:", response);
         
         // Check if response has the expected structure
         if (!response) {
@@ -578,12 +545,10 @@ const Summary: React.FC<SummaryProps> = React.memo(({
 
         // If still no data, use demo data
         if (transformedData.length === 0) {
-          console.log("⚠️ No valid summary data found, using demo data");
           transformedData = longSummaryData;
         }
 
         setSummaryData(transformedData);
-        console.log("✅ Summary data processed successfully:", transformedData);
       } catch (err: unknown) {
         const error = err as { message?: string; status?: number; response?: { data?: unknown } };
         console.error("❌ Error fetching summary:", err);

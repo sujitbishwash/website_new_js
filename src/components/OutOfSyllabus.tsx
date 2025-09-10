@@ -113,10 +113,6 @@ const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack, suggestedVideos
   const navigate = useNavigate();
   const { getUserData } = useAuth();
 
-  // Debug logging
-  console.log("🎬 OutOfSyllabus - suggestedVideos received:", suggestedVideos);
-  console.log("🎬 OutOfSyllabus - suggestedVideos length:", suggestedVideos?.length);
-
   // Effect to inject custom styles into the document's head
   useEffect(() => {
     const styleTag = document.createElement("style");

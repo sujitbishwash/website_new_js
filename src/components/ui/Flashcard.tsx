@@ -114,7 +114,6 @@ const Flashcard: React.FC<FlashcardProps> = ({ videoId }) => {
 
   const editCurrentCard = () => {
     if (cards.length === 0) return;
-    console.log("Editing card:", cards[currentCardIndex]);
     // In a real app, this would open an edit modal or form
   };
 

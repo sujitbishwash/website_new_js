@@ -196,28 +196,13 @@ const Quiz: React.FC<QuizProps> = ({
   markAsSubmitted,
   topics,
 }) => {
-  console.log(`🏗️ Quiz Component .................. Topics:`, topics);
   // Generate unique component instance ID for debugging (stable across renders)
   const componentId = React.useRef(Math.random().toString(36).substr(2, 9)).current;
   
-  // Debug component mount/unmount
-  React.useEffect(() => {
-    console.log(`🏗️ Quiz Component [${componentId}] MOUNTED with topics:`, topics);
-    console.log(`🏗️ Quiz Component [${componentId}] Topics type:`, typeof topics);
-    console.log(`🏗️ Quiz Component [${componentId}] Topics is array:`, Array.isArray(topics));
-    return () => {
-      console.log(`🗑️ Quiz Component [${componentId}] UNMOUNTED`);
-    };
-  }, [componentId, topics]);
-  
   // Memoize topics to prevent infinite re-renders
   const topicsToUse = React.useMemo(() => {
-    console.log(`🔍 Quiz Component [${componentId}] Deriving topicsToUse. Topics prop:`, topics);
     return topics && topics.length > 0 ? topics : null;
   }, [topics, componentId]);
-  
-  console.log(`🔍 Quiz Component [${componentId}] Topics prop:`, topics);
-  console.log(`🎯 Quiz Component [${componentId}] Topics to use:`, topicsToUse);
   
   // Quiz state
   const [quizQuestions, setQuizQuestions] = React.useState<QuizQuestion[]>([]);
@@ -226,18 +211,6 @@ const Quiz: React.FC<QuizProps> = ({
   const hasAttemptedFetchRef = React.useRef<boolean>(false);
   const lastTopicsRef = React.useRef<string>("");
   
-  // Debug feedback props (moved after state declarations)
-  console.log(`🔍 Quiz Component [${componentId}] Props:`, {
-    videoId,
-    canSubmitFeedback,
-    existingFeedback: !!existingFeedback,
-    hasMarkAsSubmitted: !!markAsSubmitted,
-    originalTopics: topics,
-    topicsToUse: topicsToUse,
-    isLoadingQuiz,
-    hasAttemptedFetch: hasAttemptedFetchRef.current,
-    quizQuestionsLength: quizQuestions.length
-  });
   const [currentQuestion, setCurrentQuestion] = React.useState<number>(0);
   const [showScore, setShowScore] = React.useState<boolean>(false);
   const [score, setScore] = React.useState<number>(0);
@@ -250,7 +223,6 @@ const Quiz: React.FC<QuizProps> = ({
   React.useEffect(() => {
     // Don't fetch if no topics available
     if (!topicsToUse) {
-      console.log(`🔄 Quiz Component [${componentId}] No topics available, skipping API call`);
       setIsLoadingQuiz(false);
       setQuizError("No topics available for quiz generation.");
       return;
@@ -260,21 +232,13 @@ const Quiz: React.FC<QuizProps> = ({
     
     // Prevent infinite calls by checking if topics actually changed
     if (lastTopicsRef.current === topicsKey) {
-      console.log(`🔄 Quiz Component [${componentId}] Topics unchanged, skipping API call`);
       return;
     }
-    
-    console.log(`🔄 Quiz Component [${componentId}] useEffect triggered with topics:`, topicsToUse);
-    console.log(`🔄 Quiz Component [${componentId}] Topics length:`, topicsToUse?.length);
-    console.log(`🔄 Quiz Component [${componentId}] Topics content:`, JSON.stringify(topicsToUse));
-    console.log(`🔄 Quiz Component [${componentId}] Previous topics:`, lastTopicsRef.current);
-    console.log(`🔄 Quiz Component [${componentId}] New topics:`, topicsKey);
     
     // Update the last topics ref
     lastTopicsRef.current = topicsKey;
     
     // Reset state when topics change
-    console.log(`🔄 Quiz Component [${componentId}] Resetting state for new topics`);
     setQuizQuestions([]);
     setCurrentQuestion(0);
     setShowScore(false);
@@ -289,21 +253,11 @@ const Quiz: React.FC<QuizProps> = ({
       try {
         hasAttemptedFetchRef.current = true;
         setQuizError(null);
-        console.log(`🎯 Quiz Component [${componentId}] About to call quizApi.generateQuiz with topics:`, topicsToUse);
-        console.log(`🎯 Quiz Component [${componentId}] API base URL:`, import.meta.env.VITE_API_BASE_URL);
         
         const response = await quizApi.generateQuiz(topicsToUse);
-        console.log(`✅ Quiz Component [${componentId}] Quiz questions loaded successfully:`, response);
-        console.log(`✅ Quiz Component [${componentId}] Questions count:`, response.questions?.length);
         
         setQuizQuestions(response.questions);
       } catch (error: unknown) {
-        console.error(`❌ Quiz Component [${componentId}] Failed to fetch quiz questions:`, error);
-        console.error(`❌ Quiz Component [${componentId}] Error details:`, {
-          message: (error as any)?.message,
-          status: (error as any)?.status,
-          stack: (error as any)?.stack
-        });
         
         // Check if it's an authentication error
         const errorStatus = (error as any)?.status;
@@ -397,26 +351,17 @@ const Quiz: React.FC<QuizProps> = ({
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
 
   React.useEffect(() => {
-    console.log("🔍 Quiz Feedback useEffect:", {
-      showScore,
-      canSubmitFeedback,
-      existingFeedback: !!existingFeedback,
-      shouldOpen: showScore && canSubmitFeedback && !existingFeedback
-    });
     
     if (showScore && canSubmitFeedback && !existingFeedback) {
-      console.log("🎯 Opening Quiz feedback modal");
       setIsFeedbackModalOpen(true);
     }
   }, [showScore, canSubmitFeedback, existingFeedback]);
 
   const handleCloseFeedback = () => {
-    console.log("🔍 Quiz feedback modal closing");
     setIsFeedbackModalOpen(false);
   };
 
   const handleDismissFeedback = () => {
-    console.log("🔍 Quiz feedback modal dismissed by user");
     setIsFeedbackModalOpen(false);
     // Mark that user has dismissed the feedback request
     if (markAsSubmitted) {
@@ -425,7 +370,6 @@ const Quiz: React.FC<QuizProps> = ({
   };
 
   const handleSubmitFeedback = async (payload: unknown) => {
-    console.log("Quiz feedback submitted:", payload);
     if (markAsSubmitted) {
       markAsSubmitted();
     }
@@ -433,7 +377,6 @@ const Quiz: React.FC<QuizProps> = ({
   };
 
   const handleSkipFeedback = () => {
-    console.log("🔍 Quiz feedback skipped");
     if (markAsSubmitted) {
       markAsSubmitted();
     }

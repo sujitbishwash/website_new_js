@@ -81,9 +81,7 @@ export const TestSubmissionForm: React.FC<TestSubmissionFormProps> = ({
       };
       localStorage.setItem(`test_answers_${sessionId}`, JSON.stringify(saveData));
       setLastSaved(new Date());
-      console.log('💾 Auto-saved answers locally');
     } catch (error) {
-      console.error('Failed to save answers locally:', error);
     }
   }, [sessionId, answers]);
 
@@ -148,12 +146,6 @@ export const TestSubmissionForm: React.FC<TestSubmissionFormProps> = ({
 
     try {
       const submissionAnswers = prepareSubmissionData();
-      
-      console.log('🚀 Submitting test:', {
-        sessionId,
-        answersCount: submissionAnswers.length,
-        timerMetadata,
-      });
 
       const results = await quizApi.submitTestEnhanced(
         sessionId,
@@ -164,8 +156,6 @@ export const TestSubmissionForm: React.FC<TestSubmissionFormProps> = ({
           end_time: timerMetadata.end_time,
         } : undefined
       );
-
-      console.log('✅ Test submitted successfully:', results);
 
       // Clear saved answers after successful submission
       localStorage.removeItem(`test_answers_${sessionId}`);
@@ -187,7 +177,6 @@ export const TestSubmissionForm: React.FC<TestSubmissionFormProps> = ({
 
   // Handle timer expiration
   const handleTimerExpired = useCallback((_metadata: TimerMetadata) => {
-    console.log('⏰ Test timer expired, auto-submitting...');
     handleSubmit();
   }, []);
 

@@ -214,54 +214,37 @@ const TestResultDialog = ({
   }, []);
 
   const handleFeedbackSubmit = useCallback(async (payload: any) => {
-    console.log("Test feedback submitted:", payload);
     markAsSubmitted();
     handleCloseFeedback();
     
     // Always execute pending navigation after feedback submission
     if (pendingNavigation) {
-      console.log("🚀 Executing pending navigation after feedback submission");
       pendingNavigation();
       setPendingNavigation(null);
     } else {
-      console.log("🚀 No pending navigation, closing dialog");
       onClose();
     }
   }, [markAsSubmitted, handleCloseFeedback, pendingNavigation, onClose]);
 
   const handleFeedbackSkip = useCallback(() => {
-    console.log("Test feedback skipped");
     handleCloseFeedback();
     
     // Always execute pending navigation after feedback skip
     if (pendingNavigation) {
-      console.log("🚀 Executing pending navigation after feedback skip");
       pendingNavigation();
       setPendingNavigation(null);
     } else {
-      console.log("🚀 No pending navigation, closing dialog");
       onClose();
     }
   }, [handleCloseFeedback, pendingNavigation, onClose]);
 
   // Auto-open feedback modal after test completion
   const shouldAutoOpenFeedback = canSubmitFeedback;
-  
-  // Debug logging
-  useEffect(() => {
-    console.log("🔍 TestResultDialog Debug:", {
-      shouldAutoOpenFeedback,
-      canSubmitFeedback,
-      existingFeedback,
-      isFeedbackModalOpen
-    });
-  }, [shouldAutoOpenFeedback, canSubmitFeedback, existingFeedback, isFeedbackModalOpen]);
+
   
   // Open feedback immediately when results are shown if allowed
   useEffect(() => {
-    console.log("🚀 Attempting to auto-open feedback modal:", shouldAutoOpenFeedback);
     if (shouldAutoOpenFeedback) {
-      console.log("✅ Opening feedback modal automatically");
       setIsFeedbackModalOpen(true);
     }
   }, [shouldAutoOpenFeedback]);
@@ -300,10 +283,8 @@ const TestResultDialog = ({
         <div 
           className="bg-[#1e2124] text-white rounded-2xl shadow-2xl w-full max-w-md mx-auto transform transition-all duration-300 scale-100 animate-fadeIn cursor-pointer"
           onClick={() => {
-            console.log("🖱️ Dialog clicked:", { canSubmitFeedback, existingFeedback });
             // Always open feedback modal if user can submit feedback
             if (canSubmitFeedback) {
-              console.log("✅ Opening feedback modal on dialog click");
               setIsFeedbackModalOpen(true);
             }
           }}

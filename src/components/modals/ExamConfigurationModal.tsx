@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../contexts/AuthContext";
 import { useUser } from "../../contexts/UserContext";
 import { examGoalApi } from "../../lib/api-client";
+import Dropdown from "../ui/dropdown";
 
 
 // --- STYLING ---
@@ -40,9 +41,7 @@ export default function ExamConfigurationModal({
   const [allExamDetails, setAllExamDetails] = useState<any[]>([]);
   const [selectedExamDetail, setSelectedExamDetail] = useState<any>(null);
   const [userExamGoal, setUserExamGoal] = useState<{exam: string, group_type: string} | null>(null);
-  const [isLoadingExamTypes, setIsLoadingExamTypes] = useState(false);
-  const [isLoadingExamDetails, setIsLoadingExamDetails] = useState(false);
-  const [isLoadingUserGoal, setIsLoadingUserGoal] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [examTypesError, setExamTypesError] = useState<string>("");
   const [examDetailsError, setExamDetailsError] = useState<string>("");
   const [userGoalError, setUserGoalError] = useState<string>("");
@@ -58,7 +57,8 @@ export default function ExamConfigurationModal({
       return { availableGroups: [] };
     }
 
-    const selectedType = examTypes.find(type => type.value === selectedExamType);
+    // Find the selected exam type by matching the label (since we're using labels in the dropdown)
+    const selectedType = examTypes.find(type => type.label === selectedExamType);
     const availableGroups = selectedType?.group || [];
 
     return { availableGroups };
@@ -69,9 +69,7 @@ export default function ExamConfigurationModal({
     if (isOpen) {
       const fetchUserExamGoal = async () => {
         try {
-          setIsLoadingUserGoal(true);
           setUserGoalError("");
-          
           
           const response = await getUserData();
           
@@ -80,16 +78,12 @@ export default function ExamConfigurationModal({
               exam: response.data.exam_goal.exam || "",
               group_type: response.data.exam_goal.group || ""
             });
-            
           } else {
-            
             setUserExamGoal(null);
           }
         } catch (error: any) {
-          
+          console.error("❌ ExamConfigurationModal: Failed to fetch user exam goal:", error);
           setUserGoalError("Failed to load user exam goal. Please try again.");
-        } finally {
-          setIsLoadingUserGoal(false);
         }
       };
 
@@ -102,18 +96,15 @@ export default function ExamConfigurationModal({
     if (isOpen) {
       const fetchInitialData = async () => {
         try {
-          setIsLoadingExamTypes(true);
-          setIsLoadingExamDetails(true);
+          setIsLoading(true);
           setExamTypesError("");
           setExamDetailsError("");
-          
           
           // Fetch exam types
           const examTypesResponse = await examGoalApi.getExamTypes();
           
           if (examTypesResponse.data.success) {
             setExamTypes(examTypesResponse.data.data);
-            
           } else {
             throw new Error("Failed to load exam types");
           }
@@ -127,18 +118,16 @@ export default function ExamConfigurationModal({
               
               if (examDetailsResponse.data.success) {
                 setAllExamDetails(examDetailsResponse.data.data);
-                
               } else {
                 throw new Error("Failed to load exam details");
               }
             }
           }
         } catch (error: any) {
-          
+          console.error("❌ ExamConfigurationModal: Failed to fetch initial data:", error);
           setExamTypesError("Failed to load exam data. Please try again.");
         } finally {
-          setIsLoadingExamTypes(false);
-          setIsLoadingExamDetails(false);
+          setIsLoading(false);
         }
       };
 
@@ -151,7 +140,7 @@ export default function ExamConfigurationModal({
   // Initialize selected exam type when exam types are loaded
   useEffect(() => {
     if (examTypes.length > 0 && !selectedExamType) {
-      setSelectedExamType(examTypes[0].value);
+      setSelectedExamType(examTypes[0].label);
     }
   }, [examTypes, selectedExamType]);
 
@@ -169,33 +158,27 @@ export default function ExamConfigurationModal({
       return;
     }
 
-    {
-      exam: selectedExamType,
-      groupType: selectedGroupType
-    });
+    // Find the exam type value from the selected label
+    const selectedExamTypeValue = examTypes.find(type => type.label === selectedExamType)?.value;
 
     // Filter exam details based on selected exam type and group type
     const filteredDetails = allExamDetails.filter(exam => 
-      exam.exam_id === selectedExamType && 
+      exam.exam_id === selectedExamTypeValue && 
       exam.id.includes(selectedGroupType)
     );
 
     if (filteredDetails.length > 0) {
       setSelectedExamDetail(filteredDetails[0]);
-      
     } else {
       setSelectedExamDetail(null);
-      
     }
-  }, [selectedExamType, selectedGroupType, allExamDetails]);
+  }, [selectedExamType, selectedGroupType, allExamDetails, examTypes]);
 
   // Auto-select exam type and group based on user's exam goal
   useEffect(() => {
     if (userExamGoal?.exam && examTypes.length > 0) {
       const examName = userExamGoal.exam.toLowerCase();
       const groupType = userExamGoal.group_type?.toLowerCase() || "";
-
-      
 
       // Find matching exam type based on exam goal
       const matchingExamType = examTypes.find(type => 
@@ -204,7 +187,7 @@ export default function ExamConfigurationModal({
       );
 
       if (matchingExamType) {
-        setSelectedExamType(matchingExamType.value);
+        setSelectedExamType(matchingExamType.label); // Use label instead of value
         
         // Find matching group type
         const matchingGroup = matchingExamType.group.find((group: string) =>
@@ -214,13 +197,10 @@ export default function ExamConfigurationModal({
         if (matchingGroup) {
           setSelectedGroupType(matchingGroup);
         }
-        
-        {
-          examType: matchingExamType.value,
-          groupType: matchingGroup || matchingExamType.group[0]
-        });
       } else {
-        
+        console.log(
+          "⚠️ ExamConfigurationModal: No exact match found for exam goal, keeping default selection"
+        );
       }
     }
   }, [userExamGoal, examTypes]);
@@ -231,15 +211,14 @@ export default function ExamConfigurationModal({
   }, [filterExamDetails]);
 
   // Event handlers
-  const handleExamTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newExamType = e.target.value;
-    setSelectedExamType(newExamType);
+  const handleExamTypeChange = (value: string) => {
+    setSelectedExamType(value);
     setSelectedGroupType(""); // Reset group type when exam type changes
     setSelectedExamDetail(null); // Clear selected exam detail
   };
 
-  const handleGroupTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedGroupType(e.target.value);
+  const handleGroupTypeChange = (value: string) => {
+    setSelectedGroupType(value);
     setSelectedExamDetail(null); // Clear selected exam detail
   };
 
@@ -252,19 +231,13 @@ export default function ExamConfigurationModal({
       setUpdateError("");
       setUpdateMessage("");
 
-      console.log("🚀 ExamConfigurationModal: Updating exam goal:.....................s", {
-        exam: selectedExamType,
-        groupType: selectedGroupType,
-      });
+      // Find the exam type value from the selected label
+      const selectedExamTypeValue = examTypes.find(type => type.label === selectedExamType)?.value;
 
       // Call the API to update exam goal
-      const response = await examGoalApi.addExamGoal(selectedExamType, selectedGroupType);
+      const response = await examGoalApi.addExamGoal(selectedExamTypeValue || selectedExamType, selectedGroupType);
 
       if (response.data.success) {
-        console.log(
-          "✅ ExamConfigurationModal: Exam goal updated successfully:",
-          response.data.message
-        );
         setUpdateMessage("Exam goal updated successfully!");
 
         await refreshUserData();
@@ -294,6 +267,7 @@ export default function ExamConfigurationModal({
   }, [
     selectedExamType,
     selectedGroupType,
+    examTypes,
     refreshUserData,
   ]);
 
@@ -488,8 +462,8 @@ export default function ExamConfigurationModal({
 
         {/* Modal Content */}
         <div className="p-6 space-y-6 overflow-y-auto">
-          {/* Loading State for Exam Types */}
-          {isLoadingExamTypes && (
+          {/* Loading State */}
+          {isLoading && (
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center space-x-2">
                 <svg
@@ -512,36 +486,7 @@ export default function ExamConfigurationModal({
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                   ></path>
                 </svg>
-                <span className="text-foreground">Loading exam types...</span>
-              </div>
-            </div>
-          )}
-
-          {/* Loading State for Exam Details */}
-          {isLoadingExamDetails && (
-            <div className="flex items-center justify-center py-4">
-              <div className="flex items-center space-x-2">
-                <svg
-                  className="animate-spin h-4 w-4 text-primary"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
-                </svg>
-                <span className="text-foreground text-sm">Loading exam details...</span>
+                <span className="text-foreground">Loading exam data...</span>
               </div>
             </div>
           )}
@@ -594,56 +539,32 @@ export default function ExamConfigurationModal({
           )}
 
                     {/* Controls - Only show when exam types are loaded */}
-          {!isLoadingExamTypes && !examTypesError && examTypes.length > 0 && (
+          {!isLoading && !examTypesError && examTypes.length > 0 && (
             <div className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label
-                    htmlFor="exam-type-select"
-                    className="block text-sm font-medium text-muted-foreground"
-                  >
-                    Exam Type
-                  </label>
-                  <select
-                    id="exam-type-select"
-                    value={selectedExamType}
-                    onChange={handleExamTypeChange}
-                    className="w-full bg-input border border-border rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all"
-                  >
-                    {examTypes.map((examType) => (
-                      <option key={examType.value} value={examType.value}>
-                        {examType.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div className="space-y-2">
-                  <label
-                    htmlFor="group-type-select"
-                    className="block text-sm font-medium text-foreground"
-                  >
-                    Group Type
-                  </label>
-                  <select
-                    id="group-type-select"
-                    value={selectedGroupType}
-                    onChange={handleGroupTypeChange}
-                    disabled={!selectedExamType || availableGroups.length === 0}
-                    className="w-full bg-input border border-border rounded-lg px-3 py-2.5 text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {availableGroups.map((group: string) => (
-                      <option key={group} value={group}>
-                        {group}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+                <Dropdown
+                  id="exam-type-select"
+                  label="Exam Type"
+                  value={selectedExamType}
+                  onChange={handleExamTypeChange}
+                  options={examTypes.map(examType => examType.label)}
+                  placeholder="Select Exam Type"
+                />
+                <Dropdown
+                  id="group-type-select"
+                  label="Group Type"
+                  value={selectedGroupType}
+                  onChange={handleGroupTypeChange}
+                  options={availableGroups}
+                  placeholder="Select Group Type"
+                  disabled={!selectedExamType || availableGroups.length === 0}
+                />
               </div>
             </div>
           )}
 
           {/* Details Card - Show when exam detail is loaded */}
-          {!isLoadingExamDetails && !examDetailsError && selectedExamDetail && (
+          {!isLoading && !examDetailsError && selectedExamDetail && (
             <div className="bg-background p-5 rounded-lg space-y-4 border border-border animate-fade-in-fast">
               <h3 className="text-lg font-semibold text-foreground border-b border-border pb-2">
                 {selectedExamDetail.name}
@@ -698,34 +619,8 @@ export default function ExamConfigurationModal({
           </button>
           <button
             onClick={handleUpdateExamGoal}
-            disabled={isUpdating || isLoadingExamTypes || isLoadingUserGoal || !!examTypesError || !!userGoalError || !selectedExamType || !selectedGroupType}
-            className="cursor-pointer px-5 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1d1d1f] transition-all disabled:bg-blue-600/50 disabled:cursor-not-allowed flex items-center"
-          >
-            {isUpdating && (
-              <svg
-                className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
-            )}
-            {isUpdating ? "Updating..." : "Update Exam Goal"}
-          </button>
-        </div>
+            disabled={isUpdating || isLoading || !!examTypesError || !!userGoalError || !selectedExamType || !selectedGroupType}
+  </div>
       </div>
     </div>
   );

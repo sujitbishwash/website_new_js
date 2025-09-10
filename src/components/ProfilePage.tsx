@@ -78,7 +78,6 @@ interface NotificationSettingRowProps {
 
 // --- DYNAMIC USER PROFILE CREATION ---
 const createInitialUserProfile = (profile: any): UserProfile => {
-  console.log("🔄 ProfilePage: Creating user profile from data:", profile);
 
   // Handle gender field - convert to proper format if needed
   let genderValue:
@@ -121,7 +120,6 @@ const createInitialUserProfile = (profile: any): UserProfile => {
     dob: dobValue,
   };
 
-  console.log("✅ ProfilePage: Created user profile:", userProfile);
   return userProfile;
 };
 
@@ -364,13 +362,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   // Update userProfile when profile from UserContext changes
   useEffect(() => {
     if (profile) {
-      console.log("🔄 ProfilePage: Profile updated from UserContext:", profile);
       const newUserProfile = createInitialUserProfile(profile);
       setUserProfile(newUserProfile);
-      console.log(
-        "✅ ProfilePage: User profile state updated:",
-        newUserProfile
-      );
     } else {
       console.log("⚠️ ProfilePage: No profile data available from UserContext");
     }
@@ -406,7 +399,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   const toggleEditMode = () => {
     setIsEditing(!isEditing);
     if (isEditing) {
-      console.log("Saving data:", userProfile);
       // Here you would typically also handle saving the data to a backend
     }
   };
@@ -531,10 +523,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               </div>
               <div className="flex gap-3">
                 <button
-                  onClick={() => {
-                    console.log("🔄 ProfilePage: Manual refresh requested");
-                    // This will trigger a re-render when profile changes
-                  }}
                   className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
                   title="Refresh profile data"
                 >

@@ -138,10 +138,6 @@ const Message: React.FC<MessageType> = ({ text, isUser }) => {
 const MessageList: React.FC<{ messages: MessageType[]; isLoading: boolean }> = ({ messages, isLoading }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  console.log("📋 MessageList rendered with messages:", messages.length);
-  console.log("📋 MessageList messages:", messages);
-  console.log("📋 MessageList isLoading:", isLoading);
-
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -151,7 +147,6 @@ const MessageList: React.FC<{ messages: MessageType[]; isLoading: boolean }> = (
   return (
     <div className="flex-1 overflow-y-auto space-y-2 pr-2 py-4">
       {messages.map((msg, index) => {
-        console.log(`📋 Rendering message ${index}:`, msg);
         return (
           <Message key={index} text={msg.text} isUser={msg.isUser} />
         );
@@ -514,11 +509,6 @@ export default function Chat({
   existingFeedback,
   markAsSubmitted,
 }: ChatProps) {
-  // Debug logging for messages
-  console.log("💬 Chat component rendered with messages:", messages.length);
-  console.log("💬 Chat messages content:", messages);
-  console.log("💬 Chat isLoading:", isLoading);
-  console.log("💬 Chat error:", error);
   
   // Feedback state management
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
@@ -528,31 +518,22 @@ export default function Chat({
     // Count user messages (excluding AI responses)
     const userMessageCount = messages.filter(msg => msg.isUser).length;
     
-    // Open feedback modal after 5 user messages if:
-    // 1. User has sent 5+ messages
-    // 2. Feedback can be submitted (must be explicitly true)
-    // 3. No existing feedback exists
-    // 4. Modal is not already open
-    // 5. User hasn't already submitted feedback
     if (
       userMessageCount >= 5 &&
       canSubmitFeedback === true &&
       !existingFeedback && // Check prop, not local state
       !isFeedbackModalOpen
     ) {
-      console.log("🎯 Opening Chat feedback modal - user has sent 5+ messages");
       setIsFeedbackModalOpen(true);
     }
   }, [messages, canSubmitFeedback, existingFeedback, isFeedbackModalOpen]);
 
   // Feedback handlers
   const handleFeedbackClose = () => {
-    console.log("🔍 Chat feedback modal closing");
     setIsFeedbackModalOpen(false);
   };
 
   const handleFeedbackDismiss = () => {
-    console.log("🔍 Chat feedback modal dismissed by user");
     setIsFeedbackModalOpen(false);
     // Mark that user has dismissed the feedback request
     if (markAsSubmitted) {
@@ -561,7 +542,6 @@ export default function Chat({
   };
 
   const handleFeedbackSkip = () => {
-    console.log("🔍 Chat feedback skipped");
     setIsFeedbackModalOpen(false);
     // Mark that user has skipped the feedback request
     if (markAsSubmitted) {
@@ -570,7 +550,6 @@ export default function Chat({
   };
 
   const handleFeedbackSubmit = async (payload: any) => {
-    console.log("Chat feedback submitted:", payload);
     
     if (markAsSubmitted) {
       markAsSubmitted();

@@ -124,26 +124,6 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   const displayRating = existingFeedback?.rating || rating;
   const hasExistingFeedback = !!existingFeedback;
 
-  // Debug logging for feedback state
-  useEffect(() => {
-    console.log("🔍 VideoFeedbackModal Debug:", {
-      parentCanSubmitFeedback,
-      canSubmitFeedback,
-      existingFeedback,
-      hasExistingFeedback,
-      videoId,
-      componentName,
-      componentNameType: typeof componentName,
-    });
-  }, [
-    parentCanSubmitFeedback,
-    canSubmitFeedback,
-    existingFeedback,
-    hasExistingFeedback,
-    videoId,
-    componentName,
-  ]);
-
   const isLowRating = useMemo(() => rating !== null && rating <= 3, [rating]);
   const showFeedbackArea = useMemo(
     () => isLowRating || showCommentToggle,
@@ -160,12 +140,9 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
       const validComponents = ["Chat", "Flashcard", "Quiz", "Summary", "Video", "Test", "TestAnalysis", "VideoRecommendation", "TestRecommentation", "SnippetRecommendation"];
       const validComponentName = validComponents.includes(componentName) ? componentName : "Video";
       
-      console.log("🎯 Fetching all feedback chips for component:", validComponentName);
-      
       const response = await feedbackApi.getFeedbackChips(validComponentName);
       setAllChips(response);
       
-      console.log("✅ All feedback chips loaded successfully:", response);
     } catch (error: any) {
       console.error("❌ Failed to fetch feedback chips:", error);
       setChipsError("Failed to load feedback suggestions");
@@ -223,7 +200,6 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
 
     // Prevent duplicate submissions
     if (!canSubmitFeedback) {
-      console.log("⚠️ User has already submitted feedback for this video");
       setSubmissionStatus("error");
       return;
     }
@@ -275,15 +251,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
         page_url: window.location.href,
       };
 
-      // Send to backend API
-      console.log("🚀 Sending feedback to backend:", backendPayload);
-      console.log("🔍 Component validation:", { 
-        original: componentName, 
-        validated: validComponentName,
-        isValid: validComponents.includes(componentName)
-      });
       await feedbackApi.submitFeedback(backendPayload);
-      console.log("✅ Feedback sent to backend successfully");
 
       // Also call the local onSubmit for any local handling
       const localPayload: VideoFeedbackPayload = {

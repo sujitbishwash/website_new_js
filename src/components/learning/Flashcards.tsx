@@ -235,16 +235,6 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
   existingFeedback,
   markAsSubmitted,
 }) => {
-  // Debug component mounting (only in development)
-  useEffect(() => {
-    console.log("🔍 Flashcards Component - Mounted/Re-rendered with props:", {
-      videoId,
-      canSubmitFeedback,
-      existingFeedback: !!existingFeedback,
-      hasMarkAsSubmitted: !!markAsSubmitted,
-      timestamp: new Date().toISOString()
-    });
-  }, [videoId]); // Only depend on videoId
   
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -264,27 +254,20 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
     const fetchFlashcards = async () => {
       // ULTRA AGGRESSIVE: Only fetch if we haven't fetched this videoId before
       if (!videoId || fetchedVideoIdRef.current === videoId) {
-        console.log("🔍 ULTRA AGGRESSIVE: Skipping fetch - already fetched:", { 
-          videoId, 
-          fetchedVideoId: fetchedVideoIdRef.current
-        });
         return;
       }
 
       // ULTRA AGGRESSIVE: Set fetching flag immediately
       if (isFetchingRef.current) {
-        console.log("🔍 ULTRA AGGRESSIVE: Already fetching, skipping");
         return;
       }
 
       if (!videoId) {
-        console.log("🔍 No videoId provided, using demo data");
         setCards(initialCards);
         setIsLoading(false);
         return;
       }
 
-      console.log("🔍 ULTRA AGGRESSIVE: Starting fetch for videoId:", videoId);
       isFetchingRef.current = true;
       fetchedVideoIdRef.current = videoId; // Mark as fetched IMMEDIATELY
       setIsLoading(true);
@@ -293,7 +276,6 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
       try {
         const response = await videoApi.getVideoFlashcards(videoId);
         
-        console.log("📊 Raw flashcards API response:", response);
         
         // Check if response has the expected structure
         if (!response) {
@@ -345,14 +327,12 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
 
         // If still no data, use demo data
         if (transformedCards.length === 0) {
-          console.log("⚠️ No valid flashcards data found, using demo data");
           transformedCards = initialCards;
         }
 
         setCards(transformedCards);
         setCurrentIndex(0);
         setIsFlipped(false);
-        console.log("✅ Flashcards data processed successfully:", transformedCards);
       } catch (err: unknown) {
         const error = err as { message?: string; status?: number; response?: { data?: unknown } };
         console.error("❌ Error fetching flashcards:", err);
@@ -462,22 +442,8 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
       !feedbackExistingFeedback &&
       !isFeedbackModalOpen
     ) {
-      console.log("🎯 Opening Flashcards feedback modal - user completed all cards");
       setIsFeedbackModalOpen(true);
     } else {
-      console.log("🔍 Flashcards feedback modal useEffect - conditions not met:", {
-        cardsLength: cards.length,
-        currentIndex,
-        isLastCard: currentIndex === cards.length - 1,
-        canSubmitFeedback: feedbackCanSubmitFeedback,
-        existingFeedback: !!feedbackExistingFeedback,
-        isFeedbackModalOpen,
-        shouldOpen: cards.length > 0 &&
-                   currentIndex === cards.length - 1 &&
-                   feedbackCanSubmitFeedback &&
-                   !feedbackExistingFeedback &&
-                   !isFeedbackModalOpen
-      });
     }
   }, [cards.length, currentIndex, feedbackCanSubmitFeedback, feedbackExistingFeedback, isFeedbackModalOpen]);
 
@@ -505,25 +471,15 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
     const hasChanged = JSON.stringify(currentState) !== JSON.stringify(prevDebugState.current);
     
     if (hasChanged && cards.length > 0) {
-      console.log("🔍 Flashcards feedback state changed:", {
-        ...currentState,
-        shouldOpenModal: cards.length > 0 && 
-                        currentIndex === cards.length - 1 && 
-                        feedbackCanSubmitFeedback && 
-                        !feedbackExistingFeedback && 
-                        !isFeedbackModalOpen
-      });
       prevDebugState.current = currentState;
     }
   }, [cards.length, currentIndex, feedbackCanSubmitFeedback, feedbackExistingFeedback, isFeedbackModalOpen, feedbackMarkAsSubmitted]);
 
   const handleFeedbackClose = () => {
-    console.log("🔍 Flashcards feedback modal closing - setting isFeedbackModalOpen to false");
     setIsFeedbackModalOpen(false);
   };
 
   const handleFeedbackDismiss = () => {
-    console.log("🔍 Flashcards feedback modal dismissed by user");
     setIsFeedbackModalOpen(false);
     // Mark that user has dismissed the feedback request
     if (feedbackMarkAsSubmitted) {
@@ -531,14 +487,12 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
     }
   };
   const handleFeedbackSubmit = async (payload: unknown) => {
-    console.log("Flashcards feedback submitted:", payload);
     if (feedbackMarkAsSubmitted) {
       feedbackMarkAsSubmitted();
     }
     setIsFeedbackModalOpen(false);
   };
   const handleFeedbackSkip = () => {
-    console.log("Flashcards feedback skipped");
     if (feedbackMarkAsSubmitted) {
       feedbackMarkAsSubmitted();
     }
@@ -601,7 +555,6 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
               <div className="mt-4 flex justify-center">
                 <button
                   onClick={() => {
-                    console.log("🔍 Manual feedback button clicked - opening modal");
                     setIsFeedbackModalOpen(true);
                   }}
                   className="px-4 py-2 rounded-lg text-sm font-medium bg-blue-600 hover:bg-blue-500 text-white transition-colors"

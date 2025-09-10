@@ -115,7 +115,6 @@ const Chat: React.FC<ChatProps> = ({ videoId }) => {
     navigator.clipboard.writeText(text)
       .then(() => {
         // Optional: Show a temporary "Copied!" message
-        console.log('Message copied to clipboard');
       })
       .catch(err => console.error('Failed to copy: ', err));
   };

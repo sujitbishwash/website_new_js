@@ -187,7 +187,6 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         setProfile(profileData);
         setIsDataLoaded(true);
 
-        console.log("✅ Profile data updated successfully");
       } catch (err) {
         setError("Failed to fetch user data");
         console.error("Error fetching user data:", err);
@@ -403,16 +402,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     // Only start background sync if user is authenticated and auth is not loading
     if (!isAuthenticated || authLoading) {
-      console.log("⏳ Waiting for authentication to complete...");
       return;
     }
 
-    // Start background sync when component mounts
-    console.log("🚀 UserProvider mounted - starting background profile sync");
-
     // Perform initial profile fetch immediately (optimized - single API call)
     const initialFetch = async () => {
-      console.log("📡 Performing initial profile and exam goal fetch in one call...");
       // Both fetchUserData and fetchExamGoal use the same getUserData() call
       // So we only need to call one of them, and it will update both profile and exam goal
       await fetchUserData();
