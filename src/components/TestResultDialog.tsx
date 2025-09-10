@@ -213,7 +213,7 @@ const TestResultDialog = ({
     setIsFeedbackModalOpen(false);
   }, []);
 
-  const handleFeedbackSubmit = useCallback(async (payload: any) => {
+  const handleFeedbackSubmit = useCallback(async (_payload: any) => {
     markAsSubmitted();
     handleCloseFeedback();
     

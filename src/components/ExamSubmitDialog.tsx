@@ -24,10 +24,6 @@ interface SummaryTableProps {
   summaryData: SummarySection[];
 }
 
-interface SummaryCardProps {
-  section: SummarySection;
-}
-
 interface ExamSubmitDialogProps {
   summaryData: SummarySection[];
   onClose: () => void;
@@ -195,45 +191,6 @@ const SummaryTable = ({ summaryData }: SummaryTableProps) => (
         </tr>
       </tbody>
     </table>
-  </div>
-);
-
-/**
- * The card-based view for mobile screens.
- */
-const SummaryCard = ({ section }: SummaryCardProps) => (
-  <div className="rounded-lg border border-border-high bg-white p-4">
-    <h3 className="mb-3 text-lg font-bold text-primary">{section.name}</h3>
-    <div className="space-y-2 text-sm">
-      <div className="flex justify-between">
-        <span className="text-gray-600">No. of questions:</span>
-        <span className="font-medium text-gray-800">{section.stats.total}</span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-gray-600">Answered:</span>
-        <span className="font-semibold text-green-600">
-          {section.stats.answered}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-gray-600">Not Answered:</span>
-        <span className="font-semibold text-red-600">
-          {section.stats.notAnswered}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-gray-600">Marked for Review:</span>
-        <span className="font-semibold text-blue-600">
-          {section.stats.markedForReview}
-        </span>
-      </div>
-      <div className="flex justify-between">
-        <span className="text-gray-600">Not Visited:</span>
-        <span className="font-medium text-gray-800">
-          {section.stats.notVisited}
-        </span>
-      </div>
-    </div>
   </div>
 );
 

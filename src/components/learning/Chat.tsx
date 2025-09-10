@@ -547,7 +547,7 @@ export default function Chat({
     }
   };
 
-  const handleFeedbackSubmit = async (payload: any) => {
+  const handleFeedbackSubmit = async (_payload: any) => {
     
     if (markAsSubmitted) {
       markAsSubmitted();

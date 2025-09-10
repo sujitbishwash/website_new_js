@@ -24,7 +24,7 @@ const ExamGoalSelector: FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [isModalOpen, setIsModalOpen] = useState(false); // kept for potential future use
   const [isFormCompleted, setIsFormCompleted] = useState(false);
 
   // Navigation guard to prevent leaving without completing
@@ -108,8 +108,7 @@ const ExamGoalSelector: FC = () => {
         // Mark form as completed to allow navigation
         setIsFormCompleted(true);
 
-        // Navigate to dashboard or show success message
-        setIsModalOpen(true);
+        // Navigate to dashboard or show success message (modal disabled)
 
         // Navigate to home page immediately after successful submission
         navigate(ROUTES.HOME);

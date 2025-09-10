@@ -324,10 +324,6 @@ const PersonalInfoForm: React.FC = () => {
               date_of_birth: formData.dob,
             };
             localStorage.setItem("userData", JSON.stringify(updatedUserData));
-            
-              "✅ Updated localStorage with new user details:",
-              updatedUserData
-            );
           }
         } catch (error) {
           

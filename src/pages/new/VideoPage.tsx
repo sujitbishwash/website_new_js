@@ -455,21 +455,10 @@ import ShareModal from "@/components/modals/ShareModal";
               page_url: window.location.href,
             });
 
-            {
-              videoId: currentVideoId,
-              watchPercentage: Math.round(watchPercentage * 100) / 100,
-              currentTime: Math.round(currentTime),
-              totalDuration: Math.round(duration)
-            });
           } catch (apiError: any) {
             // If API endpoint doesn't exist (404), try alternative approach
             if (apiError.status === 404) {
-              {
-                videoId: currentVideoId,
-                watchPercentage: Math.round(watchPercentage * 100) / 100,
-                currentTime: Math.round(currentTime),
-                totalDuration: Math.round(duration)
-              });
+              
               
               // Store progress in localStorage as fallback
               const progressData = {
@@ -489,12 +478,7 @@ import ShareModal from "@/components/modals/ShareModal";
             }
           }
         } else {
-          {
-            currentTime,
-            duration,
-            videoId: currentVideoId,
-            condition: `duration > 0: ${duration > 0}, currentTime >= 0.1: ${currentTime >= 0.1}`
-          });
+         
         }
       } catch (error) {
         
@@ -800,7 +784,7 @@ import ShareModal from "@/components/modals/ShareModal";
   
     // Handle feedback completion and navigation
     const handleFeedbackComplete = useCallback(
-      (action: "submit" | "skip" | "dismiss") => {
+      (_action: "submit" | "skip" | "dismiss") => {
         closeFeedbackModal();
   
         // Check if there was a pending navigation

@@ -369,7 +369,7 @@ const Quiz: React.FC<QuizProps> = ({
     }
   };
 
-  const handleSubmitFeedback = async (payload: unknown) => {
+  const handleSubmitFeedback = async (_payload: unknown) => {
     if (markAsSubmitted) {
       markAsSubmitted();
     }

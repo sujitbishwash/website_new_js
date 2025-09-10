@@ -41,7 +41,7 @@ const feedbackApi = {
   },
 
   // Submit feedback to backend
-  submitFeedback: async (payload: VideoFeedbackPayload): Promise<void> => {
+  submitFeedback: async (_payload: VideoFeedbackPayload): Promise<void> => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 1000));
     

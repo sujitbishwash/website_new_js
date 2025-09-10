@@ -27,10 +27,6 @@ const AuthCallbackPage: React.FC = () => {
           // Use token from query parameter
           
           localStorage.setItem("authToken", tokenFromQuery);
-          
-            "🔑 Token stored from query:",
-            tokenFromQuery ? `${tokenFromQuery.substring(0, 20)}...` : "null"
-          );
 
           // Store the token and let the API calls fetch real user data
           

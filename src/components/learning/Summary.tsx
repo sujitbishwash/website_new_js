@@ -219,7 +219,7 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
     }
   };
 
-  const onSubmit = async (payload: unknown) => {
+  const onSubmit = async (_payload: unknown) => {
     
     if (markAsSubmitted) {
       markAsSubmitted();
@@ -339,12 +339,7 @@ interface SummaryProps {
   markAsSubmitted?: () => void;
 }
 
-const Summary: React.FC<SummaryProps> = React.memo(({
-  videoId,
-  canSubmitFeedback,
-  existingFeedback,
-  markAsSubmitted,
-}) => {
+const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
 
   // Temporarily disable feedback to prevent re-renders
   const feedbackCanSubmitFeedback = false;

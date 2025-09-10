@@ -342,15 +342,7 @@ const TestMainPage = () => {
     const testStartTime = new Date(Date.now() - totalTimeTaken * 1000);
     
     // Log the exact request format for debugging
-    const requestData = {
-      session_id: sessionId,
-      answers: submittedAnswers,
-      metadata: {
-        total_time: totalTimeTaken,
-        start_time: testStartTime.toISOString(),
-        end_time: now.toISOString(),
-      }
-    };
+    // request shape retained for debugging reference (unused)
     
     
     
@@ -619,9 +611,6 @@ const TestMainPage = () => {
         }
       }
     } catch (err: any) {
-      
-        `Error attempting to enable full-screen mode: ${err.message}. This is often due to security restrictions in iframes.`
-      );
     }
   };
 

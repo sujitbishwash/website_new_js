@@ -229,12 +229,7 @@ const Navigation: React.FC<NavigationProps> = ({
 
 // --- MAIN APP COMPONENT ---
 
-const Flashcards: React.FC<FlashcardsProps> = React.memo(({
-  videoId,
-  canSubmitFeedback,
-  existingFeedback,
-  markAsSubmitted,
-}) => {
+const Flashcards: React.FC<FlashcardsProps> = React.memo(({ videoId }) => {
   
   const [cards, setCards] = useState<Card[]>(initialCards);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -486,7 +481,7 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({
       feedbackMarkAsSubmitted();
     }
   };
-  const handleFeedbackSubmit = async (payload: unknown) => {
+  const handleFeedbackSubmit = async (_payload: unknown) => {
     if (feedbackMarkAsSubmitted) {
       feedbackMarkAsSubmitted();
     }

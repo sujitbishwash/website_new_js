@@ -3,12 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertTriangle, Link, Loader, LoaderCircle, X } from "lucide-react";
+import { AlertTriangle, Link, LoaderCircle, X } from "lucide-react";
 
 // --- Type Definitions ---
-interface IconProps {
-  className?: string;
-}
+// Removed unused IconProps
 
 interface AddSourceModalProps {
   isOpen: boolean;

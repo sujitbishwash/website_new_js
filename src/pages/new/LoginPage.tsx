@@ -466,7 +466,7 @@ const GoogleSignInButton: React.FC = () => {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await signInWithGoogle();
+      const { error } = await signInWithGoogle();
 
       
 

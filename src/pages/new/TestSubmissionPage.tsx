@@ -113,11 +113,6 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
       // setTestStartTime(new Date());
       setPageState('test');
 
-      
-        sessionId: response.session_id,
-        questionsCount: convertedQuestions.length
-      });
-
     } catch (error: any) {
       
       setError(error.message || 'Failed to load test. Please try again.');

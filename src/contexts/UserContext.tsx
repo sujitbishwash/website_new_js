@@ -122,14 +122,9 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
   // Fetch profile data only (exam goal is fetched separately when needed)
   const fetchUserData = useCallback(
-    async (forceRefresh = false) => {
-      
-
-
-
+    async () => {
       // If AuthContext is still loading, wait for it to complete
       if (authLoading) {
-        
         return;
       }
 
@@ -199,14 +194,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
   // Individual fetch methods
   const fetchProfile = useCallback(
-    async (forceRefresh = false) => {
-      await fetchUserData(forceRefresh);
+    async () => {
+      await fetchUserData();
     },
     [fetchUserData]
   );
 
   const fetchExamGoal = useCallback(
-    async (forceRefresh = false) => {
+    async () => {
       
       try {
         setIsLoading(true);
@@ -267,21 +262,13 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
-
-
-
-
-
-
-
-
   // Refresh methods
   const refreshProfile = useCallback(async () => {
-    await fetchUserData(true);
+    await fetchUserData();
   }, [fetchUserData]);
 
   const refreshExamGoal = useCallback(async () => {
-    await fetchExamGoal(true);
+    await fetchExamGoal();
   }, [fetchExamGoal]);
 
   const refreshStats = useCallback(async () => {
@@ -289,7 +276,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   }, [fetchStats]);
 
   const refreshAll = useCallback(async () => {
-    await fetchUserData(true);
+    await fetchUserData();
   }, [fetchUserData]);
 
   // Update methods with optimistic updates
