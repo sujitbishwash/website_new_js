@@ -262,7 +262,7 @@ const TestMainPage = () => {
     setError(null);
 
     try {
-      console.log("Attempting to fetch questions from API...");
+      
       const response = await quizApi.startTest({
         ...testConfig,
         topics: testConfig.sub_topic,
@@ -307,7 +307,7 @@ const TestMainPage = () => {
         throw new Error('Invalid response format from API');
       }
     } catch (apiError) {
-      console.error("Failed to fetch questions:", apiError);
+      
       setError(
         "Failed to fetch questions from server. Please try again later."
       );
@@ -318,7 +318,7 @@ const TestMainPage = () => {
 
   // Submit test to API
   const submitTestToAPI = async (): Promise<SubmitTestResponse> => {
-    console.log("Attempting to submit test to API...");
+    
     if (!sessionId) {
       throw new Error("Session ID is required to submit test");
     }
@@ -352,7 +352,7 @@ const TestMainPage = () => {
       }
     };
     
-    console.log("🚀 Submitting test with data (answer_order format):", JSON.stringify(requestData, null, 2));
+    
     
     const response = await quizApi.submitTestEnhanced(
       sessionId,
@@ -364,7 +364,7 @@ const TestMainPage = () => {
       }
     );
     
-    console.log("✅ Successfully submitted test to API:", response);
+    
     return response;
   };
 
@@ -564,12 +564,12 @@ const TestMainPage = () => {
       const apiResponse = await submitTestToAPI();
 
       if (apiResponse) {
-        console.log("Test submitted successfully:", apiResponse);
+        
         navigate(ROUTES.ANALYSIS2, { state: { sessionId: apiResponse.session_id || sessionId } });
         // setShowTestResultDialog(true);
       }
     } catch (error) {
-      console.error("Failed to submit test:", error);
+      
       setError("Failed to submit test. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -577,17 +577,17 @@ const TestMainPage = () => {
   };
 
   const handleAutoSubmit = async () => {
-    console.log("Test auto-submitted due to time expiration");
+    
     try {
       setIsSubmitting(true);
       const apiResponse = await submitTestToAPI();
 
       if (apiResponse) {
-        console.log("Test auto-submitted successfully:", apiResponse);
+        
         navigate(ROUTES.ANALYSIS2, { state: { sessionId: apiResponse.session_id || sessionId } });
       }
     } catch (error) {
-      console.error("Failed to auto-submit test:", error);
+      
       setError("Failed to auto-submit test.");
     } finally {
       setIsSubmitting(false);
@@ -619,7 +619,7 @@ const TestMainPage = () => {
         }
       }
     } catch (err: any) {
-      console.error(
+      
         `Error attempting to enable full-screen mode: ${err.message}. This is often due to security restrictions in iframes.`
       );
     }

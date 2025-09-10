@@ -1637,7 +1637,7 @@ export default function TestAnalysis2() {
       try {
         const data = await quizApi.testAnalysis(sessionId);
         setAnalysisData(data || {});
-        console.log("🧪 testAnalysis response", data);
+        
 
         // Optional: if backend already returns an object compatible with current UI
         // shape, assign directly. Otherwise map it here.
@@ -1667,7 +1667,7 @@ export default function TestAnalysis2() {
           };
         }
       } catch (e: any) {
-        console.error("Failed to load test analysis", e);
+        
         setAnalysisError(e?.message || "Failed to load analysis");
       } finally {
         setIsLoadingAnalysis(false);

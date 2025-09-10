@@ -286,7 +286,7 @@ const PersonalInfoForm: React.FC = () => {
     const fetchUserData = async () => {
       try {
         setIsLoadingUserData(true);
-        console.log("🔍 PersonalDetails: Using cached user data from AuthContext...");
+        
 
         // Use getUserData from AuthContext instead of direct API call
         const response = await getUserData();
@@ -298,7 +298,7 @@ const PersonalInfoForm: React.FC = () => {
           response.data
         ) {
           const userData = response.data;
-          console.log("📋 PersonalDetails: User data received from context:", userData);
+          
 
           // Populate form with existing user data if available
           const updatedFormData: FormData = {
@@ -308,12 +308,12 @@ const PersonalInfoForm: React.FC = () => {
           };
 
           setFormData(updatedFormData);
-          console.log("✅ PersonalDetails: Form populated with user data:", updatedFormData);
+          
         } else {
-          console.log("⚠️ PersonalDetails: No user data found in context");
+          
         }
       } catch (error) {
-        console.error("❌ PersonalDetails: Error fetching user data:", error);
+        
       } finally {
         setIsLoadingUserData(false);
       }
@@ -378,7 +378,7 @@ const PersonalInfoForm: React.FC = () => {
 
       try {
         // Call API to update user details
-        console.log("Submitting user details:", formData);
+        
 
         const response = await authApi.updateUserDetails({
           name: formData.name,
@@ -392,7 +392,7 @@ const PersonalInfoForm: React.FC = () => {
           );
         }
 
-        console.log("✅ User details saved successfully");
+        
 
         // Update localStorage with the new user data to ensure validation passes
         try {
@@ -406,13 +406,13 @@ const PersonalInfoForm: React.FC = () => {
               date_of_birth: formData.dob,
             };
             localStorage.setItem("userData", JSON.stringify(updatedUserData));
-            console.log(
+            
               "✅ Updated localStorage with new user details:",
               updatedUserData
             );
           }
         } catch (error) {
-          console.error("❌ Error updating localStorage:", error);
+          
         }
 
         // Also update the form data to reflect the saved state
@@ -429,7 +429,7 @@ const PersonalInfoForm: React.FC = () => {
         // Navigate to exam goal page
         navigate(ROUTES.EXAM_GOAL, { replace: true });
       } catch (error) {
-        console.error("❌ Error saving user details:", error);
+        
         setSubmitError("Failed to save your details. Please try again.");
       } finally {
         setIsLoading(false);

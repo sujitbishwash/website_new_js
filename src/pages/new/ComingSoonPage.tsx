@@ -89,7 +89,7 @@ const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft());
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     // Here you would typically handle the email submission, e.g., send to an API
-    console.log("Email submitted:", email);
+    
     alert(`Thank you! We'll notify ${email} at launch.`);
     setEmail("");
   };

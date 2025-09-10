@@ -159,7 +159,7 @@ const TestConfigurationPageComponent = () => {
           setSelectedLanguage(data.language[0]);
         }
       } catch (err: any) {
-        console.error("Failed to fetch test configuration data:", err);
+        
         setError("Failed to load test configuration. Please try again.");
       } finally {
         setIsLoading(false);
@@ -210,7 +210,7 @@ const TestConfigurationPageComponent = () => {
         },
       });
     } catch (err: any) {
-      console.error("Failed to create test:", err);
+      
       setError(err.message || "Failed to create test. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -253,7 +253,7 @@ const TestConfigurationPageComponent = () => {
             </span>*/}
             <button
               onClick={() => {
-                console.log("🔄 ProfilePage: Manual refresh requested");
+                
                 // This will trigger a re-render when profile changes
               }}
               className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"

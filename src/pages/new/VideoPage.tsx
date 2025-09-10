@@ -37,7 +37,7 @@ import ShareModal from "@/components/modals/ShareModal";
   
   // Wrapper components to prevent unnecessary re-renders
   const FlashcardsWrapper = React.memo(({ videoId }: { videoId: string }) => {
-    console.log("🔄 FlashcardsWrapper rendered for videoId:", videoId);
+    
     return (
       <Flashcards 
         videoId={videoId}
@@ -46,7 +46,7 @@ import ShareModal from "@/components/modals/ShareModal";
   });
 
   const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
-    console.log("🔄 SummaryWrapper rendered for videoId:", videoId);
+    
     return (
       <Summary 
         videoId={videoId}
@@ -430,14 +430,9 @@ import ShareModal from "@/components/modals/ShareModal";
 
     // Function to save video progress - only called on navigation away from page
     const saveVideoProgress = useCallback(async () => {
-      console.log("💾 saveVideoProgress called:", { 
-        currentVideoId, 
-        hasPlayer: !!ytPlayerRef.current,
-        playerState: ytPlayerRef.current?.getPlayerState?.() 
-      });
       
       if (!currentVideoId || !ytPlayerRef.current) {
-        console.log("❌ Cannot save progress - missing videoId or player");
+        
         return;
       }
 
@@ -445,7 +440,7 @@ import ShareModal from "@/components/modals/ShareModal";
         const currentTime = ytPlayerRef.current.getCurrentTime();
         const duration = ytPlayerRef.current.getDuration();
         
-        console.log("📊 Video data on navigation:", { currentTime, duration });
+        
         
         // Only save progress if video has been played (currentTime >= 0.1) and duration is available
         if (duration > 0 && currentTime >= 0.1) {
@@ -460,7 +455,7 @@ import ShareModal from "@/components/modals/ShareModal";
               page_url: window.location.href,
             });
 
-            console.log("📊 Video progress saved successfully on navigation:", {
+            {
               videoId: currentVideoId,
               watchPercentage: Math.round(watchPercentage * 100) / 100,
               currentTime: Math.round(currentTime),
@@ -469,7 +464,7 @@ import ShareModal from "@/components/modals/ShareModal";
           } catch (apiError: any) {
             // If API endpoint doesn't exist (404), try alternative approach
             if (apiError.status === 404) {
-              console.log("⚠️ Video progress API not available, storing locally:", {
+              {
                 videoId: currentVideoId,
                 watchPercentage: Math.round(watchPercentage * 100) / 100,
                 currentTime: Math.round(currentTime),
@@ -494,7 +489,7 @@ import ShareModal from "@/components/modals/ShareModal";
             }
           }
         } else {
-          console.log("⏸️ Skipping progress save - video not played yet:", {
+          {
             currentTime,
             duration,
             videoId: currentVideoId,
@@ -502,20 +497,19 @@ import ShareModal from "@/components/modals/ShareModal";
           });
         }
       } catch (error) {
-        console.error("❌ Failed to save video progress:", error);
+        
       }
     }, [currentVideoId, videoDetail]);
 
     // Create a wrapped navigate function that shows alert before navigating
     const navigateWithProgress = useCallback((to: string, options?: any) => {
-      console.log("🧭 Navigate called with alert:", { to, options });
       /*
       const confirmed = window.confirm("Are you sure you want to leave this video?");
       if (confirmed) {
-        console.log("✅ User confirmed, navigating to:", to);
+        
         navigate(to, options);
       } else {
-        console.log("❌ User cancelled navigation");
+        
       }
         */
       saveVideoProgress();
@@ -526,11 +520,7 @@ import ShareModal from "@/components/modals/ShareModal";
     const blocker = useBlocker(
       ({ currentLocation, nextLocation }) => {
         const isNavigatingAway = currentLocation.pathname !== nextLocation.pathname;
-        console.log("🚧 Navigation blocker triggered:", { 
-          currentPath: currentLocation.pathname, 
-          nextPath: nextLocation.pathname, 
-          isNavigatingAway 
-        });
+        
         return isNavigatingAway;
       }
     );
@@ -538,15 +528,15 @@ import ShareModal from "@/components/modals/ShareModal";
     // Handle React Router navigation blocking
     useEffect(() => {
       if (blocker.state === "blocked") {
-        console.log("🚧 Blocker state is blocked, showing alert...");
+        
         // Show alert before allowing navigation
         /*
         const confirmed = window.confirm("Are you sure you want to leave this video?");
         if (confirmed) {
-          console.log("✅ User confirmed, proceeding with navigation");
+          
           blocker.proceed();
         } else {
-          console.log("❌ User cancelled navigation");
+          
           blocker.reset();
         }
           */
@@ -584,9 +574,7 @@ import ShareModal from "@/components/modals/ShareModal";
     components: [ComponentName.Video, ComponentName.Chat, ComponentName.Quiz, ComponentName.Summary, ComponentName.Flashcard],
     sourceId: currentVideoId || '',
     pageUrl: window.location.href,
-    onFeedbackExists: (component, existingFeedback) => {
-      console.log(`✅ Found existing feedback for ${component}:`, existingFeedback);
-    }
+    onFeedbackExists: () => {}
   });
     
     // Create wrapper functions for markAsSubmitted for each component
@@ -601,10 +589,7 @@ import ShareModal from "@/components/modals/ShareModal";
     // Removed unused callback functions
 
     // Create wrapper function for markAsSubmitted to maintain backward compatibility
-    const videoMarkAsSubmitted = useCallback(() => {
-      // Note: Video component is not tracked by the hook, so we'll handle it separately
-      console.log("Video feedback submitted");
-    }, []);
+    const videoMarkAsSubmitted = useCallback(() => {}, []);
 
 
     // Extract video feedback state
@@ -628,7 +613,7 @@ import ShareModal from "@/components/modals/ShareModal";
     // YouTube player event handlers
     const onYouTubeReady = useCallback((event: any) => {
       const player = event.target;
-      console.log("🎯 YouTube player ready!");
+      
       
       // Store player reference for progress tracking
       ytPlayerRef.current = player;
@@ -652,19 +637,9 @@ import ShareModal from "@/components/modals/ShareModal";
               hasShownFeedbackRef.current = true;
             }
             
-            // Log progress every 10 seconds for debugging
-            if (currentTime >= 0.1 && Math.floor(currentTime) % 10 === 0) {
-              console.log("🎬 Video progress tracking:", {
-                currentTime: currentTime.toFixed(2),
-                duration: duration.toFixed(2),
-                watchPercentage: progress.toFixed(2),
-                playerState: player.getPlayerState?.()
-              });
-            }
+            
           }
-        } catch (error) {
-          console.warn("⚠️ Error tracking video progress:", error);
-        }
+        } catch (error) {}
       }, 2000); // Update every 2 seconds
       
       // Store interval reference for cleanup
@@ -693,7 +668,6 @@ import ShareModal from "@/components/modals/ShareModal";
     
     const onYouTubeStateChange = useCallback((event: any) => {
       const playerState = event.data;
-      console.log("🔄 YouTube player state changed:", playerState);
       
       // Update playing state
       
@@ -704,7 +678,6 @@ import ShareModal from "@/components/modals/ShareModal";
       
       // Log when video starts playing (state 1 = playing)
       if (playerState === 1) {
-        console.log("▶️ Video started playing");
       }
     }, [onYouTubeEnd, saveVideoProgress]);
 
@@ -763,7 +736,7 @@ import ShareModal from "@/components/modals/ShareModal";
     useEffect(() => {
       const handleBeforeUnload = (event: BeforeUnloadEvent) => {
         // Show alert before leaving the page
-        console.log("🚪 Before unload - showing alert");
+        
         const message = "Are you sure you want to leave this video?";
         event.returnValue = message;
         return message;
@@ -771,7 +744,7 @@ import ShareModal from "@/components/modals/ShareModal";
 
       const handlePopState = () => {
         // Show alert before browser back/forward navigation
-        console.log("⬅️ Pop state - showing alert");
+        
         /*
         const confirmed = window.confirm("Are you sure you want to leave this video?");
         if (!confirmed) {
@@ -785,7 +758,7 @@ import ShareModal from "@/components/modals/ShareModal";
       // Handle React Router navigation
       const handleRouteChange = () => {
         // Show alert before navigation
-        console.log("🔄 Route change - showing alert");
+        
         /*
         const confirmed = window.confirm("Are you sure you want to leave this video?");
         return confirmed;
@@ -847,7 +820,7 @@ import ShareModal from "@/components/modals/ShareModal";
               navigateWithProgress(data.intendedPath);
             }
           } catch (error) {
-            console.error("Failed to parse pending navigation:", error);
+            
           }
         }
   
@@ -855,7 +828,7 @@ import ShareModal from "@/components/modals/ShareModal";
         localStorage.removeItem(`feedback_pending_${currentVideoId}`);
   
         // Log feedback action for analytics
-        console.log(`Feedback ${action} for video:`, currentVideoId);
+        
       },
       [closeFeedbackModal, currentVideoId, navigate]
     );
@@ -864,26 +837,25 @@ import ShareModal from "@/components/modals/ShareModal";
     useEffect(() => {
       const fetchVideoDetails = async () => {
         try {
-          console.log("🎯 VideoPage: Starting to fetch video details for videoId:", currentVideoId);
+          
           setIsLoadingVideo(true);
   
           // Try to get video details from API
           const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
-          console.log("🎯 VideoPage: Calling videoApi.getVideoDetail with URL:", videoUrl);
+          
           const details = await videoApi.getVideoDetail(videoUrl);
-          console.log("🎯 VideoPage: Fetched video details...............................:", details);
-          console.log("🎯 VideoPage: Video topics: .....................................", details.topics);
+          
           setVideoDetail(details);
         } catch (err: any) {
-          console.error("Failed to fetch video details:", err);
+          
           
           // Check if it's an out-of-syllabus error
           if (err.isOutOfSyllabus || err.status === 204) {
-            console.log("Content is out of syllabus, showing OutOfSyllabus modal");
+            
             setShowOutOfSyllabus(true);
           } else {
             // For other errors, set a fallback video detail with default topics
-            console.log("🎯 VideoPage: Video detail API failed, using fallback with default topics");
+            
             
           }
         } finally {
@@ -894,7 +866,7 @@ import ShareModal from "@/components/modals/ShareModal";
       if (currentVideoId) {
         fetchVideoDetails();
       } else {
-        console.log("🎯 VideoPage: No currentVideoId, skipping video detail fetch");
+        
         setIsLoadingVideo(false);
       }
     }, [currentVideoId]);
@@ -920,7 +892,7 @@ import ShareModal from "@/components/modals/ShareModal";
           );
           setChapters(transformedChapters);
         } catch (err: any) {
-          console.error("Failed to fetch chapters:", err);
+          
           setChaptersError("Failed to load chapters. Please try again.");
         } finally {
           setIsLoadingChapters(false);
@@ -943,7 +915,7 @@ import ShareModal from "@/components/modals/ShareModal";
       );
       setTranscript(response.transcript);
     } catch (err: any) {
-      console.error("Failed to fetch transcript:", err);
+      
       setTranscriptError("Failed to load transcript. Please try again.");
     } finally {
       setIsLoadingTranscript(false);
@@ -995,12 +967,12 @@ import ShareModal from "@/components/modals/ShareModal";
             const startResponse = await chatApi.startChat(currentVideoId);
             setChatMessages([{ text: startResponse.content, isUser: false }]);
           } catch (startErr) {
-            console.error("Failed to start chat:", startErr);
+            
             setChatError("Failed to start new chat.");
           }
         }
       } catch (err) {
-        console.error("Failed to fetch chat history:", err);
+        
         setChatError("Failed to load chat history. Starting new chat.");
   
         // Try to start a new chat if history fails
@@ -1008,7 +980,7 @@ import ShareModal from "@/components/modals/ShareModal";
           const startResponse = await chatApi.startChat(currentVideoId);
           setChatMessages([{ text: startResponse.content, isUser: false }]);
         } catch (startErr) {
-          console.error("Failed to start chat:", startErr);
+          
           setChatError("Failed to start new chat.");
         }
       } finally {
@@ -1019,48 +991,47 @@ import ShareModal from "@/components/modals/ShareModal";
   
     const handleSendMessage = useCallback(
       async (message: string) => {
-        console.log("🚀 handleSendMessage called with:", message);
-        console.log("🚀 currentVideoId:", currentVideoId);
+        
         
         if (!message.trim() || !currentVideoId) {
-          console.log("❌ Early return - empty message or no videoId");
+          
           return;
         }
   
         // Add user message immediately
         const userMessage = { text: message, isUser: true };
-        console.log("📝 Adding user message:", userMessage);
+        
         setChatMessages((prev) => {
           const newMessages = [...prev, userMessage];
-          console.log("📝 Updated chat messages:", newMessages);
+          
           return newMessages;
         });
   
         setIsChatLoading(true);
         setChatError(null);
-        console.log("⏳ Set loading to true, calling API...");
+        
   
         try {
           const response = await chatApi.sendMessage(currentVideoId, message);
-          console.log("✅ API response received:", response);
+          
           const assistantMessage = { text: response.content, isUser: false };
-          console.log("🤖 Adding assistant message:", assistantMessage);
+          
           setChatMessages((prev) => {
             const newMessages = [...prev, assistantMessage];
-            console.log("🤖 Final chat messages:", newMessages);
+            
             return newMessages;
           });
         } catch (err) {
-          console.error("❌ Failed to send message:", err);
+          
           setChatError("Failed to send message. Please try again.");
           // Remove the user message if sending failed
           setChatMessages((prev) => {
             const newMessages = prev.slice(0, -1);
-            console.log("🔄 Removed user message after error:", newMessages);
+            
             return newMessages;
           });
         } finally {
-          console.log("🏁 Set loading to false");
+          
           setIsChatLoading(false);
         }
       },
@@ -1088,10 +1059,7 @@ import ShareModal from "@/components/modals/ShareModal";
 
     // Create components that update when videoDetail changes
     const components = useMemo(() => {
-      console.log("🔄 Creating components for videoId:", currentVideoId);
-      console.log("🔄 VideoDetail in components:", videoDetail);
-      console.log("🔄 VideoDetail topics in components:", videoDetail?.topics);
-      console.log("🔄 Chat messages in components:", chatMessages.length);
+      
       
       return {
         chat: (
@@ -1115,10 +1083,7 @@ import ShareModal from "@/components/modals/ShareModal";
           />
         ),
         quiz: (() => {
-          console.log("🎯 VideoPage: Rendering Quiz with topics:", videoDetail?.topics);
-          console.log("🎯 VideoPage: VideoDetail exists:", !!videoDetail);
-          console.log("🎯 VideoPage: isLoadingVideo:", isLoadingVideo);
-          console.log("🎯 VideoPage: VideoDetail topics:", videoDetail?.topics);
+          
           
           return (
             <Quiz 
@@ -1177,7 +1142,7 @@ import ShareModal from "@/components/modals/ShareModal";
         try {
           // Video interaction detected
         } catch (error) {
-          console.warn("Error getting video progress on interaction:", error);
+          
         }
       }
     }, [
@@ -1426,7 +1391,7 @@ import ShareModal from "@/components/modals/ShareModal";
           >
             <OutOfSyllabus
               onGoBack={() => {
-                console.log("Closing OutOfSyllabus modal");
+                
                 setShowOutOfSyllabus(false);
                 navigateWithProgress(ROUTES.HOME);
               }}

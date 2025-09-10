@@ -306,7 +306,7 @@ export default function HomePage() {
       const response = await attemptedTestsApi.getAttemptedTests(1, 10);
       setAttemptedTests(response.tests);
     } catch (error: any) {
-      console.error("Failed to fetch attempted tests:", error);
+      
       setAttemptedTestsError(error.message || "Failed to load attempted tests");
       // Fallback to empty array if API fails
       setAttemptedTests([]);
@@ -324,7 +324,7 @@ export default function HomePage() {
         const videos = await videoApi.getSuggestedVideos();
         setSuggestedVideos(videos);
       } catch (error: any) {
-        console.error("Failed to fetch suggested videos:", error);
+        
         setVideosError(error.message || "Failed to load suggested videos");
         // Fallback to empty array if API fails
         setSuggestedVideos([]);
@@ -347,11 +347,11 @@ export default function HomePage() {
 
       navigate(buildVideoLearningRoute(details.external_source_id));
     } catch (err: any) {
-      console.error("Failed to fetch video details:", err);
+      
       
       // Check if it's an out-of-syllabus error
       if (err.isOutOfSyllabus || err.status === 204) {
-        console.log("Content is out of syllabus, redirecting to dashboard");
+        
         navigate(ROUTES.HOME);
       }
     } finally {
@@ -365,7 +365,7 @@ export default function HomePage() {
       // Navigate directly since we already have the videoId
       navigate(buildVideoLearningRoute(videoId));
     } catch (err: any) {
-      console.error("Failed to navigate to video:", err);
+      
     } finally {
       setLoadingVideoId(null);
     }
@@ -422,7 +422,7 @@ export default function HomePage() {
                     const videos = await videoApi.getSuggestedVideos();
                     setSuggestedVideos(videos);
                   } catch (error: any) {
-                    console.error("Failed to fetch suggested videos:", error);
+                    
                     setVideosError(
                       error.message || "Failed to load suggested videos"
                     );

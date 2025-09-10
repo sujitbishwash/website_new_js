@@ -139,7 +139,7 @@ const ExamGoalSelector: FC = () => {
           throw new Error("Failed to fetch exam data");
         }
       } catch (err: any) {
-        console.error("Failed to fetch exam data:", err);
+        
         setError("Failed to load exam data. Please try again.");
       } finally {
         setIsLoading(false);
@@ -167,29 +167,17 @@ const ExamGoalSelector: FC = () => {
   const handleSubmit = async () => {
     if (!examType || !specificExam) return;
 
-    console.log("🚀 Starting exam goal submission...", {
-      examType,
-      specificExam,
-    });
-
     try {
       setIsSubmitting(true);
 
       // commenting until the API is ready
       const response = await examGoalApi.addExamGoal(examType, specificExam);
-      console.log("📡 API Response:", response);
 
       if (response.data.success) {
-        console.log("✅ Exam goal added successfully:", response.data.message);
-
-        
-
         // Force refresh the user data to get the updated exam goal
-        console.log("🔄 Force refreshing user data...");
         await refreshUserData();
 
         // Update exam goal state
-        console.log("🔍 Checking exam goal state...");
         await checkExamGoal();
 
         // Mark form as completed to allow navigation
@@ -199,18 +187,12 @@ const ExamGoalSelector: FC = () => {
         setIsModalOpen(true);
 
         // Navigate to home page immediately after successful submission
-        console.log("🏠 Navigating to home page...");
         navigate(ROUTES.HOME);
       } else {
-        console.log("❌ API call failed:", response.data);
+        // no-op
       }
     } catch (err: any) {
-      console.error("❌ Failed to add exam goal:", err);
-      console.error("❌ Error details:", {
-        message: err.message,
-        status: err.status,
-        data: err.data,
-      });
+      setError("Failed to add exam goal. Please try again.");
       // You can add error handling logic here
     } finally {
       setIsSubmitting(false);

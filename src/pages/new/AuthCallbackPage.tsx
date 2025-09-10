@@ -13,7 +13,7 @@ const AuthCallbackPage: React.FC = () => {
   useEffect(() => {
     // Prevent multiple executions
     if (hasRunRef.current) {
-      console.log("⏭️ AuthCallbackPage: effect already executed, skipping");
+      
       return;
     }
     hasRunRef.current = true;
@@ -25,46 +25,46 @@ const AuthCallbackPage: React.FC = () => {
 
         if (tokenFromQuery) {
           // Use token from query parameter
-          console.log("🔑 Token found in query parameter");
+          
           localStorage.setItem("authToken", tokenFromQuery);
-          console.log(
+          
             "🔑 Token stored from query:",
             tokenFromQuery ? `${tokenFromQuery.substring(0, 20)}...` : "null"
           );
 
           // Store the token and let the API calls fetch real user data
-          console.log("🔄 Proceeding with token from query parameter...");
+          
         } else {
           // No token present; invalid access to callback
-          console.log("❌ No token in callback query params");
+          
           setError("Invalid authentication callback.");
           setTimeout(() => navigate(ROUTES.LOGIN), 2000);
           return;
         }
 
         // Use AuthContext login function to properly set the authentication state
-        console.log("🔑 Using AuthContext login function to set authentication state");
+        
         await login(tokenFromQuery);
         
         // Now check user state to determine proper redirect destination
-        console.log("🔍 Checking user state to determine redirect destination...");
+        
         const userState = await checkUserState();
-        console.log("👤 User state:", userState);
+        
         
         // Navigate based on user state
         if (userState.nextStep === "dashboard") {
-          console.log("✅ User has complete profile, redirecting to dashboard");
+          
           navigate(ROUTES.HOME, { replace: true });
         } else if (userState.nextStep === "exam-goal") {
-          console.log("🎯 User needs exam goal, redirecting to exam goal page");
+          
           navigate(ROUTES.EXAM_GOAL, { replace: true });
         } else {
-          console.log("📝 User needs personal details, redirecting to personal details page");
+          
           navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
         return;
       } catch (error) {
-        console.error("Auth callback error:", error);
+        
         setError("An unexpected error occurred.");
         setTimeout(() => {
           navigate(ROUTES.LOGIN);

@@ -29,21 +29,21 @@ const LoginPage: React.FC = () => {
         try {
           // Use the stored user data from AuthContext
           const userState = await checkUserState();
-          console.log("User state:", userState);
+          
 
           // Navigate based on user state
           if (userState.nextStep === "dashboard") {
-            console.log("User has exam goal, redirecting to dashboard");
+            
             navigate(ROUTES.HOME, { replace: true });
           } else if (userState.nextStep === "exam-goal") {
-            console.log("Redirecting to exam goal page");
+            
             navigate(ROUTES.EXAM_GOAL, { replace: true });
           } else {
-            console.log("Redirecting to personal details page");
+            
             navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
           }
         } catch (error) {
-          console.error("Error checking user state:", error);
+          
           // Fallback to personal details page if exam goal API fails
           navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
@@ -277,12 +277,12 @@ const LoginCard: React.FC = () => {
       return;
     }
     try {
-      console.log("📧 Sending OTP to:", email);
+      
 
       // Call the API to send OTP
       const response = await authApi.sendOtp(email);
 
-      console.log("📧 OTP Response:", response);
+      
 
       setSuccess(response.data.message || "OTP sent successfully!");
       setOtpSent(true);
@@ -304,12 +304,12 @@ const LoginCard: React.FC = () => {
       return;
     }
     try {
-      console.log("🔐 Verifying OTP:", finalOtp, "for email:", email);
+      
 
       // Call the API to verify OTP
       const response = await authApi.verifyOtp(email, finalOtp);
 
-      console.log("🔐 Verify OTP Response:", response);
+      
 
       // Store the token in localStorage and update auth context
       localStorage.setItem("authToken", response.data.access_token);
@@ -323,21 +323,21 @@ const LoginCard: React.FC = () => {
       try {
         const { checkUserState } = useAuth();
         const userState = await checkUserState();
-        console.log("User state:", userState);
+        
 
         // Navigate based on user state
         if (userState.nextStep === "dashboard") {
-          console.log("User has exam goal, redirecting to dashboard");
+          
           navigate(from, { replace: true });
         } else if (userState.nextStep === "exam-goal") {
-          console.log("Redirecting to exam goal page");
+          
           navigate(ROUTES.EXAM_GOAL, { replace: true });
         } else {
-          console.log("Redirecting to personal details page");
+          
           navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
       } catch (error) {
-        console.error("Error checking user state:", error);
+        
         // Fallback to personal details page if API fails
         navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
       }
@@ -470,17 +470,17 @@ const GoogleSignInButton: React.FC = () => {
     try {
       const { data, error } = await signInWithGoogle();
 
-      console.log("Google sign-in data:", data);
+      
 
       if (error) {
-        console.error("Google sign-in error:", error);
+        
         // You can add error handling here (e.g., show a toast notification)
       }
 
       // If successful, the user will be redirected to the callback URL
       // and the auth state will be updated automatically
     } catch (error) {
-      console.error("Google sign-in error:", error);
+      
     } finally {
       setIsLoading(false);
     }

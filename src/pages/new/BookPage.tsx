@@ -161,7 +161,7 @@ const BookPage: React.FC = () => {
         };
         reader.readAsArrayBuffer(file);
       } catch (err) {
-        console.error("Error processing PDF:", err);
+        
         setError(
           "Sorry, I had trouble reading that PDF. Please try another file."
         );
@@ -233,7 +233,7 @@ const BookPage: React.FC = () => {
         throw new Error("No content in API response.");
       }
     } catch (err) {
-      console.error(`Error with ${type}:`, err);
+      
       setChatHistory((prev) => [
         ...prev,
         {

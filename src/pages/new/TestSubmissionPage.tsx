@@ -73,7 +73,7 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
       setPageState('loading');
       setError(null);
 
-      console.log('🚀 Initializing test with config:', testConfig);
+      
 
       // Start test session
       const response = await quizApi.startTest({
@@ -113,13 +113,13 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
       // setTestStartTime(new Date());
       setPageState('test');
 
-      console.log('✅ Test initialized successfully:', {
+      
         sessionId: response.session_id,
         questionsCount: convertedQuestions.length
       });
 
     } catch (error: any) {
-      console.error('❌ Failed to initialize test:', error);
+      
       setError(error.message || 'Failed to load test. Please try again.');
       setPageState('error');
     }
@@ -173,20 +173,20 @@ export const TestSubmissionPage: React.FC<TestSubmissionPageProps> = ({
 
   // Handle timer expiration
   const handleTimerExpired = useCallback((_metadata: TimerMetadata) => {
-    console.log('⏰ Test time expired, auto-submitting...');
+    
     setShowSubmissionForm(true);
   }, []);
 
   // Handle test submission
   const handleSubmissionComplete = useCallback((results: SubmitTestResponse) => {
-    console.log('✅ Test submission completed:', results);
+    
     setTestResults(results);
     setPageState('results');
   }, []);
 
   // Handle submission error
   const handleSubmissionError = useCallback((error: string) => {
-    console.error('❌ Test submission error:', error);
+    
     setError(error);
     setPageState('error');
   }, []);

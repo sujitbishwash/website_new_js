@@ -29,7 +29,7 @@ const HistoryPage = () => {
       // Navigate directly since we already have the videoId
       navigate(buildVideoLearningRoute(videoId));
     } catch (err: any) {
-      console.error("Failed to navigate to video:", err);
+      
     } finally {
       setLoadingVideoId(null);
     }
