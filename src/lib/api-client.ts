@@ -1019,3 +1019,37 @@ export const feedbackApi = {
     return response.data;
   },
 };
+
+// Attempted Tests API interfaces
+export interface AttemptedTest {
+  id: string;
+  title: string;
+  positive_score: number;
+  date: string;
+  questions: number;
+  correct: number;
+  wrong: number;
+  session_id: number;
+  total_marks: number;
+  total_marks_scored: number;
+  attempt: number;
+  subject: string;
+  topics: string[];
+  level: string;
+  language?: string;
+}
+
+export interface AttemptedTestsResponse {
+  tests: AttemptedTest[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export const attemptedTestsApi = {
+  // Get user's attempted tests
+  getAttemptedTests: async (page: number = 1, size: number = 4): Promise<AttemptedTestsResponse> => {
+    const response = await apiRequest<AttemptedTestsResponse>('GET', `/test-series/attempted-tests?page=${page}&size=${size}`);
+    return response.data;
+  },
+};
