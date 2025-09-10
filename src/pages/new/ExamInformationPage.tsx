@@ -31,8 +31,8 @@ export default function ExamInformationPage() {
         {/*<div className="flex items-center justify-between ml-18 lg:ml-0">
           <Hexagon width={48} height={48} className="text-muted-foreground" />
         </div>*/}
-        <div className="flex text-center px-2">
-          <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
+        <div className="flex-1 text-center px-2">
+          <h1 className="text-lg sm:text-xl font-bold text-foreground">
             {instructions.title}
           </h1>
         </div>
