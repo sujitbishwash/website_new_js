@@ -71,7 +71,7 @@ export default function ExamConfigurationModal({
         try {
           setIsLoadingUserGoal(true);
           setUserGoalError("");
-          console.log("🎯 ExamConfigurationModal: Fetching user exam goal...");
+          
           
           const response = await getUserData();
           
@@ -80,13 +80,13 @@ export default function ExamConfigurationModal({
               exam: response.data.exam_goal.exam || "",
               group_type: response.data.exam_goal.group || ""
             });
-            console.log("✅ ExamConfigurationModal: User exam goal loaded successfully:", response.data.exam_goal);
+            
           } else {
-            console.log("ℹ️ ExamConfigurationModal: No exam goal found for user");
+            
             setUserExamGoal(null);
           }
         } catch (error: any) {
-          console.error("❌ ExamConfigurationModal: Failed to fetch user exam goal:", error);
+          
           setUserGoalError("Failed to load user exam goal. Please try again.");
         } finally {
           setIsLoadingUserGoal(false);
@@ -106,14 +106,14 @@ export default function ExamConfigurationModal({
           setIsLoadingExamDetails(true);
           setExamTypesError("");
           setExamDetailsError("");
-          console.log("🎯 ExamConfigurationModal: Fetching exam types and details...");
+          
           
           // Fetch exam types
           const examTypesResponse = await examGoalApi.getExamTypes();
           
           if (examTypesResponse.data.success) {
             setExamTypes(examTypesResponse.data.data);
-            console.log("✅ ExamConfigurationModal: Exam types loaded successfully");
+            
           } else {
             throw new Error("Failed to load exam types");
           }
@@ -127,14 +127,14 @@ export default function ExamConfigurationModal({
               
               if (examDetailsResponse.data.success) {
                 setAllExamDetails(examDetailsResponse.data.data);
-                console.log("✅ ExamConfigurationModal: All exam details loaded successfully");
+                
               } else {
                 throw new Error("Failed to load exam details");
               }
             }
           }
         } catch (error: any) {
-          console.error("❌ ExamConfigurationModal: Failed to fetch initial data:", error);
+          
           setExamTypesError("Failed to load exam data. Please try again.");
         } finally {
           setIsLoadingExamTypes(false);
@@ -169,7 +169,7 @@ export default function ExamConfigurationModal({
       return;
     }
 
-    console.log("🎯 ExamConfigurationModal: Filtering exam details for:", {
+    {
       exam: selectedExamType,
       groupType: selectedGroupType
     });
@@ -182,10 +182,10 @@ export default function ExamConfigurationModal({
 
     if (filteredDetails.length > 0) {
       setSelectedExamDetail(filteredDetails[0]);
-      console.log("✅ ExamConfigurationModal: Exam detail filtered successfully");
+      
     } else {
       setSelectedExamDetail(null);
-      console.log("⚠️ ExamConfigurationModal: No matching exam detail found");
+      
     }
   }, [selectedExamType, selectedGroupType, allExamDetails]);
 
@@ -195,13 +195,7 @@ export default function ExamConfigurationModal({
       const examName = userExamGoal.exam.toLowerCase();
       const groupType = userExamGoal.group_type?.toLowerCase() || "";
 
-      console.log(
-        "🎯 ExamConfigurationModal: Auto-selecting exam based on user goal:",
-        {
-          examName,
-          groupType,
-        }
-      );
+      
 
       // Find matching exam type based on exam goal
       const matchingExamType = examTypes.find(type => 
@@ -221,14 +215,12 @@ export default function ExamConfigurationModal({
           setSelectedGroupType(matchingGroup);
         }
         
-        console.log("✅ ExamConfigurationModal: Found matching exam type:", {
+        {
           examType: matchingExamType.value,
           groupType: matchingGroup || matchingExamType.group[0]
         });
       } else {
-        console.log(
-          "⚠️ ExamConfigurationModal: No exact match found for exam goal, keeping default selection"
-        );
+        
       }
     }
   }, [userExamGoal, examTypes]);

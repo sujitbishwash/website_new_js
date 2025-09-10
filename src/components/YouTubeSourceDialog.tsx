@@ -121,11 +121,9 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       if (Array.isArray(videos)) {
         setSuggestedVideos(videos);
       } else {
-        console.warn("API returned non-array data:", videos);
         throw new Error("Invalid response format from API");
       }
     } catch (err: any) {
-      console.error("Failed to fetch suggested videos:", err.message);
       setSuggestionsError("Failed to load suggested videos");
       setSuggestedVideos([]);
     } finally {
@@ -151,11 +149,9 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
       // First validate the URL
       const validationResult = await validateUrl(url);
-      console.log("Validation result:", validationResult); // Debug log
 
       if (!validationResult.isValid) {
         if (validationResult.isOutOfSyllabus) {
-          console.log("Setting showOutOfSyllabus to true"); // Debug log
           // Show OutOfSyllabus modal
           setShowOutOfSyllabus(true);
           setIsLoading(false);
@@ -175,7 +171,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     } catch (err: any) {
       // Check if it's an out-of-syllabus error from getVideoDetail
       if (err.isOutOfSyllabus || err.status === 204) {
-        console.log("Content is out of syllabus, showing OutOfSyllabus modal");
         setShowOutOfSyllabus(true);
         setIsLoading(false);
         return;
@@ -224,7 +219,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     } catch (err: any) {
       // Check if it's an out-of-syllabus error from getVideoDetail
       if (err.isOutOfSyllabus || err.status === 204) {
-        console.log("Content is out of syllabus, showing OutOfSyllabus modal");
+        // Show OutOfSyllabus modal
         setShowOutOfSyllabus(true);
         setLoadingVideoId(null);
         return;
@@ -241,18 +236,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   if (!isOpen) {
     return null;
   }
-
-  console.log(
-    "YouTubeSourceDialog render - showOutOfSyllabus:",
-    showOutOfSyllabus
-  ); // Debug log
-
-  // Debug logging for suggested videos
-  console.log("🎬 YouTubeSourceDialog - suggestedVideos:", suggestedVideos);
-  console.log(
-    "🎬 YouTubeSourceDialog - suggestedVideos length:",
-    suggestedVideos?.length
-  );
 
   return (
     <>
@@ -421,7 +404,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         >
           <OutOfSyllabus
             onGoBack={() => {
-              console.log("Closing OutOfSyllabus modal"); // Debug log
               setShowOutOfSyllabus(false);
             }}
             suggestedVideos={suggestedVideos}
