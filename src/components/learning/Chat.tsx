@@ -39,7 +39,6 @@ interface ChatProps {
 // Typing indicator component with animated dots
 const TypingIndicator: React.FC = () => (
   <div className="flex justify-center mb-6">
-    <div className="px-5 py-3 rounded-2xl bg-gradient-to-r from-blue-900/20 to-purple-900/20 text-foreground rounded-bl-none border border-blue-600/30 backdrop-blur-sm">
       <div className="flex items-center space-x-3">
         <div className="flex items-center space-x-1">
           <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms', animationDuration: '1.4s' }}></div>
@@ -48,7 +47,6 @@ const TypingIndicator: React.FC = () => (
         </div>
         <span className="text-sm text-blue-200 font-medium">AI is thinking...</span>
       </div>
-    </div>
   </div>
 );
 

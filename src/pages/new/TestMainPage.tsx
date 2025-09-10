@@ -127,7 +127,7 @@ const InstructionsModal = ({ onClose }: { onClose: () => void }) => (
       <div className="flex justify-end items-center gap-4 p-5 border-t border-border bg-card rounded-b-2xl">
         <button
           onClick={onClose}
-          className="w-full transform rounded-lg px-6 py-2.5 font-semibold bg-blue-600 hover:bg-blue-700 text-foreground  hover:text-foreground transition-all duration-200 ease-in-out focus:outline-none sm:w-auto"
+          className="w-full transform rounded-lg px-6 py-2.5 font-semibold bg-blue-600 hover:bg-blue-700 text-white  hover:text-foreground transition-all duration-200 ease-in-out focus:outline-none sm:w-auto"
         >
           Got it
         </button>
@@ -922,7 +922,7 @@ const TestMainPage = () => {
             <h3 className="font-bold mb-4 text-foreground capitalize">
               {sectionTabs.find((t) => t.id === currentSection)?.label || currentSection}
             </h3>
-            <div className="grid grid-cols-6 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-3 justify-items-center">
+            <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-3 justify-items-center">
               {questions.map((q, index) => {
                 const buttonProps = {
                   number: index + 1,

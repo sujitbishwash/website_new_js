@@ -1,6 +1,10 @@
 import { Angry, Frown, Laugh, Meh, Smile, X } from "lucide-react";
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import { feedbackApi, FeedbackRequest, FeedbackChipsResponse } from "@/lib/api-client";
+import {
+  feedbackApi,
+  FeedbackRequest,
+  FeedbackChipsResponse,
+} from "@/lib/api-client";
 
 // --- TYPE DEFINITIONS ---
 
@@ -74,10 +78,9 @@ const SmileyIcon: React.FC<{
   };
 
   // Ensure rating is a valid key, fallback to neutral (3) if not
-  const validRating = (rating >= 1 && rating <= 5) ? rating : 3;
+  const validRating = rating >= 1 && rating <= 5 ? rating : 3;
   return icons[validRating];
 };
-
 
 // --- MAIN COMPONENT ---
 
@@ -135,7 +138,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
     try {
       setChipsLoading(true);
       setChipsError("");
-      
+
       // Validate component name
       const validComponents = ["Chat", "Flashcard", "Quiz", "Summary", "Video", "Test", "TestAnalysis", "VideoRecommendation", "TestRecommentation", "SnippetRecommendation"];
       const validComponentName = validComponents.includes(componentName) ? componentName : "Video";
@@ -155,11 +158,11 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
   // Get dynamic chips by filtering all chips based on current rating
   const dynamicChips = useMemo(() => {
     if (!rating) return [];
-    
+
     // Get chips for the current rating from allChips
     const chipsForRating = allChips[rating.toString()] || [];
     // Extract just the labels from the chip objects
-    return chipsForRating.map(chip => chip.label);
+    return chipsForRating.map((chip) => chip.label);
   }, [rating, allChips]);
 
   useEffect(() => {
@@ -180,7 +183,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
       setSubmissionStatus("idle");
       setAllChips({});
       setChipsError("");
-      
+
       // Fetch all feedback chips for this component
       fetchAllFeedbackChips();
     }
@@ -238,9 +241,22 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
 
     try {
       // Validate component name for API submission
-      const validComponents = ["Chat", "Flashcard", "Quiz", "Summary", "Video", "Test", "TestAnalysis", "VideoRecommendation", "TestRecommentation", "SnippetRecommendation"];
-      const validComponentName = validComponents.includes(componentName) ? componentName : "Video";
-      
+      const validComponents = [
+        "Chat",
+        "Flashcard",
+        "Quiz",
+        "Summary",
+        "Video",
+        "Test",
+        "TestAnalysis",
+        "VideoRecommendation",
+        "TestRecommentation",
+        "SnippetRecommendation",
+      ];
+      const validComponentName = validComponents.includes(componentName)
+        ? componentName
+        : "Video";
+
       // Transform data for backend API
       const backendPayload: FeedbackRequest = {
         component: validComponentName,
@@ -336,11 +352,11 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-[9999] flex items-center justify-center bg-submit/20 backdrop-blur-sm animate-fade-in p-4"
+      className="fixed inset-0 z-[9999] flex items-center justify-center bg-submit/20 backdrop-blur-sm animate-fade-in"
       onClick={handleBackdropClick}
     >
       <div
-        className="flex flex-col relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-card rounded-2xl shadow-xl border-1 pointer-events-auto m-4 contrast-more:border-2 motion-reduce:animate-none animate-[fadeIn_0.5s_ease-out]"
+        className=" m-4 flex flex-col relative w-full max-w-xl max-h-[90vh] overflow-y-auto bg-card rounded-2xl shadow-xl border-1"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -380,11 +396,8 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
             <X />
           </button>
         </div>
-
-        <form
-          onSubmit={handleSubmit}
-          
-        ><div className="p-6 space-y-6 overflow-y-auto flex-1">
+        {/* Modal Content */}
+        <div className="p-4 sm:p-6 space-y-6 overflow-y-auto flex-1">
           {/* Already Submitted Warning */}
           {!canSubmitFeedback && existingFeedback && (
             <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
@@ -415,11 +428,11 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
 
           {/* Star Rating */}
           <div className="text-center">
-            <p className="text-sm sm:text-lg text-gray-500 dark:text-gray-400 mb-4">
+            <p className=" hidden sm:block text-lg text-gray-500 dark:text-gray-400 mb-4">
               Rate your experience
             </p>
             <div
-              className="flex justify-center space-x-1 sm:space-x-12 feedback-stars"
+              className="flex justify-between sm:justify-center sm:space-x-12 feedback-stars"
               onMouseLeave={() => setHoverRating(null)}
               role="radiogroup"
               aria-label="Rate your experience with this video"
@@ -501,7 +514,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                     <div className="text-sm text-gray-600 dark:text-gray-400">
                       Select up to 3 suggestions:
                     </div>
-                    
+
                     {/* Loading state for chips */}
                     {chipsLoading && (
                       <div className="flex items-center justify-center py-4">
@@ -541,36 +554,40 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                     )}
 
                     {/* Chips display */}
-                    {!chipsLoading && !chipsError && dynamicChips.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {dynamicChips.map((chipLabel, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => handleChipToggle(chipLabel)}
-                            aria-pressed={selectedChips.includes(chipLabel)}
-                            className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-blue-500 feedback-chip ${
-                              selectedChips.includes(chipLabel)
-                                ? "bg-blue-600 text-white selected"
-                                : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
-                            }`}
-                          >
-                            {chipLabel}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                    {!chipsLoading &&
+                      !chipsError &&
+                      dynamicChips.length > 0 && (
+                        <div className="flex flex-wrap gap-2">
+                          {dynamicChips.map((chipLabel, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => handleChipToggle(chipLabel)}
+                              aria-pressed={selectedChips.includes(chipLabel)}
+                              className={`px-3 py-1.5 text-sm font-medium rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-blue-500 feedback-chip ${
+                                selectedChips.includes(chipLabel)
+                                  ? "bg-blue-600 text-white selected"
+                                  : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600"
+                              }`}
+                            >
+                              {chipLabel}
+                            </button>
+                          ))}
+                        </div>
+                      )}
 
                     {/* No chips available message */}
-                    {!chipsLoading && !chipsError && dynamicChips.length === 0 && (
-                      <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
-                        No suggestions available for this rating
-                      </div>
-                    )}
+                    {!chipsLoading &&
+                      !chipsError &&
+                      dynamicChips.length === 0 && (
+                        <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                          No suggestions available for this rating
+                        </div>
+                      )}
 
                     {selectedChips.length > 0 && (
                       <div className="text-xs text-gray-500 dark:text-gray-400">
-                        Selected: {selectedChips.join(', ')}
+                        Selected: {selectedChips.join(", ")}
                       </div>
                     )}
                   </div>
@@ -583,7 +600,7 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
                       placeholder="Tell us more ..."
                       rows={3}
                       maxLength={50}
-                      className={`w-full p-2 text-foreground text-2xl bg-background border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary transition-colors resize-none ${
+                      className={`w-full p-2 text-foreground text-2xl bg-background border rounded-lg transition-colors resize-none ${
                         comment.length > 45
                           ? "border-orange-300 dark:border-orange-600"
                           : comment.length > 50
@@ -669,38 +686,38 @@ const VideoFeedbackModal: React.FC<VideoFeedbackModalProps> = ({
               </ul>
             </div>
           )}
-          </div>
-          {/* Action Buttons */}
-          <div className="flex-shrink-0 flex justify-end items-center gap-4 p-5 border-t border-border bg-card rounded-b-2xl">
-            <button
-              type="button"
-              onClick={handleSkip}
-              className="px-6 py-2.5 text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-gray-400 feedback-button"
-            >
-              Maybe Later
-            </button>
-            <button
-              type="submit"
-              disabled={
-                rating === null ||
-                submissionStatus === "submitting" ||
-                !(canSubmitFeedback || existingFeedback)
-              }
-              className="flex-1 px-8 py-2.5 text-sm sm:text-base font-bold text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed feedback-button"
-            >
-              {submissionStatus === "submitting" ? (
-                <div className="flex items-center justify-center">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 feedback-spinner"></div>
-                  Sending to Server...
-                </div>
-              ) : !canSubmitFeedback ? (
-                "Feedback Already Submitted"
-              ) : (
-                "Submit Feedback"
-              )}
-            </button>
-          </div>
-        </form>
+        </div>
+        {/* Action Buttons */}
+        <div className="flex-shrink-0 flex justify-end items-center gap-4 p-4 sm:p-6 border-t border-border bg-card rounded-b-2xl">
+          <button
+            type="button"
+            onClick={handleSkip}
+            className="px-6 py-2.5 text-sm sm:text-base font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-gray-400 feedback-button"
+          >
+            Maybe Later
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={
+              rating === null ||
+              submissionStatus === "submitting" ||
+              !(canSubmitFeedback || existingFeedback)
+            }
+            className="flex-1 px-8 py-2.5 text-sm sm:text-base font-bold text-white bg-blue-600 rounded-lg transition-colors hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800 focus-visible:ring-blue-500 disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed feedback-button"
+          >
+            {submissionStatus === "submitting" ? (
+              <div className="flex items-center justify-center">
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2 feedback-spinner"></div>
+                Sending to Server...
+              </div>
+            ) : !canSubmitFeedback ? (
+              "Feedback Already Submitted"
+            ) : (
+              <span className="flex justify-center">Submit <span className="hidden sm:block">Feedback</span></span>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -3,90 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { authApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 import { useAuth } from "../../contexts/AuthContext";
-
-// --- ICONS (using SVG for self-containment) ---
-const UserIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
-  </svg>
-);
-
-const GenderIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="m14.31 8-3.02 6" />
-    <path d="m11.29 16 3.02-6" />
-    <path d="m9 12h.01" />
-    <path d="m15 12h.01" />
-  </svg>
-);
-
-const CalendarIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-    <line x1="16" x2="16" y1="2" y2="6" />
-    <line x1="8" x2="8" y1="2" y2="6" />
-    <line x1="3" x2="21" y1="10" y2="10" />
-  </svg>
-);
-
-const LoaderIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={`${className} animate-spin`}
-  >
-    <line x1="12" y1="2" x2="12" y2="6"></line>
-    <line x1="12" y1="18" x2="12" y2="22"></line>
-    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-    <line x1="2" y1="12" x2="6" y2="12"></line>
-    <line x1="18" y1="12" x2="22" y2="12"></line>
-    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-  </svg>
-);
+import { Calendar, LoaderCircle, User, VenusAndMars } from "lucide-react";
+import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg";
 
 // --- TYPE DEFINITIONS (for TypeScript) ---
 interface InputFieldProps {
@@ -136,7 +54,7 @@ const InputField: React.FC<InputFieldProps> = ({
 }) => {
   const errorClasses = error
     ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-    : "border-gray-600 focus:border-blue-400 focus:ring-blue-400";
+    : "border-border focus:border-blue-400 focus:ring-blue-400";
   return (
     <div>
       <label
@@ -152,7 +70,7 @@ const InputField: React.FC<InputFieldProps> = ({
         <input
           id={id}
           {...props}
-          className={`block w-full rounded-lg bg-gray-700 py-3 pl-10 pr-3 text-white placeholder-gray-500 transition duration-150 ease-in-out focus:outline-none focus:ring-2 sm:text-sm ${errorClasses}`}
+          className={`block w-full rounded-lg bg-background-subtle py-3 pl-10 pr-3 text-foreground placeholder-muted-foreground transition duration-150 ease-in-out focus:outline-none focus:ring-2 sm:text-sm ${errorClasses}`}
         />
       </div>
       {error && (
@@ -440,33 +358,32 @@ const PersonalInfoForm: React.FC = () => {
   // Show loading state while fetching user data
   if (isLoadingUserData) {
     return (
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-gray-800 p-6 sm:p-8 shadow-2xl transition-all duration-500">
-        <div className="text-center">
-          <LoaderIcon className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">
+      <div className="text-center">
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+        </div>
+        {/**<h2 className="text-2xl font-bold text-white mb-2">
             Loading Profile...
           </h2>
-          <p className="text-gray-400">Fetching your existing information</p>
-        </div>
+          <p className="text-gray-400">Fetching your existing information</p>*/}
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-md space-y-8 rounded-2xl bg-gray-800 p-6 sm:p-8 shadow-2xl transition-all duration-500">
+    <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-4 sm:p-8 shadow-2xl transition-all duration-500 border border-divider">
       <div>
-        <h2 className="text-center text-3xl font-bold tracking-tight text-white">
+        <h2 className="text-center text-3xl font-bold tracking-tight text-foreground">
           Complete Your Profile
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-400">
-          Please provide your personal information to continue. This information
-          is required.
+        <p className="mt-2 text-center text-sm sm:text-md text-muted-foreground">
+          Please provide your personal information to continue.
         </p>
-        {(formData.name || formData.gender || formData.dob) && (
+        {/*(formData.name || formData.gender || formData.dob) && (
           <p className="mt-2 text-center text-xs text-blue-400">
             ✓ Your existing information has been loaded
           </p>
-        )}
+        )*/}
       </div>
 
       {submitError && (
@@ -484,7 +401,7 @@ const PersonalInfoForm: React.FC = () => {
             value={formData.name}
             onChange={handleChange}
             placeholder="Enter your full name"
-            icon={<UserIcon className="h-5 w-5 text-gray-500" />}
+            icon={<User className="h-5 w-5 text-muted-foreground" />}
             error={errors.name}
           />
           <SelectField
@@ -492,7 +409,7 @@ const PersonalInfoForm: React.FC = () => {
             label="Gender *"
             value={formData.gender}
             onChange={handleChange}
-            icon={<GenderIcon className="h-5 w-5 text-gray-500" />}
+            icon={<VenusAndMars className="h-5 w-5 text-muted-foreground" />}
             error={errors.gender}
           >
             <option value="" disabled>
@@ -510,11 +427,11 @@ const PersonalInfoForm: React.FC = () => {
               value={formData.dob}
               onChange={handleChange}
               placeholder="Select a date"
-              icon={<CalendarIcon className="h-5 w-5 text-gray-500" />}
+              icon={<Calendar className="h-5 w-5 text-muted-foreground" />}
               error={errors.dob}
             />
             {age !== null && !errors.dob && (
-              <p className="mt-2 text-xs text-blue-400">
+              <p className="mt-2 text-xs text-primary">
                 You are {age} years old.
               </p>
             )}
@@ -525,15 +442,15 @@ const PersonalInfoForm: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-blue-600 to-blue-700 py-3 px-4 text-sm font-semibold text-white transition-all duration-300 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer group relative flex w-full justify-center rounded-md border border-transparent bg-primary py-3 px-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? (
               <>
-                <LoaderIcon className="h-5 w-5 mr-2" />
+                <LoaderCircle className="h-5 w-5 mr-2 animate-spin " />
                 Saving...
               </>
             ) : (
-              "Continue to Exam Goal"
+              "Next"
             )}
           </button>
         </div>
@@ -546,7 +463,7 @@ const PersonalInfoForm: React.FC = () => {
 
 export default function PersonalDetails() {
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-gray-900 p-4 font-sans">
+    <main className="flex min-h-screen w-full items-center justify-center bg-background p-4">
       <style>{`
             @keyframes fadeIn {
                 from { opacity: 0; transform: translateY(-10px); }
@@ -556,6 +473,18 @@ export default function PersonalDetails() {
                 animation: fadeIn 0.5s ease-in-out;
             }
         `}</style>
+      <header className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
+        <div
+          className={`flex items-center gap-2 overflow-hidden transition-all duration-300 lg:w-auto`}
+        >
+          <img src={AiPadhaiLogo} alt="Logo" width={30} height={30} />
+          <h1
+            className={`text-xl font-semibold whitespace-nowrap overflow-hidden transition-all duration-300 lg:w-auto`}
+          >
+            AI Padhai
+          </h1>
+        </div>
+      </header>
       <PersonalInfoForm />
     </main>
   );

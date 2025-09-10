@@ -54,7 +54,7 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
           </span>
         )}
       </h2>
-      <div className="flex flex-wrap gap-4 text-white">
+      <div className="flex flex-wrap gap-1 sm:gap-4 text-white">
         {options.length > 0 ? (
           options.map((option) => (
             <Chip
@@ -231,20 +231,20 @@ const TestConfigurationPageComponent = () => {
 
   return (
     <div className="bg-background text-foreground min-h-screen font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-7xl mx-auto bg-card border border-divider rounded-2xl shadow-2xl p-4 mt-15 sm:mt-0 sm:p-8 space-y-6 ">
+      <div className="w-full max-w-7xl mx-auto bg-card border border-divider rounded-2xl shadow-2xl p-4 mt-15 mb-10 sm:mb-0 sm:mt-0 sm:p-8 sm:space-y-6 ">
         {/* --- Header --- */}
-        <div className="text-center">
+        <div className="text-center mb-6 sm:mb-0">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Configure Your Test
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
+          <p className="mt-2 text-lg text-muted-foreground hidden sm:block">
             Select your preferences to start a practice test.
           </p>
         </div>
 
         {/* --- User Profile Section --- */}
         {profile && examGoal && (
-          <div className="mt-4 flex justify-start items-center gap-3">
+          <div className="mt-4 flex justify-start items-center gap-3 hidden sm:block">
             <span className="text-xs font-medium px-3 py-1">
               Exam Goal: {examGoal.exam}
             </span>
@@ -272,7 +272,7 @@ const TestConfigurationPageComponent = () => {
         )}
 
         {/* --- Form Sections --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 sm:gap-6">
           <SelectionPanel
             title="1. Select Subject"
             options={subjects}
@@ -315,7 +315,7 @@ const TestConfigurationPageComponent = () => {
               !selectedDifficulty ||
               !selectedLanguage
             }
-            className={`px-4 py-2 text-xl font-semibold rounded-lg backdrop-blur-sm border-1  transition-all duration-300 ${
+            className={`w-full sm:w-auto px-4 py-2 text-xl font-semibold rounded-lg backdrop-blur-sm border-1  transition-all duration-300 ${
               isSubmitting ||
               !selectedSubject ||
               !selectedDifficulty ||

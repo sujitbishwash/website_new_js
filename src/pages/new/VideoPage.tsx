@@ -334,7 +334,7 @@ import ShareModal from "@/components/modals/ShareModal";
           <div
             className={`flex items-center ${
               isLeftColumnVisible ? "justify-start" : "justify-center gap-2"
-            } rounded-lg p-4 w-full overflow-x-auto`}
+            } rounded-lg p-2 sm:p-4 w-full overflow-x-auto`}
           >
             {modes.map(({ key, label, icon }) => (
               <button
@@ -352,7 +352,7 @@ import ShareModal from "@/components/modals/ShareModal";
               </button>
             ))}
           </div>
-          <div className="flex flex-row items-center absolute top-1/2 -translate-y-1/2 right-2 space-x-2">
+          <div className="flex flex-row items-center absolute top-1/2 -translate-y-1/2 right-2 space-x-2 hidden sm:block">
             <button
               onClick={onShare}
               title="Share"
@@ -1256,7 +1256,7 @@ import ShareModal from "@/components/modals/ShareModal";
       </div>
         <div className="sm:hidden">
           <div className="flex flex-col h-[100vh]">
-            <header className="flex flex-row mb-2 gap-3 justify-between p-4 items-center ">
+            <header className="flex flex-row gap-3 justify-between p-4 items-center ">
               <div className="flex-1 min-w-0 overflow-ellipsis">
                 <h1 className="text-md text-gray-500 truncate px-14 ">
                   {videoDetail?.title || "Video Title Not Available"}
@@ -1294,13 +1294,13 @@ import ShareModal from "@/components/modals/ShareModal";
             </header>
             <div className={`flex-shrink-0 ${isVideoVisible ? "" : "hidden"}`}>
               {/* YouTube Video Player with Progress Tracking - Mobile */}
-              <div className="mb-4">
+              <div className="">
                 <YouTube
                   videoId={currentVideoId}
                   onReady={onYouTubeReady}
                   onEnd={onYouTubeEnd}
                   onStateChange={onYouTubeStateChange}
-                  className="aspect-video bg-black rounded-lg overflow-hidden shadow-lg w-full h-full"
+                  className="aspect-video bg-black overflow-hidden w-full h-full"
                   opts={{
                     height: '100%',
                     width: '100%',
@@ -1316,13 +1316,10 @@ import ShareModal from "@/components/modals/ShareModal";
                 
                 
               </div>
-            </div>
-  
-            {isLeftColumnVisible ? (
-              <div className="sm:hidden mb-3">
+            </div><div className="p-1">
                 <button
                   onClick={() => setIsVideoVisible(!isVideoVisible)}
-                  className="flex w-full items-center justify-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-gray-800 text-white hover:bg-gray-700 transition-colors shadow-sm"
+                  className="flex w-full items-center justify-center gap-2 px-4 py-2 rounded-lg border-1 text-sm font-medium text-foreground transition-colors"
                 >
                   {isVideoVisible ? (
                     <EyeOff className="w-4 h-4" />
@@ -1331,8 +1328,7 @@ import ShareModal from "@/components/modals/ShareModal";
                   )}
                   <span>{isVideoVisible ? "Hide" : "Show"} Video</span>
                 </button>
-              </div>
-            ) : null}
+                </div>
             <div className="flex-grow overflow-hidden">
               <AITutorPanel
                 currentMode={currentMode}
