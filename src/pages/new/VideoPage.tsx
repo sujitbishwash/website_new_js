@@ -1019,25 +1019,48 @@ import ShareModal from "@/components/modals/ShareModal";
   
     const handleSendMessage = useCallback(
       async (message: string) => {
-        if (!message.trim() || !currentVideoId) return;
+        console.log("🚀 handleSendMessage called with:", message);
+        console.log("🚀 currentVideoId:", currentVideoId);
+        
+        if (!message.trim() || !currentVideoId) {
+          console.log("❌ Early return - empty message or no videoId");
+          return;
+        }
   
         // Add user message immediately
         const userMessage = { text: message, isUser: true };
-        setChatMessages((prev) => [...prev, userMessage]);
+        console.log("📝 Adding user message:", userMessage);
+        setChatMessages((prev) => {
+          const newMessages = [...prev, userMessage];
+          console.log("📝 Updated chat messages:", newMessages);
+          return newMessages;
+        });
   
         setIsChatLoading(true);
         setChatError(null);
+        console.log("⏳ Set loading to true, calling API...");
   
         try {
           const response = await chatApi.sendMessage(currentVideoId, message);
+          console.log("✅ API response received:", response);
           const assistantMessage = { text: response.content, isUser: false };
-          setChatMessages((prev) => [...prev, assistantMessage]);
+          console.log("🤖 Adding assistant message:", assistantMessage);
+          setChatMessages((prev) => {
+            const newMessages = [...prev, assistantMessage];
+            console.log("🤖 Final chat messages:", newMessages);
+            return newMessages;
+          });
         } catch (err) {
-          console.error("Failed to send message:", err);
+          console.error("❌ Failed to send message:", err);
           setChatError("Failed to send message. Please try again.");
           // Remove the user message if sending failed
-          setChatMessages((prev) => prev.slice(0, -1));
+          setChatMessages((prev) => {
+            const newMessages = prev.slice(0, -1);
+            console.log("🔄 Removed user message after error:", newMessages);
+            return newMessages;
+          });
         } finally {
+          console.log("🏁 Set loading to false");
           setIsChatLoading(false);
         }
       },
@@ -1068,6 +1091,7 @@ import ShareModal from "@/components/modals/ShareModal";
       console.log("🔄 Creating components for videoId:", currentVideoId);
       console.log("🔄 VideoDetail in components:", videoDetail);
       console.log("🔄 VideoDetail topics in components:", videoDetail?.topics);
+      console.log("🔄 Chat messages in components:", chatMessages.length);
       
       return {
         chat: (
@@ -1114,7 +1138,18 @@ import ShareModal from "@/components/modals/ShareModal";
           />
         ),
       };
-    }, [currentVideoId, videoDetail]); // Depend on both currentVideoId and videoDetail
+    }, [
+      currentVideoId, 
+      videoDetail, 
+      chatMessages, 
+      isChatLoading, 
+      chatError, 
+      isLeftColumnVisible,
+      chatFeedbackState,
+      chatMarkAsSubmitted,
+      quizFeedbackState,
+      quizMarkAsSubmitted
+    ]); // Include all dependencies that affect component rendering
   
     const handleShare = useCallback(() => {
       setIsShareModalOpen(true);
@@ -1381,7 +1416,7 @@ import ShareModal from "@/components/modals/ShareModal";
               // Only close if clicking on the backdrop, not on the modal content
               if (e.target === e.currentTarget) {
                 setShowOutOfSyllabus(false);
-                navigateWithProgress(ROUTES.DASHBOARD);
+                navigateWithProgress(ROUTES.HOME);
               }
             }}
           >
@@ -1389,7 +1424,7 @@ import ShareModal from "@/components/modals/ShareModal";
               onGoBack={() => {
                 console.log("Closing OutOfSyllabus modal");
                 setShowOutOfSyllabus(false);
-                navigateWithProgress(ROUTES.DASHBOARD);
+                navigateWithProgress(ROUTES.HOME);
               }}
             />
           </div>

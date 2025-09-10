@@ -629,7 +629,7 @@ const TestMainPage = () => {
 
   const handleCloseTestResultDialog = () => {
     setShowTestResultDialog(false);
-    navigate(ROUTES.DASHBOARD);
+    navigate(ROUTES.HOME);
   };
 
   // --- Loading and Error States ---

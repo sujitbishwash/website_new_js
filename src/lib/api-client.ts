@@ -2,8 +2,8 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  // baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  baseURL: 'https://api.krishak.in',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  // baseURL: 'https://api.krishak.in',
   headers: {
     "Content-Type": "application/json",
   },
@@ -162,7 +162,10 @@ export const authApi = {
   googleLogin: async () => {
     // For OAuth flows, we need to redirect the entire page, not make an AJAX request
     // This avoids CORS issues with Google's OAuth endpoint
-    const redirectUrl = `${API_CONFIG.baseURL}/ums/auth/login`;
+    // Determine environment for backend routing (Vite)
+    const mode: string = import.meta.env.MODE;
+    const envParam = mode === 'production' ? 'prod' : 'dev';
+    const redirectUrl = `${API_CONFIG.baseURL}/ums/auth/login?env=${envParam}`;
     window.location.href = redirectUrl;
 
     // Return a promise that resolves immediately since we're redirecting
@@ -491,7 +494,7 @@ export const chatApi = {
   getChatHistory: async (videoId: string): Promise<ChatHistoryResponse> => {
     const response = await apiRequest<ChatHistoryResponse>(
       "GET",
-      `/ai_agent/history?vedio_id=${encodeURIComponent(videoId)}`
+      `/ai_agent/history?video_id=${encodeURIComponent(videoId)}`
     );
     return response.data;
   },
@@ -500,7 +503,7 @@ export const chatApi = {
     const response = await apiRequest<ChatStartResponse>(
       "POST",
       "/ai_agent/start",
-      { vedio_id: videoId }
+      { video_id: videoId }
     );
     return response.data;
   },
@@ -513,7 +516,7 @@ export const chatApi = {
       "POST",
       "/ai_agent/send",
       {
-        vedio_id: videoId,
+        video_id: videoId,
         message: message,
       }
     );
@@ -1013,6 +1016,40 @@ export const feedbackApi = {
   // Get specific feedback by ID
   getFeedbackById: async (id: string): Promise<FeedbackResponse> => {
     const response = await apiRequest<FeedbackResponse>('GET', `/feedback/${id}`);
+    return response.data;
+  },
+};
+
+// Attempted Tests API interfaces
+export interface AttemptedTest {
+  id: string;
+  title: string;
+  positive_score: number;
+  date: string;
+  questions: number;
+  correct: number;
+  wrong: number;
+  session_id: number;
+  total_marks: number;
+  total_marks_scored: number;
+  attempt: number;
+  subject: string;
+  topics: string[];
+  level: string;
+  language?: string;
+}
+
+export interface AttemptedTestsResponse {
+  tests: AttemptedTest[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export const attemptedTestsApi = {
+  // Get user's attempted tests
+  getAttemptedTests: async (page: number = 1, size: number = 4): Promise<AttemptedTestsResponse> => {
+    const response = await apiRequest<AttemptedTestsResponse>('GET', `/test-series/attempted-tests?page=${page}&size=${size}`);
     return response.data;
   },
 };

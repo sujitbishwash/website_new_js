@@ -55,7 +55,7 @@ const OnboardingRoute: React.FC<OnboardingRouteProps> = ({
   // If user's next step is not this page, redirect accordingly without rendering children
   if (nextStep && nextStep !== requiredStep) {
     if (nextStep === "dashboard") {
-      return <Navigate to={ROUTES.DASHBOARD} replace />;
+      return <Navigate to={ROUTES.HOME} replace />;
     }
     if (nextStep === "exam-goal") {
       return <Navigate to={ROUTES.EXAM_GOAL} replace />;

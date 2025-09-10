@@ -219,7 +219,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   const navigateToHome = () => {
     onClose();
-    navigate(ROUTES.DASHBOARD);
+    navigate(ROUTES.HOME);
   };
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
@@ -454,7 +454,7 @@ export default function YouTubeSourceDialog() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const navigate = useNavigate();
   const handleClose = () => {
-    navigate(ROUTES.DASHBOARD);
+    navigate(ROUTES.HOME);
     setIsModalOpen(false);
   };
 

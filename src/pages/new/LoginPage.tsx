@@ -26,7 +26,7 @@ const LoginPage: React.FC = () => {
           // Navigate based on user state
           if (userState.nextStep === "dashboard") {
             console.log("User has exam goal, redirecting to dashboard");
-            navigate(ROUTES.DASHBOARD, { replace: true });
+            navigate(ROUTES.HOME, { replace: true });
           } else if (userState.nextStep === "exam-goal") {
             console.log("Redirecting to exam goal page");
             navigate(ROUTES.EXAM_GOAL, { replace: true });
@@ -251,7 +251,7 @@ const LoginCard: React.FC = () => {
   // Get the return URL from location state, or default to dashboard
   const from =
     (location.state as { from?: { pathname: string } })?.from?.pathname ||
-    ROUTES.DASHBOARD;
+    ROUTES.HOME;
 
   const validateEmail = (email: string): boolean => {
     const re =

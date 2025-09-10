@@ -1,4 +1,4 @@
-import { SuggestedVideo, videoApi } from "@/lib/api-client";
+import { SuggestedVideo, videoApi, attemptedTestsApi, AttemptedTest } from "@/lib/api-client";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSourceModal } from "../../components/YouTubeSourceDialog";
@@ -26,15 +26,7 @@ interface Topic {
   description: string;
 }
 
-interface AttemptedTest {
-  id: string;
-  title: string;
-  score: number;
-  date: string;
-  questions: number;
-  correct: number;
-  wrong: number;
-}
+// AttemptedTest interface is now imported from api-client
 
 interface SuggestedReading {
   id: string;
@@ -266,35 +258,7 @@ const initialTopics: Topic[] = [
   },
 ];
 
-const initialAttemptedTests: AttemptedTest[] = [
-  {
-    id: "at1",
-    title: "Algebra Basics Test",
-    score: 85,
-    date: "2025-07-26",
-    questions: 20,
-    correct: 17,
-    wrong: 3,
-  },
-  {
-    id: "at2",
-    title: "Modern Art Quiz",
-    score: 92,
-    date: "2025-07-25",
-    questions: 25,
-    correct: 23,
-    wrong: 2,
-  },
-  {
-    id: "at3",
-    title: "Data Structures Challenge",
-    score: 78,
-    date: "2025-07-24",
-    questions: 30,
-    correct: 23,
-    wrong: 7,
-  },
-];
+// Mock data removed - now using API
 
 const suggestedReadings: SuggestedReading[] = [
   { id: "sr1", title: "A Brief History of Time", topic: "Cosmology" },
@@ -310,7 +274,9 @@ const suggestedTests: SuggestedTest[] = [
 
 // --- MAIN COMPONENT ---
 export default function HomePage() {
-  const [attemptedTests, setAttemptedTests] = useState(initialAttemptedTests);
+  const [attemptedTests, setAttemptedTests] = useState<AttemptedTest[]>([]);
+  const [isLoadingAttemptedTests, setIsLoadingAttemptedTests] = useState(false);
+  const [attemptedTestsError, setAttemptedTestsError] = useState<string | null>(null);
   const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
   const [suggestedVideos, setSuggestedVideos] = useState<SuggestedVideo[]>([]);
   const [isLoadingVideos, setIsLoadingVideos] = useState(false);
@@ -327,6 +293,23 @@ export default function HomePage() {
     formatDuration,
     formatLastUpdated,
   } = useVideoProgress();
+
+  // Fetch attempted tests
+  const fetchAttemptedTests = async () => {
+    try {
+      setIsLoadingAttemptedTests(true);
+      setAttemptedTestsError(null);
+      const response = await attemptedTestsApi.getAttemptedTests(1, 10);
+      setAttemptedTests(response.tests);
+    } catch (error: any) {
+      console.error("Failed to fetch attempted tests:", error);
+      setAttemptedTestsError(error.message || "Failed to load attempted tests");
+      // Fallback to empty array if API fails
+      setAttemptedTests([]);
+    } finally {
+      setIsLoadingAttemptedTests(false);
+    }
+  };
 
   // Fetch suggested videos when component mounts
   useEffect(() => {
@@ -347,13 +330,8 @@ export default function HomePage() {
     };
 
     fetchSuggestedVideos();
+    fetchAttemptedTests();
   }, []);
-
-  const handleRemoveRecord = (id: string, type: "test") => {
-    if (type === "test") {
-      setAttemptedTests((prev) => prev.filter((item) => item.id !== id));
-    }
-  };
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
     try {
@@ -370,7 +348,7 @@ export default function HomePage() {
       // Check if it's an out-of-syllabus error
       if (err.isOutOfSyllabus || err.status === 204) {
         console.log("Content is out of syllabus, redirecting to dashboard");
-        navigate(ROUTES.DASHBOARD);
+        navigate(ROUTES.HOME);
       }
     } finally {
       setIsLoadingVideos(false);
@@ -715,68 +693,95 @@ export default function HomePage() {
 
         {/* Attempted Tests Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
-          <h2 className="text-md sm:text-2xl font-bold text-foreground mb-5 flex justify-between items-center">
-            <span>Attempted Tests</span>
-            <span
-              onClick={() => {
-                navigate(ROUTES.ATTEMPTED_TESTS);
-              }}
-              className="text-sm font-medium text-primary hover:opacity-80 transition-colors cursor-pointer"
-            >
-              View all
-            </span>
-          </h2>
-          <div className="space-y-4">
-            {attemptedTests.map((test) => (
-              <div
-                key={test.id}
-                className="group relative bg-card/80 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 transition-all duration-300 hover:shadow-xl hover:bg-accent/10 border border-border-medium hover:border-primary"
+          <div className="flex justify-between items-center mb-5">
+            <h2 className="text-2xl font-bold text-foreground">Attempted Tests</h2>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={fetchAttemptedTests}
+                disabled={isLoadingAttemptedTests}
+                className="flex items-center gap-2 px-3 py-2 text-sm text-primary hover:text-primary/80 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
               >
-                <div className="flex-shrink-0 text-center w-24">
-                  <p
-                    className={`text-4xl font-bold ${
-                      test.score >= 80 ? "text-green-400" : "text-yellow-400"
-                    }`}
-                  >
-                    {test.score}%
-                  </p>
-                  <p className="text-xs text-muted-foreground/80">
-                    Overall Score
-                  </p>
-                </div>
-                <div className="flex-grow w-full border-t sm:border-t-0 sm:border-l border-slate-700 pt-3 sm:pt-0 sm:pl-4">
-                  <h3 className="font-semibold text-foreground text-lg">
-                    {test.title}
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    Attempted: {test.date}
-                  </p>
-                  <div className="flex items-center space-x-4 text-sm">
-                    <div className="flex items-center text-green-400">
-                      <CheckCircleIcon className="h-5 w-5 mr-1.5" />
-                      <span>{test.correct} Correct</span>
-                    </div>
-                    <div className="flex items-center text-red-400">
-                      <XCircleIcon className="h-5 w-5 mr-1.5" />
-                      <span>{test.wrong} Wrong</span>
+                <RefreshCcw className="w-4 h-4" />
+                Refresh
+              </button>
+              <a
+                href="#"
+                className="text-sm font-medium text-primary hover:opacity-80 transition-colors"
+              >
+                View all
+              </a>
+            </div>
+          </div>
+
+          {isLoadingAttemptedTests ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+              <span className="ml-2 text-muted-foreground">
+                Loading attempted tests...
+              </span>
+            </div>
+          ) : attemptedTestsError ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>{attemptedTestsError}</p>
+              <button
+                onClick={fetchAttemptedTests}
+                className="mt-2 text-primary hover:underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : attemptedTests.length > 0 ? (
+            <div className="space-y-4">
+              {attemptedTests.map((test) => (
+                <div
+                  key={test.id}
+                  className="group relative bg-card/80 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 transition-all duration-300 hover:shadow-xl hover:bg-accent/10 border border-border-medium hover:border-primary"
+                >
+                  <div className="flex-shrink-0 text-center w-24">
+                    <p
+                      className={`text-4xl font-bold ${test.total_marks_scored >= 80 ? "text-green-400" : "text-yellow-400"
+                        }`}
+                    >
+                      {test.total_marks_scored} / {test.total_marks}
+                    </p>
+                    <p className="text-xs text-muted-foreground/80">
+                      Overall Score
+                    </p>
+                  </div>
+                  <div className="flex-grow w-full border-t sm:border-t-0 sm:border-l border-slate-700 pt-3 sm:pt-0 sm:pl-4">
+                    <h3 className="font-semibold text-foreground text-lg">
+                      {test.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Attempted: {test.date}
+                    </p>
+                    <div className="flex items-center space-x-4 text-sm">
+                      <div className="flex items-center text-green-400">
+                        <CheckCircleIcon className="h-5 w-5 mr-1.5" />
+                        <span>{test.correct} Correct</span>
+                      </div>
+                      <div className="flex items-center text-red-400">
+                        <XCircleIcon className="h-5 w-5 mr-1.5" />
+                        <span>{test.wrong} Wrong</span>
+                      </div>
                     </div>
                   </div>
+                  <button
+                    onClick={() => navigate(ROUTES.ANALYSIS2, { state: { sessionId: test.session_id } })}
+                    className="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-md hover:bg-primary/90 transition-colors w-full sm:w-auto cursor-pointer"
+                  >
+                    Review Test
+                  </button>
                 </div>
-                <button
-                  onClick={() => navigate(ROUTES.ANALYSIS)}
-                  className="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-md hover:bg-primary/90 transition-colors w-full sm:w-auto cursor-pointer"
-                >
-                  Review Test
-                </button>
-                <button
-                  onClick={() => handleRemoveRecord(test.id, "test")}
-                  className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:bg-accent hover:text-accent-foreground"
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </button>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground">
+              <ClipboardList className="h-12 w-12 mx-auto mb-4 opacity-50" />
+              <p className="text-lg font-medium mb-2">No attempted tests</p>
+              <p className="text-sm">Complete some tests to see them here</p>
+            </div>
+          )}
         </div>
 
         {/* Explore Topics Card */}
