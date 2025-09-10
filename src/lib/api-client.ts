@@ -157,10 +157,7 @@ export const authApi = {
 
   // Get authenticated user data (for exam goal check)
   getAuthenticatedUser: async () => {
-    console.log(
-      "🚨 DIRECT API CALL to getAuthenticatedUser",
-      new Date().toISOString()
-    );
+    
     return apiRequest<{
       exam?: string;
       group_type?: string;

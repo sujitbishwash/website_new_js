@@ -87,7 +87,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   // Load stored data on mount
   useEffect(() => {
     const loadStoredData = () => {
-      console.log("🔄 UserContext: Loading stored data from localStorage...");
+      
 
       // Check AuthContext's localStorage for exam goal data
       let authContextExamGoal = null;
@@ -100,17 +100,11 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
               exam: parsedUserData.exam,
               groupType: parsedUserData.group_type,
             };
-            console.log(
-              "🎯 UserContext: Found exam goal in AuthContext localStorage:",
-              authContextExamGoal
-            );
+            
           }
         }
       } catch (error) {
-        console.warn(
-          "UserContext: Failed to parse AuthContext localStorage data:",
-          error
-        );
+        
       }
 
       if (authContextExamGoal) setExamGoal(authContextExamGoal as ExamGoal);
@@ -118,9 +112,8 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       // Mark as loaded if we have any stored data
       if (authContextExamGoal) {
         setIsDataLoaded(true);
-        console.log("✅ UserContext: Data loaded from localStorage");
       } else {
-        console.log("⚠️ UserContext: No stored data found");
+        
       }
     };
 
@@ -130,20 +123,13 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   // Fetch profile data only (exam goal is fetched separately when needed)
   const fetchUserData = useCallback(
     async (forceRefresh = false) => {
-      console.log(
-        "🔍 fetchUserData called",
-        new Date().toISOString(),
-        "forceRefresh:",
-        forceRefresh
-      );
+      
 
 
 
       // If AuthContext is still loading, wait for it to complete
       if (authLoading) {
-        console.log(
-          "⏳ AuthContext is still loading, skipping UserContext fetch..."
-        );
+        
         return;
       }
 
@@ -151,14 +137,10 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         setIsLoading(true);
         setError(null);
 
-        console.log(
-          "📡 UserContext: Fetching profile data from API...",
-          new Date().toISOString()
-        );
+        
         const response = await getUserData();
         const userData = response?.data;
-
-        console.log("📋 User data from API:", userData);
+        
 
         // Update profile data only
         const profileData: UserProfile = {
@@ -182,10 +164,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
             groupType: userData.exam_goal.group,
           };
 
-          console.log(
-            "🎯 UserContext: Found exam goal data in /ums/me response:",
-            examGoalData
-          );
+          
 
           // Update exam goal state
           setExamGoal(examGoalData);
@@ -196,10 +175,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
             groupType: userData.group_type,
           };
 
-          console.log(
-            "🎯 UserContext: Found exam goal data in legacy format:",
-            examGoalData
-          );
+          
 
 
 
@@ -232,21 +208,14 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
 
   const fetchExamGoal = useCallback(
     async (forceRefresh = false) => {
-      console.log("🎯 fetchExamGoal called with forceRefresh:", forceRefresh);
-
-
-
+      
       try {
         setIsLoading(true);
         setError(null);
-
-        console.log("📡 fetchExamGoal: Getting exam goal from /ums/me API...");
+        
         const response = await getUserData();
         const userData = response?.data;
-        console.log(
-          "📡 fetchExamGoal: /ums/me API response received:",
-          userData
-        );
+        
 
         if (userData?.exam_goal?.exam && userData?.exam_goal?.group) {
           const examGoalData: ExamGoal = {
@@ -254,25 +223,19 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
             groupType: userData.exam_goal.group,
           };
 
-          console.log("🎯 fetchExamGoal: Parsed exam goal data:", examGoalData);
-
-
-
+          
           // Update state
           setExamGoal(examGoalData);
-          console.log("🎯 Exam goal fetched from /ums/me:", examGoalData);
+          
         } else {
           // No exam goal found
-          console.log(
-            "⚠️ fetchExamGoal: No exam goal found in /ums/me response"
-          );
-
+          
           setExamGoal(null);
-          console.log("❌ No exam goal found");
+          
         }
       } catch (err) {
         setError("Failed to fetch exam goal");
-        console.error("❌ fetchExamGoal: Error fetching exam goal:", err);
+        
         setExamGoal(null);
       } finally {
         setIsLoading(false);
@@ -297,7 +260,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       setIsDataLoaded(true);
     } catch (err) {
       setError("Failed to fetch stats");
-      console.error("Error fetching stats:", err);
+      
       // On error, assume no stats
       setStats(null);
     } finally {
@@ -348,7 +311,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         // Revert on failure
         setProfile(originalProfile);
         setError("Failed to update profile");
-        console.error("Error updating profile:", err);
+        
       }
     },
     [profile]
@@ -371,7 +334,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         // Revert on failure
         setExamGoal(originalExamGoal);
         setError("Failed to update exam goal");
-        console.error("Error updating exam goal:", err);
+        
       }
     },
     [examGoal]
@@ -394,7 +357,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         // Revert on failure
         setPreferences(originalPreferences);
         setError("Failed to update preferences");
-        console.error("Error updating preferences:", err);
+        
       }
     },
     [preferences]
@@ -419,10 +382,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
             groupType: parsedUserData.group_type,
           };
 
-          console.log(
-            "🔄 UserContext: Syncing exam goal from AuthContext:",
-            examGoalData
-          );
+          
 
 
 
@@ -434,10 +394,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       }
       return false;
     } catch (error) {
-      console.warn(
-        "UserContext: Failed to sync exam goal from AuthContext:",
-        error
-      );
+      
       return false;
     }
   }, []);
