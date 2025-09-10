@@ -52,18 +52,18 @@ export const useVideoProgress = () => {
         });
 
         setProgressData(transformedData);
-        console.log("📊 Fetched video progress from API:", transformedData);
+        
       } catch (apiError: any) {
         // If API fails (404 or other error), fallback to localStorage
         if (apiError.status === 404) {
-          console.log("⚠️ API not available, fetching from localStorage");
+          
           await fetchFromLocalStorage();
         } else {
           throw apiError;
         }
       }
     } catch (err: any) {
-      console.error("❌ Failed to fetch video progress:", err);
+      
       setError(err.message || "Failed to load video progress");
       // Fallback to localStorage on any error
       await fetchFromLocalStorage();
@@ -98,7 +98,7 @@ export const useVideoProgress = () => {
             url: data.url
           };
         } catch {
-          console.warn(`Failed to parse localStorage data for key: ${key}`);
+          
           return null;
         }
       }).filter(Boolean) as VideoProgressData[];
@@ -107,9 +107,9 @@ export const useVideoProgress = () => {
       localProgressData.sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
       
       setProgressData(localProgressData);
-      console.log("📊 Fetched video progress from localStorage:", localProgressData);
+      
     } catch (err) {
-      console.error("❌ Failed to fetch from localStorage:", err);
+      
       setError("Failed to load video progress from local storage");
     }
   }, []);

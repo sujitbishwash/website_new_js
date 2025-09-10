@@ -46,7 +46,7 @@ const feedbackApi = {
     await new Promise(resolve => setTimeout(resolve, 1000));
     
     // In real implementation, send to your backend
-    console.log('Submitting feedback:', payload);
+    
     
     // Simulate occasional error
     if (Math.random() < 0.1) {
@@ -117,7 +117,7 @@ export const useVideoFeedback = ({
       const suggestions = await feedbackApi.getFeedbackSuggestions();
       setFeedbackSuggestions(suggestions);
     } catch (error) {
-      console.error('Failed to load feedback suggestions:', error);
+      
       // Fallback to default suggestions
       setFeedbackSuggestions([]);
     } finally {
@@ -157,7 +157,7 @@ export const useVideoFeedback = ({
       await feedbackApi.submitFeedback(payload);
       onFeedbackSubmitted?.(payload);
     } catch (error) {
-      console.error('Failed to submit feedback:', error);
+      
       throw error;
     }
   }, [onFeedbackSubmitted]);
@@ -251,7 +251,7 @@ export const useVideoFeedback = ({
         // Clear pending feedback
         localStorage.removeItem(`feedback_pending_${videoId}`);
       } catch (error) {
-        console.error('Failed to parse pending feedback:', error);
+        
         localStorage.removeItem(`feedback_pending_${videoId}`);
       }
     }
