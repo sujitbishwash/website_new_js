@@ -184,12 +184,15 @@ const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp, onOtpComplete }) => {
           }`}
           type="text"
           name="otp"
+          inputMode="numeric" // shows number keypad on mobile
+          pattern="[0-9]*"
           maxLength={1}
           value={data}
           onChange={(e) => handleChange(e.target, index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
           onFocus={(e) => e.currentTarget.select()}
           onPaste={index === 0 ? handlePaste : (e) => e.preventDefault()}
+          autoFocus={index === 0} // ✅ only true for first input
         />
       ))}
     </div>

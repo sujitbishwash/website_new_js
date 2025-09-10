@@ -129,7 +129,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen bg-card text-foreground border-r border-border flex flex-col z-40 transition-all duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-[100dvh] bg-card text-foreground border-r border-border flex flex-col z-40 transition-all duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 lg:static w-72 ${
           isContracted ? "lg:w-20" : "lg:w-64"

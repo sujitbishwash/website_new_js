@@ -1,4 +1,3 @@
-import { AddSourceModal } from "@/components/YouTubeSourceDialog";
 import Dropdown from "@/components/ui/dropdown";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -199,8 +198,8 @@ const ExamGoalSelector: FC = () => {
           <button
             onClick={handleSubmit}
             disabled={isButtonDisabled}
-            className={`w-full text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-opacity-50 ${
-              isButtonDisabled ? "bg-muted-foreground cursor-not-allowed" : "bg-primary hover:shadow-lg"
+            className={`w-full text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-opacity-50 cursor-pointer ${
+              isButtonDisabled ? "bg-muted-foreground cursor-not-allowed" : "bg-primary hover:bg-primary/80 hover:shadow-lg"
             }`}
           >
             {isSubmitting
@@ -210,13 +209,13 @@ const ExamGoalSelector: FC = () => {
         </div>
       )}
       {/* YouTube Source Dialog Modal */}
-      <AddSourceModal
+      {/**<AddSourceModal
         isOpen={isModalOpen}
         onClose={() => {
           setIsModalOpen(false);
           navigate(ROUTES.HOME);
         }}
-      />
+      />*/}
     </div>
   );
 };
@@ -232,18 +231,6 @@ const ExamGoalPage: FC = () => {
       navigate(ROUTES.HOME, { replace: true });
     }
   }, [isAuthenticated, isLoading, hasExamGoal, navigate]);
-
-  // This hook runs once when the component mounts to load Tailwind CSS.
-  useEffect(() => {
-    // Check if the script already exists to avoid adding it multiple times
-    if (!document.querySelector('script[src="https://cdn.tailwindcss.com"]')) {
-      const script = document.createElement("script");
-      script.src = "https://cdn.tailwindcss.com";
-      script.async = true;
-      // Appending to the document head is standard practice
-      document.head.appendChild(script);
-    }
-  }, []); // The empty dependency array ensures this effect runs only once.
 
   // Show loading spinner while checking authentication
   if (isLoading) {

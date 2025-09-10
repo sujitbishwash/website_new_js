@@ -204,7 +204,9 @@ const PersonalInfoForm: React.FC = () => {
     const fetchUserData = async () => {
       try {
         setIsLoadingUserData(true);
-        console.log("🔍 PersonalDetails: Using cached user data from AuthContext...");
+        console.log(
+          "🔍 PersonalDetails: Using cached user data from AuthContext..."
+        );
 
         // Use getUserData from AuthContext instead of direct API call
         const response = await getUserData();
@@ -216,7 +218,10 @@ const PersonalInfoForm: React.FC = () => {
           response.data
         ) {
           const userData = response.data;
-          console.log("📋 PersonalDetails: User data received from context:", userData);
+          console.log(
+            "📋 PersonalDetails: User data received from context:",
+            userData
+          );
 
           // Populate form with existing user data if available
           const updatedFormData: FormData = {
@@ -226,7 +231,10 @@ const PersonalInfoForm: React.FC = () => {
           };
 
           setFormData(updatedFormData);
-          console.log("✅ PersonalDetails: Form populated with user data:", updatedFormData);
+          console.log(
+            "✅ PersonalDetails: Form populated with user data:",
+            updatedFormData
+          );
         } else {
           console.log("⚠️ PersonalDetails: No user data found in context");
         }
@@ -358,15 +366,15 @@ const PersonalInfoForm: React.FC = () => {
   // Show loading state while fetching user data
   if (isLoadingUserData) {
     return (
-        <div className="text-center">
-          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
-                      </div>
-          {/**<h2 className="text-2xl font-bold text-white mb-2">
+      <div className="text-center">
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+        </div>
+        {/**<h2 className="text-2xl font-bold text-white mb-2">
             Loading Profile...
           </h2>
           <p className="text-gray-400">Fetching your existing information</p>*/}
-        </div>
+      </div>
     );
   }
 
@@ -446,7 +454,7 @@ const PersonalInfoForm: React.FC = () => {
           >
             {isLoading ? (
               <>
-                <LoaderCircle className="h-5 w-5 mr-2" />
+                <LoaderCircle className="h-5 w-5 mr-2 animate-spin " />
                 Saving...
               </>
             ) : (
@@ -473,7 +481,7 @@ export default function PersonalDetails() {
                 animation: fadeIn 0.5s ease-in-out;
             }
         `}</style>
-        <header className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
+      <header className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
         <div
           className={`flex items-center gap-2 overflow-hidden transition-all duration-300 lg:w-auto`}
         >

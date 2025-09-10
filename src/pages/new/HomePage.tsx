@@ -1,4 +1,9 @@
-import { SuggestedVideo, videoApi, attemptedTestsApi, AttemptedTest } from "@/lib/api-client";
+import {
+  SuggestedVideo,
+  videoApi,
+  attemptedTestsApi,
+  AttemptedTest,
+} from "@/lib/api-client";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSourceModal } from "../../components/YouTubeSourceDialog";
@@ -42,23 +47,6 @@ interface SuggestedTest {
 
 // --- SVG ICONS ---
 // Using inline SVGs to keep the component self-contained.
-
-const TrashIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    className={className}
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-    />
-  </svg>
-);
 
 const CheckCircleIcon: React.FC<IconProps> = ({ className }) => (
   <svg
@@ -276,7 +264,9 @@ const suggestedTests: SuggestedTest[] = [
 export default function HomePage() {
   const [attemptedTests, setAttemptedTests] = useState<AttemptedTest[]>([]);
   const [isLoadingAttemptedTests, setIsLoadingAttemptedTests] = useState(false);
-  const [attemptedTestsError, setAttemptedTestsError] = useState<string | null>(null);
+  const [attemptedTestsError, setAttemptedTestsError] = useState<string | null>(
+    null
+  );
   const [isYouTubeModalOpen, setIsYouTubeModalOpen] = useState(false);
   const [suggestedVideos, setSuggestedVideos] = useState<SuggestedVideo[]>([]);
   const [isLoadingVideos, setIsLoadingVideos] = useState(false);
@@ -694,7 +684,11 @@ export default function HomePage() {
         {/* Attempted Tests Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
           <div className="flex justify-between items-center mb-5">
-            <h2 className="text-2xl font-bold text-foreground">Attempted Tests</h2>
+            
+            
+            <h2 className="text-md sm:text-2xl font-bold text-foreground">
+              Attempted Tests
+            </h2>
             <div className="flex items-center gap-2">
               <button
                 onClick={fetchAttemptedTests}
@@ -704,12 +698,12 @@ export default function HomePage() {
                 <RefreshCcw className="w-4 h-4" />
                 Refresh
               </button>
-              <a
-                href="#"
-                className="text-sm font-medium text-primary hover:opacity-80 transition-colors"
+              <span
+                onClick={() => navigate(ROUTES.ATTEMPTED_TESTS)}
+                className="text-sm font-medium text-primary hover:opacity-80 transition-colors hover:cursor-pointer"
               >
                 View all
-              </a>
+              </span>
             </div>
           </div>
 
@@ -739,8 +733,11 @@ export default function HomePage() {
                 >
                   <div className="flex-shrink-0 text-center w-24">
                     <p
-                      className={`text-4xl font-bold ${test.total_marks_scored >= 80 ? "text-green-400" : "text-yellow-400"
-                        }`}
+                      className={`text-4xl font-bold ${
+                        test.total_marks_scored >= 80
+                          ? "text-green-400"
+                          : "text-yellow-400"
+                      }`}
                     >
                       {test.total_marks_scored} / {test.total_marks}
                     </p>
@@ -767,7 +764,11 @@ export default function HomePage() {
                     </div>
                   </div>
                   <button
-                    onClick={() => navigate(ROUTES.ANALYSIS2, { state: { sessionId: test.session_id } })}
+                    onClick={() =>
+                      navigate(ROUTES.ANALYSIS2, {
+                        state: { sessionId: test.session_id },
+                      })
+                    }
                     className="px-4 py-2 text-sm font-semibold bg-primary text-white rounded-md hover:bg-primary/90 transition-colors w-full sm:w-auto cursor-pointer"
                   >
                     Review Test
