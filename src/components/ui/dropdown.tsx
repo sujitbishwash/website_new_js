@@ -61,7 +61,7 @@ const Dropdown: FC<DropdownProps> = ({
           id={id}
           disabled={disabled}
           onClick={() => !disabled && setIsOpen(!isOpen)}
-          className={`w-full flex justify-between items-center text-left rounded-xl px-4 py-3 focus:outline-none focus:ring-1  transition-colors cursor-pointer disabled:cursor-not-allowed ${
+          className={`w-full flex justify-between items-center text-left rounded-xl px-4 py-3 focus:outline-none focus:ring-1 bg-background-subtle transition-colors cursor-pointer disabled:cursor-not-allowed ${
             value ? "text-foreground" : "text-muted-foreground"
           } ${isOpen ? "border border-blue-400" : "border border-border"}`}
         >

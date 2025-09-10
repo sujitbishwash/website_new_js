@@ -3,8 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { authApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 import { useAuth } from "../../contexts/AuthContext";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import { Calendar, LoaderCircle, User, VenusAndMars } from "lucide-react";
+import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg";
 
 // --- TYPE DEFINITIONS (for TypeScript) ---
 interface InputFieldProps {
@@ -54,7 +54,7 @@ const InputField: React.FC<InputFieldProps> = ({
 }) => {
   const errorClasses = error
     ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-    : "border-gray-600 focus:border-blue-400 focus:ring-blue-400";
+    : "border-border focus:border-blue-400 focus:ring-blue-400";
   return (
     <div>
       <label
@@ -70,7 +70,7 @@ const InputField: React.FC<InputFieldProps> = ({
         <input
           id={id}
           {...props}
-          className={`block w-full rounded-lg bg-gray-700 py-3 pl-10 pr-3 text-white placeholder-gray-500 transition duration-150 ease-in-out focus:outline-none focus:ring-2 sm:text-sm ${errorClasses}`}
+          className={`block w-full rounded-lg bg-background-subtle py-3 pl-10 pr-3 text-foreground placeholder-muted-foreground transition duration-150 ease-in-out focus:outline-none focus:ring-2 sm:text-sm ${errorClasses}`}
         />
       </div>
       {error && (
@@ -358,33 +358,32 @@ const PersonalInfoForm: React.FC = () => {
   // Show loading state while fetching user data
   if (isLoadingUserData) {
     return (
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-gray-800 p-6 sm:p-8 shadow-2xl transition-all duration-500">
         <div className="text-center">
-          <LoaderCircle className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">
+          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                      </div>
+          {/**<h2 className="text-2xl font-bold text-white mb-2">
             Loading Profile...
           </h2>
-          <p className="text-gray-400">Fetching your existing information</p>
+          <p className="text-gray-400">Fetching your existing information</p>*/}
         </div>
-      </div>
     );
   }
 
   return (
-    <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-6 sm:p-8 shadow-2xl transition-all duration-500">
+    <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-4 sm:p-8 shadow-2xl transition-all duration-500 border border-divider">
       <div>
-        <h2 className="text-center text-3xl font-bold tracking-tight text-white">
+        <h2 className="text-center text-3xl font-bold tracking-tight text-foreground">
           Complete Your Profile
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-400">
-          Please provide your personal information to continue. This information
-          is required.
+        <p className="mt-2 text-center text-sm sm:text-md text-muted-foreground">
+          Please provide your personal information to continue.
         </p>
-        {(formData.name || formData.gender || formData.dob) && (
+        {/*(formData.name || formData.gender || formData.dob) && (
           <p className="mt-2 text-center text-xs text-blue-400">
             ✓ Your existing information has been loaded
           </p>
-        )}
+        )*/}
       </div>
 
       {submitError && (
@@ -402,7 +401,7 @@ const PersonalInfoForm: React.FC = () => {
             value={formData.name}
             onChange={handleChange}
             placeholder="Enter your full name"
-            icon={<User className="h-5 w-5 text-gray-500" />}
+            icon={<User className="h-5 w-5 text-muted-foreground" />}
             error={errors.name}
           />
           <SelectField
@@ -410,7 +409,7 @@ const PersonalInfoForm: React.FC = () => {
             label="Gender *"
             value={formData.gender}
             onChange={handleChange}
-            icon={<VenusAndMars className="h-5 w-5 text-gray-500" />}
+            icon={<VenusAndMars className="h-5 w-5 text-muted-foreground" />}
             error={errors.gender}
           >
             <option value="" disabled>
@@ -428,11 +427,11 @@ const PersonalInfoForm: React.FC = () => {
               value={formData.dob}
               onChange={handleChange}
               placeholder="Select a date"
-              icon={<Calendar className="h-5 w-5 text-gray-500" />}
+              icon={<Calendar className="h-5 w-5 text-muted-foreground" />}
               error={errors.dob}
             />
             {age !== null && !errors.dob && (
-              <p className="mt-2 text-xs text-blue-400">
+              <p className="mt-2 text-xs text-primary">
                 You are {age} years old.
               </p>
             )}
@@ -443,7 +442,7 @@ const PersonalInfoForm: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-blue-600 to-blue-700 py-3 px-4 text-sm font-semibold text-white transition-all duration-300 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer group relative flex w-full justify-center rounded-md border border-transparent bg-primary py-3 px-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? (
               <>
@@ -451,7 +450,7 @@ const PersonalInfoForm: React.FC = () => {
                 Saving...
               </>
             ) : (
-              "Continue to Exam Goal"
+              "Next"
             )}
           </button>
         </div>
@@ -464,7 +463,7 @@ const PersonalInfoForm: React.FC = () => {
 
 export default function PersonalDetails() {
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-background p-4 font-sans">
+    <main className="flex min-h-screen w-full items-center justify-center bg-background p-4">
       <style>{`
             @keyframes fadeIn {
                 from { opacity: 0; transform: translateY(-10px); }
@@ -474,6 +473,18 @@ export default function PersonalDetails() {
                 animation: fadeIn 0.5s ease-in-out;
             }
         `}</style>
+        <header className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
+        <div
+          className={`flex items-center gap-2 overflow-hidden transition-all duration-300 lg:w-auto`}
+        >
+          <img src={AiPadhaiLogo} alt="Logo" width={30} height={30} />
+          <h1
+            className={`text-xl font-semibold whitespace-nowrap overflow-hidden transition-all duration-300 lg:w-auto`}
+          >
+            AI Padhai
+          </h1>
+        </div>
+      </header>
       <PersonalInfoForm />
     </main>
   );

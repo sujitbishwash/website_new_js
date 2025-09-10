@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertTriangle, X } from "lucide-react";
+import { AlertTriangle, Link, Loader, LoaderCircle, X } from "lucide-react";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -14,44 +14,6 @@ interface AddSourceModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-// To make this a self-contained component, we'll use inline SVGs for icons
-// instead of an external library like lucide-react.
-
-const LinkIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72" />
-    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72" />
-  </svg>
-);
-
-const LoadingIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M21 12a9 9 0 11-6.219-8.56" />
-  </svg>
-);
 
 // The Modal Component
 export const AddSourceModal: React.FC<AddSourceModalProps> = ({
@@ -299,7 +261,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           {/* Header */}
           <div className="text-center p-4 border-b border-border">
             <h2 className="flex items-center text-lg font-semibold text-foreground">
-              <LinkIcon className="mr-3 h-5 w-5 text-muted-foreground" />
+              <Link className="mr-3 h-5 w-5 text-muted-foreground" />
               YouTube, Website, Etc.
             </h2>
           </div>
@@ -357,7 +319,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
               {isLoadingSuggestions ? (
                 <div className="mt-4 flex items-center justify-center py-8">
-                  <LoadingIcon className="h-6 w-6 animate-spin text-gray-400" />
+                  <LoaderCircle className="h-6 w-6 animate-spin text-gray-400" />
                   <span className="ml-2 text-sm text-gray-400">
                     Loading suggestions...
                   </span>

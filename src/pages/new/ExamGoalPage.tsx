@@ -1,11 +1,11 @@
 import { AddSourceModal } from "@/components/YouTubeSourceDialog";
 import Dropdown from "@/components/ui/dropdown";
-import { theme } from "@/styles/theme";
 import { FC, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { examGoalApi, ExamType } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
+import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg";
 
 // --- Type Definitions ---
 interface ExamData {
@@ -146,23 +146,14 @@ const ExamGoalSelector: FC = () => {
   const isButtonDisabled = !examType || !specificExam || isSubmitting;
 
   return (
-    <div
-      className="w-full max-w-2xl rounded-2xl p-6 sm:p-8 md:p-12 shadow-2xl"
-      style={{ backgroundColor: theme.cardBackground }}
-    >
+    
+    <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-4 sm:p-8 shadow-2xl transition-all duration-500 border border-divider">
       <div className="text-center">
-        <h1
-          className="text-3xl sm:text-4xl font-bold"
-          style={{ color: theme.primaryText }}
-        >
+        <h2 className="text-center text-3xl font-bold tracking-tight text-foreground">
           Select Your Exam Goal
-        </h1>
-        <p
-          className="mt-3 text-base sm:text-lg"
-          style={{ color: theme.secondaryText }}
-        >
-          Choose the exam you are preparing for to personalize your learning
-          experience.
+        </h2>
+        <p className="mt-2 text-center text-sm sm:text-md text-muted-foreground">
+          Choose your exam to personalize the experience.
         </p>
       </div>
 
@@ -176,7 +167,7 @@ const ExamGoalSelector: FC = () => {
         {isLoading ? (
           <div className="text-center py-8">
             <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
-            <p className="mt-2 text-sm" style={{ color: theme.secondaryText }}>
+            <p className="mt-2 text-sm">
               Loading exam data...
             </p>
           </div>
@@ -209,15 +200,8 @@ const ExamGoalSelector: FC = () => {
             onClick={handleSubmit}
             disabled={isButtonDisabled}
             className={`w-full text-white font-bold py-3 px-4 rounded-lg transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-opacity-50 ${
-              isButtonDisabled ? "cursor-not-allowed" : "hover:shadow-lg"
+              isButtonDisabled ? "bg-muted-foreground cursor-not-allowed" : "bg-primary hover:shadow-lg"
             }`}
-            style={{
-              backgroundImage: isButtonDisabled
-                ? "none"
-                : `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
-              backgroundColor: isButtonDisabled ? theme.mutedText : "",
-              outlineColor: theme.accent,
-            }}
           >
             {isSubmitting
               ? "Navigating to dashboard..."
@@ -266,14 +250,10 @@ const ExamGoalPage: FC = () => {
     return (
       <main
         className="flex min-h-screen w-full items-center justify-center p-4"
-        style={{
-          backgroundColor: theme.background,
-          fontFamily: "'Inter', sans-serif",
-        }}
       >
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
-          <p className="mt-2 text-sm" style={{ color: theme.secondaryText }}>
+          <p className="mt-2 text-sm">
             Loading...
           </p>
         </div>
@@ -287,18 +267,30 @@ const ExamGoalPage: FC = () => {
   }
 
   return (
-    <main
-      className="flex min-h-screen w-full items-center justify-center p-4"
-      style={{
-        backgroundColor: theme.background,
-        fontFamily: "'Inter', sans-serif",
-      }}
-    >
-      <style>
-        {`
-          @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap');
-        `}
-      </style>
+    
+    <main className="flex min-h-screen w-full items-center justify-center bg-background p-4">
+      <style>{`
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(-10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.5s ease-in-out;
+            }
+        `}</style>
+      
+        <header className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
+        <div
+          className={`flex items-center gap-2 overflow-hidden transition-all duration-300 lg:w-auto`}
+        >
+          <img src={AiPadhaiLogo} alt="Logo" width={30} height={30} />
+          <h1
+            className={`text-xl font-semibold whitespace-nowrap overflow-hidden transition-all duration-300 lg:w-auto`}
+          >
+            AI Padhai
+          </h1>
+        </div>
+      </header>
       <ExamGoalSelector />
     </main>
   );
