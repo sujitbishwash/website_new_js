@@ -1,12 +1,12 @@
 import { theme } from "@/styles/theme";
 import { ChevronDown } from "lucide-react";
-import {  FC, useEffect, useRef, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 
 // Props for the Dropdown component
-interface DropdownProps {
+export interface DropdownProps {
   label: string;
   value: string;
-  onChange: (e: React.MouseEvent<HTMLLIElement>) => void;
+  onChange: (value: string) => void;
   options: string[];
   placeholder: string;
   disabled?: boolean;
@@ -42,8 +42,8 @@ const Dropdown: FC<DropdownProps> = ({
     };
   }, []);
 
-  const handleOptionClick = (e: React.MouseEvent<HTMLLIElement>) => {
-    onChange(e);
+  const handleOptionClick = (option: string) => {
+    onChange(option);
     setIsOpen(false);
   };
 
@@ -71,12 +71,14 @@ const Dropdown: FC<DropdownProps> = ({
 
         {isOpen && !disabled && (
           <div className="absolute z-10 mt-2 w-full bg-card rounded-md shadow-lg border-border border">
-            <ul className="py-1 max-h-60 overflow-auto">
+            <div className="py-1 max-h-60 overflow-auto">
               {options.map((option) => (
-                <li
+                <div
                   key={option}
-                  onClick={handleOptionClick}
-                  className={`px-4 py-2 text-sm cursor-pointer transition-colors text-foreground ${value === option ? `bg-border-medium` : 'transparent'}`}
+                  className={`px-4 py-2 text-sm cursor-pointer transition-colors text-foreground hover:bg-border-medium ${
+                    value === option ? 'bg-border-medium' : 'transparent'
+                  }`}
+                  onClick={() => handleOptionClick(option)}
                   onMouseEnter={(e) => {
                     if (value !== option) {
                       e.currentTarget.style.backgroundColor = theme.dividerHigh;
@@ -89,9 +91,9 @@ const Dropdown: FC<DropdownProps> = ({
                   }}
                 >
                   {option}
-                </li>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 import { AddSourceModal } from "@/components/YouTubeSourceDialog";
+import Dropdown from "@/components/ui/dropdown";
 import { theme } from "@/styles/theme";
-import { ChangeEvent, FC, useEffect, useMemo, useState } from "react";
+import { FC, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { examGoalApi, ExamType } from "../../lib/api-client";
@@ -12,81 +13,6 @@ interface ExamData {
 }
 
 // --- Reusable Components ---
-
-// Props for the Dropdown component
-interface DropdownProps {
-  label: string;
-  value: string;
-  onChange: (e: ChangeEvent<HTMLSelectElement>) => void;
-  options: string[];
-  placeholder: string;
-  disabled?: boolean;
-  id: string;
-}
-
-// Custom Dropdown Component
-const Dropdown: FC<DropdownProps> = ({
-  label,
-  value,
-  onChange,
-  options,
-  placeholder,
-  disabled = false,
-  id,
-}) => {
-  return (
-    <div className="w-full">
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium mb-2"
-        style={{ color: theme.secondaryText }}
-      >
-        {label}
-      </label>
-      <div className="relative">
-        <select
-          id={id}
-          value={value}
-          onChange={onChange}
-          disabled={disabled}
-          className="w-full appearance-none rounded-lg border px-4 py-3 pr-10 focus:outline-none focus:ring-2"
-          style={{
-            backgroundColor: disabled ? theme.inputBackground : theme.mutedText,
-            borderColor: theme.divider,
-            color: theme.primaryText,
-            cursor: disabled ? "not-allowed" : "pointer",
-            outlineColor: theme.accent,
-          }}
-        >
-          <option value="" disabled>
-            {placeholder}
-          </option>
-          {options.map((option) => (
-            <option key={option} value={option}>
-              {option}
-            </option>
-          ))}
-        </select>
-        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3">
-          <svg
-            className="h-5 w-5"
-            style={{ color: theme.secondaryText }}
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 // Main Card Component
 const ExamGoalSelector: FC = () => {
@@ -155,13 +81,13 @@ const ExamGoalSelector: FC = () => {
     [examType, examData]
   );
 
-  const handleExamTypeChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setExamType(e.target.value);
+  const handleExamTypeChange = (value: string) => {
+    setExamType(value);
     setSpecificExam(""); // Reset specific exam when type changes
   };
 
-  const handleSpecificExamChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setSpecificExam(e.target.value);
+  const handleSpecificExamChange = (value: string) => {
+    setSpecificExam(value);
   };
 
   const handleSubmit = async () => {
