@@ -3,90 +3,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { authApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 import { useAuth } from "../../contexts/AuthContext";
-
-// --- ICONS (using SVG for self-containment) ---
-const UserIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
-  </svg>
-);
-
-const GenderIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="m14.31 8-3.02 6" />
-    <path d="m11.29 16 3.02-6" />
-    <path d="m9 12h.01" />
-    <path d="m15 12h.01" />
-  </svg>
-);
-
-const CalendarIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-    <line x1="16" x2="16" y1="2" y2="6" />
-    <line x1="8" x2="8" y1="2" y2="6" />
-    <line x1="3" x2="21" y1="10" y2="10" />
-  </svg>
-);
-
-const LoaderIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={`${className} animate-spin`}
-  >
-    <line x1="12" y1="2" x2="12" y2="6"></line>
-    <line x1="12" y1="18" x2="12" y2="22"></line>
-    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-    <line x1="2" y1="12" x2="6" y2="12"></line>
-    <line x1="18" y1="12" x2="22" y2="12"></line>
-    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-  </svg>
-);
+import LoadingSpinner from "@/components/LoadingSpinner";
+import { Calendar, LoaderCircle, User, VenusAndMars } from "lucide-react";
 
 // --- TYPE DEFINITIONS (for TypeScript) ---
 interface InputFieldProps {
@@ -442,7 +360,7 @@ const PersonalInfoForm: React.FC = () => {
     return (
       <div className="w-full max-w-md space-y-8 rounded-2xl bg-gray-800 p-6 sm:p-8 shadow-2xl transition-all duration-500">
         <div className="text-center">
-          <LoaderIcon className="h-12 w-12 text-blue-500 mx-auto mb-4" />
+          <LoaderCircle className="h-12 w-12 text-blue-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold text-white mb-2">
             Loading Profile...
           </h2>
@@ -453,7 +371,7 @@ const PersonalInfoForm: React.FC = () => {
   }
 
   return (
-    <div className="w-full max-w-md space-y-8 rounded-2xl bg-gray-800 p-6 sm:p-8 shadow-2xl transition-all duration-500">
+    <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-6 sm:p-8 shadow-2xl transition-all duration-500">
       <div>
         <h2 className="text-center text-3xl font-bold tracking-tight text-white">
           Complete Your Profile
@@ -484,7 +402,7 @@ const PersonalInfoForm: React.FC = () => {
             value={formData.name}
             onChange={handleChange}
             placeholder="Enter your full name"
-            icon={<UserIcon className="h-5 w-5 text-gray-500" />}
+            icon={<User className="h-5 w-5 text-gray-500" />}
             error={errors.name}
           />
           <SelectField
@@ -492,7 +410,7 @@ const PersonalInfoForm: React.FC = () => {
             label="Gender *"
             value={formData.gender}
             onChange={handleChange}
-            icon={<GenderIcon className="h-5 w-5 text-gray-500" />}
+            icon={<VenusAndMars className="h-5 w-5 text-gray-500" />}
             error={errors.gender}
           >
             <option value="" disabled>
@@ -510,7 +428,7 @@ const PersonalInfoForm: React.FC = () => {
               value={formData.dob}
               onChange={handleChange}
               placeholder="Select a date"
-              icon={<CalendarIcon className="h-5 w-5 text-gray-500" />}
+              icon={<Calendar className="h-5 w-5 text-gray-500" />}
               error={errors.dob}
             />
             {age !== null && !errors.dob && (
@@ -529,7 +447,7 @@ const PersonalInfoForm: React.FC = () => {
           >
             {isLoading ? (
               <>
-                <LoaderIcon className="h-5 w-5 mr-2" />
+                <LoaderCircle className="h-5 w-5 mr-2" />
                 Saving...
               </>
             ) : (
@@ -546,7 +464,7 @@ const PersonalInfoForm: React.FC = () => {
 
 export default function PersonalDetails() {
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-gray-900 p-4 font-sans">
+    <main className="flex min-h-screen w-full items-center justify-center bg-background p-4 font-sans">
       <style>{`
             @keyframes fadeIn {
                 from { opacity: 0; transform: translateY(-10px); }
