@@ -39,38 +39,25 @@ interface ChatProps {
 // Typing indicator component with animated dots
 const TypingIndicator: React.FC = () => (
   <div className="flex justify-center mb-6">
-      <div className="flex items-center space-x-3">
-        <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0ms', animationDuration: '1.4s' }}></div>
-          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '200ms', animationDuration: '1.4s' }}></div>
-          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '400ms', animationDuration: '1.4s' }}></div>
-        </div>
-        <span className="text-sm text-blue-200 font-medium">AI is thinking...</span>
+    <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-1">
+        <div
+          className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+          style={{ animationDelay: "0ms", animationDuration: "1.4s" }}
+        ></div>
+        <div
+          className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+          style={{ animationDelay: "200ms", animationDuration: "1.4s" }}
+        ></div>
+        <div
+          className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+          style={{ animationDelay: "400ms", animationDuration: "1.4s" }}
+        ></div>
       </div>
-  </div>
-);
-
-const ChatHeader: React.FC = () => (
-  <div className="text-center p-6 md:p-8">
-    <div className="inline-block p-6 bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-full mb-6 border border-blue-600/30 shadow-lg backdrop-blur-sm">
-      <MessageCircle height={48} width={48}/>
+      <span className="text-sm text-blue-200 font-medium">
+        AI is thinking...
+      </span>
     </div>
-    {/* Changed title from "AI Tutor" to "AI Padhai" */}
-    <h1
-      className="text-3xl sm:text-4xl font-bold mb-4 text-primary"
-      style={{
-        background: "linear-gradient(135deg, #60A5FA 0%, #A78BFA 100%)",
-        WebkitBackgroundClip: "text",
-        WebkitTextFillColor: "transparent",
-        backgroundClip: "text",
-      }}
-    >
-      Learn with AI Padhai
-    </h1>
-    <p className="text-foreground text-lg max-w-md mx-auto leading-relaxed">
-      Your intelligent learning companion for personalized education and
-      interactive discussions
-    </p>
   </div>
 );
 
@@ -133,7 +120,10 @@ const Message: React.FC<MessageType> = ({ text, isUser }) => {
   );
 };
 
-const MessageList: React.FC<{ messages: MessageType[]; isLoading: boolean }> = ({ messages, isLoading }) => {
+const MessageList: React.FC<{
+  messages: MessageType[];
+  isLoading: boolean;
+}> = ({ messages, isLoading }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -145,19 +135,13 @@ const MessageList: React.FC<{ messages: MessageType[]; isLoading: boolean }> = (
   return (
     <div className="flex-1 overflow-y-auto space-y-2 pr-2 py-4">
       {messages.map((msg, index) => {
-        return (
-          <Message key={index} text={msg.text} isUser={msg.isUser} />
-        );
+        return <Message key={index} text={msg.text} isUser={msg.isUser} />;
       })}
       {isLoading && <TypingIndicator />}
       <div ref={messagesEndRef} />
     </div>
   );
 };
-
-
-
-
 
 // --- Markdown Renderer ---
 const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
@@ -402,11 +386,26 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
 };
 
 const ChatInput: React.FC<{
+  textAreaRef: React.RefObject<HTMLTextAreaElement>;
   onSendMessage: (text: string) => void;
   isLoading?: boolean;
   isLeftColumnVisible: boolean;
-}> = ({ onSendMessage, isLoading = false, isLeftColumnVisible }) => {
+}> = ({
+  textAreaRef,
+  onSendMessage,
+  isLoading = false,
+  isLeftColumnVisible,
+}) => {
   const [inputValue, setInputValue] = useState<string>("");
+
+  // Automatically adjust textarea height
+  React.useEffect(() => {
+    if (textAreaRef.current) {
+      textAreaRef.current.style.height = "auto";
+      const scrollHeight = textAreaRef.current.scrollHeight;
+      textAreaRef.current.style.height = `${scrollHeight}px`;
+    }
+  }, [inputValue, textAreaRef]);
 
   const handleSend = () => {
     if (inputValue.trim() && !isLoading) {
@@ -427,9 +426,10 @@ const ChatInput: React.FC<{
       <div
         className={`bg-card border border-border rounded-2xl p-2 flex flex-col ${
           isLeftColumnVisible ? "w-full" : "sm:w-[50vw]"
-        } ${isLoading ? 'animate-pulse border-blue-400/50' : ''}`}
+        } ${isLoading ? "animate-pulse border-blue-400/50" : ""}`}
       >
         <textarea
+          ref={textAreaRef}
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onKeyPress={handleKeyPress}
@@ -438,47 +438,18 @@ const ChatInput: React.FC<{
           style={{ minHeight: "40px", maxHeight: "200px" }}
           disabled={isLoading}
           className={`w-full bg-gray text-foreground placeholder-gray-400 focus:outline-none p-2 sm:pl-4 sm:pr-4 text-sm sm:text-base min-w-0 ${
-            isLoading ? 'opacity-50 cursor-not-allowed' : ''
+            isLoading ? "opacity-50 cursor-not-allowed" : ""
           }`}
         />
         <div className="flex items-center justify-end gap-1">
-          {/**<div className="flex items-center justify-between mt-2">
-            <div className="hidden sm:block">
-              <PlanSelector />
-            </div>
-
-            <div className="sm:ml-2">
-              <ModeSelector />
-            </div>
-          </div>*/}
-
           <div className="flex items-center gap-1">
-            {/*
-            <button
-              type="button"
-              className="p-2 text-gray-400 hover:text-foreground hover:bg-gray-700 rounded-full"
-            >
-              <PlusIcon />
-            </button>
-            <button
-              type="button"
-              className="p-2 text-gray-400 hover:text-foreground hover:bg-gray-700 rounded-full"
-            >
-              <SettingsIcon />
-            </button>
-            <button
-              type="button"
-              className="p-2 text-gray-400 hover:text-foreground hover:bg-gray-700 rounded-full"
-            >
-              <CanvasIcon />
-            </button>*/}
             <button
               onClick={handleSend}
               type="submit"
               className={`p-2 text-white rounded-full transition-all duration-200 ${
-                isLoading 
-                  ? 'bg-blue-500/50 cursor-not-allowed animate-pulse' 
-                  : 'bg-border-medium hover:bg-border-high cursor-pointer'
+                isLoading
+                  ? "bg-blue-500/50 cursor-not-allowed animate-pulse"
+                  : "bg-border-medium hover:bg-border-high cursor-pointer"
               }`}
               disabled={isLoading || !inputValue.trim()}
             >
@@ -507,15 +478,15 @@ export default function Chat({
   existingFeedback,
   markAsSubmitted,
 }: ChatProps) {
-  
   // Feedback state management
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
 
+  const textAreaRef = React.useRef<HTMLTextAreaElement>(null);
   // Check if feedback modal should open after 5 conversations
   useEffect(() => {
     // Count user messages (excluding AI responses)
-    const userMessageCount = messages.filter(msg => msg.isUser).length;
-    
+    const userMessageCount = messages.filter((msg) => msg.isUser).length;
+
     if (
       userMessageCount >= 5 &&
       canSubmitFeedback === true &&
@@ -548,7 +519,6 @@ export default function Chat({
   };
 
   const handleFeedbackSubmit = async (_payload: any) => {
-    
     if (markAsSubmitted) {
       markAsSubmitted();
     }
@@ -559,31 +529,49 @@ export default function Chat({
     <div className="flex flex-col flex-1 h-full bg-background text-primaryText w-full">
       {/* Conversation progress indicator - Fixed sticky positioning */}
       {messages.length > 0 && (
-        <div className="px-4 py-2 mb-2 sticky top-0 bg-background z-10 border-b border-border/50">
-          <div className={`w-full ${!isLeftColumnVisible ? "max-w-[60vw] mx-auto" : ""}`}>
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="px-4 sticky top-0 bg-background z-10 border-b border-border/50">
+          <div
+            className={`w-full ${
+              !isLeftColumnVisible ? "max-w-[60vw] mx-auto" : ""
+            }`}
+          >
+            {/**<div className="flex items-center justify-between text-sm text-muted-foreground">
               <span>Conversation Progress</span>
               <span className="flex items-center gap-2">
                 <span className="text-xs bg-blue-600 text-white px-2 py-1 rounded-full">
-                  {messages.filter(msg => msg.isUser).length} messages
+                  {messages.filter((msg) => msg.isUser).length} messages
                 </span>
                 {!existingFeedback && (
                   <span className="text-xs text-muted-foreground">
-                    {Math.max(0, 5 - messages.filter(msg => msg.isUser).length)} more for feedback
+                    {Math.max(
+                      0,
+                      5 - messages.filter((msg) => msg.isUser).length
+                    )}{" "}
+                    more for feedback
                   </span>
                 )}
               </span>
-            </div>
+            </div>*/}
             {/* Progress bar */}
             {!existingFeedback && (
-              <div className="w-full bg-gray-700 rounded-full h-2 mt-2">
+              <div className="w-full bg-border rounded-full h-2">
                 <div
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-500 ease-in-out"
-                  style={{ 
-                    width: `${Math.min(100, (messages.filter(msg => msg.isUser).length / 5) * 100)}%` 
+                  className="bg-primary h-2 rounded-full transition-all duration-500 ease-in-out"
+                  style={{
+                    width: `${Math.min(
+                      100,
+                      (messages.filter((msg) => msg.isUser).length / 5) * 100
+                    )}%`,
                   }}
                 />
               </div>
+            )}
+
+            {!existingFeedback && (
+              <span className="text-xs text-muted-foreground">
+                {Math.max(0, 5 - messages.filter((msg) => msg.isUser).length)}{" "}
+                messages left
+              </span>
             )}
           </div>
         </div>
@@ -597,9 +585,24 @@ export default function Chat({
       >
         <div className={`w-full ${!isLeftColumnVisible ? "max-w-[60vw]" : ""}`}>
           {messages.length === 0 && (
-            <div className="flex flex-col justify-center items-center p-8 space-y-8">
-              <ChatHeader />
-              <SuggestionChips />
+            <div className="flex flex-col justify-center items-center px-8 py-4">
+              {/* Centered content container */}
+              <div className="text-center p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+                {/* Icon container with Apple's "frosted glass" or "glassmorphism" effect */}
+                <div className="inline-block p-4 sm:p-5 mb-2 sm:mb-6">
+                  <MessageCircle className="text-muted-foreground h-18 w-18 sm:h-20 sm:w-20" />
+                </div>
+                {/* Title with a vibrant gradient for emphasis */}
+                <h1 className="text-2xl sm:text-5xl font-semibold mb-4 tracking-tight bg-gradient-to-br from-primary to-purple-400 bg-clip-text text-transparent">
+                  Learn with AI Padhai
+                </h1>
+
+                {/* Subtitle with a softer, off-white color for readability */}
+                <p className="text-muted-foreground text-sm sm:text-lg max-w-md mx-auto leading-relaxed">
+                  Your smart companion for personalized learning and interactive
+                  discussions.
+                </p>
+              </div>
             </div>
           )}
           {messages.length > 0 && (
@@ -608,11 +611,13 @@ export default function Chat({
             </>
           )}
           {error && (
-            <div className="text-red-400 text-sm bg-red-900/20 border border-red-600/30 rounded-lg px-4 py-3 text-center">
-              {error}
+            <div className="flex justify-center">
+              <div className="w-fit text-red-400 text-sm bg-red-900/20 border border-red-600/30 rounded-lg px-4 py-3 justify-center">
+                {error}
+              </div>
             </div>
           )}
-          
+
           {/* Show feedback status if feedback has been submitted */}
           {existingFeedback && (
             <div className="mt-4 flex justify-center">
@@ -630,11 +635,12 @@ export default function Chat({
       </div>
 
       <ChatInput
+        textAreaRef={textAreaRef}
         onSendMessage={onSendMessage}
         isLoading={isLoading}
         isLeftColumnVisible={isLeftColumnVisible}
       />
-      
+
       {/* Feedback Modal */}
       <VideoFeedbackModal
         isOpen={isFeedbackModalOpen}

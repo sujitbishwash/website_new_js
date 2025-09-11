@@ -442,7 +442,7 @@ const Quiz: React.FC<QuizProps> = ({
 
   return (
     <div
-      className="bg-background flex flex-col items-center justify-start p-4 text-neutral-100"
+      className="bg-background flex flex-col items-center justify-start px-4 text-neutral-100"
     >
       <div className="w-full max-w-2xl min-h-[400px] text-left flex flex-col justify-center transition-transform duration-300 ease-in-out ">
         {showScore ? (
