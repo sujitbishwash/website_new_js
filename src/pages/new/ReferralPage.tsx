@@ -1,5 +1,5 @@
 import { theme } from "@/styles/theme";
-import { Plus } from "lucide-react";
+import { Copy, Plus } from "lucide-react";
 import { useState } from "react";
 
 // --- Apple-inspired Theme ---
@@ -338,19 +338,25 @@ const ReferralStyles = () => (
 );
 
 // --- FAQ Item Component ---
-const FaqItem = ({ q, a }: { q: string; a: string }) => {
-  const [isOpen, setIsOpen] = useState(false);
-  return (
-    <div className="faq-item">
-      <div className="faq-question" onClick={() => setIsOpen(!isOpen)}>
-        <span>{q}</span>
-        <span className={`faq-toggle ${isOpen ? "open" : ""}`}><Plus/></span>
-      </div>
-      <div className={`faq-answer ${isOpen ? "open" : ""}`}>
-        <p>{a}</p>
-      </div>
-    </div>
-  );
+const FaqItem = ({ q, a }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    return (
+        <div className="border-b border-border py-5 last:border-b-0 last:pb-0">
+            <div 
+                className="flex cursor-pointer items-center justify-between text-lg font-medium text-foreground" 
+                onClick={() => setIsOpen(!isOpen)}
+            >
+                <span>{q}</span>
+                <span className={`text-2xl font-light transition-transform duration-300 ease-in-out ${isOpen ? 'rotate-45' : ''}`}>
+                  <Plus /></span>
+            </div>
+            <div 
+                className={`overflow-hidden text-muted-foreground transition-all duration-300 ease-in-out ${isOpen ? 'mt-4 max-h-48' : 'max-h-0'}`}
+            >
+                <p className="leading-relaxed">{a}</p>
+            </div>
+        </div>
+    );
 };
 
 // --- Main Referral Page Component ---
@@ -399,19 +405,15 @@ const ReferralPage = () => {
   return (
     <>
       <ReferralStyles />
-      <div className="referral-page">
-        <div className="referral-container">
+      <div className="min-h-screen bg-background p-4 font-sans text-foreground antialiased sm:p-6 md:p-12">
+        <div className="mx-auto flex max-w-5xl flex-col gap-4 sm:gap-6">
           {/* --- Header --- */}
-          <div className="referral-header">
-            <h1>Refer Friends, Earn Big!</h1>
-            <p className="subtitle">
-              Share AI Padhai & Earn <span>₹50</span> for Every Friend Who
-              Joins!
-            </p>
-          </div>
+          <header className="mb-6 text-center">
+            <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl md:text-5xl">Refer & Earn</h1>
+          </header>
 
           {/* --- Premium Unlock Section --- */}
-          <div className="premium-unlock-section">
+          {/**<div className="premium-unlock-section">
             <h2>Plus, unlock a FREE 1-Month Premium Subscription!</h2>
             <p>Enjoy unlimited access when your first referral signs up:</p>
             <ul className="premium-features-list">
@@ -420,146 +422,100 @@ const ReferralPage = () => {
               ))}
             </ul>
             <p className="footer-text">Start sharing your unique code today!</p>
+          </div>*/}
+
+          {/* --- Offer Section --- */}
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-divider bg-background-subtle p-6 text-center hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
+                  <h3 className="mb-2 text-base font-semibold text-muted-foreground">Your friend gets</h3>
+                  <p className="text-lg font-semibold text-foreground sm:text-xl">10% discount on first purchase</p>
+              </div>
+              <div className="rounded-2xl border border-divider bg-background-subtle p-6 text-center hover:shadow-xl">
+                  <h3 className="mb-2 text-base font-semibold text-muted-foreground">You get</h3>
+                  <p className="text-lg font-semibold text-foreground sm:text-xl">₹50 for each referral</p>
+              </div>
           </div>
 
           {/* --- Referral Code Card --- */}
-          <div className="referral-card">
-            <h3 className="card-title">Your Unique Referral Code</h3>
-            <div className="referral-code-section">
-              <div className="referral-code-box">{referralCode}</div>
+          <div className="rounded-2xl border border-divider bg-card p-2 sm:p-6 shadow-sm md:p-8 hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-background-subtle p-4">
+              <div className="flex-grow text-center sm:text-left font-mono text-lg sm:text-xl font-semibold tracking-wider text-foreground">{referralCode}</div>
               <button
                 onClick={handleCopy}
-                className={`copy-button ${
-                  copyText === "Copied!" ? "copied" : ""
-                }`}
+                className={`flex items-center justify-center gap-2 rounded-lg px-6 py-3 text-base font-medium text-white transition-all duration-200 ease-in-out active:scale-95 cursor-pointer ${copyText === 'Copied!' ? 'bg-[#34c759]' : 'bg-primary hover:bg-primary/80'}`}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  fill="currentColor"
-                  viewBox="0 0 16 16"
-                >
-                  <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z" />
-                  <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zM-1 8a.5.5 0 0 1 .5-.5h15a.5.5 0 0 1 0 1H-.5A.5.5 0 0 1-1 8z" />
-                </svg>
+                <Copy />
                 {copyText}
               </button>
             </div>
           </div>
-
           {/* --- How It Works Card --- */}
-          <div className="referral-card">
-            <h3 className="card-title">How It Works</h3>
-            <div className="how-it-works-grid">
-              <div className="step-card">
-                <div className="icon">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="#58a6ff"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M13.5 1a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM11 2.5a2.5 2.5 0 1 1 .603 1.628l-6.718 3.12a2.499 2.499 0 0 1 0 1.504l6.718 3.12a2.5 2.5 0 1 1-.488.876l-6.718-3.12a2.5 2.5 0 1 1 0-3.256l6.718-3.12A2.5 2.5 0 0 1 11 2.5zm-8.5 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm11 5.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z" />
-                  </svg>
+          <div className="rounded-2xl border border-divider bg-card p-6 shadow-sm md:p-8 hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
+            <h3 className="mb-6 text-xl font-semibold text-foreground sm:text-2xl">How It Works</h3>
+            <ol className="flex flex-col gap-5">
+                <li className="flex items-center gap-4 text-base text-foreground sm:text-lg">
+                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/20 font-semibold text-primary">1</span> 
+                    Share the code or link with a friend.
+                </li>
+                <li className="flex items-center gap-4 text-base text-foreground sm:text-lg">
+                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/20 font-semibold text-primary">2</span> 
+                    Your friend buys a course at a discount.
+                </li>
+                <li className="flex items-center gap-4 text-base text-foreground sm:text-lg">
+                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary/20 font-semibold text-primary">3</span> 
+                    Get a reward for your referral.
+                </li>
+            </ol>
+          </div>
+
+          {/* --- Stats & Leaderboard Card --- */}
+          <div className="rounded-2xl border border-divider bg-card p-6 shadow-sm md:p-8 hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
+            <div className="grid grid-cols-1 gap-12 md:grid-cols-[1fr_2fr]">
+                {/* --- Stats Section --- */}
+                <div className="flex justify-between sm:justify-start sm:flex-col gap-6">
+                  <div className="stat-item">
+                    <h4 className="flex mb-2 text-base font-medium text-muted-foreground"><span className="hidden sm:block">Friends</span>Referred</h4>
+                    <div className="text-3xl font-semibold leading-none text-foreground sm:text-4xl">12</div>
+                  </div>
+                  <div className="stat-item">
+                    <h4 className="flex mb-2 text-base font-medium text-muted-foreground"><span className="hidden sm:block">Rewards</span>Earned</h4>
+                    <div className="text-3xl font-semibold leading-none text-foreground sm:text-4xl">₹1150</div>
+                  </div>
+                  <div className="stat-item">
+                    <h4 className="flex mb-2 text-base font-medium text-muted-foreground">Pending</h4>
+                    <div className="text-3xl font-semibold leading-none text-foreground sm:text-4xl">₹450</div>
+                  </div>
                 </div>
-                <h4>Share Your Code</h4>
-                <p>
-                  Share your unique referral code with your friends via social
-                  media or direct message.
-                </p>
-              </div>
-              <div className="step-card">
-                <div className="icon">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="#58a6ff"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10z" />
-                  </svg>
+
+                {/* --- Leaderboard Section --- */}
+                <div className="overflow-x-auto">
+                    <table className="w-full sm:min-w-[400px] border-collapse">
+                      <thead>
+                        <tr className="border-b border-divider">
+                          <th className="pb-4 text-left text-sm font-medium uppercase text-muted-foreground">Rank</th>
+                          <th className="pb-4 pl-2 text-left text-sm font-medium uppercase text-muted-foreground">Name</th>
+                          <th className="pb-4 text-left text-sm font-medium uppercase text-muted-foreground">Referrals</th>
+                          <th className="pb-4 text-right sm:text-left text-sm font-medium uppercase text-muted-foreground">Earns</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {leaderboardData.map((user) => (
+                          <tr key={user.rank} className="border-b border-divider last:border-b-0">
+                            <td className="whitespace-nowrap py-4 pr-4 font-semibold text-foreground">#{user.rank}</td>
+                            <td className="whitespace-nowrap py-4 px-2 font-medium text-foreground">{user.name}</td>
+                            <td className="whitespace-nowrap py-4 px-2 text-muted-foreground">{user.referrals}</td>
+                            <td className="whitespace-nowrap py-4 pl-2 font-medium text-primary">{user.rewards}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                 </div>
-                <h4>Friend Signs Up</h4>
-                <p>
-                  Your friend signs up for an Ai Padhai premium plan using your
-                  referral code.
-                </p>
-              </div>
-              <div className="step-card">
-                <div className="icon">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
-                    fill="#58a6ff"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M1 3a1 1 0 0 1 1-1h12a1 1 0 0 1 1 1H1zm7 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z" />
-                    <path d="M0 5a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V5zm3 0a2 2 0 0 1-2 2v4a2 2 0 0 1 2 2h10a2 2 0 0 1 2-2V7a2 2 0 0 1-2-2H3z" />
-                  </svg>
-                </div>
-                <h4>You Get Rewarded</h4>
-                <p>
-                  You receive cash rewards for every successful referral. It's
-                  that simple!
-                </p>
-              </div>
             </div>
           </div>
-
-          {/* --- Stats Card --- */}
-          <div className="referral-card">
-            <h3 className="card-title">Your Referral Status</h3>
-            <div className="stats-grid">
-              <div className="stat-item">
-                <h4>Friends Referred</h4>
-                <div className="value">12</div>
-              </div>
-              <div className="stat-item">
-                <h4>Rewards Earned</h4>
-                <div className="value">₹1150</div>
-              </div>
-              <div className="stat-item">
-                <h4>Pending Rewards</h4>
-                <div className="value">₹450</div>
-              </div>
-            </div>
-          </div>
-
-          {/* --- Leaderboard Card --- */}
-          <div className="referral-card">
-            <h3 className="card-title">Referral Leaderboard</h3>
-            <table className="leaderboard-table">
-              <thead>
-                <tr>
-                  <th>Rank</th>
-                  <th>Name</th>
-                  <th>Referrals</th>
-                  <th>Rewards</th>
-                </tr>
-              </thead>
-              <tbody>
-                {leaderboardData.map((user) => (
-                  <tr key={user.rank}>
-                    <td className="rank">#{user.rank}</td>
-                    <td>{user.name}</td>
-                    <td>{user.referrals}</td>
-                    <td className="rewards">{user.rewards}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
           {/* --- FAQ Card --- */}
-          <div className="referral-card">
-            <h3 className="card-title">Frequently Asked Questions</h3>
-            {faqData.map((faq) => (
-              <FaqItem key={faq.q} q={faq.q} a={faq.a} />
-            ))}
+          <div className="rounded-2xl border border-border bg-card p-4 sm:p-8 shadow-sm hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
+              <h3 className="mb-2 sm:mb-6 text-xl sm:text-2xl font-semibold text-foreground">Frequently Asked Questions</h3>
+              {faqData.map(faq => <FaqItem key={faq.q} q={faq.q} a={faq.a} />)}
           </div>
         </div>
       </div>
