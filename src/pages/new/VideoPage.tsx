@@ -3,7 +3,6 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
   import Flashcards from "@/components/learning/Flashcards";
   import Quiz from "@/components/learning/Quiz";
   import Summary from "@/components/learning/Summary";
-  import OutOfSyllabus from "@/components/OutOfSyllabus";
   
   import { ComponentName } from "@/lib/api-client";
   import { ROUTES } from "@/routes/constants";
@@ -1356,28 +1355,6 @@ import ShareModal from "@/components/modals/ShareModal";
           onClose={handleCloseShareModal}
           url={`https://www.youtube.com`}
         />
-
-        {/* OutOfSyllabus Modal */}
-        {showOutOfSyllabus && (
-          <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black bg-opacity-50"
-            onClick={(e) => {
-              // Only close if clicking on the backdrop, not on the modal content
-              if (e.target === e.currentTarget) {
-                setShowOutOfSyllabus(false);
-                navigateWithProgress(ROUTES.HOME);
-              }
-            }}
-          >
-            <OutOfSyllabus
-              onGoBack={() => {
-                
-                setShowOutOfSyllabus(false);
-                navigateWithProgress(ROUTES.HOME);
-              }}
-            />
-          </div>
-        )}
 
   
         <style>{`
