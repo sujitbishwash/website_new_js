@@ -9,13 +9,15 @@ import { cn } from "@/lib/utils";
 const DropdownMenu = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof DropdownMenuPrimitive.Root>
->(function DropdownMenu({ ...props }) {
+>(function DropdownMenu({ ...props }, ref) {
   return (
-    <DropdownMenuPrimitive.Root
-      data-slot="dropdown-menu"
-      modal={false}
-      {...props}
-    />
+    <div ref={ref}>
+      <DropdownMenuPrimitive.Root
+        data-slot="dropdown-menu"
+        modal={false}
+        {...props}
+      />
+    </div>
   );
 });
 
