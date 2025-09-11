@@ -419,6 +419,7 @@ const VideoPage: React.FC = () => {
   const videoDurationRef = useRef<number>(0);
   const ytPlayerRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const periodicSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
@@ -680,10 +681,27 @@ const VideoPage: React.FC = () => {
       if (playerState === 0) {
         // 0 = ended
         onYouTubeEnd();
+        if (periodicSaveIntervalRef.current) {
+          clearInterval(periodicSaveIntervalRef.current);
+          periodicSaveIntervalRef.current = null;
+        }
       }
 
       // Log when video starts playing (state 1 = playing)
       if (playerState === 1) {
+        if (!periodicSaveIntervalRef.current) {
+          periodicSaveIntervalRef.current = setInterval(() => {
+            saveVideoProgress();
+          }, 60000);
+        }
+      }
+
+      // Pause (2) or buffering (3) should stop periodic saving
+      if (playerState === 2 || playerState === 3 || playerState === 5) {
+        if (periodicSaveIntervalRef.current) {
+          clearInterval(periodicSaveIntervalRef.current);
+          periodicSaveIntervalRef.current = null;
+        }
       }
     },
     [onYouTubeEnd, saveVideoProgress]
@@ -721,6 +739,11 @@ const VideoPage: React.FC = () => {
         }
         ytPlayerRef.current = null;
       }
+
+      if (periodicSaveIntervalRef.current) {
+        clearInterval(periodicSaveIntervalRef.current);
+        periodicSaveIntervalRef.current = null;
+      }
     }
   }, [currentVideoId]);
 
@@ -733,6 +756,10 @@ const VideoPage: React.FC = () => {
       if (progressIntervalRef.current != null) {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
+      }
+      if (periodicSaveIntervalRef.current != null) {
+        clearInterval(periodicSaveIntervalRef.current);
+        periodicSaveIntervalRef.current = null;
       }
 
       // Save final progress before unmounting
