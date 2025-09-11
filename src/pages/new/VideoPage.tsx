@@ -653,6 +653,10 @@ const VideoPage: React.FC = () => {
         if (interval) {
           clearInterval(interval);
         }
+        if (periodicSaveIntervalRef.current) {
+          clearInterval(periodicSaveIntervalRef.current);
+          periodicSaveIntervalRef.current = null;
+        }
       };
     },
     [openFeedbackModal, saveVideoProgress]
@@ -676,6 +680,7 @@ const VideoPage: React.FC = () => {
       const playerState = event.data;
 
       // Update playing state
+      console.debug("[Video] onYouTubeStateChange: playerState", playerState);
 
       // Handle video end
       if (playerState === 0) {
@@ -689,14 +694,17 @@ const VideoPage: React.FC = () => {
 
       // Log when video starts playing (state 1 = playing)
       if (playerState === 1) {
-        if (!periodicSaveIntervalRef.current) {
-          periodicSaveIntervalRef.current = setInterval(() => {
-            saveVideoProgress();
-          }, 60000);
+        // Start or restart periodic save on play
+        if (periodicSaveIntervalRef.current) {
+          clearInterval(periodicSaveIntervalRef.current);
+          periodicSaveIntervalRef.current = null;
         }
+        periodicSaveIntervalRef.current = setInterval(() => {
+          saveVideoProgress();
+        }, 60000);
       }
 
-      // Pause (2) or buffering (3) should stop periodic saving
+      // Stop periodic save on pause/buffer/cued; will restart on next play
       if (playerState === 2 || playerState === 3 || playerState === 5) {
         if (periodicSaveIntervalRef.current) {
           clearInterval(periodicSaveIntervalRef.current);
