@@ -532,7 +532,7 @@ export default function ExamConfigurationModal({
           )}
 
           {/* Current User Exam Goal Display */}
-          {userExamGoal && (
+          {!isLoading && userExamGoal && (
             <div className="bg-blue-500/20 border border-blue-500/30 text-blue-300 text-sm p-3 rounded-lg">
               <span className="font-semibold">Current Goal:</span> {userExamGoal.exam} ({userExamGoal.group_type})
             </div>

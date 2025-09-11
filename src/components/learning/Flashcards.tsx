@@ -510,7 +510,7 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({ videoId }) => {
   
 
   return (
-    <div className="bg-background font-sans text-foreground w-full max-w-full px-4 border-border box-border flex flex-col gap-5 justify-start items-center">
+    <div className="bg-background font-sans text-foreground w-full max-w-full px-4 sm:px-4 border-border box-border flex flex-col gap-5 justify-start items-center">
       <div className="w-full max-w-2xl">
         {isLoading ? (
           <FlashcardsLoadingSpinner />

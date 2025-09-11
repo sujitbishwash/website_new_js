@@ -30,6 +30,7 @@ import { ROUTES } from "./constants";
 import Stats  from "../pages/new/Stats";
 import VideoPage from "@/pages/new/VideoPage";
 import TestAnalysis2 from "@/pages/new/Analysis2Page";
+import AttemptedTests2 from "@/pages/new/AttemptedTests2Page";
 
 // Route configuration object for easy maintenance
 export const routes = [
@@ -155,6 +156,13 @@ export const routes = [
             element: <AttemptedTests />,
             name: "Attempted Tests",
             description: "Attempted Tests",
+          },
+          
+          {
+            path: "attempted-tests2",
+            element: <AttemptedTests2 />,
+            name: "Attempted Tests2",
+            description: "Attempted Tests2",
           },
           {
             path: "stats",

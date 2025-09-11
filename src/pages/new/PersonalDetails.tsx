@@ -3,8 +3,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { authApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 import { useAuth } from "../../contexts/AuthContext";
-import { Calendar, LoaderCircle, User, VenusAndMars } from "lucide-react";
+import { Calendar, User, VenusAndMars } from "lucide-react";
 import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg";
+import CustomLoader from "../../components/icons/customloader";
 
 // --- TYPE DEFINITIONS (for TypeScript) ---
 interface InputFieldProps {
@@ -442,7 +443,7 @@ const PersonalInfoForm: React.FC = () => {
           >
             {isLoading ? (
               <>
-                <LoaderCircle className="h-5 w-5 mr-2 animate-spin " />
+                <CustomLoader />
                 Saving...
               </>
             ) : (

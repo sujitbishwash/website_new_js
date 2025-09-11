@@ -61,22 +61,8 @@ const TypingIndicator: React.FC = () => (
   </div>
 );
 
-const SuggestionChip: React.FC<{ text: string }> = ({ text }) => (
-  <button className="bg-gradient-to-r from-gray-700/80 to-gray-600/80 hover:from-gray-600/90 hover:to-gray-500/90 transition-all duration-300 text-sm md:text-base text-foreground py-3 px-6 rounded-full backdrop-blur-sm border border-gray-600/50 hover:border-gray-500/60 shadow-lg hover:shadow-xl transform hover:scale-105">
-    {text}
-  </button>
-);
 
-const SuggestionChips: React.FC = () => {
-  const suggestions = ["Quiz", "Flashcards", "Summary"];
-  return (
-    <div className="flex flex-wrap justify-center gap-4 sm:gap-6 p-6">
-      {suggestions.map((item) => (
-        <SuggestionChip key={item} text={item} />
-      ))}
-    </div>
-  );
-};
+
 
 const Message: React.FC<MessageType> = ({ text, isUser }) => {
   const markdownText = text.replace(/\\n/g, "\n");
@@ -529,7 +515,7 @@ export default function Chat({
     <div className="flex flex-col flex-1 h-full bg-background text-primaryText w-full">
       {/* Conversation progress indicator - Fixed sticky positioning */}
       {messages.length > 0 && (
-        <div className="px-4 sticky top-0 bg-background z-10 border-b border-border/50">
+        <div className="px-4 sm:px-4 sticky top-0 bg-background z-10 border-b border-border/50">
           <div
             className={`w-full ${
               !isLeftColumnVisible ? "max-w-[60vw] mx-auto" : ""
@@ -587,13 +573,13 @@ export default function Chat({
           {messages.length === 0 && (
             <div className="flex flex-col justify-center items-center px-8 py-4">
               {/* Centered content container */}
-              <div className="text-center p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
+              <div className="text-center p-2 sm:p-6 md:p-8 space-y-6 sm:space-y-8">
                 {/* Icon container with Apple's "frosted glass" or "glassmorphism" effect */}
                 <div className="inline-block p-4 sm:p-5 mb-2 sm:mb-6">
                   <MessageCircle className="text-muted-foreground h-18 w-18 sm:h-20 sm:w-20" />
                 </div>
                 {/* Title with a vibrant gradient for emphasis */}
-                <h1 className="text-2xl sm:text-5xl font-semibold mb-4 tracking-tight bg-gradient-to-br from-primary to-purple-400 bg-clip-text text-transparent">
+                <h1 className="text-2xl sm:text-5xl font-semibold mb-2 sm:mb-4 tracking-tight bg-gradient-to-br from-primary to-purple-400 bg-clip-text text-transparent">
                   Learn with AI Padhai
                 </h1>
 

@@ -14,6 +14,7 @@ export const navigationCategories = {
     { path: '/test-main-page', name: 'Test Interface' },
     { path: '/analysis', name: 'Test Analysis' },
     { path: '/analysis2', name: 'Test Analysis2' },
+    { path: '/attempted-tests2', name: 'Attempted Tests2' },
   ],
   auth: [
     { path: '/login', name: 'Login' },

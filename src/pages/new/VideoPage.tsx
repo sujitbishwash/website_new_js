@@ -54,6 +54,13 @@ const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
 });
 
 // Type definitions
+// --- TYPE DEFINITIONS ---
+interface ContentCardProps {
+  icon: React.ReactNode;
+  title: string;
+  children: React.ReactNode;
+}
+
 interface IconProps {
   path: string;
   className?: string;
@@ -122,6 +129,75 @@ interface HeaderProps {
   onToggleFullScreen: () => void;
   onNavigate: (to: string) => void;
 }
+
+
+// --- DYNAMIC CONTENT ---
+const getTodaysEvent = () => {
+  const today = new Date();
+  const day = today.getDate();
+  const month = today.toLocaleString('default', { month: 'long' });
+
+  const events: { [key: string]: { [key: number]: { title: string; trivia: string } } } = {
+    "September": {
+      9: {
+        title: "California admitted to the Union (1850)",
+        trivia: "On this day, California became the 31st state of the United States, a key moment in the country's westward expansion.",
+      },
+    },
+     "August": {
+      9: {
+        title: "Resignation of Richard Nixon (1974)",
+        trivia: "Following the Watergate scandal, Richard Nixon became the first U.S. President to resign from office on this day.",
+      },
+    },
+    // Add more events for other dates...
+  };
+
+  const event = events[month]?.[day] || {
+    title: "A notable day in history!",
+    trivia: "Every day holds a special place in the story of our world. Explore and learn something new!"
+  };
+  return event;
+};
+
+const getTodaysTechEvent = () => {
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.toLocaleString('default', { month: 'long' });
+
+    const techEvents: { [key: string]: { [key: number]: { title: string; trivia: string } } } = {
+        "September": {
+            9: {
+                title: "First Computer 'Bug' Found (1947)",
+                trivia: "Grace Hopper and her team found a moth stuck in a relay of the Harvard Mark II computer, coining the term 'bug' for a computer fault.",
+            },
+        },
+        // Add more tech events
+    };
+
+    return techEvents[month]?.[day] || {
+        title: "Innovations of the Past",
+        trivia: "Technology is constantly evolving. Today is another day in its incredible history of progress!"
+    };
+};
+
+
+const quotes = [
+  { text: "'The only way to do great work is to love what you do.'", author: "Steve Jobs" },
+  { text: "'The beautiful thing about learning is that nobody can take it away from you.'", author: "B.B. King" },
+  { text: "'Live as if you were to die tomorrow. Learn as if you were to live forever.'", author: "Mahatma Gandhi" },
+];
+const ContentCard = ({ icon, title, children }: ContentCardProps) => (
+  <div className="bg-gray-700 rounded-2xl p-5 border border-gray-600 flex-shrink-0 w-full snap-center flex flex-col justify-between min-h-[250px] shadow-lg">
+    <div className="flex items-center gap-3 mb-4">
+      {icon}
+      <h3 className="text-white text-lg font-semibold m-0">{title}</h3>
+    </div>
+    <div className="text-gray-400 flex-1 flex flex-col justify-center">
+      {children}
+    </div>
+  </div>
+);
 
 const Header: React.FC<HeaderProps> = ({
   videoDetail,
@@ -333,7 +409,7 @@ const AITutorPanel: React.FC<{
       <div className="relative bg-background">
         <div
           className={`flex items-center ${
-            isLeftColumnVisible ? "justify-start" : "justify-center gap-2"
+            isLeftColumnVisible ? "justify-between sm:justify-start" : "justify-center gap-2"
           } rounded-lg p-2 sm:p-4 w-full overflow-x-auto`}
         >
           {modes.map(({ key, label, icon }) => (
@@ -352,7 +428,7 @@ const AITutorPanel: React.FC<{
             </button>
           ))}
         </div>
-        <div className="flex flex-row items-center absolute top-1/2 -translate-y-1/2 right-2 space-x-2 sm:flex">
+        <div className="flex flex-row items-center absolute top-1/2 -translate-y-1/2 right-2 space-x-2 sm:flex hidden">
           <button
             onClick={onShare}
             title="Share"
@@ -383,6 +459,13 @@ const AITutorPanel: React.FC<{
 
 // --- Main App Component ---
 const VideoPage: React.FC = () => {
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+
+  const todaysEvent = getTodaysEvent();
+  const todaysTechEvent = getTodaysTechEvent();
+  const quote = quotes[Math.floor(Math.random() * quotes.length)];
+  
+  const scrollRef = useRef<HTMLDivElement>(null);
   const { videoId } = useParams<{ videoId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
@@ -1156,11 +1239,80 @@ const VideoPage: React.FC = () => {
     }
   }, [handleVideoInteraction]);
 
+  const getScrollStepWidth = () => {
+    if (scrollRef.current && scrollRef.current.firstElementChild) {
+        const cardElement = scrollRef.current.firstElementChild as HTMLElement;
+        const gap = parseFloat(getComputedStyle(scrollRef.current).gap) || 0;
+        return cardElement.offsetWidth + gap;
+    }
+    return 0;
+  }
+
+    const scrollHorizontally = (direction: 'left' | 'right') => {
+      if (scrollRef.current) {
+          const stepWidth = getScrollStepWidth();
+          const newIndex = direction === 'left' ? currentCardIndex - 1 : currentCardIndex + 1;
+          scrollRef.current.scrollTo({ left: newIndex * stepWidth, behavior: 'smooth' });
+      }
+  };
+
   // Show loading screen while video details are being fetched
   if (isLoadingVideo) {
     return (
-      <div className="bg-background text-foreground min-h-screen font-sans flex items-center justify-center">
+      <div className="fixed inset-0 bg-gray-900/80 flex justify-center items-center p-4 font-sans backdrop-blur-sm">
         <div className="text-center">
+          <div className="bg-gray-800 rounded-3xl p-6 w-full max-w-[420px] shadow-2xl border border-gray-600 flex flex-col max-h-[95vh] animate-fadeInScaleUp">
+        <div className="text-center mb-5">
+          <h2 className="text-2xl font-bold text-white m-0 tracking-tight">Did you know?</h2>
+          <p className="text-sm text-blue-400 mt-2 font-medium">While we get things ready for you...</p>
+        </div>
+
+        <div className="relative overflow-x-auto snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" ref={scrollRef}>
+             <div className="flex gap-4 p-1">
+                <ContentCard icon={<Icon path="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" className="text-blue-400" />} title="On This Day">
+                    <p className="text-white font-semibold mb-2 leading-tight">{todaysEvent.title}</p>
+                    <p className="m-0 leading-relaxed text-sm">{todaysEvent.trivia}</p>
+                </ContentCard>
+                <ContentCard icon={<Icon path="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" className="text-blue-400" />} title="Quote of the Moment">
+                    <p className="text-lg italic text-white mb-4 leading-normal">"{quote.text}"</p>
+                    <p className="text-right text-gray-500 m-0">- {quote.author}</p>
+                </ContentCard>
+                <ContentCard icon={<Icon path="M5 12h14M12 5l7 7-7 7" className="text-blue-400" />} title="Tech History">
+                   <p className="text-white font-semibold mb-2 leading-tight">{todaysTechEvent.title}</p>
+                   <p className="m-0 leading-relaxed text-sm">{todaysTechEvent.trivia}</p>
+                </ContentCard>
+            </div>
+        </div>
+        
+        <div className="flex justify-center items-center gap-4 pt-5">
+            <button
+                className="bg-transparent border-none text-gray-400 cursor-pointer p-1 flex items-center justify-center rounded-full transition-colors duration-200 hover:bg-gray-700 hover:text-white disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => scrollHorizontally('left')}
+                disabled={currentCardIndex === 0}
+            >
+                <Icon path="M15 19l-7-7 7-7" className="w-6 h-6" />
+            </button>
+            <div className="flex gap-2">
+                {[0, 1, 2].map(index => (
+                    <span
+                        key={index}
+                        className={`w-2 h-2 rounded-full transition-colors duration-300 ${currentCardIndex === index ? 'bg-blue-400' : 'bg-gray-600'}`}
+                    />
+                ))}
+            </div>
+            <button
+                 className="bg-transparent border-none text-gray-400 cursor-pointer p-1 flex items-center justify-center rounded-full transition-colors duration-200 hover:bg-gray-700 hover:text-white disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
+                 onClick={() => scrollHorizontally('right')}
+                 disabled={currentCardIndex === 2}
+            >
+                <Icon path="M9 5l7 7-7 7" className="w-6 h-6" />
+            </button>
+        </div>
+
+        <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-xl py-3.5 px-6 text-base font-semibold cursor-pointer mt-6 transition-transform transition-shadow duration-200 hover:scale-105 hover:shadow-lg">
+            Let's Go!
+        </button>
+      </div>
           <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-primary mb-6"></div>
           <h2 className="text-2xl font-bold text-foreground mb-2">
             Loading Video

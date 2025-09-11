@@ -32,6 +32,7 @@ export const ROUTES = {
     // Coming soon routes
     PREVIOUS_YEAR_PAPERS: "/previous-year-papers",
     ATTEMPTED_TESTS: "/attempted-tests",
+    ATTEMPTED_TESTS2: "/attempted-tests2",
 
     // Auth routes
     LOGIN: "/login",
@@ -67,6 +68,7 @@ export const ROUTE_NAMES = {
     [ROUTES.FLASHCARDS]: "Flashcards",
     [ROUTES.PREVIOUS_YEAR_PAPERS]: "Previous Year Papers",
     [ROUTES.ATTEMPTED_TESTS]: "Attempted Tests",
+    [ROUTES.ATTEMPTED_TESTS2]: "Attempted Tests2",
     [ROUTES.LOGIN]: "Login",
     [ROUTES.PERSONAL_DETAILS]: "Personal Details",
     [ROUTES.EXAM_GOAL]: "Exam Goal",

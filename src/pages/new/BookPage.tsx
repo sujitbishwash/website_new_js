@@ -1,3 +1,4 @@
+import CustomLoader from "@/components/icons/customloader";
 import { theme } from "@/styles/theme";
 import {
   BookOpen,
@@ -391,7 +392,7 @@ const BookPage: React.FC = () => {
           className="mt-4 flex items-center justify-center space-x-2"
           style={{ color: theme.accent }}
         >
-          <Loader className="animate-spin h-5 w-5" />
+          <CustomLoader />
           <span>Reading your book...</span>
         </div>
       )}
@@ -484,10 +485,7 @@ const BookPage: React.FC = () => {
               className="p-3 rounded-lg"
               style={{ backgroundColor: theme.inputBackground }}
             >
-              <Loader
-                className="animate-spin h-5 w-5"
-                style={{ color: theme.accent }}
-              />
+              <CustomLoader/>
             </div>
           </div>
         )}

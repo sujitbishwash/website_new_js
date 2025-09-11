@@ -3,7 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertTriangle, Link, LoaderCircle, X } from "lucide-react";
+import { AlertTriangle, Link,  X } from "lucide-react";
+import CustomLoader from "../components/icons/customloader";
 
 // --- Type Definitions ---
 // Removed unused IconProps
@@ -300,7 +301,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
               {isLoadingSuggestions ? (
                 <div className="mt-4 flex items-center justify-center py-8">
-                  <LoaderCircle className="h-6 w-6 animate-spin text-gray-400" />
+                  <CustomLoader />
                   <span className="ml-2 text-sm text-gray-400">
                     Loading suggestions...
                   </span>
