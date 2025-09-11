@@ -502,6 +502,7 @@ const VideoPage: React.FC = () => {
   const videoDurationRef = useRef<number>(0);
   const ytPlayerRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const periodicSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
@@ -735,6 +736,10 @@ const VideoPage: React.FC = () => {
         if (interval) {
           clearInterval(interval);
         }
+        if (periodicSaveIntervalRef.current) {
+          clearInterval(periodicSaveIntervalRef.current);
+          periodicSaveIntervalRef.current = null;
+        }
       };
     },
     [openFeedbackModal, saveVideoProgress]
@@ -758,15 +763,36 @@ const VideoPage: React.FC = () => {
       const playerState = event.data;
 
       // Update playing state
+      console.debug("[Video] onYouTubeStateChange: playerState", playerState);
 
       // Handle video end
       if (playerState === 0) {
         // 0 = ended
         onYouTubeEnd();
+        if (periodicSaveIntervalRef.current) {
+          clearInterval(periodicSaveIntervalRef.current);
+          periodicSaveIntervalRef.current = null;
+        }
       }
 
       // Log when video starts playing (state 1 = playing)
       if (playerState === 1) {
+        // Start or restart periodic save on play
+        if (periodicSaveIntervalRef.current) {
+          clearInterval(periodicSaveIntervalRef.current);
+          periodicSaveIntervalRef.current = null;
+        }
+        periodicSaveIntervalRef.current = setInterval(() => {
+          saveVideoProgress();
+        }, 60000);
+      }
+
+      // Stop periodic save on pause/buffer/cued; will restart on next play
+      if (playerState === 2 || playerState === 3 || playerState === 5) {
+        if (periodicSaveIntervalRef.current) {
+          clearInterval(periodicSaveIntervalRef.current);
+          periodicSaveIntervalRef.current = null;
+        }
       }
     },
     [onYouTubeEnd, saveVideoProgress]
@@ -804,6 +830,11 @@ const VideoPage: React.FC = () => {
         }
         ytPlayerRef.current = null;
       }
+
+      if (periodicSaveIntervalRef.current) {
+        clearInterval(periodicSaveIntervalRef.current);
+        periodicSaveIntervalRef.current = null;
+      }
     }
   }, [currentVideoId]);
 
@@ -816,6 +847,10 @@ const VideoPage: React.FC = () => {
       if (progressIntervalRef.current != null) {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
+      }
+      if (periodicSaveIntervalRef.current != null) {
+        clearInterval(periodicSaveIntervalRef.current);
+        periodicSaveIntervalRef.current = null;
       }
 
       // Save final progress before unmounting
