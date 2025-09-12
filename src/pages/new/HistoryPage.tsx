@@ -36,8 +36,8 @@ const HistoryPage = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-8 text-foreground bg-background pt-16 sm:pt-12">
-      <div className="flex justify-between items-center mb-10">
+    <div className="min-h-screen text-foreground bg-background p-2 sm:p-6 ">
+      <div className="flex justify-center gap-4 sm:gap-0 sm:justify-between items-center mt-2 sm:mt-10 mb-10">
         <h1 className="text-left text-3xl font-semibold">
           <span className="hidden sm:inline">Your Learning </span>
           History

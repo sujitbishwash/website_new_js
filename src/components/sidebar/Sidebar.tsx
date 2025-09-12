@@ -95,15 +95,14 @@ const Sidebar: React.FC<SidebarProps> = ({
         firstPart != ROUTES.PREMIUM &&
         firstPart != ROUTES.EXAM_INFO &&
         firstPart != ROUTES.EXAM_RECONFIRM &&
-        firstPart != ROUTES.TEST_MAIN_PAGE &&
-        (
+        firstPart != ROUTES.TEST_MAIN_PAGE && (
           <button
             onClick={() => {
               navigate(ROUTES.PREMIUM);
             }}
-            className="
+            className={`
             fixed top-4 right-4 sm:right-8 z-30 flex items-center gap-1 rounded-full 
-            py-2 ps-2.5 pe-3 text-sm font-semibold
+             text-sm font-semibold
             bg-gray-200/50 dark:bg-[#373669]/50 backdrop-blur-md
             text-gray 
             hover:text-white 
@@ -112,11 +111,12 @@ const Sidebar: React.FC<SidebarProps> = ({
             hover:backdrop-blur-0 hover:bg-opacity-100
             cursor-pointer transition-all duration-300
             glow-purple transform hover:scale-105 focus:outline-none
-          "
+              ${(window.innerWidth<640 && firstPart != ROUTES.HOME) ? "p-2" : "py-2 ps-2.5 pe-3"}
+          `}
           >
             <SparklesIcon className="h-5 w-5" />
             <span className="hidden sm:inline">Upgrade plan</span>
-            <span className="sm:hidden">Upgrade</span>
+            <span className={`sm:hidden ${(window.innerWidth<640 && firstPart == ROUTES.HOME) ? "" : "hidden"}`}>Upgrade</span>
           </button>
         )}
       {/* Overlay for mobile */}

@@ -238,18 +238,20 @@ const calculateDaysSince = (dateString: string): string => {
 // --- Component for AI Recommended Tests ---
 const AiTestCard = ({ test }: { test: AiRecommendation }) => {
   const navigate = useNavigate();
-  return (<div className="select-none flex-shrink-0 w-auto bg-background-subtle border border-border rounded-2xl p-5 flex flex-col justify-between transform hover:scale-[1.02] hover:border-primary transition-all duration-300 ease-in-out">
-    <div>
-      <p className="text-lg font-semibold text-foreground">{test.reason}</p>
-      <p className="text-md text-muted-foreground">{test.examName}</p>
+  return (
+    <div className="select-none flex-shrink-0 w-auto bg-background-subtle border border-border rounded-2xl p-5 flex flex-col justify-between transform hover:scale-[1.02] hover:border-primary transition-all duration-300 ease-in-out">
+      <div>
+        <p className="text-lg font-semibold text-foreground">{test.reason}</p>
+        <p className="text-md text-muted-foreground">{test.examName}</p>
+      </div>
+      <button
+        onClick={() => navigate(ROUTES.EXAM_INFO)}
+        className="mt-4 w-full px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/80 transition-colors duration-200 cursor-pointer"
+      >
+        Start Now
+      </button>
     </div>
-    <button
-      onClick={() => navigate(ROUTES.EXAM_INFO)}
-      className="mt-4 w-full px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/80 transition-colors duration-200 cursor-pointer"
-    >
-      Start Now
-    </button>
-  </div>);
+  );
 };
 
 // --- Reusable Pill and Color functions ---
@@ -287,27 +289,27 @@ const ActionButton = ({
 
   if (status === "In Progress") {
     return (
-      <button className="cursor-pointer px-4 py-2 text-sm font-semibold rounded-lg w-full justify-center text-center bg-blue-500 text-white hover:bg-blue-600 flex gap-2 items-center transition-colors">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          fill="currentColor"
-          className="bi bi-play-fill"
-          viewBox="0 0 16 16"
-        >
-          <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393" />
-        </svg>
-        Resume Test
-      </button>
+      <>
+        <button className="cursor-pointer px-4 py-2 text-md hover:bg-foreground/10 font-semibold rounded-lg w-full justify-center text-center text-foreground flex gap-2 items-center transition-colors">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="currentColor"
+            className="bi bi-play-fill w-5 h-5"
+            viewBox="0 0 16 16"
+          >
+            <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393" />
+          </svg>
+          <span className="hidden sm:inline">Resume Test</span>
+        </button>
+      </>
     );
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative sm:block hidden" ref={dropdownRef}>
       <button
         onClick={() => setMoreOpen(!isMoreOpen)}
-        className="p-1 rounded-full hover:bg-accent cursor-pointer"
+        className="p-1 rounded-full hover:bg-foreground/10 cursor-pointer"
       >
         <EllipsisVertical className="text-muted-foreground" size={20} />
       </button>
@@ -344,30 +346,41 @@ const TestFeedCard = ({ test }: { test: MockTest }) => {
       className={`
       select-none hover:shadow-xl hover:-translate-y-0.5
       transition-all duration-300 ease-in-out
-      bg-card border border-border rounded-xl sm:rounded-2xl sm:shadow-lg 
+      bg-card border border-border rounded-xl sm:rounded-2xl shadow-sm 
       hover:border-primary
-      p-3 sm:p-5 flex flex-row sm:items-center sm:justify-between gap-5
+      p-3 sm:p-5 flex flex-row ${
+        test.status === "Completed" ? "items-start" : "items-center"
+      } justify-between gap-5
     ${isMoreOpen ? "z-20" : "z-auto"}`}
     >
       {/* Left section */}
-      <div className="">
-        <div className="flex justify-between items-start">
-          <p className="font-semibold text-lg text-foreground">
-            {test.examName} | {test.testName}
-          </p>
-        </div>
-        <p className="text-muted-foreground text-sm flex items-center flex-wrap gap-x-2">
+      <div className="flex-col hidden sm:block">
+        <span className="flex justify-between items-start font-semibold text-md sm:text-lg text-foreground">
+          {test.examName} • {test.testName}
+        </span>
+        {daysSince && (
+          <span className="flex items-center flex-wrap gap-x-2 text-xs text-muted-foreground">
+            {daysSince}
+          </span>
+        )}
+      </div>
+      <div className="flex-col sm:hidden block">
+        <span className="font-semibold text-md sm:text-lg text-foreground">
+          {test.examName} • {test.testName}
           {daysSince && (
-            <span className="text-xs text-muted-foreground">{daysSince}</span>
+            <span className="text-sm text-muted-foreground">
+              {" "}
+              • {daysSince}
+            </span>
           )}
-        </p>
+        </span>
       </div>
 
       {/* Score / Percentile */}
-      <div className="flex flex-row sm:items-center gap-4 text-center">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-center">
         {test.status === "Completed" && (
           <>
-            <div>
+            <div className="text-end sm:text-center">
               <p className="font-semibold text-muted-foreground text-lg sm:text-2xl">
                 {test.score.toFixed(1)}
                 <span className="text-sm text-muted-foreground">
@@ -376,7 +389,7 @@ const TestFeedCard = ({ test }: { test: MockTest }) => {
               </p>
               <p className="text-xs text-muted-foreground">Score</p>
             </div>
-            <div>
+            <div className="hidden sm:block">
               <p
                 className={`font-semibold ${getPercentileColor(
                   test.percentile
@@ -390,13 +403,11 @@ const TestFeedCard = ({ test }: { test: MockTest }) => {
         )}
         {/* Action button */}
 
-        <div className="sm:block hidden">
-          <ActionButton
-            status={test.status}
-            isMoreOpen={isMoreOpen}
-            setMoreOpen={setMoreOpen}
-          />
-        </div>
+        <ActionButton
+          status={test.status}
+          isMoreOpen={isMoreOpen}
+          setMoreOpen={setMoreOpen}
+        />
       </div>
     </div>
   );
@@ -484,10 +495,10 @@ const AttemptedTests2 = () => {
   };
 
   return (
-    <div className="p-2 sm:p-6 bg-background min-h-screen font-sans text-foreground mt-10 sm:mt-4">
+    <div className="p-2 sm:p-6 bg-background min-h-screen font-sans text-foreground mt:2">
       <div className="mx-auto p-2 sm:p-6 md:p-8 max-w-7xl">
         {/**<header className="mb-10">
-          <h1 className="text-4xl font-bold text-gray-100 tracking-tight">
+          <h1 className="text-4xl font-bold text-gray-100">
             Attempted Tests
           </h1>
         </header>*/}
@@ -496,7 +507,7 @@ const AttemptedTests2 = () => {
           {/* --- LEFT COLUMN: ATTEMPT HISTORY --- */}
           <section className="lg:col-span-3">
             <div className="mb-6 flex flex-wrap justify-between items-center gap-4">
-              <h2 className="text-4xl font-semibold text-foreground tracking-tight">
+              <h2 className="text-2xl sm:text-4xl font-semibold text-foreground w-full text-center sm:w-auto sm:text-left">
                 Attempted Tests
               </h2>
               <div className="flex justify-between items-center sm:gap-4 flex-wrap">
@@ -525,6 +536,7 @@ const AttemptedTests2 = () => {
                 </div>
               </div>
             </div>
+
             <div className="max-h-auto space-y-5">{renderTests()}</div>
             <Pagination
               totalTests={filteredTests.length}
@@ -536,7 +548,7 @@ const AttemptedTests2 = () => {
 
           {/* --- RIGHT COLUMN: AI RECOMMENDATIONS --- */}
           <section className="lg:col-span-1 lg:sticky top-8">
-            <h2 className="text-xl font-semibold text-foreground mb-4 tracking-tight">
+            <h2 className="text-xl font-semibold text-foreground mb-4">
               Recommended Tests
             </h2>
             <div className="flex flex-col gap-5">

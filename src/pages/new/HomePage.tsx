@@ -698,12 +698,12 @@ export default function HomePage() {
                 <RefreshCcw className="w-4 h-4" />
                 Refresh
               </button>
-              <span
-                onClick={() => navigate(ROUTES.ATTEMPTED_TESTS)}
-                className="text-sm font-medium text-primary hover:opacity-80 transition-colors hover:cursor-pointer"
+              <button
+                onClick={() => navigate(ROUTES.ATTEMPTED_TESTS2)}
+                className="text-sm text-primary hover:opacity-80 transition-colors hover:cursor-pointer"
               >
                 View all
-              </span>
+              </button>
             </div>
           </div>
 
