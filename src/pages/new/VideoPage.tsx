@@ -731,6 +731,13 @@ const VideoPage: React.FC = () => {
       // Store interval reference for cleanup
       progressIntervalRef.current = interval;
 
+      // Start a resilient 60s periodic saver once per player init
+      if (!periodicSaveIntervalRef.current) {
+        periodicSaveIntervalRef.current = setInterval(() => {
+          saveVideoProgress();
+        }, 60000);
+      }
+
       // Return cleanup function
       return () => {
         if (interval) {
@@ -775,25 +782,8 @@ const VideoPage: React.FC = () => {
         }
       }
 
-      // Log when video starts playing (state 1 = playing)
-      if (playerState === 1) {
-        // Start or restart periodic save on play
-        if (periodicSaveIntervalRef.current) {
-          clearInterval(periodicSaveIntervalRef.current);
-          periodicSaveIntervalRef.current = null;
-        }
-        periodicSaveIntervalRef.current = setInterval(() => {
-          saveVideoProgress();
-        }, 60000);
-      }
-
-      // Stop periodic save on pause/buffer/cued; will restart on next play
-      if (playerState === 2 || playerState === 3 || playerState === 5) {
-        if (periodicSaveIntervalRef.current) {
-          clearInterval(periodicSaveIntervalRef.current);
-          periodicSaveIntervalRef.current = null;
-        }
-      }
+      // We keep the periodic saver running regardless of temporary states;
+      // saveVideoProgress() itself guards for valid time/duration.
     },
     [onYouTubeEnd, saveVideoProgress]
   );
@@ -1165,6 +1155,25 @@ const VideoPage: React.FC = () => {
     quizFeedbackState,
     summaryFeedbackState,
   ]);
+
+  // Start a resilient 60s periodic saver tied to the current video id
+  useEffect(() => {
+    if (periodicSaveIntervalRef.current) {
+      clearInterval(periodicSaveIntervalRef.current);
+      periodicSaveIntervalRef.current = null;
+    }
+    if (currentVideoId) {
+      periodicSaveIntervalRef.current = setInterval(() => {
+        saveVideoProgress();
+      }, 60000);
+    }
+    return () => {
+      if (periodicSaveIntervalRef.current) {
+        clearInterval(periodicSaveIntervalRef.current);
+        periodicSaveIntervalRef.current = null;
+      }
+    };
+  }, [currentVideoId, saveVideoProgress]);
 
   // Create components that update when videoDetail changes
   const components = useMemo(() => {
