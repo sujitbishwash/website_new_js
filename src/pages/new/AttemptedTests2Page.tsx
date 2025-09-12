@@ -1,10 +1,10 @@
-import CustomLoader from "@/components/icons/customloader";
-import { LayoutGrid, LayoutList, Menu, Play } from "lucide-react";
-import React, { useState } from "react";
+import { ROUTES } from "@/routes/constants";
+import { EllipsisVertical, RefreshCcw, TrendingUp } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // --- TYPE DEFINITIONS ---
 type MockTestStatus = "Completed" | "In Progress";
-type ViewMode = "grid" | "list"; // 'compact' is removed
 
 interface MockTest {
   id: string;
@@ -236,17 +236,21 @@ const calculateDaysSince = (dateString: string): string => {
 };
 
 // --- Component for AI Recommended Tests ---
-const AiTestCard = ({ test }: { test: AiRecommendation }) => (
-  <div className="select-none flex-shrink-0 w-auto bg-background-subtle border border-border rounded-2xl p-5 flex flex-col justify-between transform hover:scale-[1.02] hover:border-primary transition-all duration-300 ease-in-out">
+const AiTestCard = ({ test }: { test: AiRecommendation }) => {
+  const navigate = useNavigate();
+  return (<div className="select-none flex-shrink-0 w-auto bg-background-subtle border border-border rounded-2xl p-5 flex flex-col justify-between transform hover:scale-[1.02] hover:border-primary transition-all duration-300 ease-in-out">
     <div>
-      <p className="font-semibold text-muted-foreground">{test.examName}</p>
-      <p className="text-sm text-primary mt-1">{test.reason}</p>
+      <p className="text-lg font-semibold text-foreground">{test.reason}</p>
+      <p className="text-md text-muted-foreground">{test.examName}</p>
     </div>
-    <button className="mt-4 w-full px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/80 transition-colors duration-200 cursor-pointer">
+    <button
+      onClick={() => navigate(ROUTES.EXAM_INFO)}
+      className="mt-4 w-full px-4 py-2 text-sm font-semibold rounded-lg bg-primary text-white hover:bg-primary/80 transition-colors duration-200 cursor-pointer"
+    >
       Start Now
     </button>
-  </div>
-);
+  </div>);
+};
 
 // --- Reusable Pill and Color functions ---
 const getPercentileColor = (percentile: number) => {
@@ -255,185 +259,144 @@ const getPercentileColor = (percentile: number) => {
   if (percentile > 0) return "text-orange-400";
   return "text-foreground";
 };
-const ActionButton = ({ status }: { status: MockTestStatus }) => {
-  switch (status) {
-    case "Completed":
-      return (
-        <div className="flex gap-4">
-          <button
-            className="cursor-pointer px-4 py-2 text-sm font-semibold rounded-lg w-full sm:w-auto text-center text-muted-foreground border hover:bg-border"
-          >
-            Re-attempt
-          </button>
-          <button
-            className="cursor-pointer px-4 py-2 text-sm font-semibold rounded-lg w-full sm:w-auto text-center text-muted-foreground border hover:bg-border"
-          >
-            View Analysis
-          </button>
-        </div>
-      );
 
-    case "In Progress":
-      return (
-        <button
-          className="px-4 py-2 text-sm font-semibold rounded-lg w-full justify-center text-center bg-amber-500 text-black hover:bg-amber-400 flex gap-2 items-center"
+const ActionButton = ({
+  status,
+  isMoreOpen,
+  setMoreOpen,
+}: {
+  status: MockTestStatus;
+  isMoreOpen: boolean;
+  setMoreOpen: (isOpen: boolean) => void;
+}) => {
+  const navigate = useNavigate();
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setMoreOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [setMoreOpen]);
+
+  if (status === "In Progress") {
+    return (
+      <button className="cursor-pointer px-4 py-2 text-sm font-semibold rounded-lg w-full justify-center text-center bg-blue-500 text-white hover:bg-blue-600 flex gap-2 items-center transition-colors">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          fill="currentColor"
+          className="bi bi-play-fill"
+          viewBox="0 0 16 16"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="16"
-            height="16"
-            fill="currentColor"
-            className="bi bi-play-fill"
-            viewBox="0 0 16 16"
-          >
-            <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393" />
-          </svg>
-          Resume Test
-        </button>
-      );
+          <path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393" />
+        </svg>
+        Resume Test
+      </button>
+    );
   }
-};
 
-
-// --- Test Card for Grid and List Views ---
-const TestFeedCard = ({ test }: { test: MockTest }) => {
-  const daysSince =
-    test.status === "Completed" ? calculateDaysSince(test.dateAttempted) : "";
-
- return (
-  <div
-    className="
-      select-none hover:shadow-xl hover:-translate-y-0.5
-      transition-all duration-300 ease-in-out
-      bg-card border border-border rounded-2xl sm:shadow-lg 
-      hover:border-primary
-      p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5
-    "
-  >
-    {/* Left section */}
-    <div className="flex-grow">
-      <div className="flex justify-between items-start">
-        <p className="font-semibold text-lg text-foreground">
-          {test.examName}
-        </p>
-      </div>
-      <p className="text-muted-foreground text-sm flex items-center flex-wrap gap-x-2">
-        {test.testName}
-        {daysSince && (
-          <span className="text-xs text-muted-foreground">
-            {daysSince}
-          </span>
-        )}
-      </p>
-    </div>
-
-    {/* Score / Percentile */}
-    {test.status === "Completed" ? (
-      <div className="flex sm:flex-row flex-col sm:items-center gap-4 text-center">
-        <div>
-          <p className="font-semibold text-muted-foreground text-2xl">
-            {test.score.toFixed(1)}
-            <span className="text-sm text-muted-foreground">
-              /{test.totalMarks}
-            </span>
-          </p>
-          <p className="text-xs text-muted-foreground">Score</p>
-        </div>
-        <div>
-          <p
-            className={`font-semibold ${getPercentileColor(
-              test.percentile
-            )} text-2xl`}
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setMoreOpen(!isMoreOpen)}
+        className="p-1 rounded-full hover:bg-accent cursor-pointer"
+      >
+        <EllipsisVertical className="text-muted-foreground" size={20} />
+      </button>
+      {isMoreOpen && (
+        <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-xl z-20 ">
+          <span
+            onClick={() => navigate(ROUTES.ANALYSIS2)}
+            className="cursor-pointer flex items-center px-4 py-2 text-sm hover:bg-foreground/10 rounded-t-lg gap-4"
           >
-            {test.percentile.toFixed(1)}%
-          </p>
-          <p className="text-xs text-muted-foreground">Percentile</p>
+            <TrendingUp className="h-5 w-5 text-muted-foreground" /> View
+            Analysis
+          </span>
+          <span
+            onClick={() => navigate(ROUTES.EXAM_INFO)}
+            className="cursor-pointer flex items-center px-4 py-2 text-sm hover:bg-foreground/10 rounded-b-lg gap-4"
+          >
+            <RefreshCcw className="h-5 w-5 text-muted-foreground" />
+            Re-Attempt
+          </span>
         </div>
-      </div>
-    ) : (
-      <div className="flex items-center">
-        <p className="text-sm text-muted-foreground px-3 py-1 rounded-full border border-border">
-          In Progress
-        </p>
-      </div>
-    )}
-
-    {/* Action button */}
-    <div className="sm:ml-4 flex-shrink-0 w-full sm:w-auto">
-      <ActionButton status={test.status} />
+      )}
     </div>
-  </div>
-);
-
+  );
 };
 
-const TestFeedCard2 = ({ test }: { test: MockTest }) => {
+// --- Test Card ---
+const TestFeedCard = ({ test }: { test: MockTest }) => {
+  const [isMoreOpen, setMoreOpen] = useState(false);
   const daysSince =
     test.status === "Completed" ? calculateDaysSince(test.dateAttempted) : "";
 
   return (
     <div
       className={`
-        select-none bg-card border border-border rounded-2xl shadow-md 
-        hover:border-primary/50 hover:shadow-lg hover:-translate-y-1 
-        transition-all duration-300 ease-in-out
-        flex flex-col overflow-hidden w-full max-w-sm mx-auto
-      `}
+      select-none hover:shadow-xl hover:-translate-y-0.5
+      transition-all duration-300 ease-in-out
+      bg-card border border-border rounded-xl sm:rounded-2xl sm:shadow-lg 
+      hover:border-primary
+      p-3 sm:p-5 flex flex-row sm:items-center sm:justify-between gap-5
+    ${isMoreOpen ? "z-20" : "z-auto"}`}
     >
-      {/* Header section with the main exam name */}
-      <div className="text-white flex h-28 w-full bg-primary items-center justify-center text-center font-bold text-3xl p-4">
-        <h2>{test.examName}</h2>
-      </div>
-      
-      {/* Main content area */}
-      <div className="flex flex-col flex-grow p-4">
-        
-        {/* Test name and date info */}
-        <div className="flex justify-between items-start mb-4">
-          <h3 className="font-semibold text-md text-foreground pr-2">
-            {test.testName}
-          </h3>
+      {/* Left section */}
+      <div className="">
+        <div className="flex justify-between items-start">
+          <p className="font-semibold text-lg text-foreground">
+            {test.examName} | {test.testName}
+          </p>
+        </div>
+        <p className="text-muted-foreground text-sm flex items-center flex-wrap gap-x-2">
           {daysSince && (
-            <p className="text-xs text-muted-foreground whitespace-nowrap pt-1">
-              {daysSince}
-            </p>
+            <span className="text-xs text-muted-foreground">{daysSince}</span>
           )}
-        </div>
-
-        {/* Conditional content based on status */}
-        <div className="flex-grow flex items-center justify-center">
-          {test.status === "Completed" ? (
-            // Completed State: Grid for Score and Percentile
-            <div className="grid grid-cols-2 gap-6 w-full text-center">
-              <div>
-                <p className="font-bold text-lg text-muted-foreground">
-                  {test.score.toFixed(1)}
-                  <span className="text-lg text-muted-foreground">/{test.totalMarks}</span>
-                </p>
-                <p className="text-sm text-muted-foreground">Score</p>
-              </div>
-              <div>
-                <p className={`font-bold text-lg ${getPercentileColor(test.percentile)}`}>
-                  {test.percentile.toFixed(1)}%
-                </p>
-                <p className="text-sm text-muted-foreground">Percentile</p>
-              </div>
-            </div>
-          ) : (
-            // In-Progress State: Badge-like display
-            <div className="flex items-center justify-center gap-2 rounded-full bg-blue-500/10 text-blue-500 py-2 px-4">
-               
-              <p className="text-sm font-semibold">
-                In Progress
-              </p>
-            </div>
-          )}
-        </div>
+        </p>
       </div>
-      
-      {/* Footer section for the action button */}
-      <div className="p-4 border-t border-border/50 bg-background/30 mt-auto">
-        <ActionButton status={test.status} />
+
+      {/* Score / Percentile */}
+      <div className="flex flex-row sm:items-center gap-4 text-center">
+        {test.status === "Completed" && (
+          <>
+            <div>
+              <p className="font-semibold text-muted-foreground text-lg sm:text-2xl">
+                {test.score.toFixed(1)}
+                <span className="text-sm text-muted-foreground">
+                  /{test.totalMarks}
+                </span>
+              </p>
+              <p className="text-xs text-muted-foreground">Score</p>
+            </div>
+            <div>
+              <p
+                className={`font-semibold ${getPercentileColor(
+                  test.percentile
+                )} text-lg sm:text-2xl`}
+              >
+                {test.percentile.toFixed(1)}%
+              </p>
+              <p className="text-xs text-muted-foreground">Percentile</p>
+            </div>
+          </>
+        )}
+        {/* Action button */}
+
+        <div className="sm:block hidden">
+          <ActionButton
+            status={test.status}
+            isMoreOpen={isMoreOpen}
+            setMoreOpen={setMoreOpen}
+          />
+        </div>
       </div>
     </div>
   );
@@ -477,7 +440,6 @@ const Pagination = ({
 // Main App Component
 const AttemptedTests2 = () => {
   const [filter, setFilter] = useState<MockTestStatus | "All">("All");
-  const [view, setView] = useState<ViewMode>("list");
   const [currentPage, setCurrentPage] = useState(1);
   const TESTS_PER_PAGE = 12;
 
@@ -512,25 +474,17 @@ const AttemptedTests2 = () => {
         </div>
       );
     }
-    const layoutClasses =
-      view === "grid"
-        ? "grid grid-cols-1 md:grid-cols-3 gap-5"
-        : "flex flex-col gap-4 sm:gap-5";
     return (
-      <div className={layoutClasses}>
-        {currentTests.map((test) =>
-          view === "list" ? (
-            <TestFeedCard key={test.id} test={test} />
-          ) : (
-            <TestFeedCard2 key={test.id} test={test} />
-          )
-        )}
+      <div className="flex flex-col gap-4 sm:gap-5">
+        {currentTests.map((test) => (
+          <TestFeedCard key={test.id} test={test} />
+        ))}
       </div>
     );
   };
 
   return (
-    <div className="p-4 sm:p-6 bg-background min-h-screen font-sans text-foreground mt-10 sm:mt-4">
+    <div className="p-2 sm:p-6 bg-background min-h-screen font-sans text-foreground mt-10 sm:mt-4">
       <div className="mx-auto p-2 sm:p-6 md:p-8 max-w-7xl">
         {/**<header className="mb-10">
           <h1 className="text-4xl font-bold text-gray-100 tracking-tight">
@@ -569,30 +523,9 @@ const AttemptedTests2 = () => {
                     </button>
                   ))}
                 </div>
-                <div className="flex items-center bg-card border border-border p-1 rounded-xl">
-                  {(["list", "grid"] as ViewMode[]).map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() => setView(mode)}
-                      className={`p-2 rounded-lg transition-colors cursor-pointer ${
-                        view === mode
-                          ? "bg-border/20 text-muted-foreground"
-                          : "text-border-medium hover:bg-background-subtle"
-                      }`}
-                    >
-                      {mode === "list" ? (
-                        <Menu className="h-4 w-4" />
-                      ) : (
-                        <LayoutGrid className="h-4 w-4" />
-                      )}
-                    </button>
-                  ))}
-                </div>
               </div>
             </div>
-            <div className="max-h-auto space-y-5">
-              {renderTests()}
-            </div>
+            <div className="max-h-auto space-y-5">{renderTests()}</div>
             <Pagination
               totalTests={filteredTests.length}
               testsPerPage={TESTS_PER_PAGE}
