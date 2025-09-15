@@ -719,7 +719,8 @@ const VideoPage: React.FC = () => {
               progress >= 90 &&
               !hasShownFeedbackRef.current &&
               videoCanSubmitFeedbackRef.current &&
-              videoCanSubmitFeedback
+              videoCanSubmitFeedback &&
+              !videoExistingFeedback
             ) {
               openFeedbackModal();
               hasShownFeedbackRef.current = true;
@@ -759,7 +760,11 @@ const VideoPage: React.FC = () => {
     await saveVideoProgress();
 
     // Show feedback modal when video ends
-    if (!hasShownFeedbackRef.current && videoCanSubmitFeedbackRef.current) {
+    if (
+      !hasShownFeedbackRef.current &&
+      videoCanSubmitFeedbackRef.current &&
+      !videoExistingFeedback
+    ) {
       openFeedbackModal();
       hasShownFeedbackRef.current = true;
     }
@@ -771,6 +776,12 @@ const VideoPage: React.FC = () => {
 
       // Update playing state
       console.debug("[Video] onYouTubeStateChange: playerState", playerState);
+
+      // Persist progress when user pauses or buffers
+      // 2 = paused, 3 = buffering per YT IFrame API
+      if (playerState === 2 || playerState === 3) {
+        saveVideoProgress();
+      }
 
       // Handle video end
       if (playerState === 0) {
@@ -1163,6 +1174,9 @@ const VideoPage: React.FC = () => {
       periodicSaveIntervalRef.current = null;
     }
     if (currentVideoId) {
+      // Kick off an immediate save once the video id is set
+      saveVideoProgress();
+      // Then continue saving every 60 seconds
       periodicSaveIntervalRef.current = setInterval(() => {
         saveVideoProgress();
       }, 60000);
@@ -1174,6 +1188,24 @@ const VideoPage: React.FC = () => {
       }
     };
   }, [currentVideoId, saveVideoProgress]);
+
+  // Save on tab backgrounding or page lifecycle transitions
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        saveVideoProgress();
+      }
+    };
+    const handlePageHide = () => {
+      saveVideoProgress();
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    window.addEventListener('pagehide', handlePageHide);
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('pagehide', handlePageHide);
+    };
+  }, [saveVideoProgress]);
 
   // Create components that update when videoDetail changes
   const components = useMemo(() => {

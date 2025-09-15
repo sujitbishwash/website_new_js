@@ -1,7 +1,8 @@
 import { ROUTES } from "@/routes/constants";
 import { EllipsisVertical, RefreshCcw, TrendingUp } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { attemptedTestsApi } from "@/lib/api-client";
 
 // --- TYPE DEFINITIONS ---
 type MockTestStatus = "Completed" | "In Progress";
@@ -24,175 +25,8 @@ interface AiRecommendation {
   reason: string;
 }
 
-// --- MOCK DATA ---
-const attemptedTestsData: MockTest[] = [
-  {
-    id: "1",
-    examName: "IBPS PO Prelims",
-    testName: "Full Mock Test #12",
-    dateAttempted: "2025-09-10",
-    score: 72.5,
-    totalMarks: 100,
-    percentile: 92.5,
-    accuracy: 85,
-    status: "Completed",
-  },
-  {
-    id: "2",
-    examName: "SBI Clerk Mains",
-    testName: "Sectional Test: Reasoning",
-    dateAttempted: "2025-09-08",
-    score: 35,
-    totalMarks: 50,
-    percentile: 88.2,
-    accuracy: 90,
-    status: "Completed",
-  },
-  {
-    id: "3",
-    examName: "SBI PO Prelims",
-    testName: "Full Mock Test #8",
-    dateAttempted: "2025-09-11",
-    score: 23,
-    totalMarks: 100,
-    percentile: 0,
-    accuracy: 0,
-    status: "In Progress",
-  },
-  {
-    id: "4",
-    examName: "RBI Assistant Prelims",
-    testName: "Full Mock Test #5",
-    dateAttempted: "2025-09-05",
-    score: 45,
-    totalMarks: 100,
-    percentile: 65.0,
-    accuracy: 72,
-    status: "Completed",
-  },
-  {
-    id: "5",
-    examName: "IBPS RRB Officer Scale I",
-    testName: "Live Mock Challenge",
-    dateAttempted: "2025-09-02",
-    score: 55.75,
-    totalMarks: 80,
-    percentile: 78.9,
-    accuracy: 81,
-    status: "Completed",
-  },
-  {
-    id: "6",
-    examName: "NABARD Grade A",
-    testName: "Phase 1 - Mock Test #3",
-    dateAttempted: "2025-08-28",
-    score: 112,
-    totalMarks: 200,
-    percentile: 75.4,
-    accuracy: 68,
-    status: "Completed",
-  },
-  {
-    id: "7",
-    examName: "SBI PO Prelims",
-    testName: "Full Mock Test #7",
-    dateAttempted: "2025-08-22",
-    score: 63,
-    totalMarks: 100,
-    percentile: 85.0,
-    accuracy: 79,
-    status: "Completed",
-  },
-  {
-    id: "8",
-    examName: "IBPS Clerk Prelims",
-    testName: "Full Mock Test #10",
-    dateAttempted: "2025-08-25",
-    score: 81.25,
-    totalMarks: 100,
-    percentile: 95.1,
-    accuracy: 91,
-    status: "Completed",
-  },
-  {
-    id: "9",
-    examName: "SBI PO Prelims",
-    testName: "Full Mock Test #7",
-    dateAttempted: "2025-08-22",
-    score: 63,
-    totalMarks: 100,
-    percentile: 85.0,
-    accuracy: 79,
-    status: "Completed",
-  },
-
-  {
-    id: "10",
-    examName: "SBI PO Prelims",
-    testName: "Full Mock Test #7",
-    dateAttempted: "2025-08-22",
-    score: 63,
-    totalMarks: 100,
-    percentile: 85.0,
-    accuracy: 79,
-    status: "Completed",
-  },
-  {
-    id: "11",
-    examName: "IBPS PO Prelims",
-    testName: "Sectional: English",
-    dateAttempted: "2025-08-20",
-    score: 22.5,
-    totalMarks: 30,
-    percentile: 91.3,
-    accuracy: 88,
-    status: "Completed",
-  },
-  {
-    id: "12",
-    examName: "NABARD Grade A",
-    testName: "Phase 1 - Mock Test #3",
-    dateAttempted: "2025-08-28",
-    score: 112,
-    totalMarks: 200,
-    percentile: 75.4,
-    accuracy: 68,
-    status: "Completed",
-  },
-  {
-    id: "13",
-    examName: "IBPS Clerk Prelims",
-    testName: "Full Mock Test #10",
-    dateAttempted: "2025-08-25",
-    score: 81.25,
-    totalMarks: 100,
-    percentile: 95.1,
-    accuracy: 91,
-    status: "Completed",
-  },
-  {
-    id: "14",
-    examName: "SBI PO Prelims",
-    testName: "Full Mock Test #7",
-    dateAttempted: "2025-08-22",
-    score: 63,
-    totalMarks: 100,
-    percentile: 85.0,
-    accuracy: 79,
-    status: "Completed",
-  },
-  {
-    id: "15",
-    examName: "IBPS PO Prelims",
-    testName: "Sectional: English",
-    dateAttempted: "2025-08-20",
-    score: 22.5,
-    totalMarks: 30,
-    percentile: 91.3,
-    accuracy: 88,
-    status: "Completed",
-  },
-];
+// --- SERVER DATA (Attempted tests) ---
+// Right side recommendations remain dummy below. Left side will be fetched from API.
 
 const aiRecommendedTests: AiRecommendation[] = [
   {
@@ -382,7 +216,7 @@ const TestFeedCard = ({ test }: { test: MockTest }) => {
           <>
             <div className="text-end sm:text-center">
               <p className="font-semibold text-muted-foreground text-lg sm:text-2xl">
-                {test.score.toFixed(1)}
+                {String(test.score)}
                 <span className="text-sm text-muted-foreground">
                   /{test.totalMarks}
                 </span>
@@ -390,14 +224,18 @@ const TestFeedCard = ({ test }: { test: MockTest }) => {
               <p className="text-xs text-muted-foreground">Score</p>
             </div>
             <div className="hidden sm:block">
-              <p
-                className={`font-semibold ${getPercentileColor(
-                  test.percentile
-                )} text-lg sm:text-2xl`}
-              >
-                {test.percentile.toFixed(1)}%
-              </p>
-              <p className="text-xs text-muted-foreground">Percentile</p>
+              {typeof test.percentile === 'number' && test.percentile > 0 ? (
+                <>
+                  <p
+                    className={`font-semibold ${getPercentileColor(
+                      test.percentile
+                    )} text-lg sm:text-2xl`}
+                  >
+                    {test.percentile.toFixed(1)}%
+                  </p>
+                  <p className="text-xs text-muted-foreground">Percentile</p>
+                </>
+              ) : null}
             </div>
           </>
         )}
@@ -453,22 +291,58 @@ const AttemptedTests2 = () => {
   const [filter, setFilter] = useState<MockTestStatus | "All">("All");
   const [currentPage, setCurrentPage] = useState(1);
   const TESTS_PER_PAGE = 12;
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [attemptedTests, setAttemptedTests] = useState<MockTest[]>([]);
+  const [total, setTotal] = useState(0);
 
-  const filteredTests = attemptedTestsData
-    .filter((test) => filter === "All" || test.status === filter)
-    .sort((a, b) => {
-      const statusOrder = { "In Progress": 1, Completed: 2 };
-      if (statusOrder[a.status] !== statusOrder[b.status])
-        return statusOrder[a.status] - statusOrder[b.status];
-      return (
-        new Date(b.dateAttempted).getTime() -
-        new Date(a.dateAttempted).getTime()
-      );
-    });
+  // Fetch attempted tests from backend
+  useEffect(() => {
+    const fetchAttempted = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const resp = await attemptedTestsApi.getAttemptedTests(currentPage, TESTS_PER_PAGE);
+        // Map API to UI model
+        const mapped: MockTest[] = (resp.tests || []).map((t: any) => ({
+          id: String(t.id ?? t.session_id ?? Math.random()),
+          examName: String(t.subject || t.title || "Test"),
+          testName: String(t.topics?.join(', ') || t.title || "Attempt"),
+          dateAttempted: t.date || new Date().toISOString(),
+          score: Number(t.total_marks_scored ?? t.positive_score ?? 0),
+          totalMarks: Number(t.total_marks ?? 100),
+          percentile: typeof t.percentile === 'number' ? t.percentile : 0,
+          accuracy: typeof t.accuracy === 'number' ? t.accuracy : 0,
+          status: ((t.status || "").toString().toLowerCase().includes('progress')
+                    ? 'In Progress'
+                    : 'Completed') as MockTestStatus,
+        }));
+        setAttemptedTests(mapped);
+        setTotal(resp.total ?? mapped.length);
+      } catch (e: any) {
+        setError(e?.message || "Failed to load attempted tests");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAttempted();
+  }, [currentPage]);
 
-  const indexOfLastTest = currentPage * TESTS_PER_PAGE;
-  const indexOfFirstTest = indexOfLastTest - TESTS_PER_PAGE;
-  const currentTests = filteredTests.slice(indexOfFirstTest, indexOfLastTest);
+  const filteredTests = useMemo(() => {
+    const base = attemptedTests
+      .sort((a, b) => {
+        const statusOrder = { "In Progress": 1, Completed: 2 } as const;
+        if (statusOrder[a.status] !== statusOrder[b.status])
+          return statusOrder[a.status] - statusOrder[b.status];
+        return (
+          new Date(b.dateAttempted).getTime() - new Date(a.dateAttempted).getTime()
+        );
+      });
+    if (filter === 'All') return base;
+    return base.filter((t) => t.status === filter);
+  }, [attemptedTests, filter]);
+
+  const currentTests = filteredTests; // server paginated; already page-scoped
 
   const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
 
@@ -537,9 +411,17 @@ const AttemptedTests2 = () => {
               </div>
             </div>
 
-            <div className="max-h-auto space-y-5">{renderTests()}</div>
+            {isLoading && (
+              <div className="text-center text-muted-foreground py-10">Loading...</div>
+            )}
+            {error && (
+              <div className="text-center text-red-400 py-4">{error}</div>
+            )}
+            {!isLoading && !error && (
+              <div className="max-h-auto space-y-5">{renderTests()}</div>
+            )}
             <Pagination
-              totalTests={filteredTests.length}
+              totalTests={total}
               testsPerPage={TESTS_PER_PAGE}
               currentPage={currentPage}
               onPageChange={handlePageChange}

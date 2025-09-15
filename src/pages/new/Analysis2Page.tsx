@@ -27,6 +27,8 @@ import { quizApi } from "@/lib/api-client";
 import { theme } from "@/styles/theme";
 import ShareModal from "@/components/modals/ShareModal";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
+import { ComponentName, feedbackApi } from "@/lib/api-client";
+import { useMultiFeedbackTracker } from "@/hooks/useFeedbackTracker";
 import RankBadge from "@/components/stats/RankBadge";
 
 interface LearningPlanStep {
@@ -1618,8 +1620,7 @@ export default function TestAnalysis2() {
   const [analysisError, setAnalysisError] = useState<string | null>(null);
   const [analysisData, setAnalysisData] = useState<Record<string, unknown> | null>(null);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
-
-  // Resolve sessionId from router state or from query string
+  // Resolve sessionId from router state or from query string (MUST be above feedback tracker)
   const sessionId = useMemo(() => {
     const fromState = (location.state as any)?.sessionId;
     if (fromState) return Number(fromState);
@@ -1627,6 +1628,30 @@ export default function TestAnalysis2() {
     const fromQuery = params.get("sessionId");
     return fromQuery ? Number(fromQuery) : undefined;
   }, [location.state, location.search]);
+  // Feedback availability for Test component
+  const { feedbackStates, isLoading: isFeedbackLoading, checkFeedback } = useMultiFeedbackTracker({
+    components: [ComponentName.Test],
+    sourceId: String(sessionId ?? ""),
+    pageUrl: typeof window !== 'undefined' ? window.location.href : '',
+    onFeedbackExists: () => {},
+  });
+  const testFeedbackState = feedbackStates[ComponentName.Test];
+
+  // Open feedback modal only when tracker confirms eligibility and no prior feedback
+  useEffect(() => {
+    if (!sessionId || isFeedbackLoading) return;
+    const canOpen = !!(testFeedbackState?.canSubmitFeedback && !testFeedbackState?.existingFeedback);
+    setIsFeedbackOpen(canOpen);
+  }, [sessionId, isFeedbackLoading, testFeedbackState?.canSubmitFeedback, testFeedbackState?.existingFeedback]);
+
+  // Ensure the tracker actually calls the API once sessionId is known
+  useEffect(() => {
+    if (sessionId) {
+      checkFeedback();
+    }
+  }, [sessionId, checkFeedback]);
+
+  
 
   // Fetch test analysis after page load, then hydrate UI dataset
   useEffect(() => {
@@ -1671,8 +1696,6 @@ export default function TestAnalysis2() {
         setAnalysisError(e?.message || "Failed to load analysis");
       } finally {
         setIsLoadingAnalysis(false);
-        // Open feedback modal once analysis is available
-        setIsFeedbackOpen(true);
       }
     };
     fetchAnalysis();
