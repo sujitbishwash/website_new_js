@@ -1,11 +1,21 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 import { useAuth } from "../../contexts/AuthContext";
-import { Calendar, User, VenusAndMars } from "lucide-react";
+import {
+  Calendar,
+  ChevronDown,
+  User,
+  VenusAndMars,
+  Mars,
+  Venus,
+  CircleSmall,
+} from "lucide-react";
 import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg";
 import CustomLoader from "../../components/icons/customloader";
+import Dropdown from "@/components/ui/dropdown";
+import { theme } from "@/styles/theme";
 
 // --- TYPE DEFINITIONS (for TypeScript) ---
 interface InputFieldProps {
@@ -40,7 +50,126 @@ interface FormErrors {
   gender?: string;
   dob?: string;
 }
+// Props for the Dropdown component
+interface DropdownOption {
+  label: string;
+  icon?: React.ReactNode;
+}
 
+interface Dropdown3Props {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: DropdownOption[];
+  placeholder: DropdownOption; // 👈 now also an object
+  disabled?: boolean;
+  id: string;
+}
+
+// Custom Dropdown Component
+const Dropdown3: FC<Dropdown3Props> = ({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  disabled = false,
+  id,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Effect to handle clicks outside the dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleOptionClick = (option: string) => {
+    onChange(option);
+    setIsOpen(false);
+  };
+
+  function capitalizeFirstLetter(str:string) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+  return (
+    <div className="w-full">
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium text-border-medium"
+      >
+        {label}
+      </label>
+      <div className="relative" ref={dropdownRef}>
+        
+        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+          {value
+              ? options.find((o) => o.label === value)?.icon
+              : placeholder.icon}
+        </span>
+        <button
+          type="button"
+          id={id}
+          disabled={disabled}
+          onClick={() => !disabled && setIsOpen(!isOpen)}
+          className={`w-full flex justify-between items-center text-left rounded-lg py-3 pl-10 pr-3 focus:outline-none focus:ring-1 bg-background-subtle transition-colors cursor-pointer disabled:cursor-not-allowed sm:text-sm ${
+            value ? "text-foreground" : "text-muted-foreground"
+          } ${isOpen ? "border border-blue-400" : "border border-border"}`}
+        >
+          <span className="flex items-center gap-2 first-letter:uppercase">
+            {/* when value selected show its icon, else placeholder icon */}
+            
+            {capitalizeFirstLetter(value || placeholder.label)}
+          </span>
+          <ChevronDown className="w-5 h-5"/>
+        </button>
+
+        {isOpen && !disabled && (
+          <div className="absolute z-10 mt-2 w-full bg-card rounded-md shadow-lg border-border border">
+            <div className="py-1 max-h-60 overflow-auto">
+              {options.map((option) => (
+                <div
+                  key={option.label}
+                  className={`px-4 py-2 text-sm cursor-pointer transition-colors text-foreground hover:bg-border-medium 
+    flex items-center gap-2 ${
+      value === option.label ? "bg-border-medium" : "transparent"
+    }`}
+                  onClick={() => handleOptionClick(option.label)}
+                  onMouseEnter={(e) => {
+                    if (value !== option.label) {
+                      e.currentTarget.style.backgroundColor = theme.dividerHigh;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (value !== option.label) {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }
+                  }}
+                >
+                  {option.icon}
+                  {capitalizeFirstLetter(option.label)}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 // --- REUSABLE MODULAR COMPONENTS ---
 
 /**
@@ -60,7 +189,7 @@ const InputField: React.FC<InputFieldProps> = ({
     <div>
       <label
         htmlFor={id}
-        className="block text-sm font-medium text-gray-400 mb-2"
+        className="block text-sm font-medium text-border-medium"
       >
         {label}
       </label>
@@ -71,7 +200,8 @@ const InputField: React.FC<InputFieldProps> = ({
         <input
           id={id}
           {...props}
-          className={`block w-full rounded-lg bg-background-subtle py-3 pl-10 pr-3 text-foreground placeholder-muted-foreground transition duration-150 ease-in-out focus:outline-none focus:ring-2 sm:text-sm ${errorClasses}`}
+          className={`block w-full rounded-lg bg-background-subtle py-3 pl-10 pr-3 text-foreground placeholder-muted-foreground transition duration-150 ease-in-out border border-border focus:border-blue-400 focus:outline-none focus:ring-1 sm:text-sm ${errorClasses}`}
+
         />
       </div>
       {error && (
@@ -82,7 +212,10 @@ const InputField: React.FC<InputFieldProps> = ({
     </div>
   );
 };
-
+/**
+          className={`w-full flex justify-between items-center text-left rounded-xl px-4 py-3 focus:outline-none focus:ring-1 bg-background-subtle transition-colors cursor-pointer disabled:cursor-not-allowed ${
+            value ? "text-foreground" : "text-muted-foreground"
+          } ${isOpen ? "border border-blue-400" : "border border-border"}`} */
 /**
  * A reusable, styled select dropdown component with validation error display.
  */
@@ -205,7 +338,6 @@ const PersonalInfoForm: React.FC = () => {
     const fetchUserData = async () => {
       try {
         setIsLoadingUserData(true);
-        
 
         // Use getUserData from AuthContext instead of direct API call
         const response = await getUserData();
@@ -217,7 +349,6 @@ const PersonalInfoForm: React.FC = () => {
           response.data
         ) {
           const userData = response.data;
-          
 
           // Populate form with existing user data if available
           const updatedFormData: FormData = {
@@ -227,12 +358,9 @@ const PersonalInfoForm: React.FC = () => {
           };
 
           setFormData(updatedFormData);
-          
         } else {
-          
         }
       } catch (error) {
-        
       } finally {
         setIsLoadingUserData(false);
       }
@@ -285,6 +413,15 @@ const PersonalInfoForm: React.FC = () => {
     // Validate on change for instant feedback
     setErrors(validate(newFormData));
   };
+  const handleChange2 = (e: string) => {
+    const value = e;
+    const newFormData = { ...formData, ["gender"]: value };
+    setFormData(newFormData);
+    // Clear submit error when user starts typing
+    if (submitError) setSubmitError(null);
+    // Validate on change for instant feedback
+    setErrors(validate(newFormData));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -297,7 +434,6 @@ const PersonalInfoForm: React.FC = () => {
 
       try {
         // Call API to update user details
-        
 
         const response = await authApi.updateUserDetails({
           name: formData.name,
@@ -310,8 +446,6 @@ const PersonalInfoForm: React.FC = () => {
             response.data.message || "Failed to update user details"
           );
         }
-
-        
 
         // Update localStorage with the new user data to ensure validation passes
         try {
@@ -326,9 +460,7 @@ const PersonalInfoForm: React.FC = () => {
             };
             localStorage.setItem("userData", JSON.stringify(updatedUserData));
           }
-        } catch (error) {
-          
-        }
+        } catch (error) {}
 
         // Also update the form data to reflect the saved state
         setFormData((prevData) => ({
@@ -344,7 +476,6 @@ const PersonalInfoForm: React.FC = () => {
         // Navigate to exam goal page
         navigate(ROUTES.EXAM_GOAL, { replace: true });
       } catch (error) {
-        
         setSubmitError("Failed to save your details. Please try again.");
       } finally {
         setIsLoading(false);
@@ -352,6 +483,7 @@ const PersonalInfoForm: React.FC = () => {
     }
   };
 
+  
   // Show loading state while fetching user data
   if (isLoadingUserData) {
     return (
@@ -401,7 +533,7 @@ const PersonalInfoForm: React.FC = () => {
             icon={<User className="h-5 w-5 text-muted-foreground" />}
             error={errors.name}
           />
-          <SelectField
+          {/**<SelectField
             id="gender"
             label="Gender *"
             value={formData.gender}
@@ -415,7 +547,22 @@ const PersonalInfoForm: React.FC = () => {
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
-          </SelectField>
+          </SelectField>*/}
+          <Dropdown3
+            id="gender"
+            label="Gender"
+            value={formData.gender}
+            onChange={handleChange2}
+            options={[
+              { label: "male", icon: <Mars className="h-5 w-5 text-muted-foreground"/> },
+              { label: "female", icon: <Venus className="h-5 w-5 text-muted-foreground"/> },
+              { label: "other", icon: <VenusAndMars className="h-5 w-5 text-muted-foreground"/> },
+            ]}
+            placeholder={{
+              label: "Select Your Gender",
+              icon: <CircleSmall className="h-5 w-5 text-muted-foreground"/>,
+            }}
+          />
           <div>
             <InputField
               id="dob"
@@ -443,7 +590,7 @@ const PersonalInfoForm: React.FC = () => {
           >
             {isLoading ? (
               <>
-                <CustomLoader />
+                <CustomLoader className="h-5 w-5"/>
                 Saving...
               </>
             ) : (

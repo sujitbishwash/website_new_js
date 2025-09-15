@@ -301,7 +301,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
               {isLoadingSuggestions ? (
                 <div className="mt-4 flex items-center justify-center py-8">
-                  <CustomLoader />
+                  <CustomLoader className="h-5 w-5"/>
                   <span className="ml-2 text-sm text-gray-400">
                     Loading suggestions...
                   </span>

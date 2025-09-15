@@ -765,7 +765,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         "Splash screen state has been reset. Refresh the page to see the splash screen again."
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                   >
                     Reset Splash State
                   </button>
@@ -777,7 +777,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         'Splash screen state has been set to "completed". User will not see splash again.'
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
                   >
                     Mark Splash as Completed
                   </button>
@@ -785,7 +785,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     onClick={() => {
                       navigate(ROUTES.SPLASH);
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
                   >
                     View Splash Screen
                   </button>
@@ -843,7 +843,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         "Authentication data has been cleared. You will need to login again."
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                   >
                     Clear Auth Data
                   </button>
@@ -857,7 +857,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         }\nUser Data: ${userData ? "Present" : "Not found"}`
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
                   >
                     Check Auth Status
                   </button>

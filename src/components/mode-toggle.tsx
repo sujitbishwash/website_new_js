@@ -17,7 +17,7 @@ export function ModeToggle() {
 
         <button
           onMouseDown={(e) => e.stopPropagation()}
-          className="px-2 py-2 shadow-sm rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
+          className="p-2 shadow-sm rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
           title="Refresh profile data"
         >
           <Sun className="h-[1.2rem] w-[1.2rem] block dark:hidden" />

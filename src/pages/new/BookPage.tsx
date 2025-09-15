@@ -392,7 +392,7 @@ const BookPage: React.FC = () => {
           className="mt-4 flex items-center justify-center space-x-2"
           style={{ color: theme.accent }}
         >
-          <CustomLoader />
+          <CustomLoader className="h-5 w-5"/>
           <span>Reading your book...</span>
         </div>
       )}
@@ -485,7 +485,7 @@ const BookPage: React.FC = () => {
               className="p-3 rounded-lg"
               style={{ backgroundColor: theme.inputBackground }}
             >
-              <CustomLoader/>
+              <CustomLoader className="h-5 w-5"/>
             </div>
           </div>
         )}
