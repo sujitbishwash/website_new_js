@@ -82,6 +82,7 @@ interface ContentTabsProps {
   onFeedbackSubmit: () => void;
   onFeedbackSkip: () => void;
   onFetchTranscript: () => void;
+  onSeekTo: (seconds: number) => void;
 }
 
 // Learning mode types
@@ -248,6 +249,7 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
   chaptersError,
   transcriptError,
   onFetchTranscript,
+  onSeekTo,
 }) => {
   const [activeTab, setActiveTab] = useState("chapters");
   return (
@@ -321,11 +323,29 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
                 key={index}
                 className="grid grid-cols-[auto,1fr] gap-x-2 sm:gap-x-4 group cursor-pointer"
               >
-                <div className="text-xs sm:text-sm font-mono text-gray-500 pt-1">
+                <div
+                  className="text-xs sm:text-sm font-mono text-blue-400 pt-1 hover:underline"
+                  onClick={() => {
+                    const parts = chapter.time.split(':').map(Number);
+                    let secs = 0;
+                    if (parts.length === 3) secs = parts[0] * 3600 + parts[1] * 60 + parts[2];
+                    else if (parts.length === 2) secs = parts[0] * 60 + parts[1];
+                    onSeekTo(secs);
+                  }}
+                >
                   {chapter.time}
                 </div>
                 <div className="border-l-2 border-gray-600 pl-2 sm:pl-4 group-hover:border-blue-500 transition-colors">
-                  <h3 className="font-semibold text-foreground text-sm sm:text-base">
+                  <h3
+                    className="font-semibold text-foreground text-sm sm:text-base hover:text-blue-400"
+                    onClick={() => {
+                      const parts = chapter.time.split(':').map(Number);
+                      let secs = 0;
+                      if (parts.length === 3) secs = parts[0] * 3600 + parts[1] * 60 + parts[2];
+                      else if (parts.length === 2) secs = parts[0] * 60 + parts[1];
+                      onSeekTo(secs);
+                    }}
+                  >
                     {chapter.title}
                   </h3>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1">
@@ -356,7 +376,25 @@ const ContentTabs: React.FC<ContentTabsProps> = ({
           </div>
         ) : transcript ? (
           <div className="text-xs sm:text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {transcript}
+            {transcript.split(/(\b\d{1,2}:\d{2}(?::\d{2})?\b)/g).map((chunk, i) => {
+              const m = chunk.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
+              if (m) {
+                const h = m[3] ? Number(m[1]) : 0;
+                const mm = m[3] ? Number(m[2]) : Number(m[1]);
+                const ss = m[3] ? Number(m[3]) : Number(m[2]);
+                const secs = h * 3600 + mm * 60 + ss;
+                return (
+                  <span
+                    key={i}
+                    className="text-blue-400 hover:underline cursor-pointer"
+                    onClick={() => onSeekTo(secs)}
+                  >
+                    {chunk}
+                  </span>
+                );
+              }
+              return <span key={i}>{chunk}</span>;
+            })}
           </div>
         ) : (
           <div className="text-center text-gray-500 py-6 sm:py-8">
@@ -503,6 +541,7 @@ const VideoPage: React.FC = () => {
   const ytPlayerRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const periodicSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [resumePosition, setResumePosition] = useState<number>(0);
 
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
@@ -700,6 +739,13 @@ const VideoPage: React.FC = () => {
 
       // Store player reference for progress tracking
       ytPlayerRef.current = player;
+
+      // Seek to saved position if available
+      try {
+        if (resumePosition && resumePosition > 0) {
+          player.seekTo(resumePosition, true);
+        }
+      } catch {}
 
       // Start progress tracking interval - only track progress, don't save
       const interval = setInterval(() => {
@@ -988,6 +1034,21 @@ const VideoPage: React.FC = () => {
     }
   }, [currentVideoId]);
 
+  // Fetch saved progress and set resume position
+  useEffect(() => {
+    const fetchProgress = async () => {
+      if (!currentVideoId) return;
+      try {
+        const resp = await videoProgressApi.getProgress(currentVideoId);
+        const pos = Number(resp.data?.current_position ?? 0);
+        if (!isNaN(pos) && pos > 0) setResumePosition(pos);
+      } catch {
+        // ignore if no progress
+      }
+    };
+    fetchProgress();
+  }, [currentVideoId]);
+
   // Fetch chapters
   useEffect(() => {
     const fetchChapters = async () => {
@@ -1262,6 +1323,15 @@ const VideoPage: React.FC = () => {
     quizMarkAsSubmitted,
   ]); // Include all dependencies that affect component rendering
 
+  // Public seek handler for chapters/transcript
+  const handleSeekTo = useCallback((seconds: number) => {
+    if (ytPlayerRef.current && typeof seconds === 'number' && seconds >= 0) {
+      try {
+        ytPlayerRef.current.seekTo(seconds, true);
+      } catch {}
+    }
+  }, []);
+
   const handleShare = useCallback(() => {
     setIsShareModalOpen(true);
   }, []);
@@ -1447,6 +1517,7 @@ const VideoPage: React.FC = () => {
               onFeedbackSubmit={() => handleFeedbackComplete("submit")}
               onFeedbackSkip={() => handleFeedbackComplete("skip")}
               onFetchTranscript={fetchTranscript}
+              onSeekTo={handleSeekTo}
             />
           </div>
           <div
