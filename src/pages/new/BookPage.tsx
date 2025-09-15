@@ -6,7 +6,6 @@ import {
   BrainCircuit,
   FileText,
   Lightbulb,
-  Loader,
   Send,
   Sparkle,
   Sparkles,

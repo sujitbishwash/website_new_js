@@ -156,6 +156,7 @@ interface Question {
   questionType: QuestionType;
   timeSpent?: number; // Track time spent on each question in seconds
   questionStartTime?: Date; // Track when user first visited this question
+  answerOrder?: number; // Track the order in which this question was answered
 }
 
 // API Response mapping interface
@@ -226,6 +227,7 @@ const TestMainPage = () => {
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [questionStartTime, setQuestionStartTime] = useState<Date>(new Date());
+  const [answerOrderCounter, setAnswerOrderCounter] = useState(0);
 
   const [questions, setQuestions] = useState<Question[]>([]);
 
@@ -330,12 +332,14 @@ const TestMainPage = () => {
     updatedQuestions[currentQuestionIndex].timeSpent = (updatedQuestions[currentQuestionIndex].timeSpent || 0) + finalTimeSpent;
 
     // Convert questions to the enhanced format with answer_order
-    const submittedAnswers = updatedQuestions.map((q, index) => ({
-      question_id: q.id,
-      selected_option: q.answer !== null ? q.options[q.answer] : null,
-      answer_order: index + 1, // API requires this field
-      time_taken: q.timeSpent || 0, // Time taken in seconds
-    }));
+    // Only include answered questions in the submission
+    const submittedAnswers = updatedQuestions
+      .map((q) => ({
+        question_id: q.id,
+        selected_option: q.answer !== null && q.answer !== undefined ? q.options[q.answer] : null,
+        answer_order: q.answerOrder ?? 0,
+        time_taken: q.timeSpent ?? 0,
+      }));
 
     // Calculate test metadata
     const totalTimeTaken = 600 - timeLeft; // Total time taken in seconds
@@ -436,6 +440,14 @@ const TestMainPage = () => {
     const currentStatus = newQuestions[currentQuestionIndex].status;
 
     newQuestions[currentQuestionIndex].answer = optionIndex;
+    
+    // Track answer order only if this is the first time answering this question
+    if (newQuestions[currentQuestionIndex].answerOrder === undefined) {
+      const newOrder = answerOrderCounter + 1;
+      newQuestions[currentQuestionIndex].answerOrder = newOrder;
+      setAnswerOrderCounter(newOrder);
+    }
+    
     if (currentStatus === "marked") {
       newQuestions[currentQuestionIndex].status = "marked-answered";
     } else {
@@ -498,6 +510,7 @@ const TestMainPage = () => {
   const handleClearResponse = () => {
     const newQuestions = [...questions];
     newQuestions[currentQuestionIndex].answer = null;
+    newQuestions[currentQuestionIndex].answerOrder = undefined; // Remove answer order when clearing
     if (newQuestions[currentQuestionIndex].status === "answered") {
       newQuestions[currentQuestionIndex].status = "not-answered";
     } else if (

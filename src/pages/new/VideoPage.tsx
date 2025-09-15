@@ -459,7 +459,7 @@ const AITutorPanel: React.FC<{
 
 // --- Main App Component ---
 const VideoPage: React.FC = () => {
-  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [currentCardIndex, _setCurrentCardIndex] = useState(0);
 
   const todaysEvent = getTodaysEvent();
   const todaysTechEvent = getTodaysTechEvent();
@@ -482,7 +482,7 @@ const VideoPage: React.FC = () => {
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
   const [isLeftColumnVisible, setIsLeftColumnVisible] = useState(true);
-  const [showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
+  const [_showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
 
   // State for learning mode
   const [currentMode, setCurrentMode] = useState<LearningMode>("chat");

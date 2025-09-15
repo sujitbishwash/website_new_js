@@ -372,7 +372,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
 };
 
 const ChatInput: React.FC<{
-  textAreaRef: React.RefObject<HTMLTextAreaElement>;
+  textAreaRef: React.RefObject<HTMLTextAreaElement | null>;
   onSendMessage: (text: string) => void;
   isLoading?: boolean;
   isLeftColumnVisible: boolean;

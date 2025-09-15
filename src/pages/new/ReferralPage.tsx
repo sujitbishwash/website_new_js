@@ -338,7 +338,7 @@ const ReferralStyles = () => (
 );
 
 // --- FAQ Item Component ---
-const FaqItem = ({ q, a }) => {
+const FaqItem: React.FC<{ q: string; a: string }> = ({ q, a }) => {
     const [isOpen, setIsOpen] = useState(false);
     return (
         <div className="border-b border-border py-5 last:border-b-0 last:pb-0">
@@ -378,12 +378,12 @@ const ReferralPage = () => {
     { rank: 5, name: "Vikram Singh", referrals: 15, rewards: "₹750" },
   ];
 
-  const premiumFeatures = [
-    "✨ Unlimited Questions",
-    "💬 Unlimited AI Chats",
-    "📝 Free Quizzes & Mock Tests",
-    "📊 Detailed Performance Reports",
-  ];
+  // const premiumFeatures = [
+  //   "✨ Unlimited Questions",
+  //   "💬 Unlimited AI Chats",
+  //   "📝 Free Quizzes & Mock Tests",
+  //   "📊 Detailed Performance Reports",
+  // ];
   const faqData = [
     {
       q: "Who is eligible to refer friends?",
