@@ -7,7 +7,7 @@ import Summary from "@/components/learning/Summary";
 import { ComponentName } from "@/lib/api-client";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
-import { Eye, EyeOff, X } from "lucide-react";
+import { Eye, EyeOff} from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import React from "react";
 import {
@@ -28,7 +28,7 @@ import ShareModal from "@/components/modals/ShareModal";
 import ContentTabs from "@/components/learning/ContentTabs";
 import AITutorPanel from "@/components/learning/AITutorPanel";
 import Header from "@/components/learning/Header";
-import ContentCard from "@/components/learning/ContentCard";
+import SparklesIcon from "@/components/icons/SparklesIcon";
 
 declare global {
   interface Window {
@@ -46,127 +46,17 @@ const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
   return <Summary videoId={videoId} />;
 });
 
-// Type definitions
-// --- TYPE DEFINITIONS ---
-
-interface IconProps {
-  path: string;
-  className?: string;
-}
-
 interface Chapter {
   time: string;
   title: string;
   content: string;
 }
 
-
-
 // Learning mode types
 type LearningMode = "chat" | "flashcards" | "quiz" | "summary";
 
-// --- Icon Components (using inline SVG for portability) ---
-// Note: In a real project, it's better to use a library like lucide-react
-const Icon: React.FC<IconProps> = ({ path, className = "w-6 h-6" }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d={path} />
-  </svg>
-);
-
-const MinimizeIcon = () => (
-  <Icon
-    path="M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"
-    className="w-5 h-5"
-  />
-);
-const SparklesIcon = () => (
-  <svg
-    width="20"
-    height="20"
-    viewBox="0 0 20 20"
-    fill="currentColor"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path d="M17.665 10C17.665 10.6877 17.1785 11.2454 16.5488 11.3945L16.4219 11.4189C14.7098 11.6665 13.6129 12.1305 12.877 12.8623C12.1414 13.5938 11.6742 14.6843 11.4238 16.3887C11.3197 17.0973 10.7182 17.665 9.96484 17.665C9.27085 17.665 8.68836 17.1772 8.53613 16.5215C8.12392 14.7459 7.6623 13.619 6.95703 12.8652C6.31314 12.1772 5.39414 11.7268 3.88672 11.4688L3.57715 11.4199C2.88869 11.319 2.33496 10.734 2.33496 10C2.33496 9.26603 2.88869 8.681 3.57715 8.58008L3.88672 8.53125C5.39414 8.27321 6.31314 7.82277 6.95703 7.13477C7.6623 6.38104 8.12392 5.25413 8.53613 3.47852L8.56934 3.35742C8.76133 2.76356 9.31424 2.33496 9.96484 2.33496C10.7182 2.33497 11.3197 2.9027 11.4238 3.61133L11.5283 4.22266C11.7954 5.58295 12.2334 6.49773 12.877 7.1377C13.6129 7.86952 14.7098 8.33351 16.4219 8.58105C17.1119 8.68101 17.665 9.26667 17.665 10Z"></path>
-  </svg>
-);
-// --- Sub-Components for Modularity ---
-
-// --- DYNAMIC CONTENT ---
-const getTodaysEvent = () => {
-  const today = new Date();
-  const day = today.getDate();
-  const month = today.toLocaleString('default', { month: 'long' });
-
-  const events: { [key: string]: { [key: number]: { title: string; trivia: string } } } = {
-    "September": {
-      9: {
-        title: "California admitted to the Union (1850)",
-        trivia: "On this day, California became the 31st state of the United States, a key moment in the country's westward expansion.",
-      },
-    },
-     "August": {
-      9: {
-        title: "Resignation of Richard Nixon (1974)",
-        trivia: "Following the Watergate scandal, Richard Nixon became the first U.S. President to resign from office on this day.",
-      },
-    },
-    // Add more events for other dates...
-  };
-
-  const event = events[month]?.[day] || {
-    title: "A notable day in history!",
-    trivia: "Every day holds a special place in the story of our world. Explore and learn something new!"
-  };
-  return event;
-};
-
-const getTodaysTechEvent = () => {
-    const today = new Date();
-    const day = today.getDate();
-    const month = today.toLocaleString('default', { month: 'long' });
-
-    const techEvents: { [key: string]: { [key: number]: { title: string; trivia: string } } } = {
-        "September": {
-            9: {
-                title: "First Computer 'Bug' Found (1947)",
-                trivia: "Grace Hopper and her team found a moth stuck in a relay of the Harvard Mark II computer, coining the term 'bug' for a computer fault.",
-            },
-        },
-        // Add more tech events
-    };
-
-    return techEvents[month]?.[day] || {
-        title: "Innovations of the Past",
-        trivia: "Technology is constantly evolving. Today is another day in its incredible history of progress!"
-    };
-};
-
-
-const quotes = [
-  { text: "'The only way to do great work is to love what you do.'", author: "Steve Jobs" },
-  { text: "'The beautiful thing about learning is that nobody can take it away from you.'", author: "B.B. King" },
-  { text: "'Live as if you were to die tomorrow. Learn as if you were to live forever.'", author: "Mahatma Gandhi" },
-];
-
 // --- Main App Component ---
 const VideoPage: React.FC = () => {
-  const [currentCardIndex, _setCurrentCardIndex] = useState(0);
-
-  const todaysEvent = getTodaysEvent();
-  const todaysTechEvent = getTodaysTechEvent();
-  const quote = quotes[Math.floor(Math.random() * quotes.length)];
-  
-  const scrollRef = useRef<HTMLDivElement>(null);
   const { videoId } = useParams<{ videoId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
@@ -1108,91 +998,7 @@ const VideoPage: React.FC = () => {
     }
   }, [handleVideoInteraction]);
 
-  const getScrollStepWidth = () => {
-    if (scrollRef.current && scrollRef.current.firstElementChild) {
-        const cardElement = scrollRef.current.firstElementChild as HTMLElement;
-        const gap = parseFloat(getComputedStyle(scrollRef.current).gap) || 0;
-        return cardElement.offsetWidth + gap;
-    }
-    return 0;
-  }
 
-    const scrollHorizontally = (direction: 'left' | 'right') => {
-      if (scrollRef.current) {
-          const stepWidth = getScrollStepWidth();
-          const newIndex = direction === 'left' ? currentCardIndex - 1 : currentCardIndex + 1;
-          scrollRef.current.scrollTo({ left: newIndex * stepWidth, behavior: 'smooth' });
-      }
-  };
-
-  // Show loading screen while video details are being fetched
-  if (isLoadingVideo) {
-    return (
-      <div className="fixed inset-0 bg-gray-900/80 flex justify-center items-center p-4 font-sans backdrop-blur-sm">
-        <div className="text-center">
-          <div className="bg-gray-800 rounded-3xl p-6 w-full max-w-[420px] shadow-2xl border border-gray-600 flex flex-col max-h-[95vh] animate-fadeInScaleUp">
-        <div className="text-center mb-5">
-          <h2 className="text-2xl font-bold text-white m-0 tracking-tight">Did you know?</h2>
-          <p className="text-sm text-blue-400 mt-2 font-medium">While we get things ready for you...</p>
-        </div>
-
-        <div className="relative overflow-x-auto snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" ref={scrollRef}>
-             <div className="flex gap-4 p-1">
-                <ContentCard icon={<Icon path="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" className="text-blue-400" />} title="On This Day">
-                    <p className="text-white font-semibold mb-2 leading-tight">{todaysEvent.title}</p>
-                    <p className="m-0 leading-relaxed text-sm">{todaysEvent.trivia}</p>
-                </ContentCard>
-                <ContentCard icon={<Icon path="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" className="text-blue-400" />} title="Quote of the Moment">
-                    <p className="text-lg italic text-white mb-4 leading-normal">"{quote.text}"</p>
-                    <p className="text-right text-gray-500 m-0">- {quote.author}</p>
-                </ContentCard>
-                <ContentCard icon={<Icon path="M5 12h14M12 5l7 7-7 7" className="text-blue-400" />} title="Tech History">
-                   <p className="text-white font-semibold mb-2 leading-tight">{todaysTechEvent.title}</p>
-                   <p className="m-0 leading-relaxed text-sm">{todaysTechEvent.trivia}</p>
-                </ContentCard>
-            </div>
-        </div>
-        
-        <div className="flex justify-center items-center gap-4 pt-5">
-            <button
-                className="bg-transparent border-none text-gray-400 cursor-pointer p-1 flex items-center justify-center rounded-full transition-colors duration-200 hover:bg-gray-700 hover:text-white disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={() => scrollHorizontally('left')}
-                disabled={currentCardIndex === 0}
-            >
-                <Icon path="M15 19l-7-7 7-7" className="w-6 h-6" />
-            </button>
-            <div className="flex gap-2">
-                {[0, 1, 2].map(index => (
-                    <span
-                        key={index}
-                        className={`w-2 h-2 rounded-full transition-colors duration-300 ${currentCardIndex === index ? 'bg-blue-400' : 'bg-gray-600'}`}
-                    />
-                ))}
-            </div>
-            <button
-                 className="bg-transparent border-none text-gray-400 cursor-pointer p-1 flex items-center justify-center rounded-full transition-colors duration-200 hover:bg-gray-700 hover:text-white disabled:text-gray-500 disabled:cursor-not-allowed disabled:opacity-50"
-                 onClick={() => scrollHorizontally('right')}
-                 disabled={currentCardIndex === 2}
-            >
-                <Icon path="M9 5l7 7-7 7" className="w-6 h-6" />
-            </button>
-        </div>
-
-        <button className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-none rounded-xl py-3.5 px-6 text-base font-semibold cursor-pointer mt-6 transition-transform transition-shadow duration-200 hover:scale-105 hover:shadow-lg">
-            Let's Go!
-        </button>
-      </div>
-          <div className="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-primary mb-6"></div>
-          <h2 className="text-2xl font-bold text-foreground mb-2">
-            Loading Video
-          </h2>
-          <p className="text-muted-foreground">
-            Fetching video details and preparing your learning experience...
-          </p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="bg-background text-foreground min-h-screen font-sans">
