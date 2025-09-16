@@ -7,18 +7,7 @@ import Summary from "@/components/learning/Summary";
 import { ComponentName } from "@/lib/api-client";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
-import {
-  BookOpen,
-  Ellipsis,
-  Eye,
-  EyeOff,
-  MessageCircle,
-  MessageCircleQuestion,
-  StickyNote,
-  Text,
-  Type,
-  X,
-} from "lucide-react";
+import { Eye, EyeOff, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import React from "react";
 import {
@@ -36,6 +25,10 @@ import {
 import YouTube from "react-youtube";
 import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
 import ShareModal from "@/components/modals/ShareModal";
+import ContentTabs from "@/components/learning/ContentTabs";
+import AITutorPanel from "@/components/learning/AITutorPanel";
+import Header from "@/components/learning/Header";
+import ContentCard from "@/components/learning/ContentCard";
 
 declare global {
   interface Window {
@@ -55,11 +48,6 @@ const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
 
 // Type definitions
 // --- TYPE DEFINITIONS ---
-interface ContentCardProps {
-  icon: React.ReactNode;
-  title: string;
-  children: React.ReactNode;
-}
 
 interface IconProps {
   path: string;
@@ -72,18 +60,7 @@ interface Chapter {
   content: string;
 }
 
-interface ContentTabsProps {
-  chapters: Chapter[];
-  transcript: string;
-  isLoadingChapters: boolean;
-  isLoadingTranscript: boolean;
-  chaptersError: string | null;
-  transcriptError: string | null;
-  onFeedbackSubmit: () => void;
-  onFeedbackSkip: () => void;
-  onFetchTranscript: () => void;
-  onSeekTo: (seconds: number) => void;
-}
+
 
 // Learning mode types
 type LearningMode = "chat" | "flashcards" | "quiz" | "summary";
@@ -123,14 +100,6 @@ const SparklesIcon = () => (
   </svg>
 );
 // --- Sub-Components for Modularity ---
-
-interface HeaderProps {
-  videoDetail: VideoDetail | null;
-  isLoading: boolean;
-  onToggleFullScreen: () => void;
-  onNavigate: (to: string) => void;
-}
-
 
 // --- DYNAMIC CONTENT ---
 const getTodaysEvent = () => {
@@ -188,312 +157,6 @@ const quotes = [
   { text: "'The beautiful thing about learning is that nobody can take it away from you.'", author: "B.B. King" },
   { text: "'Live as if you were to die tomorrow. Learn as if you were to live forever.'", author: "Mahatma Gandhi" },
 ];
-const ContentCard = ({ icon, title, children }: ContentCardProps) => (
-  <div className="bg-gray-700 rounded-2xl p-5 border border-gray-600 flex-shrink-0 w-full snap-center flex flex-col justify-between min-h-[250px] shadow-lg">
-    <div className="flex items-center gap-3 mb-4">
-      {icon}
-      <h3 className="text-white text-lg font-semibold m-0">{title}</h3>
-    </div>
-    <div className="text-gray-400 flex-1 flex flex-col justify-center">
-      {children}
-    </div>
-  </div>
-);
-
-const Header: React.FC<HeaderProps> = ({
-  videoDetail,
-  isLoading,
-  onToggleFullScreen,
-  onNavigate,
-}) => {
-  return (
-    <header className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-3 sm:gap-4">
-      <div className="flex-1 min-w-0">
-        <h1 className="text-md text-gray-500 truncate">
-          {isLoading ? (
-            <div className="h-8 bg-gray-700 rounded w-3/4 animate-pulse"></div>
-          ) : (
-            videoDetail?.title || "Video Title Not Available"
-          )}
-        </h1>
-      </div>
-      <div className="flex items-center gap-2 self-start sm:self-center">
-        <button
-          onClick={() => {
-            onNavigate(ROUTES.PREMIUM);
-          }}
-          className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none"
-        >
-          <SparklesIcon />
-          <span className="hidden sm:inline">Upgrade plan</span>
-          <span className="sm:hidden">Upgrade</span>
-        </button>
-        <button
-          className="p-2 text-muted-foreground hover:bg-foreground/10 rounded-full cursor-pointer"
-          onClick={onToggleFullScreen}
-        >
-          <X />
-        </button>
-      </div>
-    </header>
-  );
-};
-
-// Memoize the VideoPlayer component to prevent re-renders from feedback state changes
-
-const ContentTabs: React.FC<ContentTabsProps> = ({
-  chapters,
-  transcript,
-  isLoadingChapters,
-  isLoadingTranscript,
-  chaptersError,
-  transcriptError,
-  onFetchTranscript,
-  onSeekTo,
-}) => {
-  const [activeTab, setActiveTab] = useState("chapters");
-  return (
-    <div className="bg-background text-foreground hidden sm:block">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center py-3">
-        <div className="flex items-center border border-border rounded-xl p-1 gap-2">
-          <button
-            onClick={() => setActiveTab("chapters")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors  cursor-pointer ${
-              activeTab === "chapters"
-                ? "bg-foreground/20 shadow-sm text-foreground"
-                : "text-muted-foreground hover:bg-foreground/10"
-            }`}
-          >
-            <BookOpen /> Chapters
-          </button>
-          <button
-            onClick={() => setActiveTab("transcripts")}
-            className={`flex items-center gap-2 px-3 sm:px-4 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
-              activeTab === "transcripts"
-                ? "bg-foreground/20 shadow-sm text-foreground"
-                : "text-muted-foreground hover:bg-foreground/10"
-            }`}
-          >
-            <Type /> Transcripts
-          </button>
-        </div>
-        <div className="flex items-center space-x-2 self-end sm:self-center">
-          <label
-            htmlFor="auto-scroll"
-            className="text-xs sm:text-sm font-medium text-muted-foreground cursor-pointer"
-          >
-            Auto Scroll
-          </label>
-          <div className="relative inline-block w-8 sm:w-10 mr-2 align-middle select-none transition duration-200 ease-in">
-            <input
-              type="checkbox"
-              name="auto-scroll"
-              id="auto-scroll"
-              className="toggle-checkbox absolute block w-5 sm:w-6 h-5 sm:h-6 rounded-full bg-card border-4 border-border appearance-none cursor-pointer"
-            />
-            <label
-              htmlFor="auto-scroll"
-              className="toggle-label block overflow-hidden h-5 sm:h-6 rounded-full bg-border-medium cursor-pointer"
-            ></label>
-          </div>
-        </div>
-      </div>
-      <div className="p-3 sm:p-4 space-y-4 sm:space-y-5 rounded-xl border border-border ">
-        {activeTab === "chapters" ? (
-          isLoadingChapters ? (
-            <div className="text-center py-6 sm:py-8">
-              <div className="inline-block animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-blue-400"></div>
-              <p className="mt-2 text-xs sm:text-sm text-gray-400">
-                Loading chapters...
-              </p>
-            </div>
-          ) : chaptersError ? (
-            <div className="text-center py-6 sm:py-8">
-              <p className="text-xs sm:text-sm text-red-400">{chaptersError}</p>
-            </div>
-          ) : chapters.length === 0 ? (
-            <div className="text-center py-6 sm:py-8">
-              <p className="text-xs sm:text-sm text-gray-500">
-                No chapters available
-              </p>
-            </div>
-          ) : (
-            chapters.map((chapter, index) => (
-              <div
-                key={index}
-                className="grid grid-cols-[auto,1fr] gap-x-2 sm:gap-x-4 group cursor-pointer"
-              >
-                <div
-                  className="text-xs sm:text-sm font-mono text-blue-400 pt-1 hover:underline"
-                  onClick={() => {
-                    const parts = chapter.time.split(':').map(Number);
-                    let secs = 0;
-                    if (parts.length === 3) secs = parts[0] * 3600 + parts[1] * 60 + parts[2];
-                    else if (parts.length === 2) secs = parts[0] * 60 + parts[1];
-                    onSeekTo(secs);
-                  }}
-                >
-                  {chapter.time}
-                </div>
-                <div className="border-l-2 border-gray-600 pl-2 sm:pl-4 group-hover:border-blue-500 transition-colors">
-                  <h3
-                    className="font-semibold text-foreground text-sm sm:text-base hover:text-blue-400"
-                    onClick={() => {
-                      const parts = chapter.time.split(':').map(Number);
-                      let secs = 0;
-                      if (parts.length === 3) secs = parts[0] * 3600 + parts[1] * 60 + parts[2];
-                      else if (parts.length === 2) secs = parts[0] * 60 + parts[1];
-                      onSeekTo(secs);
-                    }}
-                  >
-                    {chapter.title}
-                  </h3>
-                  <p className="text-xs sm:text-sm text-muted-foreground mt-1">
-                    {chapter.content}
-                  </p>
-                </div>
-              </div>
-            ))
-          )
-        ) : isLoadingTranscript ? (
-          <div className="text-center py-6 sm:py-8">
-            <div className="inline-block animate-spin rounded-full h-5 w-5 sm:h-6 sm:w-6 border-b-2 border-blue-400"></div>
-            <p className="mt-2 text-xs sm:text-sm text-gray-400">
-              Loading transcript...
-            </p>
-          </div>
-        ) : transcriptError ? (
-          <div className="text-center py-6 sm:py-8">
-            <p className="text-xs sm:text-sm text-red-400 mb-4">
-              {transcriptError}
-            </p>
-            <button
-              onClick={onFetchTranscript}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Try Again
-            </button>
-          </div>
-        ) : transcript ? (
-          <div className="text-xs sm:text-sm text-gray-300 leading-relaxed whitespace-pre-wrap">
-            {transcript.split(/(\b\d{1,2}:\d{2}(?::\d{2})?\b)/g).map((chunk, i) => {
-              const m = chunk.match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-              if (m) {
-                const h = m[3] ? Number(m[1]) : 0;
-                const mm = m[3] ? Number(m[2]) : Number(m[1]);
-                const ss = m[3] ? Number(m[3]) : Number(m[2]);
-                const secs = h * 3600 + mm * 60 + ss;
-                return (
-                  <span
-                    key={i}
-                    className="text-blue-400 hover:underline cursor-pointer"
-                    onClick={() => onSeekTo(secs)}
-                  >
-                    {chunk}
-                  </span>
-                );
-              }
-              return <span key={i}>{chunk}</span>;
-            })}
-          </div>
-        ) : (
-          <div className="text-center text-gray-500 py-6 sm:py-8">
-            <p className="text-xs sm:text-sm mb-4">
-              Click the button below to fetch the video transcript.
-            </p>
-            <button
-              onClick={onFetchTranscript}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              Fetch Transcript
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-const AITutorPanel: React.FC<{
-  currentMode: LearningMode;
-  onModeChange: (mode: LearningMode) => void;
-  onToggleFullScreen: () => void;
-  isLeftColumnVisible: boolean;
-  onShare: () => void;
-  // Components to render
-  components: {
-    chat: React.ReactNode;
-    flashcards: React.ReactNode;
-    quiz: React.ReactNode;
-    summary: React.ReactNode;
-  };
-}> = ({
-  currentMode,
-  onModeChange,
-  onToggleFullScreen,
-  isLeftColumnVisible,
-  onShare,
-  components,
-}) => {
-  const modes: { key: LearningMode; label: string; icon: any }[] = [
-    { key: "chat", label: "Chat", icon: <MessageCircle /> },
-    { key: "flashcards", label: "Flashcards", icon: <StickyNote /> },
-    { key: "quiz", label: "Quiz", icon: <MessageCircleQuestion /> },
-    { key: "summary", label: "Summary", icon: <Text /> },
-  ];
-
-  return (
-    <div className={`bg-card flex flex-col h-full sm:max-h-[100vh]`}>
-      <div className="relative bg-background">
-        <div
-          className={`flex items-center ${
-            isLeftColumnVisible ? "justify-between sm:justify-start" : "justify-center gap-2"
-          } rounded-lg p-2 sm:p-4 w-full overflow-x-auto`}
-        >
-          {modes.map(({ key, label, icon }) => (
-            <button
-              key={key}
-              onClick={() => onModeChange(key)}
-              className={`flex-shrink-0 flex items-center justify-center gap-2 w-auto px-2 ${
-                isLeftColumnVisible ? "sm:px-2" : "sm:px-4"
-              } py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-colors cursor-pointer ${
-                currentMode === key
-                  ? "bg-card text-foreground"
-                  : "text-muted-foreground hover:bg-foreground/10"
-              }`}
-            >
-              {icon} {label}
-            </button>
-          ))}
-        </div>
-        <div className="flex flex-row items-center absolute top-1/2 -translate-y-1/2 right-2 space-x-2 sm:flex hidden">
-          <button
-            onClick={onShare}
-            title="Share"
-            className="p-2 text-foreground hover:bg-foreground/10 rounded-full transition-colors"
-          >
-            <Ellipsis />
-          </button>
-
-          <button
-            onClick={onToggleFullScreen}
-            title={
-              isLeftColumnVisible ? "Full Screen Chat" : "Exit Full Screen"
-            }
-            className={`p-2 text-foreground hover:bg-foreground/10 rounded-full transition-colors ${
-              isLeftColumnVisible ? "hidden" : "sm:block"
-            }`}
-          >
-            <MinimizeIcon />
-          </button>
-        </div>
-      </div>
-      <div className="flex-1 overflow-y-auto bg-background">
-        {components[currentMode]}
-      </div>
-    </div>
-  );
-};
 
 // --- Main App Component ---
 const VideoPage: React.FC = () => {
@@ -541,12 +204,30 @@ const VideoPage: React.FC = () => {
   const ytPlayerRef = useRef<any>(null);
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const periodicSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isPlayingRef = useRef<boolean>(false);
+  const isPlayerActivelyPlaying = useCallback((): boolean => {
+    try {
+      const state = ytPlayerRef.current?.getPlayerState?.();
+      // 1 = playing
+      if (state === 1) return true;
+    } catch {}
+    return isPlayingRef.current;
+  }, []);
   const [resumePosition, setResumePosition] = useState<number>(0);
+  const [resumePercent, setResumePercent] = useState<number>(0);
+  const resumeSeekAppliedRef = useRef<boolean>(false);
 
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
 
-  // Function to save video progress - only called on navigation away from page
+  // Track last saved progress to avoid duplicate saves
+  const lastSavedProgressRef = useRef<{
+    percentage: number;
+    position: number;
+    timestamp: number;
+  } | null>(null);
+
+  // Function to save video progress with throttling and deduplication
   const saveVideoProgress = useCallback(async () => {
     if (!currentVideoId || !ytPlayerRef.current) {
       return;
@@ -559,6 +240,18 @@ const VideoPage: React.FC = () => {
       // Only save progress if video has been played (currentTime >= 0.1) and duration is available
       if (duration > 0 && currentTime >= 0.1) {
         const watchPercentage = (currentTime / duration) * 100;
+        const now = Date.now();
+        
+        // Throttle saves: only save if progress changed significantly or enough time passed
+        const lastSaved = lastSavedProgressRef.current;
+        const shouldSave = !lastSaved || 
+          Math.abs(watchPercentage - lastSaved.percentage) >= 5 || // 5% change
+          Math.abs(currentTime - lastSaved.position) >= 30 || // 30 seconds change
+          (now - lastSaved.timestamp) >= 60000; // 1 minute passed
+
+        if (!shouldSave) {
+          return;
+        }
 
         try {
           await videoProgressApi.trackProgress({
@@ -568,6 +261,30 @@ const VideoPage: React.FC = () => {
             current_position: Math.round(currentTime),
             page_url: window.location.href,
           });
+          
+          // Update last saved progress
+          lastSavedProgressRef.current = {
+            percentage: watchPercentage,
+            position: currentTime,
+            timestamp: now
+          };
+          
+          // Mirror to localStorage on successful save
+          const progressData = {
+            videoId: currentVideoId,
+            title: videoDetail?.title || `Video ${currentVideoId}`,
+            thumbnailUrl: `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`,
+            watchPercentage: Math.round(watchPercentage * 100) / 100,
+            currentTime: Math.round(currentTime),
+            totalDuration: Math.round(duration),
+            lastUpdated: new Date().toISOString(),
+            subject: videoDetail?.topics?.[0] || "General",
+            description: videoDetail?.description || "Video content",
+          };
+          localStorage.setItem(
+            `video_progress_${currentVideoId}`,
+            JSON.stringify(progressData)
+          );
         } catch (apiError: any) {
           // If API endpoint doesn't exist (404), try alternative approach
           if (apiError.status === 404) {
@@ -591,7 +308,6 @@ const VideoPage: React.FC = () => {
             throw apiError;
           }
         }
-      } else {
       }
     } catch (error) {}
   }, [currentVideoId, videoDetail]);
@@ -599,15 +315,6 @@ const VideoPage: React.FC = () => {
   // Create a wrapped navigate function that shows alert before navigating
   const navigateWithProgress = useCallback(
     (to: string, options?: any) => {
-      /*
-      const confirmed = window.confirm("Are you sure you want to leave this video?");
-      if (confirmed) {
-        
-        navigate(to, options);
-      } else {
-        
-      }
-        */
       saveVideoProgress();
       navigate(to, options);
     },
@@ -624,17 +331,6 @@ const VideoPage: React.FC = () => {
   // Handle React Router navigation blocking
   useEffect(() => {
     if (blocker.state === "blocked") {
-      // Show alert before allowing navigation
-      /*
-        const confirmed = window.confirm("Are you sure you want to leave this video?");
-        if (confirmed) {
-          
-          blocker.proceed();
-        } else {
-          
-          blocker.reset();
-        }
-          */
       saveVideoProgress();
       blocker.proceed();
     }
@@ -646,13 +342,6 @@ const VideoPage: React.FC = () => {
   useEffect(() => {
     // Check if location has changed
     if (prevLocationRef.current !== location.pathname) {
-      /*
-        const confirmed = window.confirm("Are you sure you want to leave this video?");
-        if (!confirmed) {
-          // Navigate back to previous location
-          window.history.pushState(null, '', prevLocationRef.current);
-        }
-        */
       saveVideoProgress();
       prevLocationRef.current = location.pathname;
     }
@@ -741,11 +430,28 @@ const VideoPage: React.FC = () => {
       ytPlayerRef.current = player;
 
       // Seek to saved position if available
-      try {
-        if (resumePosition && resumePosition > 0) {
-          player.seekTo(resumePosition, true);
-        }
-      } catch {}
+      const attemptSeek = () => {
+        try {
+          if (!resumeSeekAppliedRef.current && resumePosition > 0) {
+            const duration = player.getDuration?.() || 0;
+            // Ensure the player is ready with a valid duration
+            if (duration > 0 && resumePosition < duration) {
+              player.seekTo(resumePosition, true);
+              resumeSeekAppliedRef.current = true;
+            }
+          } else if (!resumeSeekAppliedRef.current && resumePercent > 0) {
+            const duration = player.getDuration?.() || 0;
+            if (duration > 0) {
+              const target = Math.min(duration - 1, Math.max(0, (resumePercent / 100) * duration));
+              player.seekTo(target, true);
+              resumeSeekAppliedRef.current = true;
+            }
+          }
+        } catch {}
+      };
+      // Try immediately and again shortly after; some embeds need a delay
+      attemptSeek();
+      setTimeout(attemptSeek, 500);
 
       // Start progress tracking interval - only track progress, don't save
       const interval = setInterval(() => {
@@ -771,6 +477,8 @@ const VideoPage: React.FC = () => {
               openFeedbackModal();
               hasShownFeedbackRef.current = true;
             }
+
+            // Note: Progress saving is now handled by the periodic interval below
           }
         } catch (error) {}
       }, 2000); // Update every 2 seconds
@@ -778,22 +486,14 @@ const VideoPage: React.FC = () => {
       // Store interval reference for cleanup
       progressIntervalRef.current = interval;
 
-      // Start a resilient 60s periodic saver once per player init
-      if (!periodicSaveIntervalRef.current) {
-        periodicSaveIntervalRef.current = setInterval(() => {
-          saveVideoProgress();
-        }, 60000);
-      }
+      // Note: Periodic saving is handled by the useEffect below to avoid duplicates
 
       // Return cleanup function
       return () => {
         if (interval) {
           clearInterval(interval);
         }
-        if (periodicSaveIntervalRef.current) {
-          clearInterval(periodicSaveIntervalRef.current);
-          periodicSaveIntervalRef.current = null;
-        }
+        // Note: Periodic interval cleanup is handled by useEffect
       };
     },
     [openFeedbackModal, saveVideoProgress]
@@ -822,6 +522,12 @@ const VideoPage: React.FC = () => {
 
       // Update playing state
       console.debug("[Video] onYouTubeStateChange: playerState", playerState);
+      // 1 = playing, 2 = paused, 3 = buffering, 0 = ended, 5 = video cued
+      if (playerState === 1) {
+        isPlayingRef.current = true;
+      } else if (playerState === 2 || playerState === 0 || playerState === 5) {
+        isPlayingRef.current = false;
+      }
 
       // Persist progress when user pauses or buffers
       // 2 = paused, 3 = buffering per YT IFrame API
@@ -833,14 +539,8 @@ const VideoPage: React.FC = () => {
       if (playerState === 0) {
         // 0 = ended
         onYouTubeEnd();
-        if (periodicSaveIntervalRef.current) {
-          clearInterval(periodicSaveIntervalRef.current);
-          periodicSaveIntervalRef.current = null;
-        }
+        // Note: Periodic interval cleanup is handled by useEffect
       }
-
-      // We keep the periodic saver running regardless of temporary states;
-      // saveVideoProgress() itself guards for valid time/duration.
     },
     [onYouTubeEnd, saveVideoProgress]
   );
@@ -859,6 +559,7 @@ const VideoPage: React.FC = () => {
     if (currentVideoId) {
       // Reset feedback state for new video
       hasShownFeedbackRef.current = false;
+      resumeSeekAppliedRef.current = false;
 
       // The useMultiFeedbackTracker hook automatically resets when sourceId changes
 
@@ -878,15 +579,10 @@ const VideoPage: React.FC = () => {
         ytPlayerRef.current = null;
       }
 
-      if (periodicSaveIntervalRef.current) {
-        clearInterval(periodicSaveIntervalRef.current);
-        periodicSaveIntervalRef.current = null;
-      }
+      // Note: Periodic interval cleanup is handled by main useEffect
     }
   }, [currentVideoId]);
 
-  // The useMultiFeedbackTracker hook automatically fetches feedback states
-  // when currentVideoId changes, so we don't need manual fetching here
 
   // Cleanup progress tracking on unmount
   useEffect(() => {
@@ -895,10 +591,7 @@ const VideoPage: React.FC = () => {
         clearInterval(progressIntervalRef.current);
         progressIntervalRef.current = null;
       }
-      if (periodicSaveIntervalRef.current != null) {
-        clearInterval(periodicSaveIntervalRef.current);
-        periodicSaveIntervalRef.current = null;
-      }
+      // Note: Periodic interval cleanup is handled by main useEffect
 
       // Save final progress before unmounting
       saveVideoProgress();
@@ -916,26 +609,11 @@ const VideoPage: React.FC = () => {
     };
 
     const handlePopState = () => {
-      // Show alert before browser back/forward navigation
-
-      /*
-        const confirmed = window.confirm("Are you sure you want to leave this video?");
-        if (!confirmed) {
-          // Prevent navigation by pushing current state back
-          window.history.pushState(null, '', window.location.href);
-        }
-          */
       saveVideoProgress();
     };
 
     // Handle React Router navigation
     const handleRouteChange = () => {
-      // Show alert before navigation
-
-      /*
-        const confirmed = window.confirm("Are you sure you want to leave this video?");
-        return confirmed;
-        */
       saveVideoProgress();
       return true;
     };
@@ -1041,13 +719,64 @@ const VideoPage: React.FC = () => {
       try {
         const resp = await videoProgressApi.getProgress(currentVideoId);
         const pos = Number(resp.data?.current_position ?? 0);
+        const pct = Number(resp.data?.watch_percentage ?? 0);
         if (!isNaN(pos) && pos > 0) setResumePosition(pos);
+        if (!isNaN(pct) && pct > 0) setResumePercent(pct);
+        if ((isNaN(pos) || pos <= 0) && (isNaN(pct) || pct <= 0)) {
+          const raw = localStorage.getItem(`video_progress_${currentVideoId}`);
+          if (raw) {
+            try {
+              const data = JSON.parse(raw);
+              const lsPos = Number(data?.currentTime ?? 0);
+              const lsPct = Number(data?.watchPercentage ?? 0);
+              if (!isNaN(lsPos) && lsPos > 0) setResumePosition(lsPos);
+              if (!isNaN(lsPct) && lsPct > 0) setResumePercent(lsPct);
+            } catch {}
+          }
+        }
       } catch {
         // ignore if no progress
+        const raw = localStorage.getItem(`video_progress_${currentVideoId}`);
+        if (raw) {
+          try {
+            const data = JSON.parse(raw);
+            const lsPos = Number(data?.currentTime ?? 0);
+            const lsPct = Number(data?.watchPercentage ?? 0);
+            if (!isNaN(lsPos) && lsPos > 0) setResumePosition(lsPos);
+            if (!isNaN(lsPct) && lsPct > 0) setResumePercent(lsPct);
+          } catch {}
+        }
       }
     };
     fetchProgress();
   }, [currentVideoId]);
+
+  // If resume position arrives after player is ready, attempt seek once
+  useEffect(() => {
+    if (ytPlayerRef.current && resumePosition > 0 && !resumeSeekAppliedRef.current) {
+      try {
+        const duration = ytPlayerRef.current.getDuration?.() || 0;
+        if (duration > 0 && resumePosition < duration) {
+          ytPlayerRef.current.seekTo(resumePosition, true);
+          resumeSeekAppliedRef.current = true;
+        }
+      } catch {}
+    }
+  }, [resumePosition]);
+
+  // Fallback: if only percent is available later, seek by percent
+  useEffect(() => {
+    if (ytPlayerRef.current && resumePercent > 0 && !resumeSeekAppliedRef.current) {
+      try {
+        const duration = ytPlayerRef.current.getDuration?.() || 0;
+        if (duration > 0) {
+          const target = Math.min(duration - 1, Math.max(0, (resumePercent / 100) * duration));
+          ytPlayerRef.current.seekTo(target, true);
+          resumeSeekAppliedRef.current = true;
+        }
+      } catch {}
+    }
+  }, [resumePercent]);
 
   // Fetch chapters
   useEffect(() => {
@@ -1116,12 +845,6 @@ const VideoPage: React.FC = () => {
     setTranscriptError(null);
     setIsLoadingTranscript(false);
 
-    // Reset feedback state when video changes
-    // setFeedbackState({ // This line was removed as per the edit hint
-    //   hasShownFeedback: false,
-    //   lastFeedbackTime: null,
-    //   feedbackCount: 0,
-    // });
   }, [currentVideoId]);
 
   const initializeChat = async () => {
@@ -1235,11 +958,15 @@ const VideoPage: React.FC = () => {
       periodicSaveIntervalRef.current = null;
     }
     if (currentVideoId) {
-      // Kick off an immediate save once the video id is set
-      saveVideoProgress();
-      // Then continue saving every 60 seconds
-      periodicSaveIntervalRef.current = setInterval(() => {
+      // Kick off an immediate save once the video id is set, only if actively playing
+      if (isPlayerActivelyPlaying()) {
         saveVideoProgress();
+      }
+      // Then continue saving every 60 seconds while playing
+      periodicSaveIntervalRef.current = setInterval(() => {
+        if (isPlayerActivelyPlaying()) {
+          saveVideoProgress();
+        }
       }, 60000);
     }
     return () => {
@@ -1248,7 +975,7 @@ const VideoPage: React.FC = () => {
         periodicSaveIntervalRef.current = null;
       }
     };
-  }, [currentVideoId, saveVideoProgress]);
+  }, [currentVideoId, saveVideoProgress, isPlayerActivelyPlaying]);
 
   // Save on tab backgrounding or page lifecycle transitions
   useEffect(() => {
@@ -1358,11 +1085,7 @@ const VideoPage: React.FC = () => {
       } catch (error) {}
     }
   }, [
-    // updateWatchPercentage, // This function is no longer available
-    // shouldShowFeedbackOnLeave, // This variable is no longer available
     openFeedbackModal,
-    // updateFeedbackState, // This function is no longer available
-    // feedbackState.hasShownFeedback, // This variable is no longer available
   ]);
 
   // Listen for video player events to catch user interactions

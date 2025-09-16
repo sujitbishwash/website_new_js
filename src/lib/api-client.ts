@@ -2,8 +2,8 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  //baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  baseURL: 'https://api.krishak.in',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  // baseURL: 'https://api.krishak.in',
   headers: {
     "Content-Type": "application/json",
   },
@@ -919,11 +919,28 @@ export interface FeedbackChipsResponse {
 
 // Video Progress Tracking API
 export const videoProgressApi = {
-  // Track video watch progress
+  // Track video watch progress with deduplication
   trackProgress: async (data: VideoProgressRequest): Promise<VideoProgressResponse> => {
+    const requestKey = `progress-${data.video_id}`;
     
-    const response = await apiRequest<VideoProgressResponse>('POST', '/video/progress', data);
-    return response.data;
+    // Check if request is already in progress
+    if (activeRequests.has(requestKey)) {
+      return activeRequests.get(requestKey)! as Promise<VideoProgressResponse>;
+    }
+
+    const requestPromise = (async (): Promise<VideoProgressResponse> => {
+      try {
+        const response = await apiRequest<VideoProgressResponse>('POST', '/video/progress', data);
+        return response.data;
+      } finally {
+        // Remove from active requests when done
+        activeRequests.delete(requestKey);
+      }
+    })();
+
+    // Store the promise to prevent duplicate requests
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
   },
 
   // Get video progress for a specific video
