@@ -344,13 +344,15 @@ const TestMainPage = () => {
 
     // Convert questions to the enhanced format with answer_order
     // Only include answered questions in the submission
-    const submittedAnswers = updatedQuestions
-      .map((q) => ({
-        question_id: q.id,
-        selected_option: q.answer !== null && q.answer !== undefined ? q.options[q.answer] : null,
-        answer_order: q.answerOrder ?? 0,
-        time_taken: q.timeSpent ?? 0,
-      }));
+    const submittedAnswers = updatedQuestions.map((q) => ({
+      question_id: q.id,
+      selected_option:
+        q.answer !== null && q.answer !== undefined
+          ? q.options[q.answer]
+          : null,
+      answer_order: q.answerOrder ?? 0,
+      time_taken: q.timeSpent ?? 0,
+    }));
 
     // Calculate test metadata
     const totalTimeTaken = 600 - timeLeft; // Total time taken in seconds
@@ -449,14 +451,14 @@ const TestMainPage = () => {
     const currentStatus = newQuestions[currentQuestionIndex].status;
 
     newQuestions[currentQuestionIndex].answer = optionIndex;
-    
+
     // Track answer order only if this is the first time answering this question
     if (newQuestions[currentQuestionIndex].answerOrder === undefined) {
       const newOrder = answerOrderCounter + 1;
       newQuestions[currentQuestionIndex].answerOrder = newOrder;
       setAnswerOrderCounter(newOrder);
     }
-    
+
     if (currentStatus === "marked") {
       newQuestions[currentQuestionIndex].status = "marked-answered";
     } else {
@@ -705,7 +707,8 @@ const TestMainPage = () => {
         {/* Responsive Title */}
         <div className="flex-1 text-center px-2">
           <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
-            {testConfig?.subject}-{testConfig?.sub_topic.join(", ")}-{testConfig?.level}
+            {testConfig?.subject}-{testConfig?.sub_topic.join(", ")}-
+            {testConfig?.level}
           </h1>
         </div>
         <div className="flex items-center">
@@ -865,77 +868,80 @@ const TestMainPage = () => {
               ))}
             </div>
           </div>*/}
-
-          {/*<div className={`bg-gray-800 rounded-b-lg rounded-tr-lg shadow-lg flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden ${textSize}`}>
-            <div className="p-4 sm:p-6 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-              <p className="text-gray-300 leading-relaxed">
-                {currentQuestion.question}
-              </p>
-            </div>
-            <div className="p-4 sm:p-6 h-full overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-              {currentQuestion.options.map((option, index) => (
-                <label
-                  key={index}
-                  className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 ${
-                    currentQuestion.answer === index
-                      ? "bg-blue-600 ring-2 ring-blue-400"
-                      : "bg-gray-700 hover:bg-gray-600"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name={`question-${currentQuestion.id}`}
-                    className="h-5 w-5 mr-4 border-gray-500 bg-gray-800 text-blue-500 focus:ring-blue-400"
-                    checked={currentQuestion.answer === index}
-                    onChange={() => handleOptionSelect(index)}
-                  />
-                  <span>{option}</span>
-                </label>
-              ))}
-            </div>
-          </div>*/}
-
-          <div
-            className={`bg-gray-800 rounded-b-lg rounded-tr-lg shadow-lg flex-grow flex flex-col overflow-hidden ${textSize}`}
-          >
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 sm:p-6 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
-              <div>
-                <p className="text-gray-300 leading-relaxed mb-6">
+          {!isSolutionMode ? (
+            <div
+              className={`bg-card rounded-b-lg rounded-tr-lg flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden ${textSize}`}
+            >
+              <div className="p-4 sm:p-6 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                <p className="text-foreground leading-relaxed">
                   {currentQuestion.question}
                 </p>
-                <div className="space-y-4">
-                  {currentQuestion.options.map((option, index) => (
-                <label
+              </div>
+              <div className="p-4 sm:p-6 h-full overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                {currentQuestion.options.map((option, index) => (
+                  <label
                   key={index}
-                  className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 ${
+                  className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 border text-foreground ${
                     currentQuestion.answer === index
-                      ? "bg-blue-600 ring-2 ring-blue-400"
-                      : "bg-gray-700 hover:bg-gray-600"
+                      ? "bg-blue-400 text-white"
+                      : "bg-background-subtle hover:bg-blue-400/20 hover:border-blue-400"
                   }`}
                 >
-                  <input
+                    <input
                     type="radio"
                     name={`question-${currentQuestion.id}`}
-                    className="h-5 w-5 mr-4 border-gray-500 bg-gray-800 text-blue-500 focus:ring-blue-400"
+                    className="h-5 w-5 mr-4 border-gray-500 bg-card text-blue-500 focus:ring-blue-400"
                     checked={currentQuestion.answer === index}
                     onChange={() => handleOptionSelect(index)}
                   />
-                  <span>{option}</span>
-                </label>
-              ))}
-                </div>
+                    <span>{option}</span>
+                  </label>
+                ))}
               </div>
+            </div>
+          ) : (
+            <div
+              className={`bg-card rounded-b-lg rounded-tr-lg flex-grow flex flex-col overflow-hidden ${textSize}`}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 sm:p-6 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+                <div>
+                  <p className="text-foreground leading-relaxed mb-6">
+                    {currentQuestion.question}
+                  </p>
+                  <div className="space-y-4">
+                    {currentQuestion.options.map((option, index) => (
+                      <label
+                  key={index}
+                  className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 border text-foreground ${
+                    currentQuestion.answer === index
+                      ? "bg-blue-400 text-white"
+                      : "bg-background-subtle hover:bg-blue-400/20 hover:border-blue-400"
+                  }`}
+                >
+                        <input
+                    type="radio"
+                    name={`question-${currentQuestion.id}`}
+                    className="h-5 w-5 mr-4 border-gray-500 bg-card text-blue-500 focus:ring-blue-400"
+                    checked={currentQuestion.answer === index}
+                    onChange={() => handleOptionSelect(index)}
+                  />
+                        <span>{option}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
 
-              <div className="border-t-2 md:border-t-0 md:border-l-2 border-gray-700 border-dashed pt-6 md:pt-0 md:pl-8">
-                <h3 className="text-lg font-bold text-blue-300 mb-4">
-                  Solution
-                </h3>
-                <div className="prose prose-invert text-gray-300">
-                  <p>SOlutuon here</p>
+                <div className="border-t-2 md:border-t-0 md:border-l-2 border-gray-700 border-dashed pt-6 md:pt-0 md:pl-8">
+                  <h3 className="text-lg font-bold text-blue-300 mb-4">
+                    Solution
+                  </h3>
+                  <div className="prose prose-invert text-gray-300">
+                    <p>SOlutuon here</p>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
         </main>
 
         {/* Sidebar */}
