@@ -2,8 +2,8 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  // baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-  baseURL: 'https://api.krishak.in',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  // baseURL: 'https://api.krishak.in',
   headers: {
     "Content-Type": "application/json",
   },
@@ -707,9 +707,9 @@ export interface Option {
 }
 
 export const quizApi = {
-  startTest: async (
+  initiateTest: async (
     testConfig: TestData
-  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+  ): Promise<{"session_id": number}> => {
     // Accept either legacy flat questions or new grouped-sections payload
     const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
       "POST",
@@ -719,12 +719,26 @@ export const quizApi = {
     return response.data as any;
   },
 
-  getQuestions: async (sessionId: number): Promise<QuestionResponse> => {
-    const response = await apiRequest<QuestionResponse>(
+  startTest: async (
+    sessionId: number
+  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+    // Accept either legacy flat questions or new grouped-sections payload
+    const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
       "GET",
-      `/test-series/question/${sessionId}`
+      `/test-series/session/${sessionId}`,
     );
-    return response.data;
+    return response.data as any;
+  },
+
+  getTestSolutions: async (
+    sessionId: number
+  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+    // Accept either legacy flat questions or new grouped-sections payload
+    const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
+      "GET",
+      `/test-series/view-solution/${sessionId}`,
+    );
+    return response.data as any;
   },
 
   submitTest: async (data: SubmitTestRequest): Promise<SubmitTestResponse> => {
@@ -1030,7 +1044,7 @@ export interface AttemptedTestsResponse {
 
 export const attemptedTestsApi = {
   // Get user's attempted tests
-  getAttemptedTests: async (page: number = 1, size: number = 4): Promise<AttemptedTestsResponse> => {
+  getAttemptedTests: async (page: number = 1, size: number = 10): Promise<AttemptedTestsResponse> => {
     const response = await apiRequest<AttemptedTestsResponse>('GET', `/test-series/attempted-tests?page=${page}&size=${size}`);
     return response.data;
   },
