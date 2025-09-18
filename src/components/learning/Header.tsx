@@ -1,7 +1,7 @@
 import React from "react";
 import { ROUTES } from "@/routes/constants";
 import { X } from "lucide-react";
-import { SparklesIcon } from "lucide-react";
+import SparklesIcon from "../icons/SparklesIcon";
 
 interface VideoDetail {
   title?: string;
@@ -39,8 +39,7 @@ const Header: React.FC<HeaderProps> = ({
             className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer transition-colors glow-purple transition-transform transform hover:scale-105 focus:outline-none"
           >
             <SparklesIcon />
-            <span className="hidden sm:inline">Upgrade plan</span>
-            <span className="sm:hidden">Upgrade</span>
+            <span className="">Upgrade</span>
           </button>
           <button
             className="p-2 text-muted-foreground hover:bg-foreground/10 rounded-full cursor-pointer"

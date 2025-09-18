@@ -259,7 +259,6 @@ const TestConfigurationPageComponent = () => {
           <p className="mt-2 text-lg text-muted-foreground hidden sm:block">
             Select your preferences to start a practice test.
           </p>
-          {selectedSubtopics}
         </div>
 
         {/* --- User Profile Section --- */}
