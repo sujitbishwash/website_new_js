@@ -77,6 +77,7 @@ export const ROUTE_NAMES = {
     [ROUTES.TERMS_AND_CONDITIONS]: "Terms and Conditions",
     [ROUTES.AUTH_CALLBACK]: "Auth Callback",
     [ROUTES.STATS]: "Stats",
+    [ROUTES.TEST_SOLUTION]: "Test Solution",
 } as const;
 
 // Helper function to build video learning route with ID

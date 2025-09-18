@@ -1889,7 +1889,7 @@ export default function TestAnalysis2() {
           <div className="lg:col-span-12">
             <div className="flex flex-col sm:flex-row items-center gap-3">
               <button
-                onClick={navigate(ROUTES.TEST_SOLUTION)}
+                onClick={() => navigate(ROUTES.TEST_SOLUTION)}
                 className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 text-lg font-semibold rounded-lg backdrop-blur-sm border-1 transition-all duration-300 text-white hover:opacity-90 bg-primary hover:bg-primary/80 cursor-pointer"
               >
                 <Text className="w-5 h-5" />
