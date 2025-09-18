@@ -130,7 +130,7 @@ const ExamGoalSelector: FC = () => {
     <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-4 sm:p-8 shadow-2xl transition-all duration-500 border border-divider">
       <div className="text-center">
         <h2 className="text-center text-3xl font-bold tracking-tight text-foreground">
-          Select Your Exam Goal
+          What's Your Exam Goal?
         </h2>
         <p className="mt-2 text-center text-sm sm:text-md text-muted-foreground">
           Choose your exam to personalize the experience.

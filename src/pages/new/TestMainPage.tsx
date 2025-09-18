@@ -1,7 +1,7 @@
 import { quizApi, SubmitTestResponse } from "@/lib/api-client";
 import React, { useEffect, useRef, useState } from "react";
 
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
 import TestResultDialog from "../../components/TestResultDialog";
 import { useUser } from "../../contexts/UserContext";
@@ -26,6 +26,7 @@ import {
   Button4,
   Button5,
 } from "@/components/test/buttons";
+import CustomLoader from "@/components/icons/customloader";
 
 // --- Helper Components & Modals ---
 const InstructionsModal = ({ onClose }: { onClose: () => void }) => (
@@ -198,7 +199,9 @@ const TestMainPage = () => {
   }>({});
   const [currentSection, setCurrentSection] =
     useState<SectionName>("english language");
-  const [sectionTabs, setSectionTabs] = useState<{ id: SectionName; label: string }[]>([
+  const [sectionTabs, setSectionTabs] = useState<
+    { id: SectionName; label: string }[]
+  >([
     { id: "english language", label: "English Language" },
     { id: "numerical ability", label: "Numerical Ability" },
     { id: "reasoning ability", label: "Reasoning Ability" },
@@ -232,6 +235,8 @@ const TestMainPage = () => {
   const [questions, setQuestions] = useState<Question[]>([]);
 
   const testConfig = location.state?.testConfig;
+  const { id } = useParams();
+  const isSolutionMode = location.pathname.endsWith("/solutions");
 
   const questionsForCurrentSection = allQuestions[currentSection] || [];
 
@@ -264,7 +269,6 @@ const TestMainPage = () => {
     setError(null);
 
     try {
-      
       const response = await quizApi.startTest({
         ...testConfig,
         topics: testConfig.sub_topic,
@@ -277,25 +281,31 @@ const TestMainPage = () => {
         const normalized: { [key in SectionName]?: Question[] } = {} as any;
         const tabs: { id: SectionName; label: string }[] = [];
         Object.values(sections).forEach((sec: any) => {
-          const key = (sec.key || sec.name || '').toLowerCase();
+          const key = (sec.key || sec.name || "").toLowerCase();
           let sectionName: SectionName | undefined;
-          if (key.includes('english')) sectionName = 'english language';
-          else if (key.includes('apt') || key.includes('num')) sectionName = 'numerical ability';
-          else if (key.includes('reason')) sectionName = 'reasoning ability';
+          if (key.includes("english")) sectionName = "english language";
+          else if (key.includes("apt") || key.includes("num"))
+            sectionName = "numerical ability";
+          else if (key.includes("reason")) sectionName = "reasoning ability";
           if (sectionName) {
-            normalized[sectionName] = (sec.questions || []).map(mapApiQuestionToQuestion);
+            normalized[sectionName] = (sec.questions || []).map(
+              mapApiQuestionToQuestion
+            );
             tabs.push({ id: sectionName, label: sec.name || sectionName });
           }
         });
         // Set current flat list from first available section for UI rendering
-        const initialSection: SectionName = (tabs[0]?.id as SectionName) || (Object.keys(normalized)[0] as SectionName) || 'english language';
+        const initialSection: SectionName =
+          (tabs[0]?.id as SectionName) ||
+          (Object.keys(normalized)[0] as SectionName) ||
+          "english language";
         setAllQuestions(normalized);
         setCurrentSection(initialSection);
         setQuestions(normalized[initialSection] || []);
         if (tabs.length) setSectionTabs(tabs);
         setSessionId(v3.session_id);
         // Configure timer if provided
-        if (typeof v3.total_time === 'number') {
+        if (typeof v3.total_time === "number") {
           setTimeLeft(v3.total_time);
         }
       } else if (response && (response as any).questions) {
@@ -306,10 +316,9 @@ const TestMainPage = () => {
         setQuestions(mappedQuestions);
         setSessionId((response as any).session_id);
       } else {
-        throw new Error('Invalid response format from API');
+        throw new Error("Invalid response format from API");
       }
     } catch (apiError) {
-      
       setError(
         "Failed to fetch questions from server. Please try again later."
       );
@@ -320,16 +329,18 @@ const TestMainPage = () => {
 
   // Submit test to API
   const submitTestToAPI = async (): Promise<SubmitTestResponse> => {
-    
     if (!sessionId) {
       throw new Error("Session ID is required to submit test");
     }
 
     // Calculate final time spent on current question
     const now = new Date();
-    const finalTimeSpent = Math.floor((now.getTime() - questionStartTime.getTime()) / 1000);
+    const finalTimeSpent = Math.floor(
+      (now.getTime() - questionStartTime.getTime()) / 1000
+    );
     const updatedQuestions = [...questions];
-    updatedQuestions[currentQuestionIndex].timeSpent = (updatedQuestions[currentQuestionIndex].timeSpent || 0) + finalTimeSpent;
+    updatedQuestions[currentQuestionIndex].timeSpent =
+      (updatedQuestions[currentQuestionIndex].timeSpent || 0) + finalTimeSpent;
 
     // Convert questions to the enhanced format with answer_order
     // Only include answered questions in the submission
@@ -344,12 +355,10 @@ const TestMainPage = () => {
     // Calculate test metadata
     const totalTimeTaken = 600 - timeLeft; // Total time taken in seconds
     const testStartTime = new Date(Date.now() - totalTimeTaken * 1000);
-    
+
     // Log the exact request format for debugging
     // request shape retained for debugging reference (unused)
-    
-    
-    
+
     const response = await quizApi.submitTestEnhanced(
       sessionId,
       submittedAnswers,
@@ -359,8 +368,7 @@ const TestMainPage = () => {
         end_time: now.toISOString(),
       }
     );
-    
-    
+
     return response;
   };
 
@@ -389,6 +397,7 @@ const TestMainPage = () => {
 
   // Timer Logic
   useEffect(() => {
+    if (isSolutionMode) return;
     // Stop timer if test is submitted or auto-submitted
     if (showTestResultDialog || isSubmitting) {
       return;
@@ -458,29 +467,32 @@ const TestMainPage = () => {
 
   const navigateToQuestion = (index: number) => {
     if (index < 0 || index >= questions.length) return;
-    
+
     const now = new Date();
-    
+
     // Track time spent on current question before navigating away
     if (index !== currentQuestionIndex) {
       const currentQuestion = questions[currentQuestionIndex];
       if (currentQuestion.questionStartTime) {
-        const timeSpent = Math.floor((now.getTime() - currentQuestion.questionStartTime.getTime()) / 1000);
+        const timeSpent = Math.floor(
+          (now.getTime() - currentQuestion.questionStartTime.getTime()) / 1000
+        );
         const newQuestions = [...questions];
-        newQuestions[currentQuestionIndex].timeSpent = (newQuestions[currentQuestionIndex].timeSpent || 0) + timeSpent;
+        newQuestions[currentQuestionIndex].timeSpent =
+          (newQuestions[currentQuestionIndex].timeSpent || 0) + timeSpent;
         setQuestions(newQuestions);
       }
     }
-    
+
     const currentStatus = questions[currentQuestionIndex].status;
     if (currentStatus === "not-visited") {
       const newQuestions = [...questions];
       newQuestions[currentQuestionIndex].status = "not-answered";
       setQuestions(newQuestions);
     }
-    
+
     setCurrentQuestionIndex(index);
-    
+
     // Set start time for the new question if not already set
     const newQuestions = [...questions];
     if (!newQuestions[index].questionStartTime) {
@@ -569,12 +581,12 @@ const TestMainPage = () => {
       const apiResponse = await submitTestToAPI();
 
       if (apiResponse) {
-        
-        navigate(ROUTES.ANALYSIS2, { state: { sessionId: apiResponse.session_id || sessionId } });
+        navigate(ROUTES.ANALYSIS2, {
+          state: { sessionId: apiResponse.session_id || sessionId },
+        });
         // setShowTestResultDialog(true);
       }
     } catch (error) {
-      
       setError("Failed to submit test. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -582,17 +594,16 @@ const TestMainPage = () => {
   };
 
   const handleAutoSubmit = async () => {
-    
     try {
       setIsSubmitting(true);
       const apiResponse = await submitTestToAPI();
 
       if (apiResponse) {
-        
-        navigate(ROUTES.ANALYSIS2, { state: { sessionId: apiResponse.session_id || sessionId } });
+        navigate(ROUTES.ANALYSIS2, {
+          state: { sessionId: apiResponse.session_id || sessionId },
+        });
       }
     } catch (error) {
-      
       setError("Failed to auto-submit test.");
     } finally {
       setIsSubmitting(false);
@@ -623,8 +634,7 @@ const TestMainPage = () => {
           setIsFullscreen(false);
         }
       }
-    } catch (err: any) {
-    }
+    } catch (err: any) {}
   };
 
   const currentQuestion = questions[currentQuestionIndex];
@@ -675,11 +685,11 @@ const TestMainPage = () => {
   // Place this check just before the main render return (after error/loading checks, before the main return)
   if (isSubmitting) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-          <p className="text-lg text-white">Submitting your quiz...</p>
-        </div>
+      <div className="fixed inset-0 flex flex-1 flex-col z-10 items-center justify-center bg-background bg-opacity-70 h-full">
+        <CustomLoader className="h-15 w-15" />
+        <p className="text-lg text-muted-foreground mt-8">
+          Submitting your answers...
+        </p>
       </div>
     );
   }
@@ -831,7 +841,7 @@ const TestMainPage = () => {
               </div>
             </div>
           </div>
-          <div className="bg-card p-4 sm:p-6 rounded-lg flex-grow border-1">
+          {/**<div className="bg-card p-4 sm:p-6 rounded-lg flex-grow border-1">
             <p className="mb-6 text-foreground">{currentQuestion.question}</p>
             <div className="space-y-4">
               {currentQuestion.options.map((option, index) => (
@@ -854,6 +864,77 @@ const TestMainPage = () => {
                 </label>
               ))}
             </div>
+          </div>*/}
+
+          {/*<div className={`bg-gray-800 rounded-b-lg rounded-tr-lg shadow-lg flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden ${textSize}`}>
+            <div className="p-4 sm:p-6 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+              <p className="text-gray-300 leading-relaxed">
+                {currentQuestion.question}
+              </p>
+            </div>
+            <div className="p-4 sm:p-6 h-full overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+              {currentQuestion.options.map((option, index) => (
+                <label
+                  key={index}
+                  className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 ${
+                    currentQuestion.answer === index
+                      ? "bg-blue-600 ring-2 ring-blue-400"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`question-${currentQuestion.id}`}
+                    className="h-5 w-5 mr-4 border-gray-500 bg-gray-800 text-blue-500 focus:ring-blue-400"
+                    checked={currentQuestion.answer === index}
+                    onChange={() => handleOptionSelect(index)}
+                  />
+                  <span>{option}</span>
+                </label>
+              ))}
+            </div>
+          </div>*/}
+
+          <div
+            className={`bg-gray-800 rounded-b-lg rounded-tr-lg shadow-lg flex-grow flex flex-col overflow-hidden ${textSize}`}
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-4 sm:p-6 h-full overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
+              <div>
+                <p className="text-gray-300 leading-relaxed mb-6">
+                  {currentQuestion.question}
+                </p>
+                <div className="space-y-4">
+                  {currentQuestion.options.map((option, index) => (
+                <label
+                  key={index}
+                  className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 ${
+                    currentQuestion.answer === index
+                      ? "bg-blue-600 ring-2 ring-blue-400"
+                      : "bg-gray-700 hover:bg-gray-600"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`question-${currentQuestion.id}`}
+                    className="h-5 w-5 mr-4 border-gray-500 bg-gray-800 text-blue-500 focus:ring-blue-400"
+                    checked={currentQuestion.answer === index}
+                    onChange={() => handleOptionSelect(index)}
+                  />
+                  <span>{option}</span>
+                </label>
+              ))}
+                </div>
+              </div>
+
+              <div className="border-t-2 md:border-t-0 md:border-l-2 border-gray-700 border-dashed pt-6 md:pt-0 md:pl-8">
+                <h3 className="text-lg font-bold text-blue-300 mb-4">
+                  Solution
+                </h3>
+                <div className="prose prose-invert text-gray-300">
+                  <p>SOlutuon here</p>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
 
@@ -862,10 +943,11 @@ const TestMainPage = () => {
           ref={asideRef}
           className={`w-3/4 bg-card/90 backdrop-blur-sm flex flex-col flex-shrink-0 transition-transform duration-300 ease-in-out ${
             isMobileMenuOpen ? "translate-x-0" : "translate-x-full"
-          } lg:translate-x-0 ${isDesktopAsideCollapsed 
-                    ? 'lg:w-0 lg:p-0 lg:border-l-0' 
-                    : 'lg:w-80 xl:w-96 p-4 sm:p-3'
-                } fixed lg:relative top-0 right-0 h-full lg:h-auto z-30 lg:z-0 border-l`}
+          } lg:translate-x-0 ${
+            isDesktopAsideCollapsed
+              ? "lg:w-0 lg:p-0 lg:border-l-0"
+              : "lg:w-80 xl:w-96 p-4 sm:p-3"
+          } fixed lg:relative top-0 right-0 h-full lg:h-auto z-30 lg:z-0 border-l`}
         >
           <button
             className="lg:hidden text-foreground absolute top-4 right-4 z-40"
@@ -876,11 +958,12 @@ const TestMainPage = () => {
           <button
             onClick={() => setIsDesktopAsideCollapsed(!isDesktopAsideCollapsed)}
             className={`hidden lg:flex items-center justify-center absolute top-1/2 -translate-y-1/2 bg-foreground hover:bg-muted-foreground text-background w-8 h-16 rounded-l-md z-40 transition-all duration-300 ease-in-out
-                ${isDesktopAsideCollapsed
-                    ? 'right-0'
-                    : 'right-[20rem] xl:right-[24rem]'
+                ${
+                  isDesktopAsideCollapsed
+                    ? "right-0"
+                    : "right-[20rem] xl:right-[24rem]"
                 }`}
-        >
+          >
             {isDesktopAsideCollapsed ? <ChevronLeft /> : <ChevronRight />}
           </button>
           {/* User Profile Section */}
@@ -922,7 +1005,8 @@ const TestMainPage = () => {
 
           <div className="flex-grow bg-background-subtle p-4 rounded-lg overflow-y-auto scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-background-subtle border">
             <h3 className="font-bold mb-4 text-foreground capitalize">
-              {sectionTabs.find((t) => t.id === currentSection)?.label || currentSection}
+              {sectionTabs.find((t) => t.id === currentSection)?.label ||
+                currentSection}
             </h3>
             <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-5 gap-3 justify-items-center">
               {questions.map((q, index) => {

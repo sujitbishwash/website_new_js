@@ -21,7 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { quizApi } from "@/lib/api-client";
 
 import { theme } from "@/styles/theme";
@@ -30,6 +30,7 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 import { ComponentName, feedbackApi } from "@/lib/api-client";
 import { useMultiFeedbackTracker } from "@/hooks/useFeedbackTracker";
 import RankBadge from "@/components/stats/RankBadge";
+import { ROUTES } from "@/routes/constants";
 
 interface LearningPlanStep {
   title: string;
@@ -522,7 +523,7 @@ const OverallPerformance = () => (
             data={{
               overall: {
                 score: (userPerformance as any)?.overall?.score ?? 0,
-                color: '#0A84FF',
+                color: "#0A84FF",
               },
             }}
             maxScore={(userPerformance as any)?.overall?.maxScore ?? 100}
@@ -531,14 +532,24 @@ const OverallPerformance = () => (
             <div className="grid grid-cols-2 gap-4 text-center mb-6">
               {Object.entries(userPerformance.sections).map(([name, data]) => {
                 const section: any = data || {};
-                const score = typeof section.score === 'number' ? section.score.toFixed(2) : String(section.score ?? '0');
-                const maxScore = section.maxScore ?? '';
+                const score =
+                  typeof section.score === "number"
+                    ? section.score.toFixed(2)
+                    : String(section.score ?? "0");
+                const maxScore = section.maxScore ?? "";
                 return (
-                  <div key={name} className="bg-background-subtle p-4 rounded-lg">
-                    <p className="text-sm text-[#8e8e93]">{section.name ?? name}</p>
-                    <p className={`text-3xl font-bold ${section.color ?? ''}`}>
+                  <div
+                    key={name}
+                    className="bg-background-subtle p-4 rounded-lg"
+                  >
+                    <p className="text-sm text-[#8e8e93]">
+                      {section.name ?? name}
+                    </p>
+                    <p className={`text-3xl font-bold ${section.color ?? ""}`}>
                       {score}{" "}
-                      <span className="text-lg text-[#636366]">/{maxScore}</span>
+                      <span className="text-lg text-[#636366]">
+                        /{maxScore}
+                      </span>
                     </p>
                   </div>
                 );
@@ -546,22 +557,34 @@ const OverallPerformance = () => (
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-2 gap-4 text-center">
               <SummaryItem
-                value={String((userPerformance as any)?.overall?.rank ?? '')}
+                value={String((userPerformance as any)?.overall?.rank ?? "")}
                 label="Rank"
-                total={String((userPerformance as any)?.overall?.maxRank ?? '')}
+                total={String((userPerformance as any)?.overall?.maxRank ?? "")}
               />
               <SummaryItem
-                value={typeof (userPerformance as any)?.overall?.percentile === 'number' ? (userPerformance as any).overall.percentile.toFixed(2) : String((userPerformance as any)?.overall?.percentile ?? '')}
+                value={
+                  typeof (userPerformance as any)?.overall?.percentile ===
+                  "number"
+                    ? (userPerformance as any).overall.percentile.toFixed(2)
+                    : String(
+                        (userPerformance as any)?.overall?.percentile ?? ""
+                      )
+                }
                 label="Percentile"
               />
               <SummaryItem
-                value={typeof (userPerformance as any)?.overall?.accuracy === 'number' ? (userPerformance as any).overall.accuracy.toFixed(2) : String((userPerformance as any)?.overall?.accuracy ?? '')}
+                value={
+                  typeof (userPerformance as any)?.overall?.accuracy ===
+                  "number"
+                    ? (userPerformance as any).overall.accuracy.toFixed(2)
+                    : String((userPerformance as any)?.overall?.accuracy ?? "")
+                }
                 label="Accuracy"
               />
               <SummaryItem
-                value={String((userPerformance as any)?.overall?.time ?? '')}
+                value={String((userPerformance as any)?.overall?.time ?? "")}
                 label="Time"
-                total={String((userPerformance as any)?.overall?.maxTime ?? '')}
+                total={String((userPerformance as any)?.overall?.maxTime ?? "")}
               />
             </div>
 
@@ -651,10 +674,12 @@ const SectionalSummary = () => {
           </div>
           <div className="flex flex-col md:flex-row items-center justify-around gap-6">
             <div className="flex flex-col items-center justify-center p-2">
-              <p className={`text-4xl font-bold ${activeSection?.color ?? ''}`}>
-                {typeof activeSection?.score === 'number' ? activeSection.score.toFixed(2) : String(activeSection?.score ?? '0')}
+              <p className={`text-4xl font-bold ${activeSection?.color ?? ""}`}>
+                {typeof activeSection?.score === "number"
+                  ? activeSection.score.toFixed(2)
+                  : String(activeSection?.score ?? "0")}
                 <span className="text-sm font-normal text-[#8e8e93]">
-                  /{String(activeSection?.maxScore ?? '')}
+                  /{String(activeSection?.maxScore ?? "")}
                 </span>
               </p>
               <p className="text-xs text-[#8e8e93] font-medium uppercase tracking-wider">
@@ -664,22 +689,30 @@ const SectionalSummary = () => {
             <div className="w-full">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <SummaryItem
-                  value={String(activeSection?.rank ?? '')}
+                  value={String(activeSection?.rank ?? "")}
                   label="Rank"
-                  total={String(activeSection?.maxRank ?? '')}
+                  total={String(activeSection?.maxRank ?? "")}
                 />
                 <SummaryItem
-                  value={typeof activeSection?.percentile === 'number' ? activeSection.percentile.toFixed(2) : String(activeSection?.percentile ?? '')}
+                  value={
+                    typeof activeSection?.percentile === "number"
+                      ? activeSection.percentile.toFixed(2)
+                      : String(activeSection?.percentile ?? "")
+                  }
                   label="Percentile"
                 />
                 <SummaryItem
-                  value={typeof activeSection?.accuracy === 'number' ? activeSection.accuracy.toFixed(2) : String(activeSection?.accuracy ?? '')}
+                  value={
+                    typeof activeSection?.accuracy === "number"
+                      ? activeSection.accuracy.toFixed(2)
+                      : String(activeSection?.accuracy ?? "")
+                  }
                   label="Accuracy"
                 />
                 <SummaryItem
-                  value={String(activeSection?.time ?? '')}
+                  value={String(activeSection?.time ?? "")}
                   label="Time"
-                  total={String(activeSection?.maxTime ?? '')}
+                  total={String(activeSection?.maxTime ?? "")}
                 />
               </div>
             </div>
@@ -812,16 +845,24 @@ const ComparisonAnalysis = () => {
   const getGroupTotal = (groupData: any) => {
     if (!groupData) return 0;
     if (activeTab === "Time Spent") {
-      const totalSeconds = Object.values(groupData).reduce((a: number, b: any) => a + Number(b || 0), 0);
+      const totalSeconds = Object.values(groupData).reduce(
+        (a: number, b: any) => a + Number(b || 0),
+        0
+      );
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
       return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
     }
     if (activeTab === "Accuracy") {
       const values = Object.values(groupData).map((v: any) => Number(v || 0));
-      return (values.reduce((a: number, b: number) => a + b, 0) / (values.length || 1)).toFixed(2);
+      return (
+        values.reduce((a: number, b: number) => a + b, 0) / (values.length || 1)
+      ).toFixed(2);
     }
-    const total = Object.values(groupData).reduce((a: number, b: any) => a + Number(b || 0), 0);
+    const total = Object.values(groupData).reduce(
+      (a: number, b: any) => a + Number(b || 0),
+      0
+    );
     return Number.isInteger(total) ? total : total.toFixed(2);
   };
 
@@ -976,10 +1017,12 @@ const DifficultyTimeGraph = ({ data, maxTime }) => {
               height -
               padding -
               (i * (height - padding * 2.5)) / (difficultyLevels.length - 1);
-            const colorClass = 
-                level === 'Hard' ? 'text-red-500' :
-                level === 'Med' ? 'text-yellow-500' :
-                'text-green-500';
+            const colorClass =
+              level === "Hard"
+                ? "text-red-500"
+                : level === "Med"
+                ? "text-yellow-500"
+                : "text-green-500";
 
             return (
               <g key={level}>
@@ -1131,10 +1174,13 @@ const YourAttemptStrategy = () => {
   );
 };
 
-const ReviewAndRelearn = () => (
+const ReviewAndRelearn = ({ onClickGoToSolution }) => (
   <div className="lg:col-span-12">
     <div className="flex flex-col sm:flex-row items-center gap-3">
-      <button className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 text-lg font-semibold rounded-lg backdrop-blur-sm border-1 transition-all duration-300 text-white hover:opacity-90 bg-primary hover:bg-primary/80 cursor-pointer">
+      <button
+        onClick={onClickGoToSolution}
+        className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 text-lg font-semibold rounded-lg backdrop-blur-sm border-1 transition-all duration-300 text-white hover:opacity-90 bg-primary hover:bg-primary/80 cursor-pointer"
+      >
         <Text className="w-5 h-5" />
         Full Answer Review
       </button>
@@ -1424,7 +1470,7 @@ const TopperStrategy = () => (
 
 const Leaderboard = () => {
   const leaderboardData = (userPerformance as any)?.leaderboard || [];
-  const currentUser = (userPerformance as any)?.user || { name: '' };
+  const currentUser = (userPerformance as any)?.user || { name: "" };
   const chunkSize = 5;
   const column1 = leaderboardData.slice(0, chunkSize);
   const column2 = leaderboardData.slice(chunkSize, chunkSize * 2);
@@ -1453,8 +1499,7 @@ const Leaderboard = () => {
       className="flex items-center justify-between text-lg  rounded-lg hover:bg-accent transition-colors duration-200"
     >
       <div className="flex items-center space-x-3">
-        
-          <RankBadge color={getBadgeClasses(user.rank)} number={user.rank}/>
+        <RankBadge color={getBadgeClasses(user.rank)} number={user.rank} />
         <div className="font-semibold text-foreground flex items-center">
           {user.name}
           {user.rank === 1 && (
@@ -1463,7 +1508,9 @@ const Leaderboard = () => {
         </div>
       </div>
       <span className="font-bold text-primary tracking-wider">
-        {typeof user.score === 'number' ? user.score.toFixed(2) : String(user.score ?? '0')}
+        {typeof user.score === "number"
+          ? user.score.toFixed(2)
+          : String(user.score ?? "0")}
       </span>
     </div>
   );
@@ -1500,7 +1547,10 @@ const Leaderboard = () => {
         {/* Current User Row */}
         <div className="flex items-center justify-between text-sm p-3 rounded-lg bg-accent border border-primary/50">
           <div className="flex items-center space-x-3">
-            <RankBadge color={getBadgeClasses(userPerformance.overall.rank)} number={userPerformance.overall.rank}/>
+            <RankBadge
+              color={getBadgeClasses(userPerformance.overall.rank)}
+              number={userPerformance.overall.rank}
+            />
             <div className="font-semibold text-gray-100 flex items-center space-x-2">
               <p className="font-bold text-lg text-foreground">
                 {currentUser.name}
@@ -1548,7 +1598,10 @@ const ScoreDonutChart = ({ data, size = 200, maxScore = 100 }) => {
   });
 
   // Calculate the current total score for display.
-  const currentScore = scoresArray.reduce((sum, item) => sum + (Number(item.value) || 0), 0);
+  const currentScore = scoresArray.reduce(
+    (sum, item) => sum + (Number(item.value) || 0),
+    0
+  );
   let cumulative = 0; // Used to stack the segments of the chart correctly.
 
   // Define the chart's dimensions and properties.
@@ -1616,9 +1669,13 @@ const ScoreDonutChart = ({ data, size = 200, maxScore = 100 }) => {
 export default function TestAnalysis2() {
   const [isShareOpen, setShareOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const [isLoadingAnalysis, setIsLoadingAnalysis] = useState(false);
   const [analysisError, setAnalysisError] = useState<string | null>(null);
-  const [analysisData, setAnalysisData] = useState<Record<string, unknown> | null>(null);
+  const [analysisData, setAnalysisData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
   // Resolve sessionId from router state or from query string (MUST be above feedback tracker)
   const sessionId = useMemo(() => {
@@ -1662,37 +1719,48 @@ export default function TestAnalysis2() {
       try {
         const data = await quizApi.testAnalysis(sessionId);
         setAnalysisData(data || {});
-        
 
         // Optional: if backend already returns an object compatible with current UI
         // shape, assign directly. Otherwise map it here.
-        if (data && typeof data === 'object') {
+        if (data && typeof data === "object") {
           const d: any = data;
           // Example mapping – adjust keys based on your API
           userPerformance = {
-            user: { name: d?.user?.name || "Student", message: d?.message || "" },
+            user: {
+              name: d?.user?.name || "Student",
+              message: d?.message || "",
+            },
             leaderboard: d?.leaderboard || userPerformance.leaderboard,
             overall: {
               score: d?.overall?.score ?? userPerformance.overall.score,
-              maxScore: d?.overall?.maxScore ?? userPerformance.overall.maxScore,
+              maxScore:
+                d?.overall?.maxScore ?? userPerformance.overall.maxScore,
               rank: d?.overall?.rank ?? userPerformance.overall.rank,
               maxRank: d?.overall?.maxRank ?? userPerformance.overall.maxRank,
-              percentile: d?.overall?.percentile ?? userPerformance.overall.percentile,
-              accuracy: d?.overall?.accuracy ?? userPerformance.overall.accuracy,
+              percentile:
+                d?.overall?.percentile ?? userPerformance.overall.percentile,
+              accuracy:
+                d?.overall?.accuracy ?? userPerformance.overall.accuracy,
               time: d?.overall?.time ?? userPerformance.overall.time,
               maxTime: d?.overall?.maxTime ?? userPerformance.overall.maxTime,
-              negativeMarks: d?.overall?.negativeMarks ?? userPerformance.overall.negativeMarks,
+              negativeMarks:
+                d?.overall?.negativeMarks ??
+                userPerformance.overall.negativeMarks,
               cutoff: d?.overall?.cutoff ?? userPerformance.overall.cutoff,
-              cognitiveSkills: d?.overall?.cognitiveSkills ?? userPerformance.overall.cognitiveSkills,
-              aiSummary: d?.overall?.aiSummary ?? userPerformance.overall.aiSummary,
-              learningPlan: d?.overall?.learningPlan ?? userPerformance.overall.learningPlan,
+              cognitiveSkills:
+                d?.overall?.cognitiveSkills ??
+                userPerformance.overall.cognitiveSkills,
+              aiSummary:
+                d?.overall?.aiSummary ?? userPerformance.overall.aiSummary,
+              learningPlan:
+                d?.overall?.learningPlan ??
+                userPerformance.overall.learningPlan,
             },
             sections: d?.sections ?? userPerformance.sections,
             comparisons: d?.comparisons ?? userPerformance.comparisons,
           };
         }
       } catch (e: any) {
-        
         setAnalysisError(e?.message || "Failed to load analysis");
       } finally {
         setIsLoadingAnalysis(false);
@@ -1703,9 +1771,9 @@ export default function TestAnalysis2() {
 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const handleShare = useCallback(() => {
-        setIsShareModalOpen(true);
-      }, []);
-    
+    setIsShareModalOpen(true);
+  }, []);
+
   const handleCloseShareModal = useCallback(() => {
     setIsShareModalOpen(false);
   }, []);
@@ -1726,7 +1794,9 @@ export default function TestAnalysis2() {
       <div className="p-4 sm:p-6 bg-background min-h-screen font-sans text-foreground mt-10 sm:mt-4 flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-400 text-lg mb-3">{analysisError}</p>
-          <p className="text-sm text-muted-foreground">Try reloading the page.</p>
+          <p className="text-sm text-muted-foreground">
+            Try reloading the page.
+          </p>
         </div>
       </div>
     );
@@ -1736,7 +1806,9 @@ export default function TestAnalysis2() {
     <div className="p-4 sm:p-6 bg-background min-h-screen font-sans text-foreground mt-10 sm:mt-4">
       {isLoadingAnalysis && (
         <div className="max-w-7xl mx-auto mb-4">
-          <div className="text-sm text-muted-foreground">Loading analysis...</div>
+          <div className="text-sm text-muted-foreground">
+            Loading analysis...
+          </div>
         </div>
       )}
       {analysisError && (
@@ -1764,7 +1836,8 @@ export default function TestAnalysis2() {
               </button>
               {isShareOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-background-subtle border border-border rounded-lg shadow-xl z-10">
-                  <a onClick={handleShare}
+                  <a
+                    onClick={handleShare}
                     href="#"
                     className="flex items-center px-4 py-2 text-sm hover:bg-accent"
                   >
@@ -1812,7 +1885,26 @@ export default function TestAnalysis2() {
         />*/}
 
           <Leaderboard />
-          <ReviewAndRelearn />
+          {/**<ReviewAndRelearn onClickGoToSolution={()=>useNavigate(ROUTES.TEST_SOLUTION)}/>*/}
+          <div className="lg:col-span-12">
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              <button
+                onClick={navigate(ROUTES.TEST_SOLUTION)}
+                className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 text-lg font-semibold rounded-lg backdrop-blur-sm border-1 transition-all duration-300 text-white hover:opacity-90 bg-primary hover:bg-primary/80 cursor-pointer"
+              >
+                <Text className="w-5 h-5" />
+                Full Answer Review
+              </button>
+              <button className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg text-lg font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer">
+                <RefreshCcw className="w-5 h-5" />
+                Re-Attempt
+              </button>
+              <button className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg text-lg font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer">
+                Next Test
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
           <ShareModal
             isOpen={isShareModalOpen}
             onClose={handleCloseShareModal}

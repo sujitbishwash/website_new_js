@@ -89,6 +89,13 @@ export const routes = [
             name: "Test Main Page",
             description: "Main test taking interface",
           },
+          
+          {
+            path: "test-main-page/solutions",
+            element: <TestMainPage />,
+            name: "Test Main Page",
+            description: "Main test taking interface",
+          },
           {
             path: "analysis",
             element: <TestAnalysis2 />,

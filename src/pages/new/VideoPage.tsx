@@ -8,7 +8,13 @@ import { ComponentName } from "@/lib/api-client";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import { Eye, EyeOff} from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useMemo,
+} from "react";
 import React from "react";
 import {
   useLocation,
@@ -29,6 +35,7 @@ import ContentTabs from "@/components/learning/ContentTabs";
 import AITutorPanel from "@/components/learning/AITutorPanel";
 import Header from "@/components/learning/Header";
 import SparklesIcon from "@/components/icons/SparklesIcon";
+import CustomLoader from "@/components/icons/customloader";
 
 declare global {
   interface Window {
@@ -45,6 +52,13 @@ const FlashcardsWrapper = React.memo(({ videoId }: { videoId: string }) => {
 const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
   return <Summary videoId={videoId} />;
 });
+
+// Type definitions
+// --- TYPE DEFINITIONS ---
+interface IconProps {
+  path: string;
+  className?: string;
+}
 
 interface Chapter {
   time: string;
@@ -998,7 +1012,39 @@ const VideoPage: React.FC = () => {
     }
   }, [handleVideoInteraction]);
 
+  // Effect to inject CSS for custom animations
+  useEffect(() => {
+    const styleId = "engaging-loading-screen-styles";
+    if (document.getElementById(styleId)) return;
 
+    const styleSheet = document.createElement("style");
+    styleSheet.id = styleId;
+    styleSheet.innerHTML = `
+      @keyframes fadeInScaleUp {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+      .animate-fadeInScaleUp { animation: fadeInScaleUp 0.3s ease-out forwards; }
+    `;
+    document.head.appendChild(styleSheet);
+
+    return () => {
+      const style = document.getElementById(styleId);
+      if (style) style.remove();
+    };
+  }, []);
+
+  // Show loading screen while video details are being fetched
+  if (isLoadingVideo) {
+    return (
+        <div className="bg-background min-h-screen font-sans flex flex-col justify-center items-center p-4 gap-4">
+        
+
+        <CustomLoader className="h-15 w-15" />
+        <span className="text-muted-foreground text-lg">Preparing lessons...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-background text-foreground min-h-screen font-sans">

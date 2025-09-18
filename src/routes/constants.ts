@@ -9,6 +9,7 @@ export const ROUTES = {
     EXAM_INFO: "/exam-info",
     EXAM_RECONFIRM: "/exam-reconfirm",
     TEST_MAIN_PAGE: "/test-main-page",
+    TEST_SOLUTION: "/test-main-page/solutions",
     ANALYSIS: "/analysis",
     ANALYSIS2: "/analysis2",
 
