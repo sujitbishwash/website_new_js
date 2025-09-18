@@ -4,6 +4,8 @@ import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 import { quizApi } from "@/lib/api-client";
 
 // --- Setup ---
+// In-memory cache: quiz questions per video/topics for this session
+const quizCache = new Map<string, QuizQuestion[]>();
 
 // Add Google Font link to the document's head
 const fontLink = document.createElement("link");
@@ -229,6 +231,7 @@ const Quiz: React.FC<QuizProps> = ({
     }
 
     const topicsKey = JSON.stringify(topicsToUse);
+    const cacheKey = `${videoId || ""}:${topicsKey}`;
     
     // Prevent infinite calls by checking if topics actually changed
     if (lastTopicsRef.current === topicsKey) {
@@ -238,6 +241,13 @@ const Quiz: React.FC<QuizProps> = ({
     // Update the last topics ref
     lastTopicsRef.current = topicsKey;
     
+    // If cached, use immediately and skip network
+    if (quizCache.has(cacheKey)) {
+      setQuizQuestions(quizCache.get(cacheKey) || []);
+      setIsLoadingQuiz(false);
+      return;
+    }
+
     // Reset state when topics change
     setQuizQuestions([]);
     setCurrentQuestion(0);
@@ -256,7 +266,8 @@ const Quiz: React.FC<QuizProps> = ({
         
         const response = await quizApi.generateQuiz(topicsToUse);
         
-        setQuizQuestions(response.questions);
+        quizCache.set(cacheKey, response.questions || []);
+        setQuizQuestions(response.questions || []);
       } catch (error: unknown) {
         
         // Check if it's an authentication error
@@ -272,7 +283,7 @@ const Quiz: React.FC<QuizProps> = ({
     };
 
     fetchQuizQuestions();
-  }, [topicsToUse, componentId]); // Depend on topicsToUse and componentId
+  }, [topicsToUse, componentId, videoId]); // Depend on topics and video
 
   const handleNextQuestion = () => {
     const nextQuestion = currentQuestion + 1;
