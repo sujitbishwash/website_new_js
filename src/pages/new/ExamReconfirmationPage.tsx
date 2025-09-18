@@ -87,7 +87,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
         </div>*/}
         <div className="flex-1 text-center px-2">
           <h1 className="text-lg sm:text-xl font-bold text-foreground">
-            {examDetails.title}
+            {testConfig?.subject}-{testConfig?.sub_topic.join(", ")}-{testConfig?.level}
           </h1>
         </div>
         <div className=" items-center space-x-4 hidden sm:flex">

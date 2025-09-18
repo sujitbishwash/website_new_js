@@ -28,7 +28,8 @@ interface TestSeriesFormData {
 interface SelectionPanelProps {
   title: string;
   options: string[];
-  selectedValue: string | null;
+  selectedValue?: string | null;
+  selectedValues?: string[] | null;
   onSelect: (value: string) => void;
   optionalLabel?: string;
   emptyMessage?: string;
@@ -39,6 +40,7 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   title,
   options,
   selectedValue,
+  selectedValues,
   onSelect,
   optionalLabel,
   emptyMessage,
@@ -56,20 +58,36 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
       </h2>
       <div className="flex flex-wrap gap-1 sm:gap-4 text-white">
         {options.length > 0 ? (
-          options.map((option) => (
-            <Chip
-              key={option}
-              value={option}
-              label={mapper ? mapper(option) : option}
-              checked={selectedValue === option}
-              onClick={onSelect}
-            />
-          ))
-        ) : (
-          <p className="text-gray-500">
-            {emptyMessage || "No options available."}
-          </p>
-        )}
+  options.map((option) => {
+    // If you really need to check selectedValues:
+    if (selectedValues) {
+      return (
+        <Chip
+          key={option}
+          value={option}
+          label={mapper ? mapper(option) : option}
+          checked={selectedValues.includes(option)}
+          onClick={() => onSelect(option)}
+        />
+      );
+    } else {
+      return (
+        <Chip
+          key={option}
+          value={option}
+          label={mapper ? mapper(option) : option}
+          checked={selectedValue === option}
+          onClick={() => onSelect(option)}
+        />
+      );
+    }
+  })
+) : (
+  <p className="text-gray-500">
+    {emptyMessage || "No options available."}
+  </p>
+)}
+
       </div>
     </div>
   );
@@ -114,6 +132,7 @@ const TestConfigurationPageComponent = () => {
   // State to hold user selections
   const [selectedSubject, setSelectedSubject] = useState("");
   const [selectedSubTopic, setSelectedSubTopic] = useState("");
+  const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
 
@@ -194,8 +213,8 @@ const TestConfigurationPageComponent = () => {
 
       const testData = {
         subject: selectedSubject,
-        // sub_topic: selectedSubTopic ? [selectedSubTopic] : [],
-        sub_topic: [],
+        sub_topic: selectedSubtopics,
+        //sub_topic: [],
         level: selectedDifficulty.toLowerCase(),
         language: selectedLanguage,
       };
@@ -240,6 +259,7 @@ const TestConfigurationPageComponent = () => {
           <p className="mt-2 text-lg text-muted-foreground hidden sm:block">
             Select your preferences to start a practice test.
           </p>
+          {selectedSubtopics}
         </div>
 
         {/* --- User Profile Section --- */}
@@ -283,8 +303,8 @@ const TestConfigurationPageComponent = () => {
           <SelectionPanel
             title="2. Select Topic"
             options={currentSubTopics}
-            selectedValue={selectedSubTopic}
-            onSelect={setSelectedSubTopic}
+            selectedValues={selectedSubtopics}
+            onSelect={(topic)=>setSelectedSubtopics((prev) => prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic])}
             optionalLabel="Optional"
             emptyMessage="No sub-topics available for this subject."
           />

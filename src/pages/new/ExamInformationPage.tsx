@@ -33,7 +33,8 @@ export default function ExamInformationPage() {
         </div>*/}
         <div className="flex-1 text-center px-2">
           <h1 className="text-lg sm:text-xl font-bold text-foreground">
-            {instructions.title}
+            {testConfig?.subject}-{testConfig?.sub_topic.join(", ")}-{testConfig?.level}
+
           </h1>
         </div>
         <div className=" items-center space-x-4 hidden sm:flex">

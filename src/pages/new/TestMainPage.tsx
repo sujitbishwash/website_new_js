@@ -705,7 +705,7 @@ const TestMainPage = () => {
         {/* Responsive Title */}
         <div className="flex-1 text-center px-2">
           <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
-            General Knowledge Test
+            {testConfig?.subject}-{testConfig?.sub_topic.join(", ")}-{testConfig?.level}
           </h1>
         </div>
         <div className="flex items-center">
