@@ -37,7 +37,7 @@ const HistoryPage = () => {
 
   return (
     <div className="min-h-screen text-foreground bg-background p-2 sm:p-6 ">
-      <div className="flex justify-center gap-4 sm:gap-0 sm:justify-between items-center mt-2 sm:mt-10 mb-10">
+      <div className="flex justify-center gap-4 sm:justify-start items-end mt-2 mb-10">
         <h1 className="text-left text-3xl font-semibold">
           <span className="hidden sm:inline">Your Learning </span>
           History
@@ -46,10 +46,9 @@ const HistoryPage = () => {
         <button
           onClick={refreshProgress}
           disabled={isLoading}
-          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-primary bg-foreground/10 border border-primary/20 rounded-full hover:bg-foreground/20 disabled:opacity-50 disabled:cursor-wait transition-colors cursor-pointer"
+          className="flex items-center gap-2 p-2 text-sm font-medium text-primary bg-foreground/10 border border-primary/20 rounded-xl hover:bg-foreground/20 disabled:opacity-50 disabled:cursor-wait transition-colors cursor-pointer"
         >
           <RefreshCcw  className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
-          <span className="hidden sm:inline">Refresh </span>
         </button>
       </div>
 
@@ -191,13 +190,13 @@ const HistoryPage = () => {
       ) : (
         <div className="flex flex-col items-center justify-center text-center h-full flex-grow pt-16">
           <History className="h-20 w-20 mx-auto mb-6 text-border" />
-          <p className="text-xl font-medium mb-2">No Learning History Yet</p>
-          <p className="text-muted-foreground max-w-xs mb-8">
+          <p className="text-xl text-border-medium font-medium mb-2">No Learning History Yet</p>
+          <p className="text-border-medium max-w-xs mb-8">
             Start watching videos to build history.
           </p>
           <button
             onClick={() => navigate("/")}
-            className="px-6 py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+            className="px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary/90 transition-colors"
           >
             Start Learning
           </button>

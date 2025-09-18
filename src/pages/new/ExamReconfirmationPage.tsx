@@ -121,7 +121,14 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
               </div>
 
               {/* Right: Controls */}
-              <div className="flex items-center justify-end gap-2 sm:gap-4 w-full sm:w-auto">
+              <div
+                className="
+      hidden sm:flex
+      flex-row items-center justify-end
+      gap-4 relative
+    "
+              >
+                {/* Text Size Dropdown */}
                 <select
                   onChange={(e) => setTextSize(e.target.value)}
                   value={textSize}
@@ -133,7 +140,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
                 </select>
 
                 {/* Language Dropdown */}
-                <div ref={langDropdownRef} className="relative hidden md:block">
+                <div ref={langDropdownRef} className="relative">
                   <button
                     onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                     className="flex items-center bg-background-subtle hover:bg-blue-400/20 px-2 py-1 rounded-md text-sm"

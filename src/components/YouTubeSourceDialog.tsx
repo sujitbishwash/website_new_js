@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { AlertTriangle, Link,  X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Link, X } from "lucide-react";
 import CustomLoader from "../components/icons/customloader";
 
 // --- Type Definitions ---
@@ -13,6 +13,33 @@ interface AddSourceModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+// --- DYNAMIC CONTENT ---
+const eventsList = [
+  {
+    type: "On This Day",
+    title: "California admitted to the Union (1850)",
+    trivia:
+      "On September 9th, California became the 31st state, a key moment in westward expansion.",
+  },
+  {
+    type: "Tech History",
+    title: "First Computer 'Bug' Found (1947)",
+    trivia:
+      "Grace Hopper's team found a moth in a relay of the Harvard Mark II, coining the term 'bug' for a computer fault.",
+  },
+  {
+    type: "Quote of the Moment",
+    title: "Steve Jobs",
+    trivia: "'The only way to do great work is to love what you do.'",
+  },
+  {
+    type: "Quote of the Moment",
+    title: "B.B. King",
+    trivia:
+      "'The beautiful thing about learning is that nobody can take it away from you.'",
+  },
+];
 
 // The Modal Component
 export const AddSourceModal: React.FC<AddSourceModalProps> = ({
@@ -35,6 +62,38 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   const [loadingVideoId, setLoadingVideoId] = useState<string | null>(null);
 
   const { getUserData } = useAuth();
+
+  //loading thins
+
+  //loading
+  const [isRendered, setIsRendered] = useState(isLoading);
+  // Initialize with a random index, but only once.
+  const [currentIndex, setCurrentIndex] = useState(() =>
+    Math.floor(Math.random() * eventsList.length)
+  );
+  const content = eventsList[currentIndex];
+
+  const handlePrev = useCallback(() => {
+    setCurrentIndex((prev) => (prev === 0 ? eventsList.length - 1 : prev - 1));
+  }, []);
+
+  const handleNext = useCallback(() => {
+    setCurrentIndex((prev) => (prev === eventsList.length - 1 ? 0 : prev + 1));
+  }, []);
+
+  // Effect for automatic slideshow
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const slideshowTimer = setInterval(() => {
+      handleNext();
+    }, 4000); // Change content every 5 seconds
+
+    // Cleanup the interval when the component unmounts or when dependencies change.
+    // This resets the timer if the user navigates manually.
+    return () => clearInterval(slideshowTimer);
+  }, [currentIndex, isLoading, handleNext]);
+  //end
   // Effect to handle clicks outside the modal
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -247,130 +306,167 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               YouTube, Website, Etc.
             </h2>
           </div>
-          <div className="p-4 sm:p-6 overflow-y-auto">
-            {/* Body */}
-
-            <label
-              htmlFor="url-input"
-              className="text-sm text-muted-foreground"
-            >
-              Enter a YouTube Link, Website URL, Doc, ArXiv, Etc.
-            </label>
-            <input
-              id="url-input"
-              type="text"
-              value={url}
-              onChange={handleUrlChange}
-              placeholder="https://youtu.be/example"
-              className="mt-2 w-full rounded-lg border border-border bg-input px-4 py-2.5 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none focus:ring-2"
-              disabled={isLoading}
-            />
-
-            {/* Error Message */}
-            {error && <div className="mt-2 text-sm text-red-400">{error}</div>}
-            {showOutOfSyllabus && userExamGoal && url.length > 0 && (
-              <div className="mt-2 text-sm flex text-red-400 gap-2 items-center">
-                <AlertTriangle className="text-red-400" />
-                This video is outside the syllabus for your selected Exam Goal:
-                {userExamGoal.exam}
-              </div>
-            )}
-            {/* Separator */}
-            <div className="my-6 flex items-center" aria-hidden="true">
-              <div className="w-full border-t border-border-high" />
-              <div className="px-3 text-sm font-medium text-muted-foreground">
-                OR
-              </div>
-              <div className="w-full border-t border-border-high" />
-            </div>
-
-            {/* Video Suggestions */}
-            <div>
-              <div className="flex items-center justify-between">
-                <h3 className="text-sm font-medium text-muted-foreground">
-                  Suggested Videos
-                </h3>
+          {isLoading ? (
+            <div className="text-foreground flex flex-col justify-center items-center p-4 ">
+              <div className="flex items-center justify-center w-full max-w-lg animate-fadeIn">
+                {/* Left Button */}
                 <button
-                  onClick={fetchSuggestedVideos}
-                  disabled={isLoadingSuggestions}
-                  className="text-xs text-primary hover:text-primary/80 disabled:opacity-50"
+                  onClick={handlePrev}
+                  className="p-2 rounded-full text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors duration-200 focus:outline-none cursor-pointer"
                 >
-                  Refresh
+                  <ChevronLeft />
                 </button>
-              </div>
 
-              {isLoadingSuggestions ? (
-                <div className="mt-4 flex items-center justify-center py-8">
-                  <CustomLoader className="h-5 w-5"/>
-                  <span className="ml-2 text-sm text-gray-400">
-                    Loading suggestions...
-                  </span>
-                </div>
-              ) : suggestionsError ? (
-                <div className="mt-4 text-center py-8">
-                  <p className="text-sm text-red-400">{suggestionsError}</p>
-                  <button
-                    onClick={fetchSuggestedVideos}
-                    className="mt-2 text-sm text-blue-400 hover:text-blue-300"
-                  >
-                    Try again
-                  </button>
-                </div>
-              ) : suggestedVideos.length === 0 ? (
-                <div className="mt-4 text-center py-8">
-                  <p className="text-sm text-gray-400">
-                    No suggested videos available
+                <div className="flex flex-col items-center justify-center text-center mx-4 flex-1">
+                 <p className="text-sm text-muted-foreground mt-10"> As we prep video, boost your general awareness.</p>
+                  <p className="text-sm font-semibold mt-4 text-primary uppercase tracking-wider">
+                    {content.type}
+                  </p>
+                  <p className="text-xl text-foreground mt-2 leading-snug font-bold">
+                    {content.trivia}
                   </p>
                 </div>
-              ) : (
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  {suggestedVideos.slice(0, 3).map((video) => (
-                    <div
-                      key={video.id}
-                      onClick={() => handleSuggestedVideoClick(video)}
-                      className={`group relative overflow-hidden rounded-lg border border-border bg-none transition-all hover:bg-accent hover:shadow-lg hover:border-primary ${
-                        loadingVideoId === video.id
-                          ? "opacity-50 pointer-events-none"
-                          : "cursor-pointer"
-                      }`}
-                    >
-                      <img
-                        src={video.thumbnailUrl}
-                        alt={`Thumbnail for ${video.title}`}
-                        className="h-24 w-full object-cover transition-transform group-hover:scale-105"
-                        onError={(e) => {
-                          const target = e.target as HTMLImageElement;
-                          target.onerror = null;
-                          target.src =
-                            "https://placehold.co/400x225/333/FFF?text=Error";
-                        }}
-                      />
-                      <div className="p-3">
-                        <p className="truncate font-semibold text-foreground">
-                          {video.title}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {video.topic}
-                        </p>
-                      </div>
-                      {loadingVideoId === video.id && (
-                        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
-                        </div>
-                      )}
-                    </div>
-                  ))}
+
+                {/* Right Button */}
+                <button
+                  onClick={handleNext}
+                  className="p-2 rounded-full text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors duration-200 focus:outline-none cursor-pointer"
+                >
+                  <ChevronRight />
+                </button>
+              </div>
+              <div className="animate-spin rounded-full h-15 w-15 mt-10 border-b-2 border-white"></div>
+            </div>
+          ) : (
+            <div className="p-4 sm:p-6 overflow-y-auto">
+              {/* Body */}
+
+              <label
+                htmlFor="url-input"
+                className="text-sm text-muted-foreground"
+              >
+                Enter a YouTube Link, Website URL, Doc, ArXiv, Etc.
+              </label>
+              <input
+                id="url-input"
+                type="text"
+                value={url}
+                onChange={handleUrlChange}
+                placeholder="https://youtu.be/example"
+                className="mt-2 w-full rounded-lg border border-border bg-input px-4 py-2.5 text-foreground placeholder-muted-foreground focus:border-primary focus:outline-none focus:ring-2"
+                disabled={isLoading}
+              />
+
+              {/* Error Message */}
+              {error && (
+                <div className="mt-2 text-sm text-red-400">{error}</div>
+              )}
+              {showOutOfSyllabus && userExamGoal && url.length > 0 && (
+                <div className="mt-2 gap-2 items-center justify-center flex-col w-full text-muted-foreground flex text-center">
+                  <span className="text-6xl">¯\_(ツ)_/¯</span>
+                  <div className="text-lg w-full">
+                    This video is outside the syllabus of{" "}
+                    {userExamGoal.group}. Please enter a relevant video.
+                  </div>
                 </div>
               )}
+              {/* Separator */}
+              <div className="my-6 flex items-center" aria-hidden="true">
+                <div className="w-full border-t border-border-high" />
+                <div className="px-3 text-sm font-medium text-muted-foreground">
+                  OR
+                </div>
+                <div className="w-full border-t border-border-high" />
+              </div>
+
+              {/* Video Suggestions */}
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-medium text-muted-foreground">
+                    Suggested Videos
+                  </h3>
+                  <button
+                    onClick={fetchSuggestedVideos}
+                    disabled={isLoadingSuggestions}
+                    className="text-xs text-primary hover:text-primary/80 disabled:opacity-50"
+                  >
+                    Refresh
+                  </button>
+                </div>
+
+                {isLoadingSuggestions ? (
+                  <div className="mt-4 flex items-center justify-center py-8">
+                    <CustomLoader className="h-5 w-5" />
+                    <span className="ml-2 text-sm text-gray-400">
+                      Loading suggestions...
+                    </span>
+                  </div>
+                ) : suggestionsError ? (
+                  <div className="mt-4 text-center py-8">
+                    <p className="text-sm text-red-400">{suggestionsError}</p>
+                    <button
+                      onClick={fetchSuggestedVideos}
+                      className="mt-2 text-sm text-blue-400 hover:text-blue-300"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : suggestedVideos.length === 0 ? (
+                  <div className="mt-4 text-center py-8">
+                    <p className="text-sm text-gray-400">
+                      No suggested videos available
+                    </p>
+                  </div>
+                ) : (
+                  <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                    {suggestedVideos.slice(0, 3).map((video) => (
+                      <div
+                        key={video.id}
+                        onClick={() => handleSuggestedVideoClick(video)}
+                        className={`group relative overflow-hidden rounded-lg border border-border bg-none transition-all hover:bg-accent hover:shadow-lg hover:border-primary ${
+                          loadingVideoId === video.id
+                            ? "opacity-50 pointer-events-none"
+                            : "cursor-pointer"
+                        }`}
+                      >
+                        <img
+                          src={video.thumbnailUrl}
+                          alt={`Thumbnail for ${video.title}`}
+                          className="h-24 w-full object-cover transition-transform group-hover:scale-105"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.onerror = null;
+                            target.src =
+                              "https://placehold.co/400x225/333/FFF?text=Error";
+                          }}
+                        />
+                        <div className="p-3">
+                          <p className="truncate font-semibold text-foreground">
+                            {video.title}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {video.topic}
+                          </p>
+                        </div>
+                        {loadingVideoId === video.id && (
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
+          )}
           {/* Footer */}
           <div className="p-4 flex justify-end space-x-4">
             <button
               onClick={navigateToHome}
               className={`rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer`}
             >
-              Go to Home
+              Cancel
             </button>
             <button
               onClick={handleAdd}
@@ -382,7 +478,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               }`}
             >
               {isLoading && (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <CustomLoader className="h-4 w-4" />
               )}
               {isLoading ? "Loading video..." : "Add"}
             </button>

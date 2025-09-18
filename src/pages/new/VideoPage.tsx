@@ -65,11 +65,6 @@ const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
 
 // Type definitions
 // --- TYPE DEFINITIONS ---
-interface ContentCardProps {
-  children: ReactNode;
-  className?: string;
-}
-
 interface IconProps {
   path: string;
   className?: string;
@@ -139,32 +134,6 @@ interface HeaderProps {
   onNavigate: (to: string) => void;
 }
 
-// --- DYNAMIC CONTENT ---
-const eventsList = [
-  {
-    type: "On This Day",
-    title: "California admitted to the Union (1850)",
-    trivia:
-      "On September 9th, California became the 31st state, a key moment in westward expansion.",
-  },
-  {
-    type: "Tech History",
-    title: "First Computer 'Bug' Found (1947)",
-    trivia:
-      "Grace Hopper's team found a moth in a relay of the Harvard Mark II, coining the term 'bug' for a computer fault.",
-  },
-  {
-    type: "Quote of the Moment",
-    title: "Steve Jobs",
-    trivia: "'The only way to do great work is to love what you do.'",
-  },
-  {
-    type: "Quote of the Moment",
-    title: "B.B. King",
-    trivia:
-      "'The beautiful thing about learning is that nobody can take it away from you.'",
-  },
-];
 
 const Header: React.FC<HeaderProps> = ({
   videoDetail,
@@ -468,35 +437,6 @@ const VideoPage: React.FC = () => {
 
   // Get video ID from URL params or location state
   const currentVideoId = videoId || location.state?.videoId;
-
-  //loading
-  const [isRendered, setIsRendered] = useState(isLoadingVideo);
-  // Initialize with a random index, but only once.
-  const [currentIndex, setCurrentIndex] = useState(() =>
-    Math.floor(Math.random() * eventsList.length)
-  );
-  const content = eventsList[currentIndex];
-
-  const handlePrev = useCallback(() => {
-    setCurrentIndex((prev) => (prev === 0 ? eventsList.length - 1 : prev - 1));
-  }, []);
-
-  const handleNext = useCallback(() => {
-    setCurrentIndex((prev) => (prev === eventsList.length - 1 ? 0 : prev + 1));
-  }, []);
-
-  // Effect for automatic slideshow
-  useEffect(() => {
-    if (!isLoadingVideo) return;
-
-    const slideshowTimer = setInterval(() => {
-      handleNext();
-    }, 4000); // Change content every 5 seconds
-
-    // Cleanup the interval when the component unmounts or when dependencies change.
-    // This resets the timer if the user navigates manually.
-    return () => clearInterval(slideshowTimer);
-  }, [currentIndex, isLoadingVideo, handleNext]);
 
   // Function to save video progress - only called on navigation away from page
   const saveVideoProgress = useCallback(async () => {
@@ -1299,35 +1239,11 @@ const VideoPage: React.FC = () => {
   // Show loading screen while video details are being fetched
   if (isLoadingVideo) {
     return (
-        <div className="bg-background text-foreground min-h-screen font-sans flex flex-col justify-center items-center p-4 ">
-        <div className="flex items-center justify-center w-full max-w-lg animate-fadeIn">
-          {/* Left Button */}
-          <button
-            onClick={handlePrev}
-            className="p-2 rounded-full text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors duration-200 focus:outline-none cursor-pointer"
-          >
-            <ChevronLeft />
-          </button>
+        <div className="bg-background min-h-screen font-sans flex flex-col justify-center items-center p-4 gap-4">
+        
 
-          <div className="flex flex-col items-center justify-center text-center mx-4 flex-1">
-            <p className="text-sm font-semibold text-primary uppercase tracking-wider">
-              {content.type}
-            </p>
-            <p className="text-xl text-foreground mt-2 leading-snug font-bold">
-              {content.trivia}
-            </p>
-          </div>
-
-          {/* Right Button */}
-          <button
-            onClick={handleNext}
-            className="p-2 rounded-full text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors duration-200 focus:outline-none cursor-pointer"
-          >
-            <ChevronRight />
-          </button>
-        </div>
-
-        <CustomLoader className="h-15 w-15 mt-10" />
+        <CustomLoader className="h-15 w-15" />
+        <span className="text-muted-foreground text-lg">Preparing lessons...</span>
       </div>
     );
   }
