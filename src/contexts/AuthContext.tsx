@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { ApiResponse, authApi } from "../lib/api-client";
+import { ApiResponse, authApi, setAuthErrorHandler } from "../lib/api-client";
 
 interface User {
   id: string;
@@ -450,6 +450,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const initializeAuth = async () => {
+      // Register global auth error handler to logout on token expiry
+      setAuthErrorHandler((status) => {
+        if (status === 401 || status === 403) {
+          logout();
+        }
+      });
       await checkAuth();
       setIsLoading(false);
     };

@@ -30,6 +30,26 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Global auth error handler registration
+let authErrorHandler: ((status: number) => void) | null = null;
+export const setAuthErrorHandler = (handler: (status: number) => void) => {
+  authErrorHandler = handler;
+};
+
+// Response interceptor to catch auth errors globally
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    try {
+      const status = error?.response?.status;
+      if ((status === 401 || status === 403) && typeof authErrorHandler === 'function') {
+        authErrorHandler(status);
+      }
+    } catch {}
+    return Promise.reject(error);
+  }
+);
+
 // Response interface
 export interface ApiResponse<T> {
   data: T;
