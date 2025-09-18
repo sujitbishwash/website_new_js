@@ -2,6 +2,7 @@ import { ChevronDown } from "lucide-react";
 import React, { useEffect, useState, useRef } from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 import { videoApi } from "@/lib/api-client";
+import Dropdown from "../ui/dropdown";
 
 // Star Rating Component with Animation
 
@@ -130,19 +131,17 @@ const SourceIcon = () => (
 // Helper function to format text with markdown-like syntax
 const formatText = (text: string) => {
   return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold text
-    .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic text
-    .replace(/\n\n/g, '<br/><br/>') // Double newlines
-    .replace(/\n/g, '<br/>'); // Single newlines
+    .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>") // Bold text
+    .replace(/\*(.*?)\*/g, "<em>$1</em>") // Italic text
+    .replace(/\n\n/g, "<br/><br/>") // Double newlines
+    .replace(/\n/g, "<br/>"); // Single newlines
 };
 
 const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
   <li className="mb-2">
     <div className="flex items-start">
-      <span
-        className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-foreground"
-      ></span>
-      <div 
+      <span className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-foreground"></span>
+      <div
         className="text-muted-foreground"
         dangerouslySetInnerHTML={{ __html: formatText(point.text) }}
       />
@@ -156,10 +155,8 @@ const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
         {point.subPoints.map((subPoint) => (
           <li key={subPoint.id} className="mb-2">
             <div className="flex items-start">
-              <span
-                className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-muted-foreground"
-              ></span>
-              <div 
+              <span className="mr-3 mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full text-muted-foreground"></span>
+              <div
                 className="text-muted-foreground"
                 dangerouslySetInnerHTML={{ __html: formatText(subPoint.text) }}
               />
@@ -196,13 +193,12 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
   markAsSubmitted,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
 
   const open = () => {
     setIsOpen(true);
   };
   const close = () => setIsOpen(false);
-  
+
   const handleDismiss = () => {
     setIsOpen(false);
     // Mark that user has dismissed the feedback request
@@ -220,7 +216,6 @@ const SummaryFeedback: React.FC<SummaryProps> = ({
   };
 
   const onSubmit = async (_payload: unknown) => {
-    
     if (markAsSubmitted) {
       markAsSubmitted();
     }
@@ -279,7 +274,8 @@ const SummaryHeader: React.FC<{
 
   return (
     <div className="flex justify-center items-center mb-4">
-      <div className="relative">
+      {/**<div className="relative">
+        
         <select
           value={activeLength}
           onChange={(e) => onLengthChange(e.target.value as SummaryLength)}
@@ -298,12 +294,17 @@ const SummaryHeader: React.FC<{
             </option>
           ))}
         </select>
-        <div
-          className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-foreground"
-        >
-          <ChevronDown/>
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-foreground">
+          <ChevronDown />
         </div>
-      </div>
+      </div>*/}
+      <Dropdown
+          id="length-select"
+          value={activeLength}
+          onChange={(e) => onLengthChange(e as SummaryLength)}
+          options={lengths}
+          defaultPosition={0}
+        />
     </div>
   );
 };
@@ -314,9 +315,7 @@ const LoadingSpinner = () => (
       className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-accent"
       style={{ borderColor: `${theme.accent} transparent` }}
     ></div>
-    <p className="ml-4 text-lg">
-      Loading Summary...
-    </p>
+    <p className="ml-4 text-lg">Loading Summary...</p>
   </div>
 );
 
@@ -340,7 +339,6 @@ interface SummaryProps {
 }
 
 const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
-
   // Temporarily disable feedback to prevent re-renders
   const feedbackCanSubmitFeedback = false;
   const feedbackExistingFeedback = null;
@@ -383,7 +381,7 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
 
       try {
         const response = await videoApi.getVideoSummary(videoId);
-        
+
         // Check if response has the expected structure
         if (!response) {
           throw new Error("Empty response from API");
@@ -394,148 +392,205 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
         // Handle different possible response structures
         if (response.sections && Array.isArray(response.sections)) {
           // Transform API response to our component format
-          transformedData = response.sections.map((section: unknown, index: number) => {
-            const sectionData = section as { title?: string; content?: string; text?: string; description?: string };
-            return {
-              id: `section_${index}`,
-              title: sectionData.title || `Section ${index + 1}`,
-              points: [{
-                id: `point_${index}`,
-                text: sectionData.content || sectionData.text || sectionData.description || "No content available"
-              }]
-            };
-          });
+          transformedData = response.sections.map(
+            (section: unknown, index: number) => {
+              const sectionData = section as {
+                title?: string;
+                content?: string;
+                text?: string;
+                description?: string;
+              };
+              return {
+                id: `section_${index}`,
+                title: sectionData.title || `Section ${index + 1}`,
+                points: [
+                  {
+                    id: `point_${index}`,
+                    text:
+                      sectionData.content ||
+                      sectionData.text ||
+                      sectionData.description ||
+                      "No content available",
+                  },
+                ],
+              };
+            }
+          );
         } else if (response.transcript) {
           // Handle the actual API response format with transcript field
           const transcriptText = response.transcript;
-          
+
           // Split the transcript into sections based on markdown headers
           const sections = transcriptText.split(/\n\n\*\*(.*?)\*\*/g);
           const processedSections: SummarySectionData[] = [];
-          
+
           for (let i = 0; i < sections.length; i += 2) {
             if (sections[i + 1]) {
               // This is a section with a header
               const title = sections[i + 1].trim();
               const content = sections[i + 2] || sections[i].trim();
-              
+
               // Split content into points based on bullet points or newlines
               const points = content
                 .split(/\n\*|\n-|\n\d+\./)
                 .filter((point: string) => point.trim().length > 0)
                 .map((point: string, pointIndex: number) => ({
                   id: `point_${i}_${pointIndex}`,
-                  text: point.trim().replace(/^\*|\d+\./, '').trim()
+                  text: point
+                    .trim()
+                    .replace(/^\*|\d+\./, "")
+                    .trim(),
                 }));
 
               processedSections.push({
                 id: `section_${i}`,
                 title: title,
-                points: points.length > 0 ? points : [{
-                  id: `point_${i}`,
-                  text: content.trim()
-                }]
+                points:
+                  points.length > 0
+                    ? points
+                    : [
+                        {
+                          id: `point_${i}`,
+                          text: content.trim(),
+                        },
+                      ],
               });
             }
           }
-          
+
           // If no sections were created, try to create sections from the content
           if (processedSections.length === 0) {
             // Look for common patterns in the transcript
-            const keyTakeawayMatch = transcriptText.match(/\*\*Key Takeaway:\*\*(.*?)(?=\*\*|$)/s);
-            const mainPointsMatch = transcriptText.match(/\*\*Main Points Covered:\*\*(.*?)(?=\*\*|$)/s);
-            const adviceMatch = transcriptText.match(/\*\*Advice for.*?:\*\*(.*?)(?=\*\*|$)/s);
-            
+            const keyTakeawayMatch = transcriptText.match(
+              /\*\*Key Takeaway:\*\*(.*?)(?=\*\*|$)/s
+            );
+            const mainPointsMatch = transcriptText.match(
+              /\*\*Main Points Covered:\*\*(.*?)(?=\*\*|$)/s
+            );
+            const adviceMatch = transcriptText.match(
+              /\*\*Advice for.*?:\*\*(.*?)(?=\*\*|$)/s
+            );
+
             if (keyTakeawayMatch) {
               processedSections.push({
                 id: "key_takeaway",
                 title: "Key Takeaway",
-                points: [{
-                  id: "key_takeaway_point",
-                  text: keyTakeawayMatch[1].trim()
-                }]
+                points: [
+                  {
+                    id: "key_takeaway_point",
+                    text: keyTakeawayMatch[1].trim(),
+                  },
+                ],
               });
             }
-            
+
             if (mainPointsMatch) {
               const mainPoints = mainPointsMatch[1]
                 .split(/\n\*|\n-|\n\d+\./)
                 .filter((point: string) => point.trim().length > 0)
                 .map((point: string, index: number) => ({
                   id: `main_point_${index}`,
-                  text: point.trim().replace(/^\*|\d+\./, '').trim()
+                  text: point
+                    .trim()
+                    .replace(/^\*|\d+\./, "")
+                    .trim(),
                 }));
-              
+
               processedSections.push({
                 id: "main_points",
                 title: "Main Points Covered",
-                points: mainPoints
+                points: mainPoints,
               });
             }
-            
+
             if (adviceMatch) {
               const advicePoints = adviceMatch[1]
                 .split(/\n\*|\n-|\n\d+\./)
                 .filter((point: string) => point.trim().length > 0)
                 .map((point: string, index: number) => ({
                   id: `advice_point_${index}`,
-                  text: point.trim().replace(/^\*|\d+\./, '').trim()
+                  text: point
+                    .trim()
+                    .replace(/^\*|\d+\./, "")
+                    .trim(),
                 }));
-              
+
               processedSections.push({
                 id: "advice",
                 title: "Advice for SBI PO Aspirants",
-                points: advicePoints
+                points: advicePoints,
               });
             }
-            
+
             // If still no sections, create a single section with the full transcript
             if (processedSections.length === 0) {
               processedSections.push({
                 id: "summary",
                 title: "Video Summary",
-                points: [{
-                  id: "summary_point",
-                  text: transcriptText
-                }]
+                points: [
+                  {
+                    id: "summary_point",
+                    text: transcriptText,
+                  },
+                ],
               });
             }
           }
-          
+
           transformedData = processedSections;
         } else if (response.summary) {
           // If only summary text is available, create a single section
-          transformedData = [{
-            id: "summary",
-            title: "Video Summary",
-            points: [{
-              id: "summary_point",
-              text: response.summary
-            }]
-          }];
+          transformedData = [
+            {
+              id: "summary",
+              title: "Video Summary",
+              points: [
+                {
+                  id: "summary_point",
+                  text: response.summary,
+                },
+              ],
+            },
+          ];
         } else if (Array.isArray(response)) {
           // If response is directly an array
           transformedData = response.map((item: unknown, index: number) => {
-            const itemData = item as { title?: string; content?: string; text?: string; description?: string };
+            const itemData = item as {
+              title?: string;
+              content?: string;
+              text?: string;
+              description?: string;
+            };
             return {
               id: `section_${index}`,
               title: itemData.title || `Section ${index + 1}`,
-              points: [{
-                id: `point_${index}`,
-                text: itemData.content || itemData.text || itemData.description || "No content available"
-              }]
+              points: [
+                {
+                  id: `point_${index}`,
+                  text:
+                    itemData.content ||
+                    itemData.text ||
+                    itemData.description ||
+                    "No content available",
+                },
+              ],
             };
           });
         } else {
           // Fallback: create a single section with available data
-          transformedData = [{
-            id: "summary",
-            title: "Video Summary",
-            points: [{
-              id: "summary_point",
-              text: JSON.stringify(response) || "No summary content available"
-            }]
-          }];
+          transformedData = [
+            {
+              id: "summary",
+              title: "Video Summary",
+              points: [
+                {
+                  id: "summary_point",
+                  text:
+                    JSON.stringify(response) || "No summary content available",
+                },
+              ],
+            },
+          ];
         }
 
         // If still no data, use demo data
@@ -545,16 +600,20 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
 
         setSummaryData(transformedData);
       } catch (err: unknown) {
-        const error = err as { message?: string; status?: number; response?: { data?: unknown } };
+        const error = err as {
+          message?: string;
+          status?: number;
+          response?: { data?: unknown };
+        };
         console.error("❌ Error fetching summary:", err);
         console.error("❌ Error details:", {
           message: error.message,
           status: error.status,
-          response: error.response?.data
+          response: error.response?.data,
         });
-        
+
         setError(error.message || "Failed to load summary");
-        
+
         // Fallback to demo data on error
         setSummaryData(longSummaryData);
       } finally {
@@ -574,8 +633,6 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
     };
   }, [videoId]);
 
-
-
   return (
     <div className="min-h-screen bg-background text-foreground px-4 sm:px-4">
       <div className="max-w-4xl mx-auto">
@@ -583,7 +640,7 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
           activeLength={summaryLength}
           onLengthChange={setSummaryLength}
         />
-        
+
         {isLoading ? (
           <LoadingSpinner />
         ) : error ? (
@@ -604,7 +661,12 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
             {summaryData?.map((section, index) => (
               <SummarySection key={index} section={section} />
             ))}
-            <SummaryFeedback videoId={videoId} canSubmitFeedback={feedbackCanSubmitFeedback} existingFeedback={feedbackExistingFeedback} markAsSubmitted={feedbackMarkAsSubmitted} />
+            <SummaryFeedback
+              videoId={videoId}
+              canSubmitFeedback={feedbackCanSubmitFeedback}
+              existingFeedback={feedbackExistingFeedback}
+              markAsSubmitted={feedbackMarkAsSubmitted}
+            />
           </div>
         )}
       </div>
@@ -612,6 +674,6 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
   );
 });
 
-Summary.displayName = 'Summary';
+Summary.displayName = "Summary";
 
 export default Summary;

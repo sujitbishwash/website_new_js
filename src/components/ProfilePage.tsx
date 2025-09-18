@@ -33,7 +33,7 @@ interface UserProfile {
   city: string;
   state: string;
   country: string;
-  gender: "Male" | "Female" | "Other" | "Prefer not to say" | "Not set" | "";
+  gender: string;
   dob: string; // Date of Birth, format YYYY-MM-DD
 }
 
@@ -50,8 +50,8 @@ interface SelectFieldProps {
   label: string;
   value: string;
   isEditing: boolean;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  name: keyof UserProfile;
+  onChange: (e: string) => void;
+  id: keyof UserProfile;
   options: string[];
 }
 
@@ -71,14 +71,13 @@ interface NotificationSettingRowProps {
   title: string;
   description: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (e: string) => void;
   options: string[];
   manageLink?: boolean;
 }
 
 // --- DYNAMIC USER PROFILE CREATION ---
 const createInitialUserProfile = (profile: any): UserProfile => {
-
   // Handle gender field - convert to proper format if needed
   let genderValue:
     | "Male"
@@ -178,7 +177,7 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
         name={name}
         value={value}
         onChange={onChange}
-        className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className={`mt-1 block w-full text-foreground border border-border focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 justify-between items-center text-left rounded-xl px-4 py-3 bg-background-subtle transition-colors cursor-pointer disabled:cursor-not-allowed`}
         autoComplete="off"
       />
     ) : (
@@ -200,11 +199,11 @@ const SelectField: React.FC<SelectFieldProps> = ({
   value,
   isEditing,
   onChange,
-  name,
+  id,
   options,
 }) => (
   <div>
-    <label className="text-sm font-medium text-muted-foreground flex items-center flex-row gap-2">
+    <label className="text-sm font-medium text-muted-foreground flex items-center flex-row gap-2 mb-1">
       {label}
       {value == "Not set" ? (
         <CircleAlert className="text-destructive w-3 h-3" />
@@ -213,21 +212,13 @@ const SelectField: React.FC<SelectFieldProps> = ({
       )}
     </label>
     {isEditing ? (
-      <select
-        name={name}
+      <Dropdown
+        id={id}
         value={value}
         onChange={onChange}
-        className="mt-1 block w-full pl-3 pr-10 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="" disabled>
-          Select...
-        </option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
+        options={options}
+        defaultPosition={0}
+      />
     ) : (
       <p
         className={`mt-1 text-base ${
@@ -240,6 +231,23 @@ const SelectField: React.FC<SelectFieldProps> = ({
   </div>
 );
 
+{
+  /**<select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="mt-1 block w-full pl-3 pr-10 py-2 rounded-md bg-background text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="" disabled>
+          Select...
+        </option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>*/
+}
 const DateField: React.FC<{
   label: string;
   value: string;
@@ -262,7 +270,7 @@ const DateField: React.FC<{
         name={name}
         value={value}
         onChange={onChange}
-        className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className={`mt-1 block w-full text-foreground border border-border focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 justify-between items-center text-left rounded-xl px-4 py-3 bg-background-subtle transition-colors cursor-pointer disabled:cursor-not-allowed`}
       />
     ) : (
       <p
@@ -282,7 +290,7 @@ const SettingRow: React.FC<SettingRowProps> = ({
   description,
   children,
 }) => (
-  <div className="py-4 flex justify-between items-center border-b border-border-medium">
+  <div className="py-4 flex justify-between items-center border-b border-border">
     <div>
       <h3 className="text-base text-foreground">{title}</h3>
       {description && (
@@ -302,10 +310,10 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
   options,
   manageLink,
 }) => (
-  <div className="py-4 flex justify-between items-center border-b border-border-medium">
+  <div className="py-4 flex justify-between items-center border-b border-border">
     <div>
-      <h3 className="text-base font-semibold text-white">{title}</h3>
-      <p className="text-sm text-foreground max-w-md">{description}</p>
+      <h3 className="text-base font-semibold text-foreground mb-4">{title}</h3>
+      <p className="text-sm text-muted-foreground max-w-md">{description}</p>
       {manageLink && (
         <a
           href="#"
@@ -315,7 +323,16 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
         </a>
       )}
     </div>
-    <select
+    <div className="w-40 ">
+      <Dropdown
+        id="responses-select"
+        value={value}
+        onChange={onChange}
+        options={options}
+        defaultPosition={0}
+      />
+    </div>
+    {/**<select
       value={value}
       onChange={onChange}
       className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -325,7 +342,7 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
           {opt}
         </option>
       ))}
-    </select>
+    </select>*/}
   </div>
 );
 
@@ -344,6 +361,7 @@ import {
 } from "lucide-react";
 import { AccentToggle } from "./Accent-toggle";
 import { ModeToggle } from "./mode-toggle";
+import Dropdown from "./ui/dropdown";
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
@@ -370,16 +388,19 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   }, [profile]);
 
   // State for new "General" settings
-  const [language, setLanguage] = useState("Auto-detect");
+
+  const allLanguages = ["English", "Hindi"];
+  const [language, setLanguage] = useState(allLanguages[0]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   // State for new notification settings
   const [responseNotifications, setResponseNotifications] = useState("Push");
   const [taskNotifications, setTaskNotifications] = useState("Push, Email");
   const { logout } = useAuth();
-
   // State for "Privacy and Security" settings
   const [mfaEnabled, setMfaEnabled] = useState(false);
-
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+  };
   const handleLogoutConfirm = async () => {
     await logout();
     // Navigate to login page after logout is complete
@@ -394,6 +415,25 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       ...prevState,
       [name]: value,
     }));
+  };
+
+  const handleGenderChange = (e: string) => {
+    const value = e;
+
+    const newUserProfileData = { ...userProfile, ["gender"]: value };
+    setUserProfile(newUserProfileData);
+  };
+  const handleAnyChange = (e: string, id: string) => {
+    const value = e;
+
+    const newUserProfileData = { ...userProfile, [id]: value };
+    setUserProfile(newUserProfileData);
+  };
+  const handleCountryChange = (e: string) => {
+    const value = e;
+
+    const newUserProfileData = { ...userProfile, ["country"]: value };
+    setUserProfile(newUserProfileData);
   };
 
   const toggleEditMode = () => {
@@ -459,14 +499,21 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               <AccentToggle />
             </SettingRow>
             <SettingRow title="Language">
-              <select
+              <Dropdown
+                id="language-select"
+                value={language}
+                onChange={handleLanguageChange}
+                options={allLanguages}
+                defaultPosition={0}
+              />
+              {/**<select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
                 className="w-40 pl-3 pr-10 py-2 rounded-lg shadow-sm bg-background text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
                 <option>English</option>
                 <option>Hindi</option>
-              </select>
+              </select>*/}
             </SettingRow>
             {/*<SettingRow title="Voice">
               <button className="flex items-center gap-2 text-foreground hover:bg-gray-700 px-3 py-1.5 rounded-md transition-colors">
@@ -498,7 +545,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Account":
         return (
           <div>
-            <div className="items-end mb-6 pb-4 flex justify-between items-center border-b border-border-medium">
+            <div className="mb-6 pb-4 flex justify-between items-end border-b border-border">
               <div>
                 <h1 className="text-3xl  text-foreground">Your Account</h1>
                 <p className="mt-1 text-muted-foreground">
@@ -522,12 +569,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 )*/}
               </div>
               <div className="flex gap-3">
-                <button
+                {/**<button
                   className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
                   title="Refresh profile data"
                 >
-                  <RefreshCcw className="w-4 h-4" />
-                </button>
+                  <RefreshCcw className="" />
+                </button>*/}
                 <button
                   onClick={toggleEditMode}
                   className="px-5 py-2 rounded-lg text-sm font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer"
@@ -579,12 +626,32 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               />
               <SelectField
                 label="Gender"
-                name="gender"
+                id="gender"
                 value={userProfile.gender}
                 isEditing={isEditing}
-                onChange={handleInputChange}
+                onChange={handleGenderChange}
                 options={genders}
               />
+              {/**isEditing ? (
+                <Dropdown
+                  id="gender-select"
+                  label="Gender"
+                  value={userProfile.gender}
+                  onChange={handleGenderChange}
+                  options={genders}
+                  defaultPosition={0}
+                />
+              ) : (
+                <p
+                  className={`mt-1 text-base ${
+                    userProfile.gender === "Not set"
+                      ? "text-foreground italic"
+                      : "text-foreground"
+                  }`}
+                >
+                  {userProfile.gender}
+                </p>
+              )*/}
               <ProfileField
                 label="Address"
                 name="address"
@@ -608,15 +675,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               />
               <SelectField
                 label="Country"
-                name="country"
+                id="country"
                 value={userProfile.country}
                 isEditing={isEditing}
-                onChange={handleInputChange}
+                onChange={handleCountryChange}
                 options={countries}
               />
-
               {/* Debug Information */}
-              {process.env.NODE_ENV === "development" && profile && (
+              {/**process.env.NODE_ENV === "development" && profile && (
                 <div className="col-span-1 md:col-span-2 mt-6 p-4 bg-accent rounded-lg border border-divider">
                   <h4 className="text-sm font-medium text-gray-400 mb-2">
                     Debug Info (Development Only)
@@ -636,7 +702,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     </div>
                   </div>
                 </div>
-              )}
+              )*/}
             </div>
           </div>
         );
@@ -644,18 +710,41 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         return (
           <div>
             <h1 className="text-3xl text-foreground mb-6">Notifications</h1>
-            <NotificationSettingRow
-              title="Responses"
-              description="Get notified when chatbot responds to requests that take time, like research or image generation."
-              value={responseNotifications}
-              onChange={(e) => setResponseNotifications(e.target.value)}
-              options={["Push", "Email", "None"]}
-            />
+            {
+              <NotificationSettingRow
+                title="Responses"
+                description="Get notified when chatbot responds to requests that take time, like research or image generation."
+                value={responseNotifications}
+                onChange={(value) => setResponseNotifications(value)}
+                options={["Push", "Email", "None"]}
+              />
+            }
+            {/**<div className="py-4 flex justify-between items-center border-b border-border-medium">
+              <div>
+                <h3 className="text-base font-semibold text-white">
+                  Responses
+                </h3>
+                <p className="text-sm text-foreground max-w-md">
+                  Get notified when chatbot responds to requests that take time,
+                  like research or image generation.
+                </p>
+              </div>
+              <div className="w-40 ">
+                <Dropdown
+                  id="responses-select"
+                  value={responseNotifications}
+                  onChange={(value: string) => setResponseNotifications(value)}
+                  options={["Push", "Email", "None"]}
+                  defaultPosition={0}
+                />
+              </div>
+            </div>*/}
+
             <NotificationSettingRow
               title="Tasks"
               description="Get notified when tasks you've created have updates."
               value={taskNotifications}
-              onChange={(e) => setTaskNotifications(e.target.value)}
+              onChange={(value) => setTaskNotifications(value)}
               options={["Push, Email", "Push", "Email", "None"]}
               manageLink
             />
@@ -670,9 +759,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               0 0 20px rgba(168, 85, 247, 0.6), 
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
-            <div className="flex justify-between items-end border-b border-border-medium pb-4">
+            <div className="flex justify-between items-end border-b border-border pb-4">
               <div>
-                <h1 className="text-3xl  text-foreground">Upgrade</h1>
+                <h1 className="text-3xl text-foreground">Upgrade</h1>
                 <p className="mt-1 text-muted-foreground">
                   You are currently on the free plan
                 </p>
@@ -747,11 +836,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Development":
         return (
           <div>
-            <h1 className="text-3xl text-foreground mb-3">Development Tools</h1>
-            <p className="text-muted-foreground mb-6">
-              Development and testing utilities for debugging purposes.
-            </p>
-
+            <div className="border-b border-border pb-4">
+              <h1 className="text-3xl text-foreground">Development Tools</h1>
+              <p className="text-muted-foreground mt-1">
+                Development and testing utilities for debugging purposes.
+              </p>
+            </div>
             <div className="space-y-6">
               <SettingRow
                 title="Splash Screen Management"
