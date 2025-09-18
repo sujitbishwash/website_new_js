@@ -84,14 +84,14 @@ export const routes = [
             description: "Confirm exam details before starting",
           },
           {
-            path: "test-main-page",
+            path: "test-main-page/:id",
             element: <TestMainPage />,
             name: "Test Main Page",
             description: "Main test taking interface",
           },
           
           {
-            path: "test-main-page/solutions",
+            path: "test-main-page/:id/solutions",
             element: <TestMainPage />,
             name: "Test Main Page",
             description: "Main test taking interface",

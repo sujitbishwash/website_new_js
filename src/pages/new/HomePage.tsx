@@ -289,7 +289,7 @@ export default function HomePage() {
     try {
       setIsLoadingAttemptedTests(true);
       setAttemptedTestsError(null);
-      const response = await attemptedTestsApi.getAttemptedTests(1, 10);
+      const response = await attemptedTestsApi.getAttemptedTests(1, 3);
       setAttemptedTests(response.tests);
     } catch (error: any) {
       

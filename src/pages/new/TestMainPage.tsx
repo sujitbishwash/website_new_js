@@ -158,6 +158,10 @@ interface Question {
   timeSpent?: number; // Track time spent on each question in seconds
   questionStartTime?: Date; // Track when user first visited this question
   answerOrder?: number; // Track the order in which this question was answered
+  // Solution mode fields
+  selectedOption?: string | null;
+  correctAnswer?: string | null;
+  isCorrect?: boolean;
 }
 
 // API Response mapping interface
@@ -167,6 +171,8 @@ interface ApiQuestion {
   content: string;
   option: string[];
   answer: string | null;
+  selected?: string | null;
+  isCorrect?: boolean;
 }
 
 // --- Helper Components ---
@@ -227,6 +233,7 @@ const TestMainPage = () => {
   const { profile, examGoal } = useUser();
 
   const [sessionId, setSessionId] = useState<number | null>(null);
+  const [headerTitle, setHeaderTitle] = useState<string>("");
   const langDropdownRef = useRef<HTMLDivElement>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [questionStartTime, setQuestionStartTime] = useState<Date>(new Date());
@@ -261,6 +268,9 @@ const TestMainPage = () => {
     questionType: apiQuestion.questionType as QuestionType,
     timeSpent: 0,
     questionStartTime: undefined,
+    selectedOption: apiQuestion.selected ?? null,
+    correctAnswer: apiQuestion.answer ?? null,
+    isCorrect: apiQuestion.isCorrect ?? undefined,
   });
 
   // Fetch questions from API
@@ -269,6 +279,70 @@ const TestMainPage = () => {
     setError(null);
 
     try {
+      // Prefer sessionId route param/state → fetch by session id
+      const paramSessionId = id ? parseInt(id, 10) : null;
+      const stateSessionId = (location.state as any)?.sessionId as number | null;
+      const sid = paramSessionId || stateSessionId || sessionId;
+
+      if (sid) {
+        const v3 = isSolutionMode
+          ? await quizApi.getTestSolutions(sid)
+          : await quizApi.startTest(sid);
+        // Handle grouped sections (v3)
+        if (v3 && (v3 as any).sections) {
+          const sections = (v3 as any).sections as Record<string, any>;
+          const normalized: { [key in SectionName]?: Question[] } = {} as any;
+          const tabs: { id: SectionName; label: string }[] = [];
+          Object.values(sections).forEach((sec: any) => {
+            const key = (sec.key || sec.name || "").toLowerCase();
+            let sectionName: SectionName | undefined;
+            if (key.includes("english")) sectionName = "english language";
+            else if (key.includes("apt") || key.includes("num"))
+              sectionName = "numerical ability";
+            else if (key.includes("reason")) sectionName = "reasoning ability";
+            if (sectionName) {
+              normalized[sectionName] = (sec.questions || []).map(
+                mapApiQuestionToQuestion
+              );
+              tabs.push({ id: sectionName, label: sec.name || sectionName });
+            }
+          });
+          const initialSection: SectionName =
+            (tabs[0]?.id as SectionName) ||
+            (Object.keys(normalized)[0] as SectionName) ||
+            "english language";
+          setAllQuestions(normalized);
+          setCurrentSection(initialSection);
+          setQuestions(normalized[initialSection] || []);
+          if (tabs.length) setSectionTabs(tabs);
+          setSessionId((v3 as any).session_id || sid);
+          if (typeof (v3 as any).total_time === "number" && !isSolutionMode) {
+            setTimeLeft((v3 as any).total_time);
+          }
+          // Derive header title if available, else set a sensible default
+          const metaSubject = (v3 as any)?.subject;
+          const metaTopics = (v3 as any)?.topics;
+          const metaLevel = (v3 as any)?.level;
+          if (metaSubject && metaTopics && metaLevel) {
+            setHeaderTitle(`${metaSubject}-${(metaTopics || []).join(", ")}-${metaLevel}`);
+          } else {
+            setHeaderTitle(isSolutionMode ? "Solutions" : "Test");
+          }
+        } else if (v3 && (v3 as any).questions) {
+          // Legacy flat payload
+          const mappedQuestions = (v3 as any).questions
+            .map(mapApiQuestionToQuestion)
+            .sort((a: Question, b: Question) => a.id - b.id);
+          setQuestions(mappedQuestions);
+          setSessionId((v3 as any).session_id || sid);
+          setHeaderTitle(isSolutionMode ? "Solutions" : "Test");
+        } else {
+          throw new Error("Invalid response format from API");
+        }
+        return;
+      }
+
+      // Fallback: legacy start from config if no session id present
       const response = await quizApi.startTest({
         ...testConfig,
         topics: testConfig.sub_topic,
@@ -305,9 +379,16 @@ const TestMainPage = () => {
         if (tabs.length) setSectionTabs(tabs);
         setSessionId(v3.session_id);
         // Configure timer if provided
-        if (typeof v3.total_time === "number") {
+        if (typeof v3.total_time === "number" && !isSolutionMode) {
           setTimeLeft(v3.total_time);
         }
+        setHeaderTitle(
+          testConfig?.subject && testConfig?.sub_topic?.length
+            ? `${testConfig?.subject}-${testConfig?.sub_topic.join(", ")}-${testConfig?.level}`
+            : isSolutionMode
+            ? "Solutions"
+            : "Test"
+        );
       } else if (response && (response as any).questions) {
         // Legacy flat payload
         const mappedQuestions = (response as any).questions
@@ -315,6 +396,13 @@ const TestMainPage = () => {
           .sort((a: Question, b: Question) => a.id - b.id);
         setQuestions(mappedQuestions);
         setSessionId((response as any).session_id);
+        setHeaderTitle(
+          testConfig?.subject && testConfig?.sub_topic?.length
+            ? `${testConfig?.subject}-${testConfig?.sub_topic.join(", ")}-${testConfig?.level}`
+            : isSolutionMode
+            ? "Solutions"
+            : "Test"
+        );
       } else {
         throw new Error("Invalid response format from API");
       }
@@ -392,10 +480,11 @@ const TestMainPage = () => {
   */
   }
 
-  // Fetch questions on component mount
+  // Fetch questions on component mount and when route/state sessionId changes
   useEffect(() => {
     fetchQuestions();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [(location.state as any)?.sessionId, id]);
 
   // Timer Logic
   useEffect(() => {
@@ -707,8 +796,7 @@ const TestMainPage = () => {
         {/* Responsive Title */}
         <div className="flex-1 text-center px-2">
           <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
-            {testConfig?.subject}-{testConfig?.sub_topic.join(", ")}-
-            {testConfig?.level}
+            {headerTitle || (isSolutionMode ? "Solutions" : "Test")}
           </h1>
         </div>
         <div className="flex items-center">
@@ -774,23 +862,25 @@ const TestMainPage = () => {
               </div>
               {/* Timer and Settings */}
               <div className="flex items-center justify-end gap-2 sm:gap-4 w-full sm:w-auto">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm mr-2 hidden sm:inline text-foreground">
-                    Time
-                    <span className="text-sm mr-2 hidden lg:inline"> Left</span>
-                    :
-                  </span>
+                {!isSolutionMode && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm mr-2 hidden sm:inline text-foreground">
+                      Time
+                      <span className="text-sm mr-2 hidden lg:inline"> Left</span>
+                      :
+                    </span>
 
-                  <span
-                    className={`font-mono text-base sm:text-lg py-1 px-2 sm:px-3 rounded-md select-none ${
-                      isTimeLow
-                        ? "bg-red-600 text-white animate-pulse"
-                        : "bg-background-subtle text-foreground"
-                    }`}
-                  >
-                    {formatTime(timeLeft)}
-                  </span>
-                </div>
+                    <span
+                      className={`font-mono text-base sm:text-lg py-1 px-2 sm:px-3 rounded-md select-none ${
+                        isTimeLow
+                          ? "bg-red-600 text-white animate-pulse"
+                          : "bg-background-subtle text-foreground"
+                      }`}
+                    >
+                      {formatTime(timeLeft)}
+                    </span>
+                  </div>
+                )}
                 <select
                   onChange={(e) => setTextSize(e.target.value)}
                   value={textSize}
@@ -844,30 +934,6 @@ const TestMainPage = () => {
               </div>
             </div>
           </div>
-          {/**<div className="bg-card p-4 sm:p-6 rounded-lg flex-grow border-1">
-            <p className="mb-6 text-foreground">{currentQuestion.question}</p>
-            <div className="space-y-4">
-              {currentQuestion.options.map((option, index) => (
-                <label
-                  key={index}
-                  className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 border text-foreground ${
-                    currentQuestion.answer === index
-                      ? "bg-blue-400 text-white"
-                      : "bg-background-subtle hover:bg-blue-400/20 hover:border-blue-400"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name={`question-${currentQuestion.id}`}
-                    className="h-5 w-5 mr-4 border-gray-500 bg-card text-blue-500 focus:ring-blue-400"
-                    checked={currentQuestion.answer === index}
-                    onChange={() => handleOptionSelect(index)}
-                  />
-                  <span>{option}</span>
-                </label>
-              ))}
-            </div>
-          </div>*/}
           {!isSolutionMode ? (
             <div
               className={`bg-card rounded-b-lg rounded-tr-lg flex-grow grid grid-cols-1 md:grid-cols-2 gap-8 overflow-hidden ${textSize}`}
@@ -909,25 +975,33 @@ const TestMainPage = () => {
                     {currentQuestion.question}
                   </p>
                   <div className="space-y-4">
-                    {currentQuestion.options.map((option, index) => (
-                      <label
-                  key={index}
-                  className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 border text-foreground ${
-                    currentQuestion.answer === index
-                      ? "bg-blue-400 text-white"
-                      : "bg-background-subtle hover:bg-blue-400/20 hover:border-blue-400"
-                  }`}
-                >
-                        <input
-                    type="radio"
-                    name={`question-${currentQuestion.id}`}
-                    className="h-5 w-5 mr-4 border-gray-500 bg-card text-blue-500 focus:ring-blue-400"
-                    checked={currentQuestion.answer === index}
-                    onChange={() => handleOptionSelect(index)}
-                  />
-                        <span>{option}</span>
-                      </label>
-                    ))}
+                    {currentQuestion.options.map((option, index) => {
+                      const isUserSelected = currentQuestion.selectedOption === option;
+                      const isCorrectOption = currentQuestion.correctAnswer === option;
+                      const highlightClass = isCorrectOption
+                        ? "bg-green-700 text-white border-green-600"
+                        : isUserSelected
+                        ? currentQuestion.isCorrect
+                          ? "bg-green-700 text-white border-green-600"
+                          : "bg-red-700 text-white border-red-600"
+                        : "bg-background-subtle";
+                      return (
+                        <label
+                          key={index}
+                          className={`flex items-center p-3 sm:p-4 rounded-lg transition-all duration-200 border ${highlightClass}`}
+                        >
+                          <input
+                            type="radio"
+                            name={`question-${currentQuestion.id}`}
+                            className="h-5 w-5 mr-4 border-gray-500 bg-card text-blue-500 focus:ring-blue-400"
+                            checked={isUserSelected}
+                            disabled
+                            readOnly
+                          />
+                          <span>{option}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -936,7 +1010,14 @@ const TestMainPage = () => {
                     Solution
                   </h3>
                   <div className="prose prose-invert text-gray-300">
-                    <p>SOlutuon here</p>
+                    <p>
+                      Correct Answer: <span className="font-semibold text-green-400">{currentQuestion.correctAnswer || "Not available"}</span>
+                    </p>
+                    {typeof currentQuestion.isCorrect === "boolean" && (
+                      <p>
+                        Your Answer: {currentQuestion.selectedOption || "Not Attempted"} {currentQuestion.selectedOption == null ? "" : currentQuestion.isCorrect ? "✓" : "✗"}
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1126,41 +1207,66 @@ const TestMainPage = () => {
                 : "opacity-100 translate-y-0"
             }`}
           >
-            <div className="flex justify-between gap-2">
-              <button
-                onClick={handleMarkForReview}
-                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs"
-              >
-                Mark & Next
-              </button>
-              <button
-                onClick={handleSkipSection}
-                className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs"
-              >
-                Skip Section
-              </button>
-              <button
-                onClick={handleSubmitTest}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs flex items-center justify-center gap-1"
-              >
-                Submit <Check />
-              </button>
-            </div>
+            {isSolutionMode ? (
+              <div className="flex justify-between gap-2">
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentQuestionIndex === 0}
+                  className={`flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs ${
+                    currentQuestionIndex === 0 ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  Prev
+                </button>
+                <button
+                  onClick={handleSaveAndNext}
+                  disabled={currentQuestionIndex === questions.length - 1}
+                  className={`flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs ${
+                    currentQuestionIndex === questions.length - 1 ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            ) : (
+              <div className="flex justify-between gap-2">
+                <button
+                  onClick={handleMarkForReview}
+                  className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs"
+                >
+                  Mark & Next
+                </button>
+                <button
+                  onClick={handleSkipSection}
+                  className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs"
+                >
+                  Skip Section
+                </button>
+                <button
+                  onClick={handleSubmitTest}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs flex items-center justify-center gap-1"
+                >
+                  Submit <Check />
+                </button>
+              </div>
+            )}
           </div>
 
           <div className="w-full flex items-center gap-2 p-3 bg-card">
             <div className="flex-1 grid grid-cols-3 gap-2">
-              <button
-                onClick={handleClearResponse}
-                disabled={!currentQuestion || currentQuestion.answer === null}
-                className={`font-bold py-3 px-2 rounded-lg transition-colors duration-200 text-sm ${
-                  !currentQuestion || currentQuestion.answer === null
-                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                    : "bg-yellow-600 hover:bg-yellow-700 text-white"
-                }`}
-              >
-                Clear
-              </button>
+              {!isSolutionMode && (
+                <button
+                  onClick={handleClearResponse}
+                  disabled={!currentQuestion || currentQuestion.answer === null}
+                  className={`font-bold py-3 px-2 rounded-lg transition-colors duration-200 text-sm ${
+                    !currentQuestion || currentQuestion.answer === null
+                      ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                      : "bg-yellow-600 hover:bg-yellow-700 text-white"
+                  }`}
+                >
+                  Clear
+                </button>
+              )}
               <button
                 onClick={handlePrevious}
                 disabled={currentQuestionIndex === 0}
@@ -1183,7 +1289,7 @@ const TestMainPage = () => {
                     : ""
                 }`}
               >
-                Next <ChevronRight />
+                {isSolutionMode ? "Next" : "Next"} <ChevronRight />
               </button>
             </div>
             <button
@@ -1196,25 +1302,29 @@ const TestMainPage = () => {
         </div>
         {/* Desktop Footer */}
         <div className="hidden md:flex justify-between items-center w-full gap-4">
-          <div className="flex flex-wrap justify-start gap-2">
-            <button
-              onClick={handleMarkForReview}
-              className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
-            >
-              Mark & Next
-            </button>
-            <button
-              onClick={handleClearResponse}
-              disabled={!currentQuestion || currentQuestion.answer === null}
-              className={`font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm ${
-                !currentQuestion || currentQuestion.answer === null
-                  ? "bg-gray-600 text-gray-400 cursor-not-allowed"
-                  : "bg-yellow-600 hover:bg-yellow-700 text-white"
-              }`}
-            >
-              Clear Response
-            </button>
-          </div>
+          {!isSolutionMode ? (
+            <div className="flex flex-wrap justify-start gap-2">
+              <button
+                onClick={handleMarkForReview}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm"
+              >
+                Mark & Next
+              </button>
+              <button
+                onClick={handleClearResponse}
+                disabled={!currentQuestion || currentQuestion.answer === null}
+                className={`font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm ${
+                  !currentQuestion || currentQuestion.answer === null
+                    ? "bg-gray-600 text-gray-400 cursor-not-allowed"
+                    : "bg-yellow-600 hover:bg-yellow-700 text-white"
+                }`}
+              >
+                Clear Response
+              </button>
+            </div>
+          ) : (
+            <div />
+          )}
           <div className="flex flex-wrap justify-center gap-3">
             <button
               onClick={handlePrevious}
@@ -1236,23 +1346,27 @@ const TestMainPage = () => {
                   : ""
               }`}
             >
-              Save & Next <ChevronRight />
+              {isSolutionMode ? "Next" : "Save & Next"} <ChevronRight />
             </button>
           </div>
-          <div className="flex flex-wrap justify-end gap-2">
-            <button
-              onClick={handleSkipSection}
-              className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm flex items-center justify-center gap-2"
-            >
-              Skip Section <ChevronsRight />
-            </button>
-            <button
-              onClick={handleSubmitTest}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm flex items-center justify-center gap-2"
-            >
-              Submit <Check />
-            </button>
-          </div>
+          {!isSolutionMode ? (
+            <div className="flex flex-wrap justify-end gap-2">
+              <button
+                onClick={handleSkipSection}
+                className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm flex items-center justify-center gap-2"
+              >
+                Skip Section <ChevronsRight />
+              </button>
+              <button
+                onClick={handleSubmitTest}
+                className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm flex items-center justify-center gap-2"
+              >
+                Submit <Check />
+              </button>
+            </div>
+          ) : (
+            <div />
+          )}
         </div>
         {/**<div className="flex flex-wrap justify-center gap-3">
           <button

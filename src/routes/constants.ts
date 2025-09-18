@@ -8,8 +8,8 @@ export const ROUTES = {
     TEST_SERIES: "/test-series",
     EXAM_INFO: "/exam-info",
     EXAM_RECONFIRM: "/exam-reconfirm",
-    TEST_MAIN_PAGE: "/test-main-page",
-    TEST_SOLUTION: "/test-main-page/solutions",
+    TEST_MAIN_PAGE: "/test-main-page/:id",
+    TEST_SOLUTION: "/test-main-page/:id/solutions",
     ANALYSIS: "/analysis",
     ANALYSIS2: "/analysis2",
 

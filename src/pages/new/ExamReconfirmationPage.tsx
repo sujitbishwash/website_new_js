@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { ROUTES } from "../../routes/constants";
 import { ChevronDown, CircleUser } from "lucide-react";
+import { quizApi } from "@/lib/api-client";
 
 // --- Type Definitions ---
 interface ExamDetails {
@@ -55,6 +56,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
   const location = useLocation();
   const { profile } = useUser();
   const testConfig = location.state?.testConfig;
+  const [isStarting, setIsStarting] = useState(false);
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
     setIsLangDropdownOpen(false);
@@ -214,19 +216,39 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
             Previous
           </button>
           <button
-            disabled={!isConfirmed}
-            onClick={() =>
-              navigate(ROUTES.TEST_MAIN_PAGE, {
-                state: { testConfig: testConfig },
-              })
-            }
+            disabled={!isConfirmed || isStarting}
+            onClick={async () => {
+              if (!isConfirmed || isStarting) return;
+              try {
+                setIsStarting(true);
+                // Generate test session and obtain session_id
+                const payload = {
+                  subject: testConfig?.subject,
+                  topics: testConfig?.sub_topic,
+                  level: testConfig?.level,
+                  language: (testConfig?.language || "en") as any,
+                } as any;
+                const response = await quizApi.initiateTest(payload);
+                const sessionId = (response as any)?.session_id;
+                if (!sessionId) {
+                  throw new Error("Failed to start test session");
+                }
+                navigate(`/test-main-page/${encodeURIComponent(sessionId)}`, {
+                  state: { sessionId },
+                });
+              } catch (e) {
+                // Optionally handle error UI here
+              } finally {
+                setIsStarting(false);
+              }
+            }}
             className={`font-bold py-2 px-6 rounded-lg transition-all ${
-              isConfirmed
+              isConfirmed && !isStarting
                 ? "bg-primary hover:bg-primary/80 text-white cursor-pointer"
                 : "bg-border-medium text-border cursor-not-allowed"
             }`}
           >
-            I am ready to begin
+            {isStarting ? "Starting..." : "I am ready to begin"}
           </button>
         </div>
       </footer>
