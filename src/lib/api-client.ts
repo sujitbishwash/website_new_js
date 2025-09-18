@@ -55,18 +55,22 @@ export const apiRequest = async <T>(
 
   
 
+  const requestKey = `${method}:${endpoint}:${data ? JSON.stringify(data) : ''}`;
+
+  // De-duplicate identical in-flight requests
+  if (activeRequests.has(requestKey)) {
+    return (await activeRequests.get(requestKey)) as ApiResponse<T>;
+  }
+
+  const runner = (async (): Promise<ApiResponse<T>> => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      
-
       const response = await apiClient.request({
         method,
         url: endpoint,
         data,
         headers: config?.headers,
       });
-
-      
 
       return {
         data: response.data,
@@ -75,8 +79,6 @@ export const apiRequest = async <T>(
     } catch (error: unknown) {
       lastError = error;
       const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
-
-      
 
       // Don't retry on authentication errors
       if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
@@ -100,11 +102,20 @@ export const apiRequest = async <T>(
 
   // If all retries failed, throw the last error
   const finalError = lastError as { response?: { status?: number; data?: { message?: string } } };
-  
+
   throw {
     message: finalError.response?.data?.message || "An error occurred",
     status: finalError.response?.status || 500,
   } as ApiError;
+  })();
+
+  activeRequests.set(requestKey, runner);
+  try {
+    const result = await runner;
+    return result;
+  } finally {
+    activeRequests.delete(requestKey);
+  }
 };
 
 // Auth related API calls
