@@ -1226,7 +1226,7 @@ const VideoPage: React.FC = () => {
       <ShareModal
         isOpen={isShareModalOpen}
         onClose={handleCloseShareModal}
-        url={`https://www.youtube.com`}
+        url={`https://www.youtube.com/watch?v=${currentVideoId}`}
       />
 
       <style>{`

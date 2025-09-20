@@ -378,12 +378,12 @@ const ReferralPage = () => {
     { rank: 5, name: "Vikram Singh", referrals: 15, rewards: "₹750" },
   ];
 
-  // const premiumFeatures = [
-  //   "✨ Unlimited Questions",
-  //   "💬 Unlimited AI Chats",
-  //   "📝 Free Quizzes & Mock Tests",
-  //   "📊 Detailed Performance Reports",
-  // ];
+   const premiumFeatures = [
+     "✨ Unlimited Questions",
+     "💬 Unlimited AI Chats",
+     "📝 Free Quizzes & Mock Tests",
+     "📊 Detailed Performance Reports",
+   ];
   const faqData = [
     {
       q: "Who is eligible to refer friends?",
@@ -411,10 +411,21 @@ const ReferralPage = () => {
           <header className="mb-6 text-center">
             <h1 className="text-3xl font-bold leading-tight text-foreground sm:text-4xl md:text-5xl">Refer & Earn</h1>
           </header>
+          {/* --- Offer Section --- */}
+          {/**<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="rounded-2xl border border-divider bg-background-subtle p-6 text-center hover:shadow-xl hover:-translate-y-0.5 transition-all duration-500 ease-in-out">
+                  <h3 className="mb-2 text-base font-semibold text-muted-foreground">Your friend gets</h3>
+                  <p className="text-lg font-semibold text-foreground sm:text-xl">10% discount on first purchase</p>
+              </div>
+              <div className="rounded-2xl border border-divider bg-background-subtle p-6 text-center hover:shadow-xl hover:-translate-y-0.5 transition-all duration-500 ease-in-out">
+                  <h3 className="mb-2 text-base font-semibold text-muted-foreground">You get</h3>
+                  <p className="text-lg font-semibold text-foreground sm:text-xl">₹50 for each referral</p>
+              </div>
+          </div>*/}
 
           {/* --- Premium Unlock Section --- */}
-          {/**<div className="premium-unlock-section">
-            <h2>Plus, unlock a FREE 1-Month Premium Subscription!</h2>
+          {<div className="premium-unlock-section">
+            <h2 className="">Unlock a FREE 1-Month Premium Subscription!</h2>
             <p>Enjoy unlimited access when your first referral signs up:</p>
             <ul className="premium-features-list">
               {premiumFeatures.map((feature) => (
@@ -422,22 +433,11 @@ const ReferralPage = () => {
               ))}
             </ul>
             <p className="footer-text">Start sharing your unique code today!</p>
-          </div>*/}
+          </div>}
 
-          {/* --- Offer Section --- */}
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-              <div className="rounded-2xl border border-divider bg-background-subtle p-6 text-center hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
-                  <h3 className="mb-2 text-base font-semibold text-muted-foreground">Your friend gets</h3>
-                  <p className="text-lg font-semibold text-foreground sm:text-xl">10% discount on first purchase</p>
-              </div>
-              <div className="rounded-2xl border border-divider bg-background-subtle p-6 text-center hover:shadow-xl">
-                  <h3 className="mb-2 text-base font-semibold text-muted-foreground">You get</h3>
-                  <p className="text-lg font-semibold text-foreground sm:text-xl">₹50 for each referral</p>
-              </div>
-          </div>
 
           {/* --- Referral Code Card --- */}
-          <div className="rounded-2xl border border-divider bg-card p-2 sm:p-6 shadow-sm md:p-8 hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
+          <div className="rounded-2xl border border-divider bg-card p-2 sm:p-6 shadow-sm md:p-8 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-500 ease-in-out">
             <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:justify-between rounded-xl bg-background-subtle p-4">
               <div className="flex-grow text-center sm:text-left font-mono text-lg sm:text-xl font-semibold tracking-wider text-foreground">{referralCode}</div>
               <button
@@ -450,7 +450,7 @@ const ReferralPage = () => {
             </div>
           </div>
           {/* --- How It Works Card --- */}
-          <div className="rounded-2xl border border-divider bg-card p-6 shadow-sm md:p-8 hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
+          <div className="rounded-2xl border border-divider bg-card p-6 shadow-sm md:p-8 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-500 ease-in-out">
             <h3 className="mb-6 text-xl font-semibold text-foreground sm:text-2xl">How It Works</h3>
             <ol className="flex flex-col gap-5">
                 <li className="flex items-center gap-4 text-base text-foreground sm:text-lg">
@@ -469,7 +469,7 @@ const ReferralPage = () => {
           </div>
 
           {/* --- Stats & Leaderboard Card --- */}
-          <div className="rounded-2xl border border-divider bg-card p-6 shadow-sm md:p-8 hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
+          <div className="rounded-2xl border border-divider bg-card p-6 shadow-sm md:p-8 hover:shadow-xl hover:-translate-y-0.5 transition-all duration-500 ease-in-out">
             <div className="grid grid-cols-1 gap-12 md:grid-cols-[1fr_2fr]">
                 {/* --- Stats Section --- */}
                 <div className="flex justify-between sm:justify-start sm:flex-col gap-6">
@@ -513,7 +513,7 @@ const ReferralPage = () => {
             </div>
           </div>
           {/* --- FAQ Card --- */}
-          <div className="rounded-2xl border border-border bg-card p-4 sm:p-8 shadow-sm hover:shadow-xl hover:translate-y-0.5 transition-all duration-500 ease-in-out">
+          <div className="rounded-2xl border border-border bg-card p-4 sm:p-8 shadow-sm hover:shadow-xl hover:-translate-y-0.5 transition-all duration-500 ease-in-out">
               <h3 className="mb-2 sm:mb-6 text-xl sm:text-2xl font-semibold text-foreground">Frequently Asked Questions</h3>
               {faqData.map(faq => <FaqItem key={faq.q} q={faq.q} a={faq.a} />)}
           </div>

@@ -4,12 +4,13 @@ import { FC, useEffect, useRef, useState } from "react";
 
 // Props for the Dropdown component
 export interface DropdownProps {
-  label: string;
+  label?: string;
   value: string;
   onChange: (value: string) => void;
   options: string[];
-  placeholder: string;
+  placeholder?: string;
   disabled?: boolean;
+  defaultPosition?:number;
   id: string;
 }
 
@@ -20,6 +21,7 @@ const Dropdown: FC<DropdownProps> = ({
   onChange,
   options,
   placeholder,
+  defaultPosition,
   disabled = false,
   id,
 }) => {
@@ -49,12 +51,15 @@ const Dropdown: FC<DropdownProps> = ({
 
   return (
     <div className="w-full">
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium mb-2 pl-1 text-muted-foreground"
-      >
-        {label}
-      </label>
+      {label && (
+        <label
+          htmlFor={id}
+          className="block text-sm font-medium mb-2 pl-1 text-muted-foreground"
+        >
+          {label}
+        </label>
+      )}
+
       <div className="relative" ref={dropdownRef}>
         <button
           type="button"
@@ -65,8 +70,8 @@ const Dropdown: FC<DropdownProps> = ({
             value ? "text-foreground" : "text-muted-foreground"
           } ${isOpen ? "border border-blue-400" : "border border-border"}`}
         >
-          <span>{value || placeholder}</span>
-          <ChevronDown />
+          <span>{value || (defaultPosition?options[defaultPosition]: placeholder)}</span>
+          <ChevronDown className="ml-4"/>
         </button>
 
         {isOpen && !disabled && (
@@ -75,20 +80,11 @@ const Dropdown: FC<DropdownProps> = ({
               {options.map((option) => (
                 <div
                   key={option}
-                  className={`px-4 py-2 text-sm cursor-pointer transition-colors text-foreground hover:bg-border-medium ${
-                    value === option ? 'bg-border-medium' : 'transparent'
+                  className={`px-4 py-2 text-sm cursor-pointer transition-colors text-foreground ${
+                    value === option ? "bg-border" : "hover:bg-border/50"
                   }`}
                   onClick={() => handleOptionClick(option)}
-                  onMouseEnter={(e) => {
-                    if (value !== option) {
-                      e.currentTarget.style.backgroundColor = theme.dividerHigh;
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (value !== option) {
-                      e.currentTarget.style.backgroundColor = "transparent";
-                    }
-                  }}
+                  
                 >
                   {option}
                 </div>

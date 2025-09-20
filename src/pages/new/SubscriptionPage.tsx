@@ -3,219 +3,6 @@ import { X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// --- CSS Styles Component ---
-// The CSS is included directly in the component to avoid file resolution errors.
-const SubscriptionStyles = () => (
-  <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-    /* --- Main Page Styles --- */
-    .subscription-page {
-      background-color: ${theme.background};
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 40px 20px;
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
-        Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-      color: ${theme.secondaryText};
-      position: relative; /* Added for positioning the close button */
-    }
-
-    /* --- Close Button --- */
-    .close-button {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      background: transparent;
-      border: none;
-      cursor: pointer;
-      padding: 10px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background-color 0.2s ease-in-out;
-    }
-
-    .close-button:hover {
-      background-color: rgba(255, 255, 255, 0.1);
-    }
-
-    .close-button svg {
-      width: 24px;
-      height: 24px;
-      color: ${theme.mutedText};
-    }
-
-    .subscription-container {
-      background-color: ${theme.cardBackground};
-      border: 1px solid ${theme.divider};
-      border-radius: 16px;
-      padding: 32px;
-      max-width: 600px;
-      width: 100%;
-      text-align: center;
-      position: relative;
-    }
-
-    /* --- Offer Banner --- */
-    .offer-banner {
-      background: linear-gradient(90deg, rgba(56, 139, 253, 0.1), rgba(4, 88, 207, 0.2));
-      border: 1px solid rgba(88, 166, 255, 0.3);
-      border-radius: 12px;
-      padding: 16px;
-      margin-bottom: 32px;
-    }
-    
-    .offer-banner .limited-time {
-      background-color: ${theme.buttonGradientTo};
-      color: ${theme.primaryText};
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-weight: 600;
-      font-size: 0.8rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .offer-banner p {
-      margin: 8px 0 0;
-      font-size: 1rem;
-      color: ${theme.primaryText};
-    }
-
-    .offer-banner .promo-code {
-      font-weight: 700;
-      background-color: rgba(88, 166, 255, 0.15);
-      padding: 2px 6px;
-      border-radius: 4px;
-      border: 1px solid rgba(88, 166, 255, 0.3);
-    }
-
-    .offer-banner .valid-until {
-      font-size: 0.8rem;
-      color: #8b949e;
-      margin-top: 4px;
-    }
-
-    /* --- Main Content --- */
-    .main-title {
-      color: ${theme.primaryText};
-      font-size: 2rem;
-      font-weight: 700;
-      margin: 0 0 24px;
-    }
-
-    .feature-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 32px;
-      text-align: left;
-      display: inline-block;
-    }
-
-    .feature-list li {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-      font-size: 1rem;
-      color: ${theme.secondaryText};
-    }
-    
-    .feature-list .sub-text {
-        color: ${theme.mutedText};
-        font-size: 0.9rem;
-        margin-left: 4px;
-    }
-
-    /* --- Plan Selection --- */
-    .plan-selection {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-
-    .plan-card {
-      background-color: ${theme.background};
-      border: 2px solid ${theme.divider};
-      border-radius: 12px;
-      padding: 24px;
-      cursor: pointer;
-      transition: border-color 0.3s ease, background-color 0.3s ease;
-      position: relative;
-    }
-
-    .plan-card.active {
-      border-color: ${theme.accent};
-      background-color: ${theme.accentLight};
-    }
-    
-    .plan-card h3 {
-        margin: 0 0 8px;
-        font-size: 1.25rem;
-        color: ${theme.primaryText};
-    }
-    
-    .plan-card .price {
-        font-size: 2.25rem;
-        font-weight: 700;
-        color: ${theme.primaryText};
-    }
-
-    .plan-card .price-per {
-        font-size: 1rem;
-        color: ${theme.mutedText};
-    }
-
-    .plan-card .billing-info {
-        font-size: 0.8rem;
-        color: ${theme.mutedText};
-        margin-top: 4px;
-    }
-
-    .save-badge {
-        position: absolute;
-        top: 16px;
-        right: 16px;
-        background-color: ${theme.green};
-        color: ${theme.primaryText};
-        padding: 4px 8px;
-        border-radius: 20px;
-        font-size: 0.75rem;
-        font-weight: 600;
-    }
-
-    /* --- Button and Footer --- */
-    .select-plan-button {
-      background: linear-gradient(90deg, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo});
-      color: white;
-      border: none;
-      border-radius: 8px;
-      padding: 14px;
-      font-size: 1rem;
-      font-weight: 600;
-      width: 100%;
-      cursor: pointer;
-      transition: opacity 0.3s ease;
-    }
-
-    .select-plan-button:hover {
-      opacity: 0.9;
-    }
-
-    .footer-text {
-      margin-top: 16px;
-      font-size: 0.9rem;
-      color: ${theme.mutedText};
-    }
-  `}</style>
-);
-
 // --- Main Subscription Page Component ---
 const SubscriptionPage = () => {
   const [selectedPlan, setSelectedPlan] = useState("annual"); // 'annual' or 'monthly'
@@ -223,7 +10,7 @@ const SubscriptionPage = () => {
 
   const features = [
     "Unlimited uploads, pastes, and records",
-    "Unlimited AI chats",
+    "Unlimited AI chats (100 chats/month)",
     "Unlimited quiz generation",
     "Unlimited practice exams",
     "Extended voice mode usage",
@@ -244,25 +31,22 @@ const SubscriptionPage = () => {
 
   return (
     <>
-      <SubscriptionStyles />
-      <div className="subscription-page mt-10 sm:mt-0">
+      <div className="justify-items-center mx-4 my-20 sm:m-10">
         <button
           className="absolute top-4 right-4 p-2 text-gray-400 rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer hidden sm:block"
           onClick={handleClose}
-          onMouseOver={(e) =>
-              (e.currentTarget.style.color = theme.primaryText)
-            }
-            onMouseOut={(e) =>
-              (e.currentTarget.style.color = theme.secondaryText)
-            }
+          onMouseOver={(e) => (e.currentTarget.style.color = theme.primaryText)}
+          onMouseOut={(e) =>
+            (e.currentTarget.style.color = theme.secondaryText)
+          }
           aria-label="Close modal"
         >
-            <X className="w-5 h-5" />
-          </button>
+          <X className="w-5 h-5" />
+        </button>
 
-        <div className="subscription-container">
-          <div className="offer-banner">
-            <div className="limited-time">
+        <div className="relative bg-card border border-border rounded-2xl p-4 sm:p-8 max-w-[600px] w-full text-center">
+          {<div className="mb-8 rounded-xl border border-primary/20 p-4 bg-accent">
+            <div className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[0.8rem] font-semibold bg-primary text-white">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -276,16 +60,28 @@ const SubscriptionPage = () => {
             </div>
             <p>
               Get <strong>25% OFF</strong> Premium! Use code:{" "}
-              <span className="promo-code">FINALS25</span>
+              <span className="font-bold bg-[rgba(88,166,255,0.15)] px-1.5 py-0.5 rounded border border-[rgba(88,166,255,0.3)]">
+                FINALS25
+              </span>
             </p>
-            <div className="valid-until">(Valid until April 30)</div>
-          </div>
+            <div className="mt-1 text-xs text-[#8b949e]">
+              (Valid until April 30)
+            </div>
+          </div>}
 
-          <h1 className="main-title">Upgrade Your Plan</h1>
+          <h1 className="text-foreground text-2xl sm:text-[2.5rem] font-bold mb-[1.5rem]">
+            Upgrade Your Plan
+          </h1>
 
-          <ul className="feature-list">
+          <p className="text-muted-foreground max-w-[450px] ml-auto mr-auto mb-[2.5rem]">
+            Unlock all premium features and accelerate your learning.
+          </p>
+          <ul className="list-none p-0 m-0 mb-8 text-left inline-block">
             {features.map((feature, index) => (
-              <li key={index}>
+              <li
+                className="flex items-center gap-3 mb-3 text-base text-muted-foreground"
+                key={index}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="20"
@@ -296,49 +92,65 @@ const SubscriptionPage = () => {
                   <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
                 </svg>
                 {feature}
-                {feature === "Unlimited AI chats" && (
-                  <span className="sub-text">
-                    (Learn+ mode: 100 chats/month)
-                  </span>
-                )}
               </li>
             ))}
           </ul>
 
-          <div className="plan-selection">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8">
             <div
-              className={`plan-card ${
-                selectedPlan === "annual" ? "active" : ""
+              className={`relative rounded-xl border-1 p-4 sm:p-6 cursor-pointer transition-colors duration-300 ${
+                selectedPlan === "annual"
+                  ? "bg-accent border-primary"
+                  : "border-border bg-background-subtle"
               }`}
               onClick={() => setSelectedPlan("annual")}
             >
-              <div className="save-badge">Save 40%</div>
-              <h3>Annual</h3>
-              <div className="price">
-                ₹199<span className="price-per"> / month</span>
+              <div className="absolute top-4 right-4 bg-green-500/20 text-green-500 px-2 py-1 rounded-full text-[0.75rem] font-semibold">
+                Save 40%
               </div>
-              <div className="billing-info">Billed annually</div>
+              <h3 className="text-foreground text-xl mb-2 font-semibold">Annual</h3>
+              <div className="text-foreground text-[2.25rem] font-bold">
+                ₹199
+                <span className="text-muted-foreground text-base">
+                  {" "}
+                  / month
+                </span>
+              </div>
+              <div className="text-muted-foreground text-xs mt-1">
+                Billed annually
+              </div>
             </div>
             <div
-              className={`plan-card ${
-                selectedPlan === "monthly" ? "active" : ""
+              className={`relative rounded-xl border-1 p-4 sm:p-6 cursor-pointer transition-colors duration-300 ${
+                selectedPlan === "monthly"
+                  ? "bg-accent border-primary"
+                  : "border-border bg-background-subtle"
               }`}
               onClick={() => setSelectedPlan("monthly")}
             >
-              <h3>Monthly</h3>
-              <div className="price">
-                ₹399<span className="price-per"> / month</span>
+              <h3 className="text-foreground text-xl mb-2 font-semibold">Monthly</h3>
+              <div className="text-foreground text-[2.25rem] font-bold">
+                ₹399
+                <span className="text-muted-foreground text-base">
+                  {" "}
+                  / month
+                </span>
               </div>
-              <div className="billing-info">Billed monthly</div>
+              <div className="text-muted-foreground text-xs mt-1">
+                Billed monthly
+              </div>
             </div>
           </div>
 
-          <button className="select-plan-button" onClick={handleSelectPlan}>
+          <button
+            className="w-full rounded-md bg-primary text-white border-none py-3.5 text-lg font-semibold cursor-pointer transition-opacity duration-300 hover:opacity-90"
+            onClick={handleSelectPlan}
+          >
             Select Plan
           </button>
 
-          <p className="footer-text">
-            Join 1M+ learners studying smarter with Ai Padhai
+          <p className="mt-4 text-sm text-muted-foreground">
+            Trusted by over 1M+ students
           </p>
         </div>
       </div>

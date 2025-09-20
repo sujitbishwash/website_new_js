@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import { useAuth } from "@/contexts/AuthContext";
-import { ChevronLeft, ChevronRight, Link, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Link, RefreshCcw, X } from "lucide-react";
 import CustomLoader from "../components/icons/customloader";
 
 // --- Type Definitions ---
@@ -318,11 +318,14 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                 </button>
 
                 <div className="flex flex-col items-center justify-center text-center mx-4 flex-1">
-                 <p className="text-sm text-muted-foreground mt-10"> As we prep video, boost your general awareness.</p>
-                  <p className="text-sm font-semibold mt-4 text-primary uppercase tracking-wider">
+                  <p className="text-sm text-muted-foreground mt-10">
+                    {" "}
+                    As we prep video, boost your General Awareness
+                  </p>
+                  <p className="text-sm font-semibold mt-4 text-primary uppercase">
                     {content.type}
                   </p>
-                  <p className="text-xl text-foreground mt-2 leading-snug font-bold">
+                  <p className="text-xl text-muted-foreground mt-2 font-bold">
                     {content.trivia}
                   </p>
                 </div>
@@ -365,8 +368,8 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                 <div className="mt-2 gap-2 items-center justify-center flex-col w-full text-muted-foreground flex text-center">
                   <span className="text-6xl">¯\_(ツ)_/¯</span>
                   <div className="text-lg w-full">
-                    This video is outside the syllabus of{" "}
-                    {userExamGoal.group}. Please enter a relevant video.
+                    Oops! This video isn’t in the {userExamGoal.group} syllabus.
+                    Please enter a relevant video.
                   </div>
                 </div>
               )}
@@ -383,14 +386,19 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               <div>
                 <div className="flex items-center justify-between">
                   <h3 className="text-sm font-medium text-muted-foreground">
-                    Suggested Videos
+                    Choose from Suggested Videos
                   </h3>
                   <button
                     onClick={fetchSuggestedVideos}
                     disabled={isLoadingSuggestions}
-                    className="text-xs text-primary hover:text-primary/80 disabled:opacity-50"
+                    className={`text-xs text-primary hover:text-primary/80 disabled:opacity-50 ${
+                      isLoadingSuggestions ? "" : "cursor-pointer"
+                    }`}
                   >
-                    Refresh
+                    <RefreshCcw
+                      className={isLoadingSuggestions ? 'animate-spin' : ''}
+
+                    />
                   </button>
                 </div>
 
@@ -470,16 +478,14 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
             </button>
             <button
               onClick={handleAdd}
-              disabled={!url.trim() || isLoading}
+              disabled={!url.trim() || isLoading || showOutOfSyllabus}
               className={`rounded-lg bg-border-medium px-5 py-2.5 text-sm font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer disabled:bg-border-border disabled:cursor-not-allowed flex items-center gap-2 ${
-                !url.trim() || isLoading
+                !url.trim() || isLoading || showOutOfSyllabus
                   ? "bg-border-border cursor-not-allowed"
                   : "bg-primary hover:bg-primary/80"
               }`}
             >
-              {isLoading && (
-                <CustomLoader className="h-4 w-4" />
-              )}
+              {isLoading && <CustomLoader className="h-4 w-4" />}
               {isLoading ? "Loading video..." : "Add"}
             </button>
           </div>
