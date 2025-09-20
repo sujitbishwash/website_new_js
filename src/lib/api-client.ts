@@ -30,6 +30,97 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
+// Global auth error handler registration
+let authErrorHandler: ((status: number, endpoint: string) => void) | null = null;
+export const setAuthErrorHandler = (handler: (status: number, endpoint: string) => void) => {
+  authErrorHandler = handler;
+};
+
+// Endpoints that should trigger logout on 401/403 (critical auth endpoints)
+const CRITICAL_AUTH_ENDPOINTS = [
+  '/ums/me',
+  '/ums/refresh-token',
+  '/ums/logout',
+  '/ums/verify-otp',
+  '/ums/login'
+];
+
+// Endpoints that should NOT trigger logout on 401/403 (resource-specific endpoints)
+const RESOURCE_ENDPOINTS = [
+  '/video/',
+  '/chapter/',
+  '/test-series/',
+  '/learning/',
+  '/feedback/',
+  '/progress/',
+  '/history/',
+  '/suggested/',
+  '/can-feedback/',
+  '/detail/'
+];
+
+// Function to check if endpoint should trigger logout
+const shouldTriggerLogout = (endpoint: string, status: number): boolean => {
+  // Always logout on critical auth endpoints
+  if (CRITICAL_AUTH_ENDPOINTS.some(critical => endpoint.includes(critical))) {
+    return true;
+  }
+  
+  // For resource endpoints, only logout on 401 (not 403)
+  if (RESOURCE_ENDPOINTS.some(resource => endpoint.includes(resource))) {
+    return status === 401; // 403 might be permission-related, not auth-related
+  }
+  
+  // For other endpoints, logout on both 401 and 403
+  return status === 401 || status === 403;
+};
+
+// Function to validate if token exists and is not expired
+const isTokenValid = (): boolean => {
+  const token = localStorage.getItem("authToken");
+  if (!token) return false;
+  
+  try {
+    // Basic JWT token validation (check if it's not expired)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    return payload.exp > currentTime;
+  } catch {
+    return false;
+  }
+};
+
+// Response interceptor to catch auth errors globally
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    try {
+      const status = error?.response?.status;
+      const endpoint = error?.config?.url || '';
+      
+      if ((status === 401 || status === 403) && typeof authErrorHandler === 'function') {
+        // Only trigger logout if:
+        // 1. The endpoint should trigger logout based on our rules
+        // 2. AND the token is actually invalid (not just a permission issue)
+        if (shouldTriggerLogout(endpoint, status)) {
+          // For 401 on resource endpoints, check if token is actually invalid
+          if (status === 401 && RESOURCE_ENDPOINTS.some(resource => endpoint.includes(resource))) {
+            if (!isTokenValid()) {
+              authErrorHandler(status, endpoint);
+            } else {
+              console.warn(`401 on ${endpoint} but token appears valid - not logging out`);
+            }
+          } else {
+            // For critical auth endpoints or 403s, always logout
+            authErrorHandler(status, endpoint);
+          }
+        }
+      }
+    } catch {}
+    return Promise.reject(error);
+  }
+);
+
 // Response interface
 export interface ApiResponse<T> {
   data: T;
@@ -55,18 +146,22 @@ export const apiRequest = async <T>(
 
   
 
+  const requestKey = `${method}:${endpoint}:${data ? JSON.stringify(data) : ''}`;
+
+  // De-duplicate identical in-flight requests
+  if (activeRequests.has(requestKey)) {
+    return (await activeRequests.get(requestKey)) as ApiResponse<T>;
+  }
+
+  const runner = (async (): Promise<ApiResponse<T>> => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      
-
       const response = await apiClient.request({
         method,
         url: endpoint,
         data,
         headers: config?.headers,
       });
-
-      
 
       return {
         data: response.data,
@@ -75,8 +170,6 @@ export const apiRequest = async <T>(
     } catch (error: unknown) {
       lastError = error;
       const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
-
-      
 
       // Don't retry on authentication errors
       if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
@@ -100,11 +193,20 @@ export const apiRequest = async <T>(
 
   // If all retries failed, throw the last error
   const finalError = lastError as { response?: { status?: number; data?: { message?: string } } };
-  
+
   throw {
     message: finalError.response?.data?.message || "An error occurred",
     status: finalError.response?.status || 500,
   } as ApiError;
+  })();
+
+  activeRequests.set(requestKey, runner);
+  try {
+    const result = await runner;
+    return result;
+  } finally {
+    activeRequests.delete(requestKey);
+  }
 };
 
 // Auth related API calls
@@ -707,9 +809,9 @@ export interface Option {
 }
 
 export const quizApi = {
-  startTest: async (
+  initiateTest: async (
     testConfig: TestData
-  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+  ): Promise<{"session_id": number}> => {
     // Accept either legacy flat questions or new grouped-sections payload
     const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
       "POST",
@@ -719,12 +821,26 @@ export const quizApi = {
     return response.data as any;
   },
 
-  getQuestions: async (sessionId: number): Promise<QuestionResponse> => {
-    const response = await apiRequest<QuestionResponse>(
+  startTest: async (
+    sessionId: number
+  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+    // Accept either legacy flat questions or new grouped-sections payload
+    const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
       "GET",
-      `/test-series/question/${sessionId}`
+      `/test-series/session/${sessionId}`,
     );
-    return response.data;
+    return response.data as any;
+  },
+
+  getTestSolutions: async (
+    sessionId: number
+  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+    // Accept either legacy flat questions or new grouped-sections payload
+    const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
+      "GET",
+      `/test-series/view-solution/${sessionId}`,
+    );
+    return response.data as any;
   },
 
   submitTest: async (data: SubmitTestRequest): Promise<SubmitTestResponse> => {
@@ -1030,7 +1146,7 @@ export interface AttemptedTestsResponse {
 
 export const attemptedTestsApi = {
   // Get user's attempted tests
-  getAttemptedTests: async (page: number = 1, size: number = 4): Promise<AttemptedTestsResponse> => {
+  getAttemptedTests: async (page: number = 1, size: number = 10): Promise<AttemptedTestsResponse> => {
     const response = await apiRequest<AttemptedTestsResponse>('GET', `/test-series/attempted-tests?page=${page}&size=${size}`);
     return response.data;
   },

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { ApiResponse, authApi } from "../lib/api-client";
+import { ApiResponse, authApi, setAuthErrorHandler } from "../lib/api-client";
 
 interface User {
   id: string;
@@ -74,8 +74,8 @@ export const useAuth = () => {
   return context;
 };
 
-// Global flag to prevent multiple simultaneous API calls
-let isGlobalFetching = false;
+// Global promise to dedupe /ums/me calls across the app
+let globalUserFetchPromise: Promise<ApiResponse<any> | null> | null = null;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -89,47 +89,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Get user data with localStorage optimization
   const getUserData = async () => {
-
-    // Prevent multiple simultaneous API calls
-    if (isGlobalFetching) {
-      // Wait for the current request to complete
-      while (isGlobalFetching) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
+    if (globalUserFetchPromise) {
+      return await globalUserFetchPromise;
     }
-
-    try {
-
-      // Mark as fetching to prevent duplicate calls
-      isGlobalFetching = true;
-
-      const { authApi } = await import("../lib/api-client");
-      const response = await authApi.getAuthenticatedUser();
-
-      // Also update localStorage with the fresh data
-      updateLocalStorageUserData(response.data);
-
-      // Clear global fetching flag
-      isGlobalFetching = false;
-
-      return response;
-    } catch (error) {
-
-      // If it's an authentication error, clear auth data
-      if (error && typeof error === "object" && "status" in error) {
-        const apiError = error as any;
-        if (apiError.status === 401 || apiError.status === 403) {
-         
-
-          // Don't call logout here as it might cause infinite loops
-          // The calling function (checkUserState) will handle logout
-        }
+    const { authApi } = await import("../lib/api-client");
+    globalUserFetchPromise = (async () => {
+      try {
+        const response = await authApi.getAuthenticatedUser();
+        updateLocalStorageUserData(response.data);
+        return response;
+      } finally {
+        globalUserFetchPromise = null;
       }
-
-      // Clear global fetching flag on error
-      isGlobalFetching = false;
-      return null;
-    }
+    })();
+    return await globalUserFetchPromise;
   };
 
   // Force refresh user data (bypass localStorage and fetch fresh data)
@@ -477,6 +450,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const initializeAuth = async () => {
+      // Register global auth error handler to logout on token expiry
+      setAuthErrorHandler((status, endpoint) => {
+        console.log(`Auth error on ${endpoint}: ${status}`);
+        logout();
+      });
       await checkAuth();
       setIsLoading(false);
     };

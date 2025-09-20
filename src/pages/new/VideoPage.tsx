@@ -53,13 +53,6 @@ const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
   return <Summary videoId={videoId} />;
 });
 
-// Type definitions
-// --- TYPE DEFINITIONS ---
-interface IconProps {
-  path: string;
-  className?: string;
-}
-
 interface Chapter {
   time: string;
   title: string;
@@ -147,6 +140,7 @@ const VideoPage: React.FC = () => {
         const now = Date.now();
         
         // Throttle saves: only save if progress changed significantly or enough time passed
+        /*
         const lastSaved = lastSavedProgressRef.current;
         const shouldSave = !lastSaved || 
           Math.abs(watchPercentage - lastSaved.percentage) >= 5 || // 5% change
@@ -156,6 +150,7 @@ const VideoPage: React.FC = () => {
         if (!shouldSave) {
           return;
         }
+          */
 
         try {
           await videoProgressApi.trackProgress({
@@ -357,8 +352,9 @@ const VideoPage: React.FC = () => {
       attemptSeek();
       setTimeout(attemptSeek, 500);
 
-      // Start progress tracking interval - only track progress, don't save
-      const interval = setInterval(() => {
+      // Start progress tracking interval after a delay to ensure player is ready
+      const interval = setTimeout(() => {
+        const progressInterval = setInterval(() => {
         try {
           const currentTime = player.getCurrentTime();
           const duration = player.getDuration();
@@ -385,17 +381,22 @@ const VideoPage: React.FC = () => {
             // Note: Progress saving is now handled by the periodic interval below
           }
         } catch (error) {}
-      }, 2000); // Update every 2 seconds
-
-      // Store interval reference for cleanup
-      progressIntervalRef.current = interval;
+        }, 5000); // Update every 5 seconds (less frequent to avoid interference)
+        
+        // Store interval reference for cleanup
+        progressIntervalRef.current = progressInterval;
+      }, 2000); // Start tracking after 2 seconds delay
 
       // Note: Periodic saving is handled by the useEffect below to avoid duplicates
 
       // Return cleanup function
       return () => {
         if (interval) {
-          clearInterval(interval);
+          clearTimeout(interval);
+        }
+        if (progressIntervalRef.current) {
+          clearInterval(progressIntervalRef.current);
+          progressIntervalRef.current = null;
         }
         // Note: Periodic interval cleanup is handled by useEffect
       };
@@ -862,10 +863,7 @@ const VideoPage: React.FC = () => {
       periodicSaveIntervalRef.current = null;
     }
     if (currentVideoId) {
-      // Kick off an immediate save once the video id is set, only if actively playing
-      if (isPlayerActivelyPlaying()) {
-        saveVideoProgress();
-      }
+      // Don't save immediately on video load - wait for user interaction
       // Then continue saving every 60 seconds while playing
       periodicSaveIntervalRef.current = setInterval(() => {
         if (isPlayerActivelyPlaying()) {
@@ -1078,6 +1076,8 @@ const VideoPage: React.FC = () => {
                     modestbranding: 1,
                     rel: 0,
                     showinfo: 0,
+                    playsinline: 1,
+                    enablejsapi: 1,
                   },
                 }}
               />
@@ -1167,6 +1167,8 @@ const VideoPage: React.FC = () => {
                     modestbranding: 1,
                     rel: 0,
                     showinfo: 0,
+                    playsinline: 1,
+                    enablejsapi: 1,
                   },
                 }}
               />

@@ -145,7 +145,7 @@ const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
         className="text-muted-foreground"
         dangerouslySetInnerHTML={{ __html: formatText(point.text) }}
       />
-      <SourceIcon />
+      {/* <SourceIcon /> */}
     </div>
     {point.subPoints && (
       <ul
@@ -160,7 +160,7 @@ const SummaryPointItem: React.FC<{ point: SummaryPoint }> = ({ point }) => (
                 className="text-muted-foreground"
                 dangerouslySetInnerHTML={{ __html: formatText(subPoint.text) }}
               />
-              <SourceIcon />
+              {/* <SourceIcon /> */}
             </div>
           </li>
         ))}
@@ -270,7 +270,8 @@ const SummaryHeader: React.FC<{
   activeLength: SummaryLength;
   onLengthChange: (length: SummaryLength) => void;
 }> = ({ activeLength, onLengthChange }) => {
-  const lengths: SummaryLength[] = ["small", "medium", "long"];
+  // const lengths: SummaryLength[] = ["small", "medium", "long"];
+  const lengths: SummaryLength[] = ["long"];
 
   return (
     <div className="w-[300px] mb-4 flex flex-row items-center gap-4">
@@ -340,6 +341,9 @@ interface SummaryProps {
   markAsSubmitted?: () => void;
 }
 
+// Cache summary data per video for the session
+const summaryCache = new Map<string, SummarySectionData[]>();
+
 const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
   // Temporarily disable feedback to prevent re-renders
   const feedbackCanSubmitFeedback = false;
@@ -357,21 +361,16 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
   const fetchedVideoIdRef = useRef<string | null>(null);
   const isFetchingRef = useRef<boolean>(false);
 
-  // Fetch summary data from API - ULTRA AGGRESSIVE APPROACH
+  // Fetch summary data from API (cache per videoId for session)
   useEffect(() => {
     const fetchSummaryData = async () => {
-      // ULTRA AGGRESSIVE: Only fetch if we haven't fetched this videoId before
-      if (!videoId || fetchedVideoIdRef.current === videoId) {
-        return;
-      }
-
-      // ULTRA AGGRESSIVE: Set fetching flag immediately
-      if (isFetchingRef.current) {
-        return;
-      }
-
       if (!videoId) {
-        setSummaryData(longSummaryData);
+        return;
+      }
+
+      // If in cache, serve and skip network
+      if (summaryCache.has(videoId)) {
+        setSummaryData(summaryCache.get(videoId) || longSummaryData);
         setIsLoading(false);
         return;
       }
@@ -600,6 +599,7 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
           transformedData = longSummaryData;
         }
 
+        summaryCache.set(videoId, transformedData);
         setSummaryData(transformedData);
       } catch (err: unknown) {
         const error = err as {
@@ -637,7 +637,9 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 sm:px-4">
-      <div className="max-w-4xl mx-auto flex flex-col justify-center items-center ">
+      <div className="max-w-4xl mx-auto">
+        {/* commenting till Summary agent is updated */}
+        
         <SummaryHeader
           activeLength={summaryLength}
           onLengthChange={setSummaryLength}

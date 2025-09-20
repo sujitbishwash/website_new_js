@@ -8,8 +8,8 @@ export const ROUTES = {
     TEST_SERIES: "/test-series",
     EXAM_INFO: "/exam-info",
     EXAM_RECONFIRM: "/exam-reconfirm",
-    TEST_MAIN_PAGE: "/test-main-page",
-    TEST_SOLUTION: "/test-main-page/solutions",
+    TEST_MAIN_PAGE: "/test-main-page/:id",
+    TEST_SOLUTION: "/test-main-page/:id/solutions",
     ANALYSIS: "/analysis",
     ANALYSIS2: "/analysis2",
 
@@ -77,6 +77,7 @@ export const ROUTE_NAMES = {
     [ROUTES.TERMS_AND_CONDITIONS]: "Terms and Conditions",
     [ROUTES.AUTH_CALLBACK]: "Auth Callback",
     [ROUTES.STATS]: "Stats",
+    [ROUTES.TEST_SOLUTION]: "Test Solution",
 } as const;
 
 // Helper function to build video learning route with ID

@@ -208,7 +208,7 @@ export default function HomePage() {
     try {
       setIsLoadingAttemptedTests(true);
       setAttemptedTestsError(null);
-      const response = await attemptedTestsApi.getAttemptedTests(1, 10);
+      const response = await attemptedTestsApi.getAttemptedTests(1, 3);
       setAttemptedTests(response.tests);
     } catch (error: any) {
       
@@ -244,13 +244,8 @@ export default function HomePage() {
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
     try {
-      // Show loading state while fetching video details
-      setIsLoadingVideos(true);
 
-      // If validation passes, fetch video details
-      const details = await videoApi.getVideoDetail(video.url);
-
-      navigate(buildVideoLearningRoute(details.external_source_id));
+      navigate(buildVideoLearningRoute(video.id));
     } catch (err: any) {
       
       
@@ -259,9 +254,7 @@ export default function HomePage() {
         
         navigate(ROUTES.HOME);
       }
-    } finally {
-      setIsLoadingVideos(false);
-    }
+    } 
   };
 
   const handleContinueLearningVideoClick = async (videoId: string) => {

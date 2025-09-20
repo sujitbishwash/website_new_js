@@ -60,6 +60,8 @@ interface FlashcardsProps {
 }
 
 // --- INITIAL DATA ---
+// Session cache for flashcards per video
+const flashcardsCache = new Map<string, Card[]>();
 const initialCards: Card[] = [
   {
     id: 1,
@@ -244,22 +246,23 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({ videoId }) => {
   const fetchedVideoIdRef = useRef<string | null>(null);
   const isFetchingRef = useRef<boolean>(false);
 
-  // Fetch flashcards data from API - ULTRA AGGRESSIVE APPROACH
+  // Fetch flashcards data from API (cache per videoId for session)
   useEffect(() => {
     const fetchFlashcards = async () => {
       // ULTRA AGGRESSIVE: Only fetch if we haven't fetched this videoId before
-      if (!videoId || fetchedVideoIdRef.current === videoId) {
+      if (!videoId) {
+        return;
+      }
+
+      // Serve from cache if present
+      if (flashcardsCache.has(videoId)) {
+        setCards(flashcardsCache.get(videoId) || initialCards);
+        setIsLoading(false);
         return;
       }
 
       // ULTRA AGGRESSIVE: Set fetching flag immediately
       if (isFetchingRef.current) {
-        return;
-      }
-
-      if (!videoId) {
-        setCards(initialCards);
-        setIsLoading(false);
         return;
       }
 
@@ -325,6 +328,7 @@ const Flashcards: React.FC<FlashcardsProps> = React.memo(({ videoId }) => {
           transformedCards = initialCards;
         }
 
+        flashcardsCache.set(videoId, transformedCards);
         setCards(transformedCards);
         setCurrentIndex(0);
         setIsFlipped(false);

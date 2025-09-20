@@ -4,6 +4,7 @@ import { useUser } from "../../contexts/UserContext";
 import { fetchTestSeriesFormData } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 import { Pen } from "lucide-react";
+import ExamConfigurationModal from "../../components/modals/ExamConfigurationModal";
 
 // --- Type Definitions ---
 interface ChipProps {
@@ -47,7 +48,8 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   mapper,
 }) => {
   return (
-    <div className="p-4 bg-background border-1 rounded-xl mb-4">
+    <div className="p-4 bg-background border-1 rounded-xl mb-4
+    ">
       <h2 className="text-xl font-semibold text-card-foreground dark:text-gray-200 mb-4">
         {title}{" "}
         {optionalLabel && (
@@ -141,6 +143,7 @@ const TestConfigurationPageComponent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isExamConfigModalOpen, setIsExamConfigModalOpen] = useState(false);
 
   // Get available subjects from API data
   const subjects = testData?.subjects.map((subject) => subject.subject) || [];
@@ -271,12 +274,9 @@ const TestConfigurationPageComponent = () => {
               Group Type: {examGoal.groupType}
             </span>*/}
             <button
-              onClick={() => {
-                
-                // This will trigger a re-render when profile changes
-              }}
+              onClick={() => setIsExamConfigModalOpen(true)}
               className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
-              title="Refresh profile data"
+              title="Edit exam goal"
             >
               <Pen className="w-4 h-4" />
             </button>
@@ -347,6 +347,12 @@ const TestConfigurationPageComponent = () => {
           </button>
         </div>
       </div>
+
+      {/* Exam Configuration Modal */}
+      <ExamConfigurationModal
+        isOpen={isExamConfigModalOpen}
+        onClose={() => setIsExamConfigModalOpen(false)}
+      />
     </div>
   );
 };
