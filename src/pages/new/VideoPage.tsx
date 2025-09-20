@@ -80,6 +80,7 @@ const VideoPage: React.FC = () => {
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
   const [isLeftColumnVisible, setIsLeftColumnVisible] = useState(true);
+  const [isVideoValidated, setIsVideoValidated] = useState(false);
 
   // State for learning mode
   const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
@@ -246,7 +247,7 @@ const VideoPage: React.FC = () => {
   }, [location.pathname]);
 
   // Simple feedback state management
-  // Use the feedback tracker hook for all components
+  // Use the feedback tracker hook for all components - only after video validation
   const {
     feedbackStates,
     isLoading: isFeedbackLoading,
@@ -259,7 +260,7 @@ const VideoPage: React.FC = () => {
       ComponentName.Summary,
       ComponentName.Flashcard,
     ],
-    sourceId: currentVideoId || "",
+    sourceId: isVideoValidated ? (currentVideoId || "") : "",
     pageUrl: window.location.href,
     onFeedbackExists: () => {},
   });
@@ -461,6 +462,9 @@ const VideoPage: React.FC = () => {
   // Reset feedback state when video changes
   useEffect(() => {
     if (currentVideoId) {
+      // Reset validation flag for new video
+      setIsVideoValidated(false);
+      
       // Reset feedback state for new video
       hasShownFeedbackRef.current = false;
       resumeSeekAppliedRef.current = false;
@@ -585,11 +589,12 @@ const VideoPage: React.FC = () => {
     [closeFeedbackModal, currentVideoId, navigate]
   );
 
-  // Fetch video details
+  // Fetch video details - this must complete first before other APIs
   useEffect(() => {
     const fetchVideoDetails = async () => {
       try {
         setIsLoadingVideo(true);
+        setIsVideoValidated(false); // Reset validation flag
 
         // Try to get video details from API
         const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
@@ -597,6 +602,8 @@ const VideoPage: React.FC = () => {
         const details = await videoApi.getVideoDetail(videoUrl);
 
         setVideoDetail(details);
+        setIsVideoValidated(true); // Mark video as validated
+        console.log('Video validated successfully, other APIs can now run');
       } catch (err: any) {
         // Check if it's an out-of-syllabus error
         if (err.isOutOfSyllabus || err.status === 204) {
@@ -620,6 +627,7 @@ const VideoPage: React.FC = () => {
         } else {
           // For other errors, set a fallback video detail with default topics
           console.error('Error fetching video details:', err);
+          setIsVideoValidated(false); // Keep validation false on error
         }
       } finally {
         setIsLoadingVideo(false);
@@ -630,13 +638,16 @@ const VideoPage: React.FC = () => {
       fetchVideoDetails();
     } else {
       setIsLoadingVideo(false);
+      setIsVideoValidated(false);
     }
   }, [currentVideoId, navigate]);
 
-  // Fetch saved progress and set resume position
+  // Fetch saved progress and set resume position - only after video validation
   useEffect(() => {
     const fetchProgress = async () => {
-      if (!currentVideoId) return;
+      if (!currentVideoId || !isVideoValidated) return;
+      
+      console.log('Fetching video progress after validation...');
       try {
         const resp = await videoProgressApi.getProgress(currentVideoId);
         const pos = Number(resp.data?.current_position ?? 0);
@@ -670,7 +681,7 @@ const VideoPage: React.FC = () => {
       }
     };
     fetchProgress();
-  }, [currentVideoId]);
+  }, [currentVideoId, isVideoValidated]);
 
   // If resume position arrives after player is ready, attempt seek once
   useEffect(() => {
@@ -699,11 +710,12 @@ const VideoPage: React.FC = () => {
     }
   }, [resumePercent]);
 
-  // Fetch chapters
+  // Fetch chapters - only after video validation
   useEffect(() => {
     const fetchChapters = async () => {
-      if (!videoDetail?.external_source_id) return;
+      if (!videoDetail?.external_source_id || !isVideoValidated) return;
 
+      console.log('Fetching video chapters after validation...');
       try {
         setIsLoadingChapters(true);
         setChaptersError(null);
@@ -727,7 +739,7 @@ const VideoPage: React.FC = () => {
     };
 
     fetchChapters();
-  }, [videoDetail?.external_source_id]);
+  }, [videoDetail?.external_source_id, isVideoValidated]);
 
   // Manual transcript fetching function
   const fetchTranscript = useCallback(async () => {
@@ -748,12 +760,13 @@ const VideoPage: React.FC = () => {
     }
   }, [videoDetail?.external_source_id]);
 
-  // Initialize chat when videoId changes
+  // Initialize chat when videoId changes - only after video validation
   useEffect(() => {
-    if (currentVideoId && !chatInitialized) {
+    if (currentVideoId && !chatInitialized && isVideoValidated) {
+      console.log('Initializing chat after video validation...');
       initializeChat();
     }
-  }, [currentVideoId, chatInitialized]);
+  }, [currentVideoId, chatInitialized, isVideoValidated]);
 
   // Reset chat state when videoId changes
   useEffect(() => {
@@ -872,13 +885,14 @@ const VideoPage: React.FC = () => {
     summaryFeedbackState,
   ]);
 
-  // Start a resilient 60s periodic saver tied to the current video id
+  // Start a resilient 60s periodic saver tied to the current video id - only after video validation
   useEffect(() => {
     if (periodicSaveIntervalRef.current) {
       clearInterval(periodicSaveIntervalRef.current);
       periodicSaveIntervalRef.current = null;
     }
-    if (currentVideoId) {
+    if (currentVideoId && isVideoValidated) {
+      console.log('Starting periodic progress saving after video validation...');
       // Don't save immediately on video load - wait for user interaction
       // Then continue saving every 60 seconds while playing
       periodicSaveIntervalRef.current = setInterval(() => {
@@ -893,7 +907,7 @@ const VideoPage: React.FC = () => {
         periodicSaveIntervalRef.current = null;
       }
     };
-  }, [currentVideoId, saveVideoProgress, isPlayerActivelyPlaying]);
+  }, [currentVideoId, isVideoValidated, saveVideoProgress, isPlayerActivelyPlaying]);
 
   // Save on tab backgrounding or page lifecycle transitions
   useEffect(() => {
@@ -1055,7 +1069,9 @@ const VideoPage: React.FC = () => {
         
 
         <CustomLoader className="h-15 w-15" />
-        <span className="text-muted-foreground text-lg">Preparing lessons...</span>
+        <span className="text-muted-foreground text-lg">
+          {isVideoValidated ? "Preparing lessons..." : "Validating video content..."}
+        </span>
       </div>
     );
   }
