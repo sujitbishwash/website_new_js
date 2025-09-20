@@ -2,6 +2,7 @@ import { useUser } from "@/contexts/UserContext";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import {
+  Bug,
   CircleUserRound,
   Ellipsis,
   ExternalLink,
@@ -54,6 +55,7 @@ interface ProfileMenuProps {
   onProfileClick: () => void;
   onUpgradeClick: () => void;
   onExamConfigurationClick: () => void;
+  onBugReportClick: () => void;
   onToggle: () => void;
 }
 
@@ -63,6 +65,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onProfileClick,
   onUpgradeClick,
   onExamConfigurationClick,
+  onBugReportClick,
   onToggle,
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
@@ -104,6 +107,12 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
     setMenuOpen(false);
   };
 
+   const handleBugReportClick = () => {
+    onToggle(); // Close the sidebar if it's open
+    onBugReportClick();
+    setMenuOpen(false);
+  };
+
   const handlePrivacyPolicyClick = () => {
     onToggle(); // Close the sidebar if it's open
     window.open(ROUTES.PRIVACY_POLICY, "_blank");
@@ -119,6 +128,12 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
     setMenuOpen(false);
   };
   const menuOptions: MenuItem[] = [
+    
+    {
+      icon: <Bug className="w-5 h-5" />,
+      label: "Report Bug",
+      action: handleBugReportClick,
+    },
     {
       icon: (
         <svg
@@ -310,6 +325,7 @@ const Moreoptions = ({
   onProfileClick,
   onUpgradeClick,
   onExamConfigurationClick,
+  onBugReportClick,
   onToggle,
 }: {
   isContracted: boolean;
@@ -317,6 +333,7 @@ const Moreoptions = ({
   onProfileClick: () => void;
   onUpgradeClick: () => void;
   onExamConfigurationClick: () => void;
+  onBugReportClick: () => void;
   onToggle: () => void;
 }) => {
   return (
@@ -341,6 +358,7 @@ const Moreoptions = ({
           onProfileClick={onProfileClick}
           onUpgradeClick={onUpgradeClick}
           onExamConfigurationClick={onExamConfigurationClick}
+          onBugReportClick={onBugReportClick}
           onToggle={onToggle}
         />
       </div>

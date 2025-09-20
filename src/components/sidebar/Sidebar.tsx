@@ -29,6 +29,7 @@ interface SidebarProps {
   onProfileClick: () => void;
   onUpgradeClick: () => void;
   onExamConfigurationClick: () => void;
+  onBugReportClick: () => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -40,6 +41,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onProfileClick,
   onUpgradeClick,
   onExamConfigurationClick,
+  onBugReportClick
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -234,6 +236,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           onProfileClick={onProfileClick}
           onUpgradeClick={onUpgradeClick}
           onExamConfigurationClick={onExamConfigurationClick}
+          onBugReportClick={onBugReportClick}
           onToggle={onToggle}
         />
       </aside>

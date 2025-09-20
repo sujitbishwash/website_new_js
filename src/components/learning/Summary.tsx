@@ -273,7 +273,7 @@ const SummaryHeader: React.FC<{
   const lengths: SummaryLength[] = ["small", "medium", "long"];
 
   return (
-    <div className="flex justify-center items-center mb-4">
+    <div className="w-[300px] mb-4 flex flex-row items-center gap-4">
       {/**<div className="relative">
         
         <select
@@ -298,9 +298,11 @@ const SummaryHeader: React.FC<{
           <ChevronDown />
         </div>
       </div>*/}
+      Type:
       <Dropdown
           id="length-select"
-          value={activeLength}
+          value={`${activeLength.charAt(0).toUpperCase()}${activeLength.slice(1)} Summary`}
+
           onChange={(e) => onLengthChange(e as SummaryLength)}
           options={lengths}
           defaultPosition={0}
@@ -635,7 +637,7 @@ const Summary: React.FC<SummaryProps> = React.memo(({ videoId }) => {
 
   return (
     <div className="min-h-screen bg-background text-foreground px-4 sm:px-4">
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto flex flex-col justify-center items-center ">
         <SummaryHeader
           activeLength={summaryLength}
           onLengthChange={setSummaryLength}
