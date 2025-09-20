@@ -100,7 +100,7 @@ const Message: React.FC<MessageType> = ({ text, isUser }) => {
             : "bg-transparent text-foreground rounded-bl-none"
         }`}
       >
-        <MarkdownRenderer content={markdownText} />
+        <MarkdownRenderer content={markdownText} isUser={isUser} />
       </div>
     </div>
   );
@@ -130,7 +130,7 @@ const MessageList: React.FC<{
 };
 
 // --- Markdown Renderer ---
-const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
+const MarkdownRenderer: React.FC<{ content: string, isUser?: boolean }> = ({ content, isUser=false }) => {
   // Clean and process the content for better rendering
   const processContent = (text: string) => {
     return text
@@ -150,7 +150,7 @@ const MarkdownRenderer: React.FC<{ content: string }> = ({ content }) => {
             p: ({ children, ...props }) => (
               <p
                 {...props}
-                className="text-foreground leading-7"
+                className={`${isUser ? "text-white":"text-foreground"} leading-7`}
                 style={{
                   fontSize: "0.95rem",
                   lineHeight: "1.8",
