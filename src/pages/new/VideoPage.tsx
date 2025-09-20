@@ -80,7 +80,6 @@ const VideoPage: React.FC = () => {
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
   const [isLeftColumnVisible, setIsLeftColumnVisible] = useState(true);
-  const [_showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
 
   // State for learning mode
   const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
@@ -601,9 +600,26 @@ const VideoPage: React.FC = () => {
       } catch (err: any) {
         // Check if it's an out-of-syllabus error
         if (err.isOutOfSyllabus || err.status === 204) {
-          setShowOutOfSyllabus(true);
+          // Try to get video title from YouTube API for better display
+          let videoTitle = `Video ${currentVideoId}`;
+          try {
+            // You could add a YouTube API call here to get the actual title
+            // For now, we'll use the videoId as fallback
+          } catch (titleErr) {
+            console.warn('Could not fetch video title:', titleErr);
+          }
+          
+          // Redirect to out-of-syllabus page with video details
+          navigate(ROUTES.OUT_OF_SYLLABUS, {
+            state: {
+              videoUrl: `https://www.youtube.com/watch?v=${currentVideoId}`,
+              videoTitle: videoTitle,
+            }
+          });
+          return;
         } else {
           // For other errors, set a fallback video detail with default topics
+          console.error('Error fetching video details:', err);
         }
       } finally {
         setIsLoadingVideo(false);
@@ -615,7 +631,7 @@ const VideoPage: React.FC = () => {
     } else {
       setIsLoadingVideo(false);
     }
-  }, [currentVideoId]);
+  }, [currentVideoId, navigate]);
 
   // Fetch saved progress and set resume position
   useEffect(() => {

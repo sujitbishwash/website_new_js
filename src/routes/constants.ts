@@ -17,6 +17,7 @@ export const ROUTES = {
     HISTORY: "/history",
     BOOKS: "/books",
     VIDEO_LEARNING: "/video-learning",
+    OUT_OF_SYLLABUS: "/out-of-syllabus",
 
     // User routes
     REFER_AND_EARN: "/refer-and-earn",
@@ -61,6 +62,7 @@ export const ROUTE_NAMES = {
     [ROUTES.HISTORY]: "History",
     [ROUTES.BOOKS]: "Books",
     [ROUTES.VIDEO_LEARNING]: "Video Learning",
+    [ROUTES.OUT_OF_SYLLABUS]: "Out of Syllabus",
     [ROUTES.REFER_AND_EARN]: "Refer and Earn",
     [ROUTES.PREMIUM]: "Premium",
     [ROUTES.PAYMENT]: "Payment",

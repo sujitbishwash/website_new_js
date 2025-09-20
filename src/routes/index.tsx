@@ -31,6 +31,7 @@ import Stats  from "../pages/new/Stats";
 import VideoPage from "@/pages/new/VideoPage";
 import TestAnalysis2 from "@/pages/new/Analysis2Page";
 import AttemptedTests2 from "@/pages/new/AttemptedTests2Page";
+import OutOfSyllabusPage from "@/pages/new/OutOfSyllabusPage";
 
 // Route configuration object for easy maintenance
 export const routes = [
@@ -150,6 +151,12 @@ export const routes = [
             element: <VideoPage />,
             name: "Video Learning",
             description: "Video Learning Page",
+          },
+          {
+            path: "out-of-syllabus",
+            element: <OutOfSyllabusPage />,
+            name: "Out of Syllabus",
+            description: "Content not part of current syllabus",
           },
           // Coming Soon Routes - Pages not yet implemented
           {
