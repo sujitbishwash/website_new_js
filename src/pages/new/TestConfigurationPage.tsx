@@ -48,7 +48,8 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   mapper,
 }) => {
   return (
-    <div className="p-4 bg-background border-1 rounded-xl mb-4">
+    <div className="p-4 bg-background border-1 rounded-xl mb-4
+    ">
       <h2 className="text-xl font-semibold text-card-foreground dark:text-gray-200 mb-4">
         {title}{" "}
         {optionalLabel && (
