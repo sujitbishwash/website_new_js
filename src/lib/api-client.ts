@@ -31,9 +31,63 @@ apiClient.interceptors.request.use((config) => {
 });
 
 // Global auth error handler registration
-let authErrorHandler: ((status: number) => void) | null = null;
-export const setAuthErrorHandler = (handler: (status: number) => void) => {
+let authErrorHandler: ((status: number, endpoint: string) => void) | null = null;
+export const setAuthErrorHandler = (handler: (status: number, endpoint: string) => void) => {
   authErrorHandler = handler;
+};
+
+// Endpoints that should trigger logout on 401/403 (critical auth endpoints)
+const CRITICAL_AUTH_ENDPOINTS = [
+  '/ums/me',
+  '/ums/refresh-token',
+  '/ums/logout',
+  '/ums/verify-otp',
+  '/ums/login'
+];
+
+// Endpoints that should NOT trigger logout on 401/403 (resource-specific endpoints)
+const RESOURCE_ENDPOINTS = [
+  '/video/',
+  '/chapter/',
+  '/test-series/',
+  '/learning/',
+  '/feedback/',
+  '/progress/',
+  '/history/',
+  '/suggested/',
+  '/can-feedback/',
+  '/detail/'
+];
+
+// Function to check if endpoint should trigger logout
+const shouldTriggerLogout = (endpoint: string, status: number): boolean => {
+  // Always logout on critical auth endpoints
+  if (CRITICAL_AUTH_ENDPOINTS.some(critical => endpoint.includes(critical))) {
+    return true;
+  }
+  
+  // For resource endpoints, only logout on 401 (not 403)
+  if (RESOURCE_ENDPOINTS.some(resource => endpoint.includes(resource))) {
+    return status === 401; // 403 might be permission-related, not auth-related
+  }
+  
+  // For other endpoints, logout on both 401 and 403
+  return status === 401 || status === 403;
+};
+
+// Function to validate if token exists and is not expired
+const isTokenValid = (): boolean => {
+  const token = localStorage.getItem("authToken");
+  if (!token) return false;
+  
+  try {
+    // Basic JWT token validation (check if it's not expired)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    return payload.exp > currentTime;
+  } catch {
+    return false;
+  }
 };
 
 // Response interceptor to catch auth errors globally
@@ -42,8 +96,25 @@ apiClient.interceptors.response.use(
   (error) => {
     try {
       const status = error?.response?.status;
+      const endpoint = error?.config?.url || '';
+      
       if ((status === 401 || status === 403) && typeof authErrorHandler === 'function') {
-        authErrorHandler(status);
+        // Only trigger logout if:
+        // 1. The endpoint should trigger logout based on our rules
+        // 2. AND the token is actually invalid (not just a permission issue)
+        if (shouldTriggerLogout(endpoint, status)) {
+          // For 401 on resource endpoints, check if token is actually invalid
+          if (status === 401 && RESOURCE_ENDPOINTS.some(resource => endpoint.includes(resource))) {
+            if (!isTokenValid()) {
+              authErrorHandler(status, endpoint);
+            } else {
+              console.warn(`401 on ${endpoint} but token appears valid - not logging out`);
+            }
+          } else {
+            // For critical auth endpoints or 403s, always logout
+            authErrorHandler(status, endpoint);
+          }
+        }
       }
     } catch {}
     return Promise.reject(error);

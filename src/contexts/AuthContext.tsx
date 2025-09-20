@@ -451,10 +451,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     const initializeAuth = async () => {
       // Register global auth error handler to logout on token expiry
-      setAuthErrorHandler((status) => {
-        if (status === 401 || status === 403) {
-          logout();
-        }
+      setAuthErrorHandler((status, endpoint) => {
+        console.log(`Auth error on ${endpoint}: ${status}`);
+        logout();
       });
       await checkAuth();
       setIsLoading(false);
