@@ -3,18 +3,12 @@ import Chat from "@/components/learning/Chat";
 import Flashcards from "@/components/learning/Flashcards";
 import Quiz from "@/components/learning/Quiz";
 import Summary from "@/components/learning/Summary";
-
+import { Box, Skeleton, Stack } from "@mui/material";
 import { ComponentName } from "@/lib/api-client";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
-import { Eye, EyeOff} from "lucide-react";
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-  useMemo,
-} from "react";
+import { Eye, EyeOff } from "lucide-react";
+import { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import React from "react";
 import {
   useLocation,
@@ -61,6 +55,170 @@ interface Chapter {
 
 // Learning mode types
 type LearningMode = "chat" | "flashcards" | "quiz" | "summary";
+
+const SkeletonLoaderVideoPage: React.FC = () => {
+  return (
+    <div className="bg-background text-white min-h-screen font-sans p-4 sm:p-6 lg:p-8">
+      {/* Main content grid */}
+      <main className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+        {/* Left Column */}
+        <div className="xl:col-span-3">
+          <Stack spacing={4}>
+            {/* Header Skeleton */}
+            <header className="flex justify-between items-center pb-4">
+              <Skeleton
+                variant="text"
+                width="70%"
+                height={20}
+                sx={{ bgcolor: theme.divider }}
+              />
+              <div className="flex items-center space-x-4">
+                <Skeleton
+                  variant="circular"
+                  width={28}
+                  height={28}
+                  sx={{ bgcolor: theme.divider }}
+                />
+                <Skeleton
+                  variant="circular"
+                  width={28}
+                  height={28}
+                  sx={{ bgcolor: theme.divider }}
+                />
+              </div>
+            </header>
+            {/* Video Player Skeleton */}
+            <Skeleton
+              variant="rectangular"
+              sx={{ borderRadius: 3, bgcolor: theme.divider }}
+              width="100%"
+              height="60%"
+              className="aspect-video"
+            />
+
+            {/* Controls Skeleton */}
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+              <Stack direction="row" spacing={2}>
+                <Skeleton
+                  variant="rectangular"
+                  sx={{ borderRadius: 1, bgcolor: theme.divider }}
+                  width={120}
+                  height={40}
+                />
+                <Skeleton
+                  variant="rectangular"
+                  sx={{ borderRadius: 1, bgcolor: theme.divider }}
+                  width={120}
+                  height={40}
+                />
+              </Stack>
+            </div>
+
+            {/* Transcript/Content Skeleton */}
+            <Box className="mt-4">
+              <Skeleton
+                variant="text"
+                width={80}
+                height={30}
+                className="mb-2"
+                sx={{ borderRadius: 1, bgcolor: theme.divider }}
+              />
+              <Skeleton
+                variant="text"
+                width="70%"
+                height={20}
+                sx={{ borderRadius: 1, bgcolor: theme.divider }}
+              />
+              <Skeleton
+                variant="text"
+                width="50%"
+                height={20}
+                sx={{ borderRadius: 1, bgcolor: theme.divider }}
+              />
+            </Box>
+          </Stack>
+        </div>
+
+        {/* Right Column (Sidebar) */}
+        <div className="xl:col-span-2 bg-background p-4 rounded-lg flex flex-col h-[95vh]">
+          {/* Tabs Skeleton */}
+          <div className="flex items-center pb-3 mb-4 overflow-x-auto">
+            <Stack direction="row" spacing={1}>
+              <Skeleton
+                variant="rectangular"
+                sx={{ borderRadius: 1, bgcolor: theme.divider }}
+                width={60}
+                height={30}
+              />
+              <Skeleton
+                variant="rectangular"
+                sx={{ borderRadius: 1, bgcolor: theme.divider }}
+                width={60}
+                height={30}
+              />
+              <Skeleton
+                variant="rectangular"
+                sx={{ borderRadius: 1, bgcolor: theme.divider }}
+                width={60}
+                height={30}
+              />
+              <Skeleton
+                variant="rectangular"
+                sx={{ borderRadius: 1, bgcolor: theme.divider }}
+                width={60}
+                height={30}
+              />
+            </Stack>
+          </div>
+
+          {/* Chat Messages Skeleton */}
+          <Stack spacing={3} className="flex-grow">
+            <Skeleton
+              variant="text"
+              width="full"
+              height={20}
+              sx={{ bgcolor: theme.divider }}
+            />
+            <Skeleton
+              variant="text"
+              width="full"
+              height={20}
+              sx={{ bgcolor: theme.divider }}
+            />
+            <Skeleton
+              variant="text"
+              width="full"
+              height={20}
+              sx={{ bgcolor: theme.divider }}
+            />
+            <Skeleton
+              variant="text"
+              width="full"
+              height={20}
+              sx={{ bgcolor: theme.divider }}
+            />
+            <Skeleton
+              variant="text"
+              width="60%"
+              height={20}
+              sx={{ bgcolor: theme.divider }}
+            />
+          </Stack>
+
+          {/* Input Skeleton */}
+          <div className="mt-auto pt-4">
+            <Skeleton
+              variant="rectangular"
+              sx={{ borderRadius: 3, bgcolor: theme.divider }}
+              width="100%"
+              height={100}
+            />
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
 
 // --- Main App Component ---
 const VideoPage: React.FC = () => {
@@ -138,7 +296,7 @@ const VideoPage: React.FC = () => {
       if (duration > 0 && currentTime >= 0.1) {
         const watchPercentage = (currentTime / duration) * 100;
         const now = Date.now();
-        
+
         // Throttle saves: only save if progress changed significantly or enough time passed
         /*
         const lastSaved = lastSavedProgressRef.current;
@@ -160,14 +318,14 @@ const VideoPage: React.FC = () => {
             current_position: Math.round(currentTime),
             page_url: window.location.href,
           });
-          
+
           // Update last saved progress
           lastSavedProgressRef.current = {
             percentage: watchPercentage,
             position: currentTime,
-            timestamp: now
+            timestamp: now,
           };
-          
+
           // Mirror to localStorage on successful save
           const progressData = {
             videoId: currentVideoId,
@@ -341,7 +499,10 @@ const VideoPage: React.FC = () => {
           } else if (!resumeSeekAppliedRef.current && resumePercent > 0) {
             const duration = player.getDuration?.() || 0;
             if (duration > 0) {
-              const target = Math.min(duration - 1, Math.max(0, (resumePercent / 100) * duration));
+              const target = Math.min(
+                duration - 1,
+                Math.max(0, (resumePercent / 100) * duration)
+              );
               player.seekTo(target, true);
               resumeSeekAppliedRef.current = true;
             }
@@ -355,34 +516,34 @@ const VideoPage: React.FC = () => {
       // Start progress tracking interval after a delay to ensure player is ready
       const interval = setTimeout(() => {
         const progressInterval = setInterval(() => {
-        try {
-          const currentTime = player.getCurrentTime();
-          const duration = player.getDuration();
+          try {
+            const currentTime = player.getCurrentTime();
+            const duration = player.getDuration();
 
-          if (duration > 0) {
-            const progress = (currentTime / duration) * 100;
-            setVideoProgress(progress);
+            if (duration > 0) {
+              const progress = (currentTime / duration) * 100;
+              setVideoProgress(progress);
 
-            // Store duration for progress tracking
-            videoDurationRef.current = duration;
+              // Store duration for progress tracking
+              videoDurationRef.current = duration;
 
-            // Auto-show feedback when video reaches 90%
-            if (
-              progress >= 90 &&
-              !hasShownFeedbackRef.current &&
-              videoCanSubmitFeedbackRef.current &&
-              videoCanSubmitFeedback &&
-              !videoExistingFeedback
-            ) {
-              openFeedbackModal();
-              hasShownFeedbackRef.current = true;
+              // Auto-show feedback when video reaches 90%
+              if (
+                progress >= 90 &&
+                !hasShownFeedbackRef.current &&
+                videoCanSubmitFeedbackRef.current &&
+                videoCanSubmitFeedback &&
+                !videoExistingFeedback
+              ) {
+                openFeedbackModal();
+                hasShownFeedbackRef.current = true;
+              }
+
+              // Note: Progress saving is now handled by the periodic interval below
             }
-
-            // Note: Progress saving is now handled by the periodic interval below
-          }
-        } catch (error) {}
+          } catch (error) {}
         }, 5000); // Update every 5 seconds (less frequent to avoid interference)
-        
+
         // Store interval reference for cleanup
         progressIntervalRef.current = progressInterval;
       }, 2000); // Start tracking after 2 seconds delay
@@ -487,7 +648,6 @@ const VideoPage: React.FC = () => {
       // Note: Periodic interval cleanup is handled by main useEffect
     }
   }, [currentVideoId]);
-
 
   // Cleanup progress tracking on unmount
   useEffect(() => {
@@ -658,7 +818,11 @@ const VideoPage: React.FC = () => {
 
   // If resume position arrives after player is ready, attempt seek once
   useEffect(() => {
-    if (ytPlayerRef.current && resumePosition > 0 && !resumeSeekAppliedRef.current) {
+    if (
+      ytPlayerRef.current &&
+      resumePosition > 0 &&
+      !resumeSeekAppliedRef.current
+    ) {
       try {
         const duration = ytPlayerRef.current.getDuration?.() || 0;
         if (duration > 0 && resumePosition < duration) {
@@ -671,11 +835,18 @@ const VideoPage: React.FC = () => {
 
   // Fallback: if only percent is available later, seek by percent
   useEffect(() => {
-    if (ytPlayerRef.current && resumePercent > 0 && !resumeSeekAppliedRef.current) {
+    if (
+      ytPlayerRef.current &&
+      resumePercent > 0 &&
+      !resumeSeekAppliedRef.current
+    ) {
       try {
         const duration = ytPlayerRef.current.getDuration?.() || 0;
         if (duration > 0) {
-          const target = Math.min(duration - 1, Math.max(0, (resumePercent / 100) * duration));
+          const target = Math.min(
+            duration - 1,
+            Math.max(0, (resumePercent / 100) * duration)
+          );
           ytPlayerRef.current.seekTo(target, true);
           resumeSeekAppliedRef.current = true;
         }
@@ -749,7 +920,6 @@ const VideoPage: React.FC = () => {
     setTranscript("");
     setTranscriptError(null);
     setIsLoadingTranscript(false);
-
   }, [currentVideoId]);
 
   const initializeChat = async () => {
@@ -889,11 +1059,11 @@ const VideoPage: React.FC = () => {
     const handlePageHide = () => {
       saveVideoProgress();
     };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    window.addEventListener('pagehide', handlePageHide);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("pagehide", handlePageHide);
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      window.removeEventListener('pagehide', handlePageHide);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("pagehide", handlePageHide);
     };
   }, [saveVideoProgress]);
 
@@ -954,7 +1124,7 @@ const VideoPage: React.FC = () => {
 
   // Public seek handler for chapters/transcript
   const handleSeekTo = useCallback((seconds: number) => {
-    if (ytPlayerRef.current && typeof seconds === 'number' && seconds >= 0) {
+    if (ytPlayerRef.current && typeof seconds === "number" && seconds >= 0) {
       try {
         ytPlayerRef.current.seekTo(seconds, true);
       } catch {}
@@ -986,9 +1156,7 @@ const VideoPage: React.FC = () => {
         // Video interaction detected
       } catch (error) {}
     }
-  }, [
-    openFeedbackModal,
-  ]);
+  }, [openFeedbackModal]);
 
   // Listen for video player events to catch user interactions
   useEffect(() => {
@@ -1034,12 +1202,13 @@ const VideoPage: React.FC = () => {
 
   // Show loading screen while video details are being fetched
   if (isLoadingVideo) {
+    return <SkeletonLoaderVideoPage />;
     return (
-        <div className="bg-background min-h-screen font-sans flex flex-col justify-center items-center p-4 gap-4">
-        
-
+      <div className="bg-background min-h-screen font-sans flex flex-col justify-center items-center p-4 gap-4">
         <CustomLoader className="h-15 w-15" />
-        <span className="text-muted-foreground text-lg">Preparing lessons...</span>
+        <span className="text-muted-foreground text-lg">
+          Preparing lessons...
+        </span>
       </div>
     );
   }

@@ -32,6 +32,7 @@ import { useMultiFeedbackTracker } from "@/hooks/useFeedbackTracker";
 import RankBadge from "@/components/stats/RankBadge";
 import { ROUTES } from "@/routes/constants";
 
+import CustomLoader from "@/components/icons/customloader";
 interface LearningPlanStep {
   title: string;
   duration: number;
@@ -1780,12 +1781,10 @@ export default function TestAnalysis2() {
   // Block render until API loads (if sessionId was provided)
   if (sessionId && isLoadingAnalysis) {
     return (
-      <div className="p-4 sm:p-6 bg-background min-h-screen font-sans text-foreground mt-10 sm:mt-4 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Fetching analysis...</p>
+      <div className="fixed inset-0 flex flex-1 flex-col z-10 items-center justify-center bg-background bg-opacity-70 h-full">
+        <CustomLoader className="h-15 w-15" />
+        <p className="text-lg text-muted-foreground mt-8">Fetching analysis...</p>
         </div>
-      </div>
     );
   }
 

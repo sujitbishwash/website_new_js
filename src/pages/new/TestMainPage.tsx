@@ -1005,11 +1005,11 @@ const TestMainPage = () => {
                   </div>
                 </div>
 
-                <div className="border-t-2 md:border-t-0 md:border-l-2 border-gray-700 border-dashed pt-6 md:pt-0 md:pl-8">
-                  <h3 className="text-lg font-bold text-blue-300 mb-4">
+                <div className="border-t-2 md:border-t-0 md:border-l-2 border-border border-dashed pt-6 md:pt-0 md:pl-8">
+                  <h3 className="text-lg font-bold text-primary mb-4">
                     Solution
                   </h3>
-                  <div className="prose prose-invert text-gray-300">
+                  <div className="prose prose-invert text-muted-foreground">
                     <p>
                       Correct Answer: <span className="font-semibold text-green-400">{currentQuestion.correctAnswer || "Not available"}</span>
                     </p>

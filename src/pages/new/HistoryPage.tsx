@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useVideoProgress } from "../../hooks/useVideoProgress";
 import { History, RefreshCcw } from "lucide-react";
 import { useState } from "react";
+import PlayIcon from "@/components/icons/PlayIcon";
 
 // --- Type Definitions ---
 
@@ -29,7 +30,6 @@ const HistoryPage = () => {
       // Navigate directly since we already have the videoId
       navigate(buildVideoLearningRoute(videoId));
     } catch (err: any) {
-      
     } finally {
       setLoadingVideoId(null);
     }
@@ -48,12 +48,17 @@ const HistoryPage = () => {
           disabled={isLoading}
           className="flex items-center gap-2 p-2 text-sm font-medium text-primary bg-foreground/10 border border-primary/20 rounded-xl hover:bg-foreground/20 disabled:opacity-50 disabled:cursor-wait transition-colors cursor-pointer"
         >
-          <RefreshCcw  className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+          <RefreshCcw
+            className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`}
+          />
         </button>
       </div>
 
       {isLoading ? (
-        <div className="flex items-center justify-center pt-32">
+        <div
+          className="flex flex-col items-center justify-center text-center gap-8"
+          style={{ minHeight: "60vh" }}
+        >
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           <span className="ml-3 text-muted-foreground text-lg">
             Loading your learning history...
@@ -76,7 +81,9 @@ const HistoryPage = () => {
               key={video.videoId}
               onClick={() => handleVideoClick(video.videoId)}
               className={`group relative bg-card/80 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-2xl cursor-pointer hover:border-primary border border-border-medium hover:-translate-y-1 ${
-                loadingVideoId === video.videoId ? 'opacity-50 pointer-events-none' : ''
+                loadingVideoId === video.videoId
+                  ? "opacity-50 pointer-events-none"
+                  : ""
               }`}
             >
               <div className="relative">
@@ -98,14 +105,8 @@ const HistoryPage = () => {
                     }
                   }}
                 />
-                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                  <svg
-                    className="h-12 w-12 text-white group-hover:scale-110 transition-all duration-300"
-                    fill="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M8 5v14l11-7z" />
-                  </svg>
+                <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 group-hover:scale-105 transition-all duration-300 flex items-center justify-center">
+                  <PlayIcon className="h-10 w-10 text-white group-hover:scale-110 transition-all duration-300" />
                 </div>
                 <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs font-medium">
                   {formatDuration(video.totalDuration)}
@@ -164,7 +165,7 @@ const HistoryPage = () => {
                   </div>
                 )}
               </div>
-              <div className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
+              {/**<div className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
                 <svg
                   className="h-4 w-4"
                   fill="none"
@@ -178,7 +179,7 @@ const HistoryPage = () => {
                     d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-              </div>
+              </div>*/}
               {loadingVideoId === video.videoId && (
                 <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -190,7 +191,9 @@ const HistoryPage = () => {
       ) : (
         <div className="flex flex-col items-center justify-center text-center h-full flex-grow pt-16">
           <History className="h-20 w-20 mx-auto mb-6 text-border" />
-          <p className="text-xl text-border-medium font-medium mb-2">No Learning History Yet</p>
+          <p className="text-xl text-border-medium font-medium mb-2">
+            No Learning History Yet
+          </p>
           <p className="text-border-medium max-w-xs mb-8">
             Start watching videos to build history.
           </p>

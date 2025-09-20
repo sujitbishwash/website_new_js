@@ -119,7 +119,7 @@ export default function BugReportModal({
           "Error capturing screenshot with dom-to-image-more:",
           err
         );
-        setError("Could not capture screenshot. Please try again.");
+        setError("Could not capture screenshot. Please try later.");
         setAttachScreenshot(false);
       }
     } else {
@@ -141,6 +141,12 @@ export default function BugReportModal({
     });
     setError("");
     setIsSubmitted(true);
+
+    setIsSubmitting(false);
+    setTimeout(() => {
+      closeModal();
+      onClose();
+    }, 2000);
   };
 
   const handleNewReport = () => {
@@ -155,14 +161,15 @@ export default function BugReportModal({
   const closeModal = () => {
     // The timeout prevents the image from disappearing before the modal fade-out animation completes.
     setTimeout(() => {
+      setDescription("");
+      setError("");
+      setAttachScreenshot(false);
       setAttachment(null);
       setAttachmentPreview(null);
       setIsSubmitted(false); // Reset submission status on close
     }, 300);
     setIsModalOpen(false);
   };
-  const inputBaseClass =
-    "w-full p-4 bg-background-subtle text-foreground border border-border rounded-lg transition placeholder:text-muted-foreground focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/30";
 
   if (!isOpen) return null;
 
@@ -170,34 +177,21 @@ export default function BugReportModal({
     <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
       {isSubmitted ? (
         <div className="relative w-full max-w-xl bg-card rounded-2xl shadow-2xl border border-border flex flex-col max-h-[90vh] p-4">
-        <div className="text-center">
-          <div className="mx-auto mb-5 flex items-center justify-center">
-            <CircleCheck className="h-14 w-14 text-[#30d158]" />
+          <div className="text-center">
+            <div className="mx-auto mb-5 flex items-center justify-center">
+              <CircleCheck className="h-14 w-14 text-[#30d158]" />
+            </div>
+            <h2 className="text-2xl font-bold text-foreground">
+              Report Submitted!
+            </h2>
+            <p className="text-muted-foreground mt-3 max-w-md mx-auto">
+              Our team will look into it shortly.
+            </p>
+
+            <p className="text-sm text-muted-foreground">
+              Thank you for helping us improve!
+            </p>
           </div>
-          <h2 className="text-2xl font-bold text-foreground">
-            Report Submitted
-          </h2>
-          <p className="text-muted-foreground mt-3 max-w-md mx-auto">
-            Thank you for your feedback. Our team will look into it shortly.
-          </p>
-          <div className="mt-6 flex justify-center gap-4">
-            <button
-              onClick={handleNewReport}
-              className="py-2 px-5 bg-[#3a3a3c] hover:bg-[#4a4a4c] text-white font-semibold rounded-lg transition"
-            >
-              Submit Another
-            </button>
-            <button
-              onClick={() => {
-                handleNewReport(); // reset all fields
-                onClose(); // existing close logic
-              }}
-              className="py-2 px-6 bg-[#0a84ff] hover:bg-[#0071e3] text-white font-semibold rounded-lg transition"
-            >
-              Close
-            </button>
-          </div>
-        </div>
         </div>
       ) : (
         <div className="bug-report-modal-container relative w-full max-w-xl bg-card rounded-2xl shadow-2xl border border-border flex flex-col max-h-[90vh]">
@@ -208,7 +202,7 @@ export default function BugReportModal({
             </h3>
             <button
               onClick={() => {
-                handleNewReport(); // reset all fields
+                closeModal(); // reset all fields
                 onClose(); // existing close logic
               }}
               className="absolute top-3 right-3 p-2 text-foreground rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
@@ -218,17 +212,30 @@ export default function BugReportModal({
           </div>
           <form noValidate className="px-4 space-y-6">
             <div className="flex flex-col gap-5">
-              <div className="flex flex-col gap-2">
-                <div className="relative">
-                  <textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    rows={4}
-                    className={inputBaseClass}
-                    placeholder="Tell us about the issue you encountered."
-                    required
-                  ></textarea>
+              <div className="relative">
+                <textarea
+                  id="description"
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  rows={4}
+                  style={{ minHeight: "40px", maxHeight: "200px" }}
+                  className={
+                    "w-full p-4 bg-background-subtle text-foreground border border-border rounded-lg transition placeholder:text-muted-foreground focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                  }
+                  placeholder="Tell us about the issue you encountered."
+                  maxLength={70}
+                  required
+                />
+                <div
+                  className={`absolute bottom-3 right-2 text-xs ${
+                    description.length > 60
+                      ? "text-orange-500"
+                      : description.length > 70
+                      ? "text-red-500"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {description.length}/50
                 </div>
               </div>
 
@@ -265,36 +272,36 @@ export default function BugReportModal({
                   </label>
                 </div>
                 {attachment && (
-                  <div className="mt-4 relative flex items-center p-3 w-full bg-border/50 rounded-lg">
-                    <div className="flex-shrink-0">
+                  <div className="mt-4 w-full">
+                    <div className="relative group bg-border/50 rounded-lg">
                       {attachmentPreview ? (
                         <img
                           src={attachmentPreview}
                           alt="Preview"
-                          className="h-12 w-12 object-cover rounded-md"
+                          className="w-full max-h-48 object-contain rounded-lg"
                         />
                       ) : (
-                        <div className="h-12 w-12 bg-card rounded-md flex items-center justify-center">
-                          <File className="h-6 w-6 text-border-medium" />
+                        <div className="w-full h-32 bg-transparent rounded-lg flex flex-col items-center justify-center">
+                          <Paperclip className="h-10 w-10 text-[#a1a1a6]" />
                         </div>
                       )}
+                      <button
+                        type="button"
+                        onClick={removeAttachment}
+                        className="cursor-pointer absolute top-2 right-2 p-1.5 bg-background text-white rounded-full opacity-0 group-hover:opacity-100 transition"
+                        title="Remove attachment"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
                     </div>
-                    <div className="ml-4 flex-1 min-w-0">
+                    <div className="mt-2 text-center">
                       <p className="text-sm font-medium text-foreground truncate">
                         {attachment.name}
                       </p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-border-high">
                         {formatFileSize(attachment.size)}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      onClick={removeAttachment}
-                      className="cursor-pointer ml-4 flex-shrink-0 p-1 text-foreground hover:bg-border-medium rounded-full  transition"
-                      title="Remove attachment"
-                    >
-                      <X className="w-5 h-5" />
-                    </button>
                   </div>
                 )}
               </div>
@@ -308,7 +315,7 @@ export default function BugReportModal({
           <div className="flex justify-end items-center gap-4 p-5 border-border bg-card rounded-b-2xl">
             <button
               onClick={() => {
-                handleNewReport(); // reset all fields
+                closeModal(); // reset all fields
                 onClose(); // existing close logic
               }}
               className="cursor-pointer px-5 py-2 text-sm font-semibold text-muted-foreground bg-foreground/10 rounded-lg hover:bg-foreground/20 focus:outline-none focus:ring-2 focus:ring-white/30 transition-colors"
@@ -316,7 +323,7 @@ export default function BugReportModal({
               Cancel
             </button>
             <button
-            onClick={handleSubmit}
+              onClick={handleSubmit}
               className="cursor-pointer px-5 py-2 text-sm font-semibold text-white bg-primary rounded-lg hover:bg-primary/50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-[#1d1d1f] transition-all disabled:bg-blue-600/50 disabled:cursor-not-allowed flex items-center"
             >
               {isSubmitting ? "Sending..." : "Send"}

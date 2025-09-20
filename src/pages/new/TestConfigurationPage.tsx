@@ -15,7 +15,6 @@ interface ChipProps {
   disabled?: boolean;
 }
 
-
 interface SubTopic {
   subject: string;
   sub_topic: string[];
@@ -48,8 +47,10 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   mapper,
 }) => {
   return (
-    <div className="p-4 bg-background border-1 rounded-xl mb-4
-    ">
+    <div
+      className="p-4 bg-background border-1 rounded-xl mb-4 max-h-82 overflow-y-auto
+    "
+    >
       <h2 className="text-xl font-semibold text-card-foreground dark:text-gray-200 mb-4">
         {title}{" "}
         {optionalLabel && (
@@ -60,36 +61,35 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
       </h2>
       <div className="flex flex-wrap gap-1 sm:gap-4 text-white">
         {options.length > 0 ? (
-  options.map((option) => {
-    // If you really need to check selectedValues:
-    if (selectedValues) {
-      return (
-        <Chip
-          key={option}
-          value={option}
-          label={mapper ? mapper(option) : option}
-          checked={selectedValues.includes(option)}
-          onClick={() => onSelect(option)}
-        />
-      );
-    } else {
-      return (
-        <Chip
-          key={option}
-          value={option}
-          label={mapper ? mapper(option) : option}
-          checked={selectedValue === option}
-          onClick={() => onSelect(option)}
-        />
-      );
-    }
-  })
-) : (
-  <p className="text-gray-500">
-    {emptyMessage || "No options available."}
-  </p>
-)}
-
+          options.map((option) => {
+            // If you really need to check selectedValues:
+            if (selectedValues) {
+              return (
+                <Chip
+                  key={option}
+                  value={option}
+                  label={mapper ? mapper(option) : option}
+                  checked={selectedValues.includes(option)}
+                  onClick={() => onSelect(option)}
+                />
+              );
+            } else {
+              return (
+                <Chip
+                  key={option}
+                  value={option}
+                  label={mapper ? mapper(option) : option}
+                  checked={selectedValue === option}
+                  onClick={() => onSelect(option)}
+                />
+              );
+            }
+          })
+        ) : (
+          <p className="text-gray-500">
+            {emptyMessage || "No options available."}
+          </p>
+        )}
       </div>
     </div>
   );
@@ -123,8 +123,6 @@ const Chip: React.FC<ChipProps> = ({
     {label}
   </button>
 );
-
-
 
 // --- Main Page Component ---
 const TestConfigurationPageComponent = () => {
@@ -181,7 +179,6 @@ const TestConfigurationPageComponent = () => {
           setSelectedLanguage(data.language[0]);
         }
       } catch (err: any) {
-        
         setError("Failed to load test configuration. Please try again.");
       } finally {
         setIsLoading(false);
@@ -232,7 +229,6 @@ const TestConfigurationPageComponent = () => {
         },
       });
     } catch (err: any) {
-      
       setError(err.message || "Failed to create test. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -303,7 +299,13 @@ const TestConfigurationPageComponent = () => {
             title="2. Select Topic"
             options={currentSubTopics}
             selectedValues={selectedSubtopics}
-            onSelect={(topic)=>setSelectedSubtopics((prev) => prev.includes(topic) ? prev.filter((t) => t !== topic) : [...prev, topic])}
+            onSelect={(topic) =>
+              setSelectedSubtopics((prev) =>
+                prev.includes(topic)
+                  ? prev.filter((t) => t !== topic)
+                  : [...prev, topic]
+              )
+            }
             optionalLabel="Optional"
             emptyMessage="No sub-topics available for this subject."
           />

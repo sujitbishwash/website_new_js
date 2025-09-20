@@ -1,8 +1,9 @@
 import { ROUTES } from "@/routes/constants";
 import { EllipsisVertical, RefreshCcw, TrendingUp } from "lucide-react";
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { attemptedTestsApi } from "@/lib/api-client";
+import CustomLoader from "@/components/icons/customloader";
 
 // --- TYPE DEFINITIONS ---
 type MockTestStatus = "Completed" | "In Progress";
@@ -68,6 +69,24 @@ const calculateDaysSince = (dateString: string): string => {
   if (diffDays === 1) return "Yesterday";
   return `${diffDays} days ago`;
 };
+
+const SkeletonCard: FC = () => (
+    <div className="animate-pulse bg-card border border-border rounded-xl sm:rounded-2xl shadow-sm p-3 sm:p-5 flex flex-col sm:flex-row items-start justify-between gap-5">
+        <div className="flex-1 w-full">
+            <div className="h-6 bg-muted-foreground/30 rounded w-3/4"></div>
+            <div className="h-4 bg-muted-foreground/30 rounded w-1/2 mt-3"></div>
+        </div>
+        <div className="flex items-center gap-4 sm:gap-6">
+            <div className="text-center">
+                <div className="h-8 w-16 bg-muted-foreground/30 rounded-md"></div>
+            </div>
+            <div className="text-center hidden sm:block">
+                <div className="h-8 w-16 bg-muted-foreground/30 rounded-md"></div>
+            </div>
+            <div className="h-8 w-8 bg-muted-foreground/30 rounded-full"></div>
+        </div>
+    </div>
+);
 
 // --- Component for AI Recommended Tests ---
 const AiTestCard = ({ test }: { test: AiRecommendation }) => {
@@ -215,7 +234,14 @@ const TestFeedCard = ({ test }: { test: MockTest }) => {
         {test.status === "Completed" && (
           <>
             <div className="text-end sm:text-center">
-              <p className="font-semibold text-muted-foreground text-lg sm:text-2xl">
+              <p 
+              className={`font-semibold text-muted-foreground text-lg sm:text-2xl text-4xl font-bold  ${
+                          test.score >= test.totalMarks * 0.7
+                            ? "text-green-400"
+                            : test.score > test.totalMarks * 0.4
+                            ? "text-yellow-400"
+                            : "text-red-400"
+                        }`}>
                 {String(test.score)}
                 <span className="text-sm text-muted-foreground">
                   /{test.totalMarks}
@@ -224,7 +250,7 @@ const TestFeedCard = ({ test }: { test: MockTest }) => {
               <p className="text-xs text-muted-foreground">Score</p>
             </div>
             <div className="hidden sm:block">
-              {typeof test.percentile === 'number' && test.percentile > 0 ? (
+              {typeof test.percentile === "number" && test.percentile > 0 ? (
                 <>
                   <p
                     className={`font-semibold ${getPercentileColor(
@@ -302,20 +328,26 @@ const AttemptedTests2 = () => {
       setIsLoading(true);
       setError(null);
       try {
-        const resp = await attemptedTestsApi.getAttemptedTests(currentPage, TESTS_PER_PAGE);
+        const resp = await attemptedTestsApi.getAttemptedTests(
+          currentPage,
+          TESTS_PER_PAGE
+        );
         // Map API to UI model
         const mapped: MockTest[] = (resp.tests || []).map((t: any) => ({
           id: String(t.id ?? t.session_id ?? Math.random()),
           examName: String(t.subject || t.title || "Test"),
-          testName: String(t.topics?.join(', ') || t.title || "Attempt"),
+          testName: String(t.topics?.join(", ") || t.title || "Attempt"),
           dateAttempted: t.date || new Date().toISOString(),
           score: Number(t.total_marks_scored ?? t.positive_score ?? 0),
           totalMarks: Number(t.total_marks ?? 100),
-          percentile: typeof t.percentile === 'number' ? t.percentile : 0,
-          accuracy: typeof t.accuracy === 'number' ? t.accuracy : 0,
-          status: ((t.status || "").toString().toLowerCase().includes('progress')
-                    ? 'In Progress'
-                    : 'Completed') as MockTestStatus,
+          percentile: typeof t.percentile === "number" ? t.percentile : 0,
+          accuracy: typeof t.accuracy === "number" ? t.accuracy : 0,
+          status: ((t.status || "")
+            .toString()
+            .toLowerCase()
+            .includes("progress")
+            ? "In Progress"
+            : "Completed") as MockTestStatus,
         }));
         setAttemptedTests(mapped);
         setTotal(resp.total ?? mapped.length);
@@ -329,16 +361,16 @@ const AttemptedTests2 = () => {
   }, [currentPage]);
 
   const filteredTests = useMemo(() => {
-    const base = attemptedTests
-      .sort((a, b) => {
-        const statusOrder = { "In Progress": 1, Completed: 2 } as const;
-        if (statusOrder[a.status] !== statusOrder[b.status])
-          return statusOrder[a.status] - statusOrder[b.status];
-        return (
-          new Date(b.dateAttempted).getTime() - new Date(a.dateAttempted).getTime()
-        );
-      });
-    if (filter === 'All') return base;
+    const base = attemptedTests.sort((a, b) => {
+      const statusOrder = { "In Progress": 1, Completed: 2 } as const;
+      if (statusOrder[a.status] !== statusOrder[b.status])
+        return statusOrder[a.status] - statusOrder[b.status];
+      return (
+        new Date(b.dateAttempted).getTime() -
+        new Date(a.dateAttempted).getTime()
+      );
+    });
+    if (filter === "All") return base;
     return base.filter((t) => t.status === filter);
   }, [attemptedTests, filter]);
 
@@ -347,6 +379,17 @@ const AttemptedTests2 = () => {
   const handlePageChange = (pageNumber: number) => setCurrentPage(pageNumber);
 
   const renderTests = () => {
+    if (isLoading) {
+            return (
+                <div className="flex flex-col gap-4 sm:gap-5">
+                    {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+                </div>
+            );
+        }
+        
+        if (error) {
+            return;
+        }
     if (currentTests.length === 0) {
       return (
         <div className="text-center col-span-full py-20 px-6 bg-gray-900/50 rounded-2xl border border-gray-800">
@@ -411,15 +454,18 @@ const AttemptedTests2 = () => {
               </div>
             </div>
 
-            {isLoading && (
-              <div className="text-center text-muted-foreground py-10">Loading...</div>
-            )}
+            {/**isLoading && (
+              <div className="text-muted-foreground h-auto font-sans flex flex-col justify-center items-center p-4 gap-4">
+                <CustomLoader className="h-15 w-15" />
+                <span className="text-muted-foreground text-lg">
+                  Loading...
+                </span>
+              </div>
+            )*/}
             {error && (
               <div className="text-center text-red-400 py-4">{error}</div>
             )}
-            {!isLoading && !error && (
               <div className="max-h-auto space-y-5">{renderTests()}</div>
-            )}
             <Pagination
               totalTests={total}
               testsPerPage={TESTS_PER_PAGE}
