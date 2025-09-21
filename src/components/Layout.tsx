@@ -32,8 +32,6 @@ const Layout: React.FC = () => {
   };
 
   const onBugReportClick = () => {
-    
-    console.log('yoo');
     setBugReportModalOpen(true);
   };
 

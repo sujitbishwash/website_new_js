@@ -135,10 +135,6 @@ export default function BugReportModal({
     }
     setIsSubmitting(true);
     setError("");
-    console.log({
-      description,
-      attachment: attachment ? attachment.name : "No file attached",
-    });
     setError("");
     setIsSubmitted(true);
 
