@@ -95,30 +95,6 @@ const VideoPage: React.FC = () => {
     }
   });
 
-  // Force progress update every 2 seconds to ensure bar moves
-  useEffect(() => {
-    if (isApiLoading && apiProgress < 100) {
-      const interval = setInterval(() => {
-        // This will trigger a re-render and progress update
-        console.log(`📊 Current progress: ${apiProgress}%`);
-      }, 2000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [isApiLoading, apiProgress]);
-
-  // Fallback progress mechanism - ensure progress always moves
-  useEffect(() => {
-    if (isApiLoading && apiProgress < 100) {
-      const fallbackInterval = setInterval(() => {
-        // Force a small progress update to keep the bar moving
-        console.log('🔄 Fallback progress update triggered');
-      }, 3000);
-      
-      return () => clearInterval(fallbackInterval);
-    }
-  }, [isApiLoading, apiProgress]);
-
   // Feedback - only after video validation
   const {
     feedbackStates, isLoading: isFeedbackLoading, markAsSubmitted
@@ -154,20 +130,16 @@ const VideoPage: React.FC = () => {
         registerApi('video-validation', 'Video Validation', 0.3);
         setApiLoading('video-validation', true, 'Validating video content...');
 
-        console.log('🔍 Validating video...');
         const details = await videoApi.getVideoDetail(`https://www.youtube.com/watch?v=${currentVideoId}`);
 
         if (!didCancel) {
         setVideoDetail(details);
           setIsVideoValidated(true);
           setApiCompleted('video-validation', 'Video validated successfully!');
-          console.log('✅ Video validated successfully, other APIs can now run');
         }
       } catch (err: any) {
         if (!didCancel) {
-          console.log('❌ Video validation failed:', err);
         if (err.isOutOfSyllabus || err.status === 204) {
-            console.log('🚫 Video is out of syllabus, redirecting...');
             setApiFailed('video-validation', 'Video is out of syllabus');
             navigate(ROUTES.OUT_OF_SYLLABUS, {
               state: {
@@ -176,7 +148,6 @@ const VideoPage: React.FC = () => {
               }
             });
         } else {
-            console.log('⚠️ Video validation error, setting fallback');
             setApiFailed('video-validation', 'Video validation failed');
             setVideoDetail({});
             setIsVideoValidated(false);
@@ -204,7 +175,6 @@ const VideoPage: React.FC = () => {
         registerApi('video-progress', 'Video Progress', 0.2);
         setApiLoading('video-progress', true, 'Loading video progress...');
         
-        console.log('📊 Fetching video progress after validation...');
         const resp = await videoProgressApi.getProgress(currentVideoId);
         
         if (!didCancel) {
@@ -212,11 +182,9 @@ const VideoPage: React.FC = () => {
           const pct = Number(resp.data?.watch_percentage ?? 0);
           if (!isNaN(pos) && pos > 0) {
             setResumePosition(pos);
-            console.log(`📊 Loaded resume position: ${pos}s`);
           }
           if (!isNaN(pct) && pct > 0) {
             setResumePercent(pct);
-            console.log(`📊 Loaded resume percentage: ${pct}%`);
           }
           if ((isNaN(pos) || pos <= 0) && (isNaN(pct) || pct <= 0)) {
             const raw = localStorage.getItem(`video_progress_${currentVideoId}`);
@@ -227,11 +195,9 @@ const VideoPage: React.FC = () => {
                 const lsPct = Number(data?.watchPercentage ?? 0);
                 if (!isNaN(lsPos) && lsPos > 0) {
                   setResumePosition(lsPos);
-                  console.log(`📊 Loaded resume position from localStorage: ${lsPos}s`);
                 }
                 if (!isNaN(lsPct) && lsPct > 0) {
                   setResumePercent(lsPct);
-                  console.log(`📊 Loaded resume percentage from localStorage: ${lsPct}%`);
                 }
               } catch {}
             }
@@ -240,7 +206,6 @@ const VideoPage: React.FC = () => {
         }
       } catch (err) {
         if (!didCancel) {
-          console.log('⚠️ Progress API failed, trying localStorage...');
           const raw = localStorage.getItem(`video_progress_${currentVideoId}`);
           if (raw) {
             try {
@@ -249,11 +214,9 @@ const VideoPage: React.FC = () => {
               const lsPct = Number(data?.watchPercentage ?? 0);
               if (!isNaN(lsPos) && lsPos > 0) {
                 setResumePosition(lsPos);
-                console.log(`📊 Loaded resume position from localStorage: ${lsPos}s`);
               }
               if (!isNaN(lsPct) && lsPct > 0) {
                 setResumePercent(lsPct);
-                console.log(`📊 Loaded resume percentage from localStorage: ${lsPct}%`);
               }
             } catch {}
           }
@@ -277,7 +240,6 @@ const VideoPage: React.FC = () => {
         registerApi('video-chapters', 'Video Chapters', 0.2);
         setApiLoading('video-chapters', true, 'Loading video chapters...');
         
-        console.log('📚 Fetching video chapters after validation...');
         setIsLoadingChapters(true);
         setChaptersError(null);
 
@@ -292,11 +254,9 @@ const VideoPage: React.FC = () => {
           );
           setChapters(transformedChapters);
           setApiCompleted('video-chapters', `Loaded ${transformedChapters.length} chapters!`);
-          console.log(`📚 Loaded ${transformedChapters.length} chapters`);
         }
       } catch (err: any) {
         if (!didCancel) {
-          console.log('❌ Failed to load chapters:', err);
           setChaptersError("Failed to load chapters. Please try again.");
           setApiFailed('video-chapters', 'Failed to load chapters');
         }
@@ -350,25 +310,12 @@ const VideoPage: React.FC = () => {
   
   const saveVideoProgress = useCallback(async (forceSave = false) => {
     if (!currentVideoId || !ytPlayerRef.current || isSavingRef.current) {
-      console.log('🚫 Save progress skipped:', { currentVideoId: !!currentVideoId, player: !!ytPlayerRef.current, saving: isSavingRef.current });
       return;
     }
 
     try {
       const currentTime = ytPlayerRef.current.getCurrentTime();
       const duration = ytPlayerRef.current.getDuration();
-      
-      console.log('🎬 Player state check:', { 
-        currentTime, 
-        duration, 
-        playerReady: !!ytPlayerRef.current,
-        playerMethods: {
-          getCurrentTime: typeof ytPlayerRef.current.getCurrentTime,
-          getDuration: typeof ytPlayerRef.current.getDuration
-        }
-      });
-
-      console.log('🔧 duration : duration :', duration);
       
       if (duration > 0 && duration >= 0.1) {
         const watchPercentage = (currentTime / duration) * 100;
@@ -382,33 +329,18 @@ const VideoPage: React.FC = () => {
           (now - lastSaved.timestamp) >= 60000;
         
         if (!shouldSave) {
-          console.log('⏸️ Save progress throttled:', { 
-            watchPercentage: Math.round(watchPercentage), 
-            lastPercentage: lastSaved ? Math.round(lastSaved.percentage) : 'none',
-            timeDiff: lastSaved ? Math.abs(currentTime - lastSaved.position) : 'none',
-            timeElapsed: lastSaved ? now - lastSaved.timestamp : 'none'
-          });
           return;
         }
 
         isSavingRef.current = true;
-        console.log('💾 Saving video progress:', { 
-          videoId: currentVideoId, 
-          watchPercentage: Math.round(watchPercentage), 
-          currentTime: Math.round(currentTime),
-          duration: Math.round(duration),
-          forceSave
-        });
 
-        console.log('📡 Making API call to videoProgressApi.trackProgress...');
-        const apiResponse = await videoProgressApi.trackProgress({
+        await videoProgressApi.trackProgress({
           video_id: currentVideoId,
           watch_percentage: Math.round(watchPercentage * 100) / 100,
           total_duration: Math.round(duration),
           current_position: Math.round(currentTime),
           page_url: window.location.href,
         });
-        console.log('✅ API call successful:', apiResponse);
 
         lastSavedProgressRef.current = {
           percentage: watchPercentage,
@@ -432,17 +364,9 @@ const VideoPage: React.FC = () => {
           })
         );
 
-        console.log('✅ Video progress saved successfully');
       } else {
-        console.log('⚠️ Video not ready for saving:', { 
-          duration, 
-          currentTime, 
-          durationValid: duration > 0, 
-          timeValid: currentTime >= 0.1 
-        });
       }
     } catch (error: any) {
-      console.error('❌ Failed to save video progress:', error);
       
       // Fallback to localStorage only
       try {
@@ -467,9 +391,7 @@ const VideoPage: React.FC = () => {
           JSON.stringify(progressData)
         );
         
-        console.log('💾 Video progress saved to localStorage as fallback');
       } catch (localError) {
-        console.error('❌ Failed to save to localStorage:', localError);
       }
     } finally {
       isSavingRef.current = false;
@@ -479,11 +401,9 @@ const VideoPage: React.FC = () => {
   // Handle YouTube player state changes (play/pause/buffering)
   const handleYouTubeStateChange = useCallback((event: any) => {
     const playerState = event.data;
-    console.log('🎬 YouTube state changed:', { playerState });
     
     // Save progress when video is paused or buffering
     if (playerState === 2 || playerState === 3) { // 2 = paused, 3 = buffering
-      console.log('⏸️ Video paused/buffering, saving progress...');
       saveVideoProgress();
     }
   }, [saveVideoProgress]);
@@ -500,10 +420,8 @@ const VideoPage: React.FC = () => {
     
     const startAutoSave = () => {
       if (!periodicSaveIntervalRef.current) {
-        console.log('💾 Starting periodic progress saving after video validation...');
         periodicSaveIntervalRef.current = setInterval(() => {
           const playerState = getPlayerState();
-          console.log('🔄 Periodic save check:', { playerState, isPlaying: playerState === 1 });
           if (playerState === 1) { // 1 = playing
             saveVideoProgress();
           }
@@ -513,7 +431,6 @@ const VideoPage: React.FC = () => {
     
     const stopAutoSave = () => {
       if (periodicSaveIntervalRef.current) {
-        console.log('⏹️ Stopping periodic progress saving...');
         clearInterval(periodicSaveIntervalRef.current);
         periodicSaveIntervalRef.current = null;
       }
@@ -528,7 +445,6 @@ const VideoPage: React.FC = () => {
   // 3. Save progress on navigation, unload or unmount
   useEffect(() => {
     const saveOnLeave = () => { 
-      console.log('🚪 Page leaving, saving progress...');
       saveVideoProgress(); 
     };
     
@@ -538,14 +454,12 @@ const VideoPage: React.FC = () => {
     return () => {
       window.removeEventListener("beforeunload", saveOnLeave);
       window.removeEventListener("pagehide", saveOnLeave);
-      console.log('🔄 Component unmounting, saving progress...');
       saveVideoProgress();
     };
   }, [currentVideoId, saveVideoProgress]);
 
   // React Router navigation block
   useBlocker(() => {
-    console.log('🚫 Navigation blocked, saving progress...');
     saveVideoProgress();
     return false;
   });
@@ -602,11 +516,9 @@ const VideoPage: React.FC = () => {
           registerApi('chat-init', 'Chat Initialization', 0.15);
           setApiLoading('chat-init', true, 'Initializing chat...');
           
-          console.log('💬 Initializing chat after video validation...');
           await initializeChat();
           setApiCompleted('chat-init', 'Chat initialized!');
         } catch (err) {
-          console.log('❌ Failed to initialize chat:', err);
           setApiFailed('chat-init', 'Failed to initialize chat');
         }
       };
@@ -637,7 +549,6 @@ const VideoPage: React.FC = () => {
             checkFeedback();
           });
         } catch (err) {
-          console.log('❌ Failed to initialize feedback:', err);
           setApiFailed('feedback-init', 'Failed to initialize feedback');
         }
       };
@@ -739,7 +650,6 @@ const VideoPage: React.FC = () => {
 
   // Show loading screen while APIs are loading
   if (isLoadingVideo || (isApiLoading && apiProgress < 90)) {
-    console.log('🔄 Showing loading screen:', { isLoadingVideo, isApiLoading, apiProgress, apiMessage });
     return (
       <LoadingScreen
         isLoading={true}
@@ -752,7 +662,6 @@ const VideoPage: React.FC = () => {
 
   // If video is not validated but we've been loading for a while, show fallback
   if (!isVideoValidated && apiProgress > 50) {
-    console.log('⚠️ Video validation taking too long, showing fallback content');
     setVideoDetail({ title: `Video ${currentVideoId}`, description: "Loading..." });
     setIsVideoValidated(true);
   }
@@ -779,7 +688,6 @@ const VideoPage: React.FC = () => {
             <div className="mb-2 flex justify-center gap-2">
               <button
                 onClick={() => {
-                  console.log('🔧 Manual save triggered (forcing save)');
                   saveVideoProgress(true);
                 }}
                 className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
@@ -788,7 +696,6 @@ const VideoPage: React.FC = () => {
               </button>
               <button
                 onClick={async () => {
-                  console.log('🧪 Testing API directly...');
                   try {
                     const testData = {
                       video_id: currentVideoId || 'test',
@@ -797,11 +704,8 @@ const VideoPage: React.FC = () => {
                       current_position: 75,
                       page_url: window.location.href,
                     };
-                    console.log('📡 Testing API with data:', testData);
-                    const result = await videoProgressApi.trackProgress(testData);
-                    console.log('✅ API test successful:', result);
+                    await videoProgressApi.trackProgress(testData);
                   } catch (error) {
-                    console.error('❌ API test failed:', error);
                   }
                 }}
                 className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
@@ -900,40 +804,6 @@ const VideoPage: React.FC = () => {
             </div>
           </header>
           <div className={`flex-shrink-0 ${isVideoVisible ? "" : "hidden"}`}>
-            {/* Debug: Manual save button - Mobile */}
-            <div className="p-2 flex justify-center gap-2">
-              <button
-                onClick={() => {
-                  console.log('🔧 Manual save triggered (mobile, forcing save)');
-                  saveVideoProgress(true);
-                }}
-                className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                💾 Save Progress (Debug)
-              </button>
-              <button
-                onClick={async () => {
-                  console.log('🧪 Testing API directly (mobile)...');
-                  try {
-                    const testData = {
-                      video_id: currentVideoId || 'test',
-                      watch_percentage: 25.5,
-                      total_duration: 300,
-                      current_position: 75,
-                      page_url: window.location.href,
-                    };
-                    console.log('📡 Testing API with data:', testData);
-                    const result = await videoProgressApi.trackProgress(testData);
-                    console.log('✅ API test successful:', result);
-                  } catch (error) {
-                    console.error('❌ API test failed:', error);
-                  }
-                }}
-                className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                🧪 Test API
-              </button>
-            </div>
             {/* YouTube Video Player with Progress Tracking - Mobile */}
             <div className="">
               <YouTube

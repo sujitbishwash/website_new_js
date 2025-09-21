@@ -104,13 +104,11 @@ export const useApiProgress = (options: UseApiProgressOptions = {}) => {
   // Update progress when APIs change
   useEffect(() => {
     const progress = calculateProgress(apis);
-    console.log('📊 Progress calculation:', { progress, apisCount: apis.size, apis: Array.from(apis.values()) });
     setOverallProgress(progress);
 
     // Check if all APIs are completed
     const allCompleted = Array.from(apis.values()).every(api => !api.isLoading);
     if (allCompleted && apis.size > 0) {
-      console.log('✅ All APIs completed!');
       setIsLoading(false);
       setCurrentMessage('Loading complete!');
       onComplete?.();
@@ -130,7 +128,6 @@ export const useApiProgress = (options: UseApiProgressOptions = {}) => {
         // Always update progress to ensure it moves
         setOverallProgress(prev => {
           const newProgress = Math.max(prev, simulatedProgress);
-          console.log('🔄 Progress simulation:', { prev, simulatedProgress, newProgress });
           return newProgress;
         });
         
@@ -153,7 +150,6 @@ export const useApiProgress = (options: UseApiProgressOptions = {}) => {
       const immediateInterval = setInterval(() => {
         setOverallProgress(prev => {
           const newProgress = Math.min(50, prev + 1);
-          console.log('🚀 Immediate progress update:', { prev, newProgress });
           return newProgress;
         });
       }, 500);
@@ -172,7 +168,6 @@ export const useApiProgress = (options: UseApiProgressOptions = {}) => {
         setOverallProgress(prev => {
           // Force progress to increase by at least 2% every 2 seconds
           const newProgress = Math.min(100, prev + 2);
-          console.log('⚡ Force progress update:', { prev, newProgress });
           return newProgress;
         });
       }, 2000);
@@ -185,7 +180,6 @@ export const useApiProgress = (options: UseApiProgressOptions = {}) => {
   useEffect(() => {
     if (isLoading && apis.size > 0) {
       const timeout = setTimeout(() => {
-        console.log('⏰ Progress timeout reached, forcing completion...');
         // Mark all loading APIs as completed
         setApis(prev => {
           const newMap = new Map(prev);
