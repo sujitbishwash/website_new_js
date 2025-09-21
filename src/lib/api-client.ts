@@ -1125,7 +1125,6 @@ export interface AttemptedTest {
   positive_score: number;
   date: string;
   questions: number;
-  correct: number;
   wrong: number;
   session_id: number;
   total_marks: number;

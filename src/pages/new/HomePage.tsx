@@ -41,6 +41,7 @@ import {
 } from "lucide-react";
 import PlayIcon from "@/components/icons/PlayIcon";
 import { theme } from "@/styles/theme";
+import formatScore from "@/lib/formatScore";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -744,7 +745,7 @@ export default function HomePage() {
                             : "text-red-400"
                         }`}
                       >
-                        {test.total_marks_scored.toFixed(1)}
+                        {formatScore(test.total_marks_scored)}
                       </p>
                       <p className="text-sm text-muted-foreground/80">
                         out of {test.total_marks}
@@ -761,7 +762,7 @@ export default function HomePage() {
                     <div className="flex items-center space-x-4 text-sm">
                       <div className="flex items-center text-green-400">
                         <CheckCircleIcon className="h-5 w-5 mr-1.5" />
-                        <span>{test.correct} Correct</span>
+                        <span>{test.positive_score} Correct</span>
                       </div>
                       <div className="flex items-center text-red-400">
                         <XCircleIcon className="h-5 w-5 mr-1.5" />

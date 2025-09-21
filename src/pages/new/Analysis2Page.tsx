@@ -33,6 +33,7 @@ import RankBadge from "@/components/stats/RankBadge";
 import { ROUTES } from "@/routes/constants";
 
 import CustomLoader from "@/components/icons/customloader";
+import formatScore from "@/lib/formatScore";
 interface LearningPlanStep {
   title: string;
   duration: number;
@@ -1659,8 +1660,8 @@ const ScoreDonutChart = ({ data, size = 200, maxScore = 100 }) => {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-sm text-[#8e8e93] font-medium">Total Score</span>
-        <span className="text-5xl font-bold">{currentScore.toFixed(0)}</span>
-        <span className="text-2xl text-[#8e8e93] font-medium">/100</span>
+        <span className="text-5xl font-bold">{formatScore(currentScore)}</span>
+        <span className="text-2xl text-[#8e8e93] font-medium">/{formatScore(maxScore)}</span>
       </div>
     </div>
   );
