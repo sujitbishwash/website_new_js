@@ -4,7 +4,23 @@ import {
   attemptedTestsApi,
   AttemptedTest,
 } from "@/lib/api-client";
-import React, { useEffect, useState } from "react";
+import {
+  Box,
+  Typography,
+  Button,
+  Grid,
+  Card,
+  CardActionArea,
+  CardMedia,
+  CardContent,
+  Skeleton,
+  CircularProgress,
+  IconButton,
+  Tooltip,
+  Container,
+  CssBaseline,
+} from "@mui/material";
+import React, { FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AddSourceModal } from "../../components/YouTubeSourceDialog";
 import { buildVideoLearningRoute, ROUTES } from "../../routes/constants";
@@ -23,6 +39,8 @@ import {
   Pyramid,
   RefreshCcw,
 } from "lucide-react";
+import PlayIcon from "@/components/icons/PlayIcon";
+import { theme } from "@/styles/theme";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -89,33 +107,27 @@ const XCircleIcon: React.FC<IconProps> = ({ className }) => (
 );
 
 const CodeBracketIcon: React.FC<IconProps> = ({ className }) => (
-  <Code className={className}/>
+  <Code className={className} />
 );
 
 const CalculatorIcon: React.FC<IconProps> = ({ className }) => (
-  <Calculator
-    className={className} />
+  <Calculator className={className} />
 );
 
 const BeakerIcon: React.FC<IconProps> = ({ className }) => (
-  <FlaskConical
-    className={className}
-    />
+  <FlaskConical className={className} />
 );
 
 const PaintBrushIcon: React.FC<IconProps> = ({ className }) => (
-  <Brush
-    className={className}/>
+  <Brush className={className} />
 );
 
 const BookOpenIcon: React.FC<IconProps> = ({ className }) => (
-  <Pyramid
-    className={className} />
+  <Pyramid className={className} />
 );
 
 const BrainIcon: React.FC<IconProps> = ({ className }) => (
-  <Brain
-    className={className} />
+  <Brain className={className} />
 );
 
 // --- MOCK DATA ---
@@ -179,6 +191,111 @@ const suggestedTests: SuggestedTest[] = [
   { id: "st3", title: "Intro to Javascript", topic: "Coding" },
 ];
 
+// --- SKELETON LOADER COMPONENT ---
+const SkeletonLoaderRecommendedVideos: FC = () => {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {Array.from(new Array(3)).map((_, index) => (
+        <div key={index} className="w-full">
+          <Skeleton
+            variant="rectangular"
+            height={130}
+            sx={{ borderRadius: 3, bgcolor: theme.divider }}
+          />
+          <Box sx={{ pt: 2, px: 0.5 }}>
+            <Skeleton
+              variant="text"
+              height={32}
+              sx={{ borderRadius: 3, bgcolor: theme.divider }}
+            />
+            <Skeleton
+              variant="text"
+              width="60%"
+              height={20}
+              sx={{ borderRadius: 3, bgcolor: theme.divider }}
+            />
+          </Box>
+        </div>
+      ))}
+    </div>
+  );
+};
+const SkeletonLoaderContinueLearning: FC = () => {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
+      {Array.from(new Array(2)).map((_, index) => (
+        <div key={index} className="w-full">
+          <Skeleton
+            variant="rectangular"
+            height={130}
+            sx={{ borderRadius: 3, bgcolor: theme.divider }}
+          />
+          <Box sx={{ pt: 2, px: 0.5 }}>
+            <Skeleton
+              variant="text"
+              height={32}
+              sx={{ borderRadius: 3, bgcolor: theme.divider }}
+            />
+            <Skeleton
+              variant="text"
+              height={32}
+              sx={{ borderRadius: 3, bgcolor: theme.divider }}
+            />
+            <Skeleton
+              variant="text"
+              width="25%"
+              sx={{ fontSize: "1rem", bgcolor: theme.divider }}
+            />
+            <Skeleton
+              variant="text"
+              height={20}
+              sx={{ borderRadius: 3, bgcolor: theme.divider }}
+            />
+          </Box>
+        </div>
+      ))}
+    </div>
+  );
+};
+const SkeletonLoaderAttemptedTests: FC = () => {
+  return (
+    <div className="space-y-4">
+      {[...Array(3)].map((_, i) => (
+        <div
+          key={i}
+          className="bg-card rounded-lg p-4 flex items-center space-x-6"
+        >
+          <Skeleton
+            variant="rounded"
+            width={96}
+            height={80}
+            sx={{ borderRadius: 3, bgcolor: theme.divider }}
+          />
+          <div className="flex-grow">
+            <Skeleton
+              variant="text"
+              sx={{ fontSize: "1rem", bgcolor: theme.divider }}
+              width="70%"
+            />
+            <Skeleton
+              variant="text"
+              sx={{ fontSize: "1rem", bgcolor: theme.divider }}
+              width="50%"
+            />
+          </div>
+
+          <Skeleton
+            variant="rounded"
+            width={112}
+            height={36}
+            sx={{ borderRadius: 3, bgcolor: theme.divider }}
+          />
+        </div>
+      ))}
+    </div>
+  );
+};
+
 // --- MAIN COMPONENT ---
 export default function HomePage() {
   const [attemptedTests, setAttemptedTests] = useState<AttemptedTest[]>([]);
@@ -211,7 +328,6 @@ export default function HomePage() {
       const response = await attemptedTestsApi.getAttemptedTests(1, 3);
       setAttemptedTests(response.tests);
     } catch (error: any) {
-      
       setAttemptedTestsError(error.message || "Failed to load attempted tests");
       // Fallback to empty array if API fails
       setAttemptedTests([]);
@@ -229,7 +345,6 @@ export default function HomePage() {
         const videos = await videoApi.getSuggestedVideos();
         setSuggestedVideos(videos);
       } catch (error: any) {
-        
         setVideosError(error.message || "Failed to load suggested videos");
         // Fallback to empty array if API fails
         setSuggestedVideos([]);
@@ -244,17 +359,13 @@ export default function HomePage() {
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
     try {
-
       navigate(buildVideoLearningRoute(video.id));
     } catch (err: any) {
-      
-      
       // Check if it's an out-of-syllabus error
       if (err.isOutOfSyllabus || err.status === 204) {
-        
         navigate(ROUTES.HOME);
       }
-    } 
+    }
   };
 
   const handleContinueLearningVideoClick = async (videoId: string) => {
@@ -263,7 +374,6 @@ export default function HomePage() {
       // Navigate directly since we already have the videoId
       navigate(buildVideoLearningRoute(videoId));
     } catch (err: any) {
-      
     } finally {
       setLoadingVideoId(null);
     }
@@ -321,7 +431,6 @@ export default function HomePage() {
                     const videos = await videoApi.getSuggestedVideos();
                     setSuggestedVideos(videos);
                   } catch (error: any) {
-                    
                     setVideosError(
                       error.message || "Failed to load suggested videos"
                     );
@@ -340,14 +449,7 @@ export default function HomePage() {
           </div>
 
           {isLoadingVideos ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="ml-2 text-muted-foreground">
-                {suggestedVideos.length > 0
-                  ? "Loading video details..."
-                  : "Loading videos..."}
-              </span>
-            </div>
+            <SkeletonLoaderRecommendedVideos />
           ) : videosError ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>{videosError}</p>
@@ -373,7 +475,7 @@ export default function HomePage() {
                       className="w-full h-36 object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                     <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center group-hover:scale-105">
-                      <CirclePlay className="h-12 w-12 text-white group-hover:scale-110 transition-all duration-300" />
+                      <PlayIcon className="h-10 w-10 text-white group-hover:scale-110 transition-all duration-300" />
                     </div>
                   </div>
                   <div className="p-4">
@@ -470,12 +572,7 @@ export default function HomePage() {
           </div>
 
           {isLoadingProgress ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="ml-2 text-muted-foreground">
-                Loading your progress...
-              </span>
-            </div>
+            <SkeletonLoaderContinueLearning />
           ) : progressError ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>{progressError}</p>
@@ -489,7 +586,7 @@ export default function HomePage() {
           ) : getWatchedVideos().length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6">
               {getWatchedVideos()
-                .slice(0, 4)
+                .slice(0, 2)
                 .map((video) => (
                   <div
                     key={video.videoId}
@@ -521,8 +618,8 @@ export default function HomePage() {
                           }
                         }}
                       />
-                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 flex items-center justify-center">
-                        <CirclePlay className="h-12 w-12 text-white group-hover:scale-110 transition-all duration-300" />
+                      <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 group-hover:scale-105 transition-all duration-300 flex items-center justify-center">
+                        <PlayIcon className="h-10 w-10 text-white group-hover:scale-110 transition-all duration-300" />
                       </div>
                       <div className="absolute top-3 right-3 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-full text-white text-xs font-medium">
                         {formatDuration(video.totalDuration)}
@@ -573,9 +670,9 @@ export default function HomePage() {
                         </div>
                       )}
                     </div>
-                    <div className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                    {/**<div className="absolute top-3 right-3 p-1.5 bg-black/40 backdrop-blur-sm rounded-full text-white opacity-0 group-hover:opacity-100 transition-opacity">
                       <CirclePlay className="h-4 w-4" />
-                    </div>
+                    </div>*/}
                     {loadingVideoId === video.videoId && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
                         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
@@ -596,8 +693,6 @@ export default function HomePage() {
         {/* Attempted Tests Card */}
         <div className="bg-card rounded-xl p-3 sm:p-6 mb-10 shadow-2xl border border-border">
           <div className="flex justify-between items-center mb-5">
-            
-            
             <h2 className="text-md sm:text-2xl font-bold text-foreground">
               Attempted Tests
             </h2>
@@ -620,12 +715,7 @@ export default function HomePage() {
           </div>
 
           {isLoadingAttemptedTests ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-              <span className="ml-2 text-muted-foreground">
-                Loading attempted tests...
-              </span>
-            </div>
+            <SkeletonLoaderAttemptedTests />
           ) : attemptedTestsError ? (
             <div className="text-center py-8 text-muted-foreground">
               <p>{attemptedTestsError}</p>
@@ -644,18 +734,22 @@ export default function HomePage() {
                   className="group relative bg-card/80 rounded-lg p-4 flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-4 transition-all duration-300 hover:shadow-xl hover:bg-accent/10 border border-border-medium hover:border-primary"
                 >
                   <div className="flex-shrink-0 text-center w-24">
-                    <p
-                      className={`text-4xl font-bold ${
-                        test.total_marks_scored >= 80
-                          ? "text-green-400"
-                          : "text-yellow-400"
-                      }`}
-                    >
-                      {test.total_marks_scored} / {test.total_marks}
-                    </p>
-                    <p className="text-xs text-muted-foreground/80">
-                      Overall Score
-                    </p>
+                    <div className="flex-shrink-0 text-center w-24">
+                      <p
+                        className={`text-4xl font-bold  ${
+                          test.total_marks_scored >= test.total_marks_scored * 0.7
+                            ? "text-green-400"
+                            : test.total_marks_scored > test.total_marks_scored * 0.4
+                            ? "text-yellow-400"
+                            : "text-red-400"
+                        }`}
+                      >
+                        {test.total_marks_scored.toFixed(1)}
+                      </p>
+                      <p className="text-sm text-muted-foreground/80">
+                        out of {test.total_marks}
+                      </p>
+                    </div>
                   </div>
                   <div className="flex-grow w-full border-t sm:border-t-0 sm:border-l border-slate-700 pt-3 sm:pt-0 sm:pl-4">
                     <h3 className="font-semibold text-foreground text-lg">
