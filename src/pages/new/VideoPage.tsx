@@ -343,37 +343,80 @@ const VideoPage: React.FC = () => {
     }
   }, [resumePosition, resumePercent]);
 
+
   // ----------------- Save Progress Logic (Throttled) -----------------
   const lastSavedProgressRef = useRef<{ percentage: number; position: number; timestamp: number } | null>(null);
-  const saveVideoProgress = useCallback(async () => {
-    if (!currentVideoId || !ytPlayerRef.current) return;
+  const isSavingRef = useRef(false);
+  
+  const saveVideoProgress = useCallback(async (forceSave = false) => {
+    if (!currentVideoId || !ytPlayerRef.current || isSavingRef.current) {
+      console.log('🚫 Save progress skipped:', { currentVideoId: !!currentVideoId, player: !!ytPlayerRef.current, saving: isSavingRef.current });
+      return;
+    }
+
     try {
       const currentTime = ytPlayerRef.current.getCurrentTime();
       const duration = ytPlayerRef.current.getDuration();
-      if (duration > 0 && currentTime >= 0.1) {
+      
+      console.log('🎬 Player state check:', { 
+        currentTime, 
+        duration, 
+        playerReady: !!ytPlayerRef.current,
+        playerMethods: {
+          getCurrentTime: typeof ytPlayerRef.current.getCurrentTime,
+          getDuration: typeof ytPlayerRef.current.getDuration
+        }
+      });
+
+      console.log('🔧 duration : duration :', duration);
+      
+      if (duration > 0 && duration >= 0.1) {
         const watchPercentage = (currentTime / duration) * 100;
         const now = Date.now();
-        /*
+        
+        // Throttling logic - only save if significant change or time elapsed (unless forced)
         const lastSaved = lastSavedProgressRef.current;
-        const shouldSave = !lastSaved ||
+        const shouldSave = forceSave || !lastSaved ||
           Math.abs(watchPercentage - lastSaved.percentage) >= 5 ||
           Math.abs(currentTime - lastSaved.position) >= 30 ||
           (now - lastSaved.timestamp) >= 60000;
-        if (!shouldSave) return;
-        */
-        await videoProgressApi.trackProgress({
+        
+        if (!shouldSave) {
+          console.log('⏸️ Save progress throttled:', { 
+            watchPercentage: Math.round(watchPercentage), 
+            lastPercentage: lastSaved ? Math.round(lastSaved.percentage) : 'none',
+            timeDiff: lastSaved ? Math.abs(currentTime - lastSaved.position) : 'none',
+            timeElapsed: lastSaved ? now - lastSaved.timestamp : 'none'
+          });
+          return;
+        }
+
+        isSavingRef.current = true;
+        console.log('💾 Saving video progress:', { 
+          videoId: currentVideoId, 
+          watchPercentage: Math.round(watchPercentage), 
+          currentTime: Math.round(currentTime),
+          duration: Math.round(duration),
+          forceSave
+        });
+
+        console.log('📡 Making API call to videoProgressApi.trackProgress...');
+        const apiResponse = await videoProgressApi.trackProgress({
           video_id: currentVideoId,
           watch_percentage: Math.round(watchPercentage * 100) / 100,
           total_duration: Math.round(duration),
           current_position: Math.round(currentTime),
           page_url: window.location.href,
         });
+        console.log('✅ API call successful:', apiResponse);
+
         lastSavedProgressRef.current = {
           percentage: watchPercentage,
           position: currentTime,
           timestamp: now
         };
-        // mirror to localStorage
+
+        // Mirror to localStorage as backup
         localStorage.setItem(
           `video_progress_${currentVideoId}`,
           JSON.stringify({
@@ -388,28 +431,64 @@ const VideoPage: React.FC = () => {
             description: videoDetail?.description || "Video content",
           })
         );
+
+        console.log('✅ Video progress saved successfully');
+      } else {
+        console.log('⚠️ Video not ready for saving:', { 
+          duration, 
+          currentTime, 
+          durationValid: duration > 0, 
+          timeValid: currentTime >= 0.1 
+        });
       }
     } catch (error: any) {
-      // fallback to localStorage
-      const progressData = {
-        videoId: currentVideoId,
-        title: videoDetail?.title || `Video ${currentVideoId}`,
-        thumbnailUrl: `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`,
-        watchPercentage: 0,
-        currentTime: 0,
-        totalDuration: 0,
-        lastUpdated: new Date().toISOString(),
-        subject: videoDetail?.topics?.[0] || "General",
-        description: videoDetail?.description || "Video content",
-      };
-      localStorage.setItem(
-        `video_progress_${currentVideoId}`,
-        JSON.stringify(progressData)
-      );
+      console.error('❌ Failed to save video progress:', error);
+      
+      // Fallback to localStorage only
+      try {
+        const currentTime = ytPlayerRef.current?.getCurrentTime() || 0;
+        const duration = ytPlayerRef.current?.getDuration() || 0;
+        const watchPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
+        
+        const progressData = {
+          videoId: currentVideoId,
+          title: videoDetail?.title || `Video ${currentVideoId}`,
+          thumbnailUrl: `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`,
+          watchPercentage: Math.round(watchPercentage * 100) / 100,
+          currentTime: Math.round(currentTime),
+          totalDuration: Math.round(duration),
+          lastUpdated: new Date().toISOString(),
+          subject: videoDetail?.topics?.[0] || "General",
+          description: videoDetail?.description || "Video content",
+        };
+        
+        localStorage.setItem(
+          `video_progress_${currentVideoId}`,
+          JSON.stringify(progressData)
+        );
+        
+        console.log('💾 Video progress saved to localStorage as fallback');
+      } catch (localError) {
+        console.error('❌ Failed to save to localStorage:', localError);
+      }
+    } finally {
+      isSavingRef.current = false;
     }
   }, [currentVideoId, videoDetail]);
 
-  // 2. Save progress every 60 seconds ONLY if playing - only after video validation
+  // Handle YouTube player state changes (play/pause/buffering)
+  const handleYouTubeStateChange = useCallback((event: any) => {
+    const playerState = event.data;
+    console.log('🎬 YouTube state changed:', { playerState });
+    
+    // Save progress when video is paused or buffering
+    if (playerState === 2 || playerState === 3) { // 2 = paused, 3 = buffering
+      console.log('⏸️ Video paused/buffering, saving progress...');
+      saveVideoProgress();
+    }
+  }, [saveVideoProgress]);
+
+  // 2. Save progress every 30 seconds ONLY if playing - only after video validation
   useEffect(() => {
     if (!isVideoValidated) return;
     
@@ -418,39 +497,55 @@ const VideoPage: React.FC = () => {
         return ytPlayerRef.current?.getPlayerState?.();
       } catch { return undefined; }
     }
+    
     const startAutoSave = () => {
       if (!periodicSaveIntervalRef.current) {
         console.log('💾 Starting periodic progress saving after video validation...');
         periodicSaveIntervalRef.current = setInterval(() => {
-          if (getPlayerState() === 1) saveVideoProgress();
-        }, 60000);
+          const playerState = getPlayerState();
+          console.log('🔄 Periodic save check:', { playerState, isPlaying: playerState === 1 });
+          if (playerState === 1) { // 1 = playing
+            saveVideoProgress();
+          }
+        }, 30000); // Reduced to 30 seconds for more frequent saves
       }
     };
+    
     const stopAutoSave = () => {
       if (periodicSaveIntervalRef.current) {
+        console.log('⏹️ Stopping periodic progress saving...');
         clearInterval(periodicSaveIntervalRef.current);
         periodicSaveIntervalRef.current = null;
       }
     };
-    // Listen for play/pause from player, fallback: always start and rely on IF, else always clear
+    
+    // Start auto-save
     startAutoSave();
+    
     return () => stopAutoSave();
   }, [currentVideoId, isVideoValidated, saveVideoProgress]);
 
   // 3. Save progress on navigation, unload or unmount
   useEffect(() => {
-    const saveOnLeave = () => { saveVideoProgress(); };
+    const saveOnLeave = () => { 
+      console.log('🚪 Page leaving, saving progress...');
+      saveVideoProgress(); 
+    };
+    
     window.addEventListener("beforeunload", saveOnLeave);
     window.addEventListener("pagehide", saveOnLeave);
+    
     return () => {
       window.removeEventListener("beforeunload", saveOnLeave);
       window.removeEventListener("pagehide", saveOnLeave);
+      console.log('🔄 Component unmounting, saving progress...');
       saveVideoProgress();
     };
   }, [currentVideoId, saveVideoProgress]);
 
   // React Router navigation block
   useBlocker(() => {
+    console.log('🚫 Navigation blocked, saving progress...');
     saveVideoProgress();
     return false;
   });
@@ -680,11 +775,46 @@ const VideoPage: React.FC = () => {
                 navigate(to, options);
               }}
             />
+            {/* Debug: Manual save button */}
+            <div className="mb-2 flex justify-center gap-2">
+              <button
+                onClick={() => {
+                  console.log('🔧 Manual save triggered (forcing save)');
+                  saveVideoProgress(true);
+                }}
+                className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                💾 Save Progress (Debug)
+              </button>
+              <button
+                onClick={async () => {
+                  console.log('🧪 Testing API directly...');
+                  try {
+                    const testData = {
+                      video_id: currentVideoId || 'test',
+                      watch_percentage: 25.5,
+                      total_duration: 300,
+                      current_position: 75,
+                      page_url: window.location.href,
+                    };
+                    console.log('📡 Testing API with data:', testData);
+                    const result = await videoProgressApi.trackProgress(testData);
+                    console.log('✅ API test successful:', result);
+                  } catch (error) {
+                    console.error('❌ API test failed:', error);
+                  }
+                }}
+                className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                🧪 Test API
+              </button>
+            </div>
             {/* YouTube Video Player with Progress Tracking */}
             <div className="mb-4">
               <YouTube
                 videoId={currentVideoId}
                 onReady={handleYouTubeReady}
+                onStateChange={handleYouTubeStateChange}
                 className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg w-full h-full"
                 style={{ borderRadius: "12px" }}
                 opts={{
@@ -770,11 +900,46 @@ const VideoPage: React.FC = () => {
             </div>
           </header>
           <div className={`flex-shrink-0 ${isVideoVisible ? "" : "hidden"}`}>
+            {/* Debug: Manual save button - Mobile */}
+            <div className="p-2 flex justify-center gap-2">
+              <button
+                onClick={() => {
+                  console.log('🔧 Manual save triggered (mobile, forcing save)');
+                  saveVideoProgress(true);
+                }}
+                className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                💾 Save Progress (Debug)
+              </button>
+              <button
+                onClick={async () => {
+                  console.log('🧪 Testing API directly (mobile)...');
+                  try {
+                    const testData = {
+                      video_id: currentVideoId || 'test',
+                      watch_percentage: 25.5,
+                      total_duration: 300,
+                      current_position: 75,
+                      page_url: window.location.href,
+                    };
+                    console.log('📡 Testing API with data:', testData);
+                    const result = await videoProgressApi.trackProgress(testData);
+                    console.log('✅ API test successful:', result);
+                  } catch (error) {
+                    console.error('❌ API test failed:', error);
+                  }
+                }}
+                className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                🧪 Test API
+              </button>
+            </div>
             {/* YouTube Video Player with Progress Tracking - Mobile */}
             <div className="">
               <YouTube
                 videoId={currentVideoId}
                 onReady={handleYouTubeReady}
+                onStateChange={handleYouTubeStateChange}
                 className="aspect-video bg-black overflow-hidden w-full h-full"
                 style={{ borderRadius: "12px" }}
                 opts={{
