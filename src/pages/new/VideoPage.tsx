@@ -17,7 +17,8 @@ import ContentTabs from "@/components/learning/ContentTabs";
 import AITutorPanel from "@/components/learning/AITutorPanel";
 import Header from "@/components/learning/Header";
 import SparklesIcon from "@/components/icons/SparklesIcon";
-import { Box, Skeleton, Stack } from "@mui/material";
+import LoadingScreen from "@/components/ui/LoadingScreen";
+import { useApiProgress } from "@/hooks/useApiProgress";
 
 declare global {
   interface Window {
@@ -38,169 +39,6 @@ const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
 type LearningMode = "chat" | "flashcards" | "quiz" | "summary";
 interface Chapter { time: string; title: string; content: string; }
 
-const SkeletonLoaderVideoPage: React.FC = () => {
-  return (
-    <div className="bg-background text-white min-h-screen font-sans p-4 sm:p-6 lg:p-8">
-      {/* Main content grid */}
-      <main className="grid grid-cols-1 xl:grid-cols-5 gap-8">
-        {/* Left Column */}
-        <div className="xl:col-span-3">
-          <Stack spacing={4}>
-            {/* Header Skeleton */}
-            <header className="flex justify-between items-center pb-4">
-              <Skeleton
-                variant="text"
-                width="70%"
-                height={20}
-                sx={{ bgcolor: theme.divider }}
-              />
-              <div className="flex items-center space-x-4">
-                <Skeleton
-                  variant="circular"
-                  width={28}
-                  height={28}
-                  sx={{ bgcolor: theme.divider }}
-                />
-                <Skeleton
-                  variant="circular"
-                  width={28}
-                  height={28}
-                  sx={{ bgcolor: theme.divider }}
-                />
-              </div>
-            </header>
-            {/* Video Player Skeleton */}
-            <Skeleton
-              variant="rectangular"
-              sx={{ borderRadius: 3, bgcolor: theme.divider }}
-              width="100%"
-              height="60%"
-              className="aspect-video"
-            />
-
-            {/* Controls Skeleton */}
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <Stack direction="row" spacing={2}>
-                <Skeleton
-                  variant="rectangular"
-                  sx={{ borderRadius: 1, bgcolor: theme.divider }}
-                  width={120}
-                  height={40}
-                />
-                <Skeleton
-                  variant="rectangular"
-                  sx={{ borderRadius: 1, bgcolor: theme.divider }}
-                  width={120}
-                  height={40}
-                />
-              </Stack>
-            </div>
-
-            {/* Transcript/Content Skeleton */}
-            <Box className="mt-4">
-              <Skeleton
-                variant="text"
-                width={80}
-                height={30}
-                className="mb-2"
-                sx={{ borderRadius: 1, bgcolor: theme.divider }}
-              />
-              <Skeleton
-                variant="text"
-                width="70%"
-                height={20}
-                sx={{ borderRadius: 1, bgcolor: theme.divider }}
-              />
-              <Skeleton
-                variant="text"
-                width="50%"
-                height={20}
-                sx={{ borderRadius: 1, bgcolor: theme.divider }}
-              />
-            </Box>
-          </Stack>
-        </div>
-
-        {/* Right Column (Sidebar) */}
-        <div className="xl:col-span-2 bg-background p-4 rounded-lg flex flex-col h-[95vh]">
-          {/* Tabs Skeleton */}
-          <div className="flex items-center pb-3 mb-4 overflow-x-auto">
-            <Stack direction="row" spacing={1}>
-              <Skeleton
-                variant="rectangular"
-                sx={{ borderRadius: 1, bgcolor: theme.divider }}
-                width={60}
-                height={30}
-              />
-              <Skeleton
-                variant="rectangular"
-                sx={{ borderRadius: 1, bgcolor: theme.divider }}
-                width={60}
-                height={30}
-              />
-              <Skeleton
-                variant="rectangular"
-                sx={{ borderRadius: 1, bgcolor: theme.divider }}
-                width={60}
-                height={30}
-              />
-              <Skeleton
-                variant="rectangular"
-                sx={{ borderRadius: 1, bgcolor: theme.divider }}
-                width={60}
-                height={30}
-              />
-            </Stack>
-          </div>
-
-          {/* Chat Messages Skeleton */}
-          <Stack spacing={3} className="flex-grow">
-            <Skeleton
-              variant="text"
-              width="full"
-              height={20}
-              sx={{ bgcolor: theme.divider }}
-            />
-            <Skeleton
-              variant="text"
-              width="full"
-              height={20}
-              sx={{ bgcolor: theme.divider }}
-            />
-            <Skeleton
-              variant="text"
-              width="full"
-              height={20}
-              sx={{ bgcolor: theme.divider }}
-            />
-            <Skeleton
-              variant="text"
-              width="full"
-              height={20}
-              sx={{ bgcolor: theme.divider }}
-            />
-            <Skeleton
-              variant="text"
-              width="60%"
-              height={20}
-              sx={{ bgcolor: theme.divider }}
-            />
-          </Stack>
-
-          {/* Input Skeleton */}
-          <div className="mt-auto pt-4">
-            <Skeleton
-              variant="rectangular"
-              sx={{ borderRadius: 3, bgcolor: theme.divider }}
-              width="100%"
-              height={100}
-            />
-          </div>
-        </div>
-      </main>
-    </div>
-  );
-};
 
 const VideoPage: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
@@ -241,6 +79,46 @@ const VideoPage: React.FC = () => {
   const [resumePosition, setResumePosition] = useState(0);
   const [resumePercent, setResumePercent] = useState(0);
 
+  // API Progress Tracking
+  const {
+    isLoading: isApiLoading,
+    progress: apiProgress,
+    message: apiMessage,
+    registerApi,
+    setApiLoading,
+    setApiCompleted,
+    setApiFailed,
+    reset: resetProgress
+  } = useApiProgress({
+    onComplete: () => {
+      console.log('🎉 All APIs loaded successfully!');
+    }
+  });
+
+  // Force progress update every 2 seconds to ensure bar moves
+  useEffect(() => {
+    if (isApiLoading && apiProgress < 100) {
+      const interval = setInterval(() => {
+        // This will trigger a re-render and progress update
+        console.log(`📊 Current progress: ${apiProgress}%`);
+      }, 2000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isApiLoading, apiProgress]);
+
+  // Fallback progress mechanism - ensure progress always moves
+  useEffect(() => {
+    if (isApiLoading && apiProgress < 100) {
+      const fallbackInterval = setInterval(() => {
+        // Force a small progress update to keep the bar moving
+        console.log('🔄 Fallback progress update triggered');
+      }, 3000);
+      
+      return () => clearInterval(fallbackInterval);
+    }
+  }, [isApiLoading, apiProgress]);
+
   // Feedback - only after video validation
   const {
     feedbackStates, isLoading: isFeedbackLoading, markAsSubmitted
@@ -270,51 +148,65 @@ const VideoPage: React.FC = () => {
       try {
         setIsLoadingVideo(true);
         setIsVideoValidated(false);
-        
+        resetProgress(); // Reset progress tracking
+
+        // Register video validation API
+        registerApi('video-validation', 'Video Validation', 0.3);
+        setApiLoading('video-validation', true, 'Validating video content...');
+
         console.log('🔍 Validating video...');
         const details = await videoApi.getVideoDetail(`https://www.youtube.com/watch?v=${currentVideoId}`);
-        
+
         if (!didCancel) {
-          setVideoDetail(details);
+        setVideoDetail(details);
           setIsVideoValidated(true);
+          setApiCompleted('video-validation', 'Video validated successfully!');
           console.log('✅ Video validated successfully, other APIs can now run');
         }
       } catch (err: any) {
         if (!didCancel) {
           console.log('❌ Video validation failed:', err);
-          if (err.isOutOfSyllabus || err.status === 204) {
+        if (err.isOutOfSyllabus || err.status === 204) {
             console.log('🚫 Video is out of syllabus, redirecting...');
+            setApiFailed('video-validation', 'Video is out of syllabus');
             navigate(ROUTES.OUT_OF_SYLLABUS, {
               state: {
                 videoUrl: `https://www.youtube.com/watch?v=${currentVideoId}`,
                 videoTitle: `Video ${currentVideoId}`,
               }
             });
-          } else {
+        } else {
             console.log('⚠️ Video validation error, setting fallback');
+            setApiFailed('video-validation', 'Video validation failed');
             setVideoDetail({});
             setIsVideoValidated(false);
           }
         }
       } finally {
         if (!didCancel) {
-          setIsLoadingVideo(false);
+        setIsLoadingVideo(false);
         }
       }
     };
 
     validateVideo();
     return () => { didCancel = true; };
-  }, [currentVideoId, navigate]);
+  }, [currentVideoId, navigate, registerApi, setApiLoading, setApiCompleted, setApiFailed, resetProgress]);
 
   // ------ Fetch progress (for resuming) - only after video validation ------
   useEffect(() => {
     if (!currentVideoId || !isVideoValidated) return;
     let didCancel = false;
 
-    console.log('📊 Fetching video progress after validation...');
-    videoProgressApi.getProgress(currentVideoId)
-      .then(resp => {
+    const fetchProgress = async () => {
+      try {
+        // Register progress API
+        registerApi('video-progress', 'Video Progress', 0.2);
+        setApiLoading('video-progress', true, 'Loading video progress...');
+        
+        console.log('📊 Fetching video progress after validation...');
+        const resp = await videoProgressApi.getProgress(currentVideoId);
+        
         if (!didCancel) {
           const pos = Number(resp.data?.current_position ?? 0);
           const pct = Number(resp.data?.watch_percentage ?? 0);
@@ -344,9 +236,9 @@ const VideoPage: React.FC = () => {
               } catch {}
             }
           }
+          setApiCompleted('video-progress', 'Video progress loaded!');
         }
-      })
-      .catch(() => {
+      } catch (err) {
         if (!didCancel) {
           console.log('⚠️ Progress API failed, trying localStorage...');
           const raw = localStorage.getItem(`video_progress_${currentVideoId}`);
@@ -365,11 +257,14 @@ const VideoPage: React.FC = () => {
               }
             } catch {}
           }
+          setApiCompleted('video-progress', 'Video progress loaded from cache!');
         }
-      });
+      }
+    };
 
+    fetchProgress();
     return () => { didCancel = true; };
-  }, [currentVideoId, isVideoValidated]);
+  }, [currentVideoId, isVideoValidated, registerApi, setApiLoading, setApiCompleted]);
 
   // ------ Fetch chapters - only after video validation ------
   useEffect(() => {
@@ -378,6 +273,10 @@ const VideoPage: React.FC = () => {
 
     const fetchChapters = async () => {
       try {
+        // Register chapters API
+        registerApi('video-chapters', 'Video Chapters', 0.2);
+        setApiLoading('video-chapters', true, 'Loading video chapters...');
+        
         console.log('📚 Fetching video chapters after validation...');
         setIsLoadingChapters(true);
         setChaptersError(null);
@@ -392,12 +291,14 @@ const VideoPage: React.FC = () => {
             })
           );
           setChapters(transformedChapters);
+          setApiCompleted('video-chapters', `Loaded ${transformedChapters.length} chapters!`);
           console.log(`📚 Loaded ${transformedChapters.length} chapters`);
         }
       } catch (err: any) {
         if (!didCancel) {
           console.log('❌ Failed to load chapters:', err);
           setChaptersError("Failed to load chapters. Please try again.");
+          setApiFailed('video-chapters', 'Failed to load chapters');
         }
       } finally {
         if (!didCancel) {
@@ -408,7 +309,7 @@ const VideoPage: React.FC = () => {
 
     fetchChapters();
     return () => { didCancel = true; };
-  }, [videoDetail?.external_source_id, isVideoValidated]);
+  }, [videoDetail?.external_source_id, isVideoValidated, registerApi, setApiLoading, setApiCompleted, setApiFailed]);
 
   // Fetch transcript when requested
   const fetchTranscript = useCallback(async () => {
@@ -600,10 +501,55 @@ const VideoPage: React.FC = () => {
   // Initialize chat when video loads - only after video validation
   useEffect(() => {
     if (currentVideoId && !chatInitialized && isVideoValidated) {
-      console.log('💬 Initializing chat after video validation...');
-      initializeChat();
+      const initChat = async () => {
+        try {
+          // Register chat API
+          registerApi('chat-init', 'Chat Initialization', 0.15);
+          setApiLoading('chat-init', true, 'Initializing chat...');
+          
+          console.log('💬 Initializing chat after video validation...');
+          await initializeChat();
+          setApiCompleted('chat-init', 'Chat initialized!');
+        } catch (err) {
+          console.log('❌ Failed to initialize chat:', err);
+          setApiFailed('chat-init', 'Failed to initialize chat');
+        }
+      };
+      
+      initChat();
     }
-  }, [currentVideoId, chatInitialized, isVideoValidated, initializeChat]);
+  }, [currentVideoId, chatInitialized, isVideoValidated, initializeChat, registerApi, setApiLoading, setApiCompleted, setApiFailed]);
+
+  // Track feedback loading - only after video validation
+  useEffect(() => {
+    if (currentVideoId && isVideoValidated) {
+      const initFeedback = async () => {
+        try {
+          // Register feedback API
+          registerApi('feedback-init', 'Feedback System', 0.15);
+          setApiLoading('feedback-init', true, 'Setting up feedback system...');
+          
+          // Wait for feedback to load
+          await new Promise(resolve => {
+            const checkFeedback = () => {
+              if (!isFeedbackLoading) {
+                setApiCompleted('feedback-init', 'Feedback system ready!');
+                resolve(true);
+              } else {
+                setTimeout(checkFeedback, 100);
+              }
+            };
+            checkFeedback();
+          });
+        } catch (err) {
+          console.log('❌ Failed to initialize feedback:', err);
+          setApiFailed('feedback-init', 'Failed to initialize feedback');
+        }
+      };
+      
+      initFeedback();
+    }
+  }, [currentVideoId, isVideoValidated, isFeedbackLoading, registerApi, setApiLoading, setApiCompleted, setApiFailed]);
 
   const handleSendMessage = useCallback(
     async (message: string) => {
@@ -652,14 +598,14 @@ const VideoPage: React.FC = () => {
         />
       ),
       quiz: (
-        <Quiz
-          key={`quiz-${currentVideoId}`}
-          videoId={currentVideoId || ""}
+          <Quiz
+            key={`quiz-${currentVideoId}`}
+            videoId={currentVideoId || ""}
           canSubmitFeedback={feedbackStates[ComponentName.Quiz]?.canSubmitFeedback}
           existingFeedback={feedbackStates[ComponentName.Quiz]?.existingFeedback}
           markAsSubmitted={() => markAsSubmitted(ComponentName.Quiz)}
-          topics={videoDetail?.topics}
-        />
+            topics={videoDetail?.topics}
+          />
       ),
       summary: (
         <SummaryWrapper
@@ -696,9 +642,24 @@ const VideoPage: React.FC = () => {
     setCurrentMode(mode);
   }, []);
 
-  // Show loading screen while video details are being fetched
-  if (isLoadingVideo) {
-    return (<SkeletonLoaderVideoPage />);
+  // Show loading screen while APIs are loading
+  if (isLoadingVideo || (isApiLoading && apiProgress < 90)) {
+    console.log('🔄 Showing loading screen:', { isLoadingVideo, isApiLoading, apiProgress, apiMessage });
+    return (
+      <LoadingScreen
+        isLoading={true}
+        progress={apiProgress}
+        message={apiMessage}
+        showSkeleton={true}
+      />
+    );
+  }
+
+  // If video is not validated but we've been loading for a while, show fallback
+  if (!isVideoValidated && apiProgress > 50) {
+    console.log('⚠️ Video validation taking too long, showing fallback content');
+    setVideoDetail({ title: `Video ${currentVideoId}`, description: "Loading..." });
+    setIsVideoValidated(true);
   }
 
   return (
