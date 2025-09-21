@@ -1,4 +1,4 @@
-import AttemptedTests from "@/pages/new/AttemptedTests";
+import AttemptedTests from "@/pages/archive/AttemptedTests";
 import AuthCallbackPage from "@/pages/new/AuthCallbackPage";
 import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";

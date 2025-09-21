@@ -57,7 +57,7 @@ const aiRecommendedTests: AiRecommendation[] = [
 // Helper to calculate days since the test was taken
 const calculateDaysSince = (dateString: string): string => {
   if (!dateString) return "";
-  const today = new Date("2025-09-11T16:58:00"); // Current fixed time
+  const today = new Date(); // Current fixed time
   const testDate = new Date(dateString);
   today.setHours(0, 0, 0, 0);
   testDate.setHours(0, 0, 0, 0);
@@ -116,10 +116,12 @@ const getPercentileColor = (percentile: number) => {
 };
 
 const ActionButton = ({
+  sessionId,
   status,
   isMoreOpen,
   setMoreOpen,
 }: {
+  sessionId: string;
   status: MockTestStatus;
   isMoreOpen: boolean;
   setMoreOpen: (isOpen: boolean) => void;
@@ -169,7 +171,9 @@ const ActionButton = ({
       {isMoreOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-xl z-20 ">
           <span
-            onClick={() => navigate(ROUTES.ANALYSIS2)}
+            onClick={() => navigate(ROUTES.ANALYSIS2, {
+          state: { sessionId: sessionId },
+        })}
             className="cursor-pointer flex items-center px-4 py-2 text-sm hover:bg-foreground/10 rounded-t-lg gap-4"
           >
             <TrendingUp className="h-5 w-5 text-muted-foreground" /> View
@@ -268,6 +272,7 @@ const TestFeedCard = ({ test }: { test: MockTest }) => {
         {/* Action button */}
 
         <ActionButton
+        sessionId={test.id}
           status={test.status}
           isMoreOpen={isMoreOpen}
           setMoreOpen={setMoreOpen}
