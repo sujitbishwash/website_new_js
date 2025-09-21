@@ -4,7 +4,6 @@ import Chat from "@/components/learning/Chat";
 import Flashcards from "@/components/learning/Flashcards";
 import Quiz from "@/components/learning/Quiz";
 import Summary from "@/components/learning/Summary";
-import { Box, Skeleton, Stack } from "@mui/material";
 import { ComponentName } from "@/lib/api-client";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
@@ -18,6 +17,7 @@ import ContentTabs from "@/components/learning/ContentTabs";
 import AITutorPanel from "@/components/learning/AITutorPanel";
 import Header from "@/components/learning/Header";
 import SparklesIcon from "@/components/icons/SparklesIcon";
+import { Box, Skeleton, Stack } from "@mui/material";
 
 declare global {
   interface Window {
@@ -221,7 +221,7 @@ const VideoPage: React.FC = () => {
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
   const [isLeftColumnVisible, setIsLeftColumnVisible] = useState(true);
-  const [_showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
+  const [isVideoValidated, setIsVideoValidated] = useState(false);
 
   // Learning mode
   const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
@@ -241,7 +241,7 @@ const VideoPage: React.FC = () => {
   const [resumePosition, setResumePosition] = useState(0);
   const [resumePercent, setResumePercent] = useState(0);
 
-  // Feedback
+  // Feedback - only after video validation
   const {
     feedbackStates, isLoading: isFeedbackLoading, markAsSubmitted
   } = useMultiFeedbackTracker({
@@ -252,7 +252,7 @@ const VideoPage: React.FC = () => {
       ComponentName.Summary,
       ComponentName.Flashcard,
     ],
-    sourceId: currentVideoId || "",
+    sourceId: isVideoValidated ? (currentVideoId || "") : "",
     pageUrl: window.location.href,
     onFeedbackExists: () => {},
   });
@@ -261,67 +261,154 @@ const VideoPage: React.FC = () => {
   const videoCanSubmitFeedback = videoFeedbackState ? videoFeedbackState.canSubmitFeedback : isFeedbackLoading ? false : true;
   const videoExistingFeedback = videoFeedbackState?.existingFeedback ?? null;
 
-  // ------ Fetch video detail, progress, chapters etc ------
+  // ------ Video Validation (MUST complete first) ------
   useEffect(() => {
     if (!currentVideoId) return;
     let didCancel = false;
 
-    // 1. Video Detail
-    setIsLoadingVideo(true);
-    videoApi.getVideoDetail(`https://www.youtube.com/watch?v=${currentVideoId}`)
-      .then(details => { if (!didCancel) setVideoDetail(details); })
-      .catch(err => {
+    const validateVideo = async () => {
+      try {
+        setIsLoadingVideo(true);
+        setIsVideoValidated(false);
+        
+        console.log('🔍 Validating video...');
+        const details = await videoApi.getVideoDetail(`https://www.youtube.com/watch?v=${currentVideoId}`);
+        
         if (!didCancel) {
-          if (err.isOutOfSyllabus || err.status === 204) setShowOutOfSyllabus(true);
-          else setVideoDetail({});
+          setVideoDetail(details);
+          setIsVideoValidated(true);
+          console.log('✅ Video validated successfully, other APIs can now run');
         }
-      })
-      .finally(() => { if (!didCancel) setIsLoadingVideo(false); });
+      } catch (err: any) {
+        if (!didCancel) {
+          console.log('❌ Video validation failed:', err);
+          if (err.isOutOfSyllabus || err.status === 204) {
+            console.log('🚫 Video is out of syllabus, redirecting...');
+            navigate(ROUTES.OUT_OF_SYLLABUS, {
+              state: {
+                videoUrl: `https://www.youtube.com/watch?v=${currentVideoId}`,
+                videoTitle: `Video ${currentVideoId}`,
+              }
+            });
+          } else {
+            console.log('⚠️ Video validation error, setting fallback');
+            setVideoDetail({});
+            setIsVideoValidated(false);
+          }
+        }
+      } finally {
+        if (!didCancel) {
+          setIsLoadingVideo(false);
+        }
+      }
+    };
 
-    // 2. Progress (for resuming)
+    validateVideo();
+    return () => { didCancel = true; };
+  }, [currentVideoId, navigate]);
+
+  // ------ Fetch progress (for resuming) - only after video validation ------
+  useEffect(() => {
+    if (!currentVideoId || !isVideoValidated) return;
+    let didCancel = false;
+
+    console.log('📊 Fetching video progress after validation...');
     videoProgressApi.getProgress(currentVideoId)
       .then(resp => {
-        const pos = Number(resp.data?.current_position ?? 0);
-        const pct = Number(resp.data?.watch_percentage ?? 0);
-        if (!isNaN(pos) && pos > 0) setResumePosition(pos);
-        if (!isNaN(pct) && pct > 0) setResumePercent(pct);
-        if ((isNaN(pos) || pos <= 0) && (isNaN(pct) || pct <= 0)) {
+        if (!didCancel) {
+          const pos = Number(resp.data?.current_position ?? 0);
+          const pct = Number(resp.data?.watch_percentage ?? 0);
+          if (!isNaN(pos) && pos > 0) {
+            setResumePosition(pos);
+            console.log(`📊 Loaded resume position: ${pos}s`);
+          }
+          if (!isNaN(pct) && pct > 0) {
+            setResumePercent(pct);
+            console.log(`📊 Loaded resume percentage: ${pct}%`);
+          }
+          if ((isNaN(pos) || pos <= 0) && (isNaN(pct) || pct <= 0)) {
+            const raw = localStorage.getItem(`video_progress_${currentVideoId}`);
+            if (raw) {
+              try {
+                const data = JSON.parse(raw);
+                const lsPos = Number(data?.currentTime ?? 0);
+                const lsPct = Number(data?.watchPercentage ?? 0);
+                if (!isNaN(lsPos) && lsPos > 0) {
+                  setResumePosition(lsPos);
+                  console.log(`📊 Loaded resume position from localStorage: ${lsPos}s`);
+                }
+                if (!isNaN(lsPct) && lsPct > 0) {
+                  setResumePercent(lsPct);
+                  console.log(`📊 Loaded resume percentage from localStorage: ${lsPct}%`);
+                }
+              } catch {}
+            }
+          }
+        }
+      })
+      .catch(() => {
+        if (!didCancel) {
+          console.log('⚠️ Progress API failed, trying localStorage...');
           const raw = localStorage.getItem(`video_progress_${currentVideoId}`);
           if (raw) {
             try {
               const data = JSON.parse(raw);
               const lsPos = Number(data?.currentTime ?? 0);
               const lsPct = Number(data?.watchPercentage ?? 0);
-              if (!isNaN(lsPos) && lsPos > 0) setResumePosition(lsPos);
-              if (!isNaN(lsPct) && lsPct > 0) setResumePercent(lsPct);
+              if (!isNaN(lsPos) && lsPos > 0) {
+                setResumePosition(lsPos);
+                console.log(`📊 Loaded resume position from localStorage: ${lsPos}s`);
+              }
+              if (!isNaN(lsPct) && lsPct > 0) {
+                setResumePercent(lsPct);
+                console.log(`📊 Loaded resume percentage from localStorage: ${lsPct}%`);
+              }
             } catch {}
           }
         }
       });
 
-    // 3. Chapters
-    setIsLoadingChapters(true);
-    setChaptersError(null);
-    videoApi.getVideoDetail(`https://www.youtube.com/watch?v=${currentVideoId}`)
-      .then(detail => {
-        if (!detail?.external_source_id) return setIsLoadingChapters(false);
-        videoApi.getVideoChapters(detail.external_source_id)
-          .then(response => {
-            const transformedChapters: Chapter[] = response.chapters.map(
-              (chapter: any) => ({
-                time: chapter.timestamp,
-                title: chapter.title,
-                content: chapter.description,
-              })
-            );
-            setChapters(transformedChapters);
-          })
-          .catch(() => setChaptersError("Failed to load chapters. Please try again."))
-          .finally(() => setIsLoadingChapters(false));
-      });
-
     return () => { didCancel = true; };
-  }, [currentVideoId]);
+  }, [currentVideoId, isVideoValidated]);
+
+  // ------ Fetch chapters - only after video validation ------
+  useEffect(() => {
+    if (!videoDetail?.external_source_id || !isVideoValidated) return;
+    let didCancel = false;
+
+    const fetchChapters = async () => {
+      try {
+        console.log('📚 Fetching video chapters after validation...');
+        setIsLoadingChapters(true);
+        setChaptersError(null);
+
+        const response = await videoApi.getVideoChapters(videoDetail.external_source_id);
+        if (!didCancel) {
+          const transformedChapters: Chapter[] = response.chapters.map(
+            (chapter: any) => ({
+              time: chapter.timestamp,
+              title: chapter.title,
+              content: chapter.description,
+            })
+          );
+          setChapters(transformedChapters);
+          console.log(`📚 Loaded ${transformedChapters.length} chapters`);
+        }
+      } catch (err: any) {
+        if (!didCancel) {
+          console.log('❌ Failed to load chapters:', err);
+          setChaptersError("Failed to load chapters. Please try again.");
+        }
+      } finally {
+        if (!didCancel) {
+          setIsLoadingChapters(false);
+        }
+      }
+    };
+
+    fetchChapters();
+    return () => { didCancel = true; };
+  }, [videoDetail?.external_source_id, isVideoValidated]);
 
   // Fetch transcript when requested
   const fetchTranscript = useCallback(async () => {
@@ -421,8 +508,10 @@ const VideoPage: React.FC = () => {
     }
   }, [currentVideoId, videoDetail]);
 
-  // 2. Save progress every 60 seconds ONLY if playing
+  // 2. Save progress every 60 seconds ONLY if playing - only after video validation
   useEffect(() => {
+    if (!isVideoValidated) return;
+    
     function getPlayerState() {
       try {
         return ytPlayerRef.current?.getPlayerState?.();
@@ -430,6 +519,7 @@ const VideoPage: React.FC = () => {
     }
     const startAutoSave = () => {
       if (!periodicSaveIntervalRef.current) {
+        console.log('💾 Starting periodic progress saving after video validation...');
         periodicSaveIntervalRef.current = setInterval(() => {
           if (getPlayerState() === 1) saveVideoProgress();
         }, 60000);
@@ -444,7 +534,7 @@ const VideoPage: React.FC = () => {
     // Listen for play/pause from player, fallback: always start and rely on IF, else always clear
     startAutoSave();
     return () => stopAutoSave();
-  }, [currentVideoId, saveVideoProgress]);
+  }, [currentVideoId, isVideoValidated, saveVideoProgress]);
 
   // 3. Save progress on navigation, unload or unmount
   useEffect(() => {
@@ -507,12 +597,13 @@ const VideoPage: React.FC = () => {
     }
   }, [currentVideoId, chatInitialized]);
 
-  // Initialize chat when video loads
+  // Initialize chat when video loads - only after video validation
   useEffect(() => {
-    if (currentVideoId && !chatInitialized) {
+    if (currentVideoId && !chatInitialized && isVideoValidated) {
+      console.log('💬 Initializing chat after video validation...');
       initializeChat();
     }
-  }, [currentVideoId, chatInitialized, initializeChat]);
+  }, [currentVideoId, chatInitialized, isVideoValidated, initializeChat]);
 
   const handleSendMessage = useCallback(
     async (message: string) => {
@@ -607,7 +698,7 @@ const VideoPage: React.FC = () => {
 
   // Show loading screen while video details are being fetched
   if (isLoadingVideo) {
-    return <SkeletonLoaderVideoPage />;
+    return (<SkeletonLoaderVideoPage />);
   }
 
   return (
