@@ -1,3 +1,4 @@
+import React, { useCallback, useEffect, useRef, useState, useMemo } from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 import Chat from "@/components/learning/Chat";
 import Flashcards from "@/components/learning/Flashcards";
@@ -8,20 +9,8 @@ import { ComponentName } from "@/lib/api-client";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import { Eye, EyeOff } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, useMemo } from "react";
-import React from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useBlocker,
-} from "react-router-dom";
-import {
-  chatApi,
-  videoApi,
-  VideoDetail,
-  videoProgressApi,
-} from "../../lib/api-client";
+import { useLocation, useNavigate, useParams, useBlocker } from "react-router-dom";
+import { chatApi, videoApi, videoProgressApi } from "../../lib/api-client";
 import YouTube from "react-youtube";
 import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
 import ShareModal from "@/components/modals/ShareModal";
@@ -29,7 +18,6 @@ import ContentTabs from "@/components/learning/ContentTabs";
 import AITutorPanel from "@/components/learning/AITutorPanel";
 import Header from "@/components/learning/Header";
 import SparklesIcon from "@/components/icons/SparklesIcon";
-import CustomLoader from "@/components/icons/customloader";
 
 declare global {
   interface Window {
@@ -47,14 +35,8 @@ const SummaryWrapper = React.memo(({ videoId }: { videoId: string }) => {
   return <Summary videoId={videoId} />;
 });
 
-interface Chapter {
-  time: string;
-  title: string;
-  content: string;
-}
-
-// Learning mode types
 type LearningMode = "chat" | "flashcards" | "quiz" | "summary";
+interface Chapter { time: string; title: string; content: string; }
 
 const SkeletonLoaderVideoPage: React.FC = () => {
   return (
@@ -220,16 +202,17 @@ const SkeletonLoaderVideoPage: React.FC = () => {
   );
 };
 
-// --- Main App Component ---
 const VideoPage: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // State for video data
-  const [videoDetail, setVideoDetail] = useState<VideoDetail | null>(null);
+  const currentVideoId = videoId || location.state?.videoId;
+
+  // Video state
+  const [videoDetail, setVideoDetail] = useState<any>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
-  const [transcript, setTranscript] = useState<string>("");
+  const [transcript, setTranscript] = useState("");
   const [isLoadingVideo, setIsLoadingVideo] = useState(true);
   const [isLoadingChapters, setIsLoadingChapters] = useState(false);
   const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
@@ -238,178 +221,29 @@ const VideoPage: React.FC = () => {
   const [chaptersError, setChaptersError] = useState<string | null>(null);
   const [transcriptError, setTranscriptError] = useState<string | null>(null);
   const [isLeftColumnVisible, setIsLeftColumnVisible] = useState(true);
-  const [isVideoValidated, setIsVideoValidated] = useState(false);
+  const [_showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
 
-  // State for learning mode
+  // Learning mode
   const [currentMode, setCurrentMode] = useState<LearningMode>("chat");
+  const [videoProgress] = useState(0);
 
-  // Video progress state
-  const [videoProgress, setVideoProgress] = useState(0);
-
-  // Chat state management
-  const [chatMessages, setChatMessages] = useState<
-    Array<{ text: string; isUser: boolean }>
-  >([]);
+  // Chat
+  const [chatMessages, setChatMessages] = useState<Array<{ text: string; isUser: boolean }>>([]);
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatInitialized, setChatInitialized] = useState(false);
 
-  // Video player ref for tracking progress
-  const videoDurationRef = useRef<number>(0);
+  // Refs (persisted values across renders)
   const ytPlayerRef = useRef<any>(null);
-  const progressIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const periodicSaveIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isPlayingRef = useRef<boolean>(false);
-  const isPlayerActivelyPlaying = useCallback((): boolean => {
-    try {
-      const state = ytPlayerRef.current?.getPlayerState?.();
-      // 1 = playing
-      if (state === 1) return true;
-    } catch {}
-    return isPlayingRef.current;
-  }, []);
-  const [resumePosition, setResumePosition] = useState<number>(0);
-  const [resumePercent, setResumePercent] = useState<number>(0);
-  const resumeSeekAppliedRef = useRef<boolean>(false);
+  const resumeSeekAppliedRef = useRef(false);
+  const periodicSaveIntervalRef = useRef<any>(null);
 
-  // Get video ID from URL params or location state
-  const currentVideoId = videoId || location.state?.videoId;
+  const [resumePosition, setResumePosition] = useState(0);
+  const [resumePercent, setResumePercent] = useState(0);
 
-  // Track last saved progress to avoid duplicate saves
-  const lastSavedProgressRef = useRef<{
-    percentage: number;
-    position: number;
-    timestamp: number;
-  } | null>(null);
-
-  // Function to save video progress with throttling and deduplication
-  const saveVideoProgress = useCallback(async () => {
-    if (!currentVideoId || !ytPlayerRef.current) {
-      return;
-    }
-
-    try {
-      const currentTime = ytPlayerRef.current.getCurrentTime();
-      const duration = ytPlayerRef.current.getDuration();
-
-      // Only save progress if video has been played (currentTime >= 0.1) and duration is available
-      if (duration > 0 && currentTime >= 0.1) {
-        const watchPercentage = (currentTime / duration) * 100;
-        const now = Date.now();
-
-        // Throttle saves: only save if progress changed significantly or enough time passed
-        /*
-        const lastSaved = lastSavedProgressRef.current;
-        const shouldSave = !lastSaved || 
-          Math.abs(watchPercentage - lastSaved.percentage) >= 5 || // 5% change
-          Math.abs(currentTime - lastSaved.position) >= 30 || // 30 seconds change
-          (now - lastSaved.timestamp) >= 60000; // 1 minute passed
-
-        if (!shouldSave) {
-          return;
-        }
-          */
-
-        try {
-          await videoProgressApi.trackProgress({
-            video_id: currentVideoId,
-            watch_percentage: Math.round(watchPercentage * 100) / 100,
-            total_duration: Math.round(duration),
-            current_position: Math.round(currentTime),
-            page_url: window.location.href,
-          });
-
-          // Update last saved progress
-          lastSavedProgressRef.current = {
-            percentage: watchPercentage,
-            position: currentTime,
-            timestamp: now,
-          };
-
-          // Mirror to localStorage on successful save
-          const progressData = {
-            videoId: currentVideoId,
-            title: videoDetail?.title || `Video ${currentVideoId}`,
-            thumbnailUrl: `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`,
-            watchPercentage: Math.round(watchPercentage * 100) / 100,
-            currentTime: Math.round(currentTime),
-            totalDuration: Math.round(duration),
-            lastUpdated: new Date().toISOString(),
-            subject: videoDetail?.topics?.[0] || "General",
-            description: videoDetail?.description || "Video content",
-          };
-          localStorage.setItem(
-            `video_progress_${currentVideoId}`,
-            JSON.stringify(progressData)
-          );
-        } catch (apiError: any) {
-          // If API endpoint doesn't exist (404), try alternative approach
-          if (apiError.status === 404) {
-            // Store progress in localStorage as fallback
-            const progressData = {
-              videoId: currentVideoId,
-              title: videoDetail?.title || `Video ${currentVideoId}`,
-              thumbnailUrl: `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`,
-              watchPercentage: Math.round(watchPercentage * 100) / 100,
-              currentTime: Math.round(currentTime),
-              totalDuration: Math.round(duration),
-              lastUpdated: new Date().toISOString(),
-              subject: videoDetail?.topics?.[0] || "General",
-              description: videoDetail?.description || "Video content",
-            };
-            localStorage.setItem(
-              `video_progress_${currentVideoId}`,
-              JSON.stringify(progressData)
-            );
-          } else {
-            throw apiError;
-          }
-        }
-      }
-    } catch (error) {}
-  }, [currentVideoId, videoDetail]);
-
-  // Create a wrapped navigate function that shows alert before navigating
-  const navigateWithProgress = useCallback(
-    (to: string, options?: any) => {
-      saveVideoProgress();
-      navigate(to, options);
-    },
-    [navigate]
-  );
-
-  // React Router navigation blocker
-  const blocker = useBlocker(({ currentLocation, nextLocation }) => {
-    const isNavigatingAway = currentLocation.pathname !== nextLocation.pathname;
-
-    return isNavigatingAway;
-  });
-
-  // Handle React Router navigation blocking
-  useEffect(() => {
-    if (blocker.state === "blocked") {
-      saveVideoProgress();
-      blocker.proceed();
-    }
-  }, [blocker]);
-
-  // Track previous location to detect navigation
-  const prevLocationRef = useRef(location.pathname);
-
-  useEffect(() => {
-    // Check if location has changed
-    if (prevLocationRef.current !== location.pathname) {
-      saveVideoProgress();
-      prevLocationRef.current = location.pathname;
-    }
-  }, [location.pathname]);
-
-  // Simple feedback state management
-  // Use the feedback tracker hook for all components - only after video validation
+  // Feedback
   const {
-    feedbackStates,
-    isLoading: isFeedbackLoading,
-    markAsSubmitted,
+    feedbackStates, isLoading: isFeedbackLoading, markAsSubmitted
   } = useMultiFeedbackTracker({
     components: [
       ComponentName.Video,
@@ -418,398 +252,35 @@ const VideoPage: React.FC = () => {
       ComponentName.Summary,
       ComponentName.Flashcard,
     ],
-    sourceId: isVideoValidated ? (currentVideoId || "") : "",
+    sourceId: currentVideoId || "",
     pageUrl: window.location.href,
     onFeedbackExists: () => {},
   });
 
-  // Create wrapper functions for markAsSubmitted for each component
-  const chatMarkAsSubmitted = useCallback(() => {
-    markAsSubmitted(ComponentName.Chat);
-  }, [markAsSubmitted]);
-
-  const quizMarkAsSubmitted = useCallback(() => {
-    markAsSubmitted(ComponentName.Quiz);
-  }, [markAsSubmitted]);
-
-  // Removed unused callback functions
-
-  // Create wrapper function for markAsSubmitted to maintain backward compatibility
-  const videoMarkAsSubmitted = useCallback(() => {}, []);
-
-  // Extract video feedback state
   const videoFeedbackState = feedbackStates[ComponentName.Video];
-  const videoCanSubmitFeedback = videoFeedbackState
-    ? videoFeedbackState.canSubmitFeedback
-    : isFeedbackLoading
-    ? false
-    : true;
+  const videoCanSubmitFeedback = videoFeedbackState ? videoFeedbackState.canSubmitFeedback : isFeedbackLoading ? false : true;
   const videoExistingFeedback = videoFeedbackState?.existingFeedback ?? null;
 
-  // Extract feedback states for all components - provide sensible defaults
-  const chatFeedbackState = feedbackStates[ComponentName.Chat] || {
-    canSubmitFeedback: true,
-    existingFeedback: null,
-    reason: "",
-  };
-  const quizFeedbackState = feedbackStates[ComponentName.Quiz] || {
-    canSubmitFeedback: true,
-    existingFeedback: null,
-    reason: "",
-  };
-  const summaryFeedbackState = feedbackStates[ComponentName.Summary] || {
-    canSubmitFeedback: true,
-    existingFeedback: null,
-    reason: "",
-  };
-  const flashcardFeedbackState = feedbackStates[ComponentName.Flashcard] || {
-    canSubmitFeedback: true,
-    existingFeedback: null,
-    reason: "",
-  };
+  // ------ Fetch video detail, progress, chapters etc ------
+  useEffect(() => {
+    if (!currentVideoId) return;
+    let didCancel = false;
 
-  // Components object will be defined after all functions are available
-
-  // Local modal state for feedback
-  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
-  const openFeedbackModal = useCallback(() => setIsFeedbackModalOpen(true), []);
-  const closeFeedbackModal = useCallback(
-    () => setIsFeedbackModalOpen(false),
-    []
-  );
-
-  // YouTube player event handlers
-  const onYouTubeReady = useCallback(
-    (event: any) => {
-      const player = event.target;
-
-      // Store player reference for progress tracking
-      ytPlayerRef.current = player;
-
-      // Seek to saved position if available
-      const attemptSeek = () => {
-        try {
-          if (!resumeSeekAppliedRef.current && resumePosition > 0) {
-            const duration = player.getDuration?.() || 0;
-            // Ensure the player is ready with a valid duration
-            if (duration > 0 && resumePosition < duration) {
-              player.seekTo(resumePosition, true);
-              resumeSeekAppliedRef.current = true;
-            }
-          } else if (!resumeSeekAppliedRef.current && resumePercent > 0) {
-            const duration = player.getDuration?.() || 0;
-            if (duration > 0) {
-              const target = Math.min(
-                duration - 1,
-                Math.max(0, (resumePercent / 100) * duration)
-              );
-              player.seekTo(target, true);
-              resumeSeekAppliedRef.current = true;
-            }
-          }
-        } catch {}
-      };
-      // Try immediately and again shortly after; some embeds need a delay
-      attemptSeek();
-      setTimeout(attemptSeek, 500);
-
-      // Start progress tracking interval after a delay to ensure player is ready
-      const interval = setTimeout(() => {
-        const progressInterval = setInterval(() => {
-          try {
-            const currentTime = player.getCurrentTime();
-            const duration = player.getDuration();
-
-            if (duration > 0) {
-              const progress = (currentTime / duration) * 100;
-              setVideoProgress(progress);
-
-              // Store duration for progress tracking
-              videoDurationRef.current = duration;
-
-              // Auto-show feedback when video reaches 90%
-              if (
-                progress >= 90 &&
-                !hasShownFeedbackRef.current &&
-                videoCanSubmitFeedbackRef.current &&
-                videoCanSubmitFeedback &&
-                !videoExistingFeedback
-              ) {
-                openFeedbackModal();
-                hasShownFeedbackRef.current = true;
-              }
-
-              // Note: Progress saving is now handled by the periodic interval below
-            }
-          } catch (error) {}
-        }, 5000); // Update every 5 seconds (less frequent to avoid interference)
-
-        // Store interval reference for cleanup
-        progressIntervalRef.current = progressInterval;
-      }, 2000); // Start tracking after 2 seconds delay
-
-      // Note: Periodic saving is handled by the useEffect below to avoid duplicates
-
-      // Return cleanup function
-      return () => {
-        if (interval) {
-          clearTimeout(interval);
+    // 1. Video Detail
+    setIsLoadingVideo(true);
+    videoApi.getVideoDetail(`https://www.youtube.com/watch?v=${currentVideoId}`)
+      .then(details => { if (!didCancel) setVideoDetail(details); })
+      .catch(err => {
+        if (!didCancel) {
+          if (err.isOutOfSyllabus || err.status === 204) setShowOutOfSyllabus(true);
+          else setVideoDetail({});
         }
-        if (progressIntervalRef.current) {
-          clearInterval(progressIntervalRef.current);
-          progressIntervalRef.current = null;
-        }
-        // Note: Periodic interval cleanup is handled by useEffect
-      };
-    },
-    [openFeedbackModal, saveVideoProgress]
-  );
+      })
+      .finally(() => { if (!didCancel) setIsLoadingVideo(false); });
 
-  const onYouTubeEnd = useCallback(async () => {
-    setVideoProgress(100);
-
-    // Save final progress when video ends
-    await saveVideoProgress();
-
-    // Show feedback modal when video ends
-    if (
-      !hasShownFeedbackRef.current &&
-      videoCanSubmitFeedbackRef.current &&
-      !videoExistingFeedback
-    ) {
-      openFeedbackModal();
-      hasShownFeedbackRef.current = true;
-    }
-  }, [openFeedbackModal, saveVideoProgress]);
-
-  const onYouTubeStateChange = useCallback(
-    (event: any) => {
-      const playerState = event.data;
-
-      // Update playing state
-      console.debug("[Video] onYouTubeStateChange: playerState", playerState);
-      // 1 = playing, 2 = paused, 3 = buffering, 0 = ended, 5 = video cued
-      if (playerState === 1) {
-        isPlayingRef.current = true;
-      } else if (playerState === 2 || playerState === 0 || playerState === 5) {
-        isPlayingRef.current = false;
-      }
-
-      // Persist progress when user pauses or buffers
-      // 2 = paused, 3 = buffering per YT IFrame API
-      if (playerState === 2 || playerState === 3) {
-        saveVideoProgress();
-      }
-
-      // Handle video end
-      if (playerState === 0) {
-        // 0 = ended
-        onYouTubeEnd();
-        // Note: Periodic interval cleanup is handled by useEffect
-      }
-    },
-    [onYouTubeEnd, saveVideoProgress]
-  );
-
-  // Use refs for feedback gates to avoid effect dependencies causing teardown
-  const videoCanSubmitFeedbackRef = useRef<boolean>(false);
-  const hasShownFeedbackRef = useRef<boolean>(false);
-
-  // Update refs when feedback state changes
-  useEffect(() => {
-    videoCanSubmitFeedbackRef.current = videoCanSubmitFeedback;
-  }, [videoCanSubmitFeedback]);
-
-  // Reset feedback state when video changes
-  useEffect(() => {
-    if (currentVideoId) {
-      // Reset validation flag for new video
-      setIsVideoValidated(false);
-      
-      // Reset feedback state for new video
-      hasShownFeedbackRef.current = false;
-      resumeSeekAppliedRef.current = false;
-
-      // The useMultiFeedbackTracker hook automatically resets when sourceId changes
-
-      // Reset video progress tracking
-      if (progressIntervalRef.current) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-
-      // Reset YouTube player reference
-      if (ytPlayerRef.current) {
-        try {
-          ytPlayerRef.current.destroy?.();
-        } catch {
-          // Ignore destroy errors
-        }
-        ytPlayerRef.current = null;
-      }
-
-      // Note: Periodic interval cleanup is handled by main useEffect
-    }
-  }, [currentVideoId]);
-
-  // Cleanup progress tracking on unmount
-  useEffect(() => {
-    return () => {
-      if (progressIntervalRef.current != null) {
-        clearInterval(progressIntervalRef.current);
-        progressIntervalRef.current = null;
-      }
-      // Note: Periodic interval cleanup is handled by main useEffect
-
-      // Save final progress before unmounting
-      saveVideoProgress();
-    };
-  }, [saveVideoProgress]);
-
-  // Navigation guard - show alert on any navigation attempt
-  useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      // Show alert before leaving the page
-
-      const message = "Are you sure you want to leave this video?";
-      event.returnValue = message;
-      return message;
-    };
-
-    const handlePopState = () => {
-      saveVideoProgress();
-    };
-
-    // Handle React Router navigation
-    const handleRouteChange = () => {
-      saveVideoProgress();
-      return true;
-    };
-
-    // Listen for navigation attempts
-    window.addEventListener("beforeunload", handleBeforeUnload);
-    window.addEventListener("popstate", handlePopState);
-
-    // Store the route change handler for cleanup
-    const originalPushState = window.history.pushState;
-    const originalReplaceState = window.history.replaceState;
-
-    // Override history methods to catch programmatic navigation
-    window.history.pushState = function (...args) {
-      if (handleRouteChange()) {
-        originalPushState.apply(this, args);
-      }
-    };
-
-    window.history.replaceState = function (...args) {
-      if (handleRouteChange()) {
-        originalReplaceState.apply(this, args);
-      }
-    };
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-      window.removeEventListener("popstate", handlePopState);
-
-      // Restore original history methods
-      window.history.pushState = originalPushState;
-      window.history.replaceState = originalReplaceState;
-    };
-  }, []);
-
-  // Handle feedback completion and navigation
-  const handleFeedbackComplete = useCallback(
-    (_action: "submit" | "skip" | "dismiss") => {
-      closeFeedbackModal();
-
-      // Check if there was a pending navigation
-      const pendingNavigation = localStorage.getItem(
-        `navigation_pending_${currentVideoId}`
-      );
-      if (pendingNavigation) {
-        try {
-          const data = JSON.parse(pendingNavigation);
-          localStorage.removeItem(`navigation_pending_${currentVideoId}`);
-
-          // Allow navigation to proceed
-          if (
-            data.intendedPath &&
-            data.intendedPath !== window.location.pathname
-          ) {
-            navigateWithProgress(data.intendedPath);
-          }
-        } catch (error) {}
-      }
-
-      // Clear any pending feedback state
-      localStorage.removeItem(`feedback_pending_${currentVideoId}`);
-
-      // Log feedback action for analytics
-    },
-    [closeFeedbackModal, currentVideoId, navigate]
-  );
-
-  // Fetch video details - this must complete first before other APIs
-  useEffect(() => {
-    const fetchVideoDetails = async () => {
-      try {
-        setIsLoadingVideo(true);
-        setIsVideoValidated(false); // Reset validation flag
-
-        // Try to get video details from API
-        const videoUrl = `https://www.youtube.com/watch?v=${currentVideoId}`;
-
-        const details = await videoApi.getVideoDetail(videoUrl);
-
-        setVideoDetail(details);
-        setIsVideoValidated(true); // Mark video as validated
-        console.log('Video validated successfully, other APIs can now run');
-      } catch (err: any) {
-        // Check if it's an out-of-syllabus error
-        if (err.isOutOfSyllabus || err.status === 204) {
-          // Try to get video title from YouTube API for better display
-          let videoTitle = `Video ${currentVideoId}`;
-          try {
-            // You could add a YouTube API call here to get the actual title
-            // For now, we'll use the videoId as fallback
-          } catch (titleErr) {
-            console.warn('Could not fetch video title:', titleErr);
-          }
-          
-          // Redirect to out-of-syllabus page with video details
-          navigate(ROUTES.OUT_OF_SYLLABUS, {
-            state: {
-              videoUrl: `https://www.youtube.com/watch?v=${currentVideoId}`,
-              videoTitle: videoTitle,
-            }
-          });
-          return;
-        } else {
-          // For other errors, set a fallback video detail with default topics
-          console.error('Error fetching video details:', err);
-          setIsVideoValidated(false); // Keep validation false on error
-        }
-      } finally {
-        setIsLoadingVideo(false);
-      }
-    };
-
-    if (currentVideoId) {
-      fetchVideoDetails();
-    } else {
-      setIsLoadingVideo(false);
-      setIsVideoValidated(false);
-    }
-  }, [currentVideoId, navigate]);
-
-  // Fetch saved progress and set resume position - only after video validation
-  useEffect(() => {
-    const fetchProgress = async () => {
-      if (!currentVideoId || !isVideoValidated) return;
-      
-      console.log('Fetching video progress after validation...');
-      try {
-        const resp = await videoProgressApi.getProgress(currentVideoId);
+    // 2. Progress (for resuming)
+    videoProgressApi.getProgress(currentVideoId)
+      .then(resp => {
         const pos = Number(resp.data?.current_position ?? 0);
         const pct = Number(resp.data?.watch_percentage ?? 0);
         if (!isNaN(pos) && pos > 0) setResumePosition(pos);
@@ -826,133 +297,183 @@ const VideoPage: React.FC = () => {
             } catch {}
           }
         }
-      } catch {
-        // ignore if no progress
-        const raw = localStorage.getItem(`video_progress_${currentVideoId}`);
-        if (raw) {
-          try {
-            const data = JSON.parse(raw);
-            const lsPos = Number(data?.currentTime ?? 0);
-            const lsPct = Number(data?.watchPercentage ?? 0);
-            if (!isNaN(lsPos) && lsPos > 0) setResumePosition(lsPos);
-            if (!isNaN(lsPct) && lsPct > 0) setResumePercent(lsPct);
-          } catch {}
-        }
-      }
-    };
-    fetchProgress();
-  }, [currentVideoId, isVideoValidated]);
+      });
 
-  // If resume position arrives after player is ready, attempt seek once
-  useEffect(() => {
-    if (
-      ytPlayerRef.current &&
-      resumePosition > 0 &&
-      !resumeSeekAppliedRef.current
-    ) {
-      try {
-        const duration = ytPlayerRef.current.getDuration?.() || 0;
-        if (duration > 0 && resumePosition < duration) {
-          ytPlayerRef.current.seekTo(resumePosition, true);
-          resumeSeekAppliedRef.current = true;
-        }
-      } catch {}
-    }
-  }, [resumePosition]);
-
-  // Fallback: if only percent is available later, seek by percent
-  useEffect(() => {
-    if (
-      ytPlayerRef.current &&
-      resumePercent > 0 &&
-      !resumeSeekAppliedRef.current
-    ) {
-      try {
-        const duration = ytPlayerRef.current.getDuration?.() || 0;
-        if (duration > 0) {
-          const target = Math.min(
-            duration - 1,
-            Math.max(0, (resumePercent / 100) * duration)
-          );
-          ytPlayerRef.current.seekTo(target, true);
-          resumeSeekAppliedRef.current = true;
-        }
-      } catch {}
-    }
-  }, [resumePercent]);
-
-  // Fetch chapters - only after video validation
-  useEffect(() => {
-    const fetchChapters = async () => {
-      if (!videoDetail?.external_source_id || !isVideoValidated) return;
-
-      console.log('Fetching video chapters after validation...');
-      try {
-        setIsLoadingChapters(true);
-        setChaptersError(null);
-
-        const response = await videoApi.getVideoChapters(
-          videoDetail.external_source_id
-        );
-        const transformedChapters: Chapter[] = response.chapters.map(
-          (chapter) => ({
-            time: chapter.timestamp,
-            title: chapter.title,
-            content: chapter.description,
+    // 3. Chapters
+    setIsLoadingChapters(true);
+    setChaptersError(null);
+    videoApi.getVideoDetail(`https://www.youtube.com/watch?v=${currentVideoId}`)
+      .then(detail => {
+        if (!detail?.external_source_id) return setIsLoadingChapters(false);
+        videoApi.getVideoChapters(detail.external_source_id)
+          .then(response => {
+            const transformedChapters: Chapter[] = response.chapters.map(
+              (chapter: any) => ({
+                time: chapter.timestamp,
+                title: chapter.title,
+                content: chapter.description,
+              })
+            );
+            setChapters(transformedChapters);
           })
-        );
-        setChapters(transformedChapters);
-      } catch (err: any) {
-        setChaptersError("Failed to load chapters. Please try again.");
-      } finally {
-        setIsLoadingChapters(false);
-      }
-    };
+          .catch(() => setChaptersError("Failed to load chapters. Please try again."))
+          .finally(() => setIsLoadingChapters(false));
+      });
 
-    fetchChapters();
-  }, [videoDetail?.external_source_id, isVideoValidated]);
+    return () => { didCancel = true; };
+  }, [currentVideoId]);
 
-  // Manual transcript fetching function
+  // Fetch transcript when requested
   const fetchTranscript = useCallback(async () => {
     if (!videoDetail?.external_source_id) return;
-
     try {
       setIsLoadingTranscript(true);
       setTranscriptError(null);
-
-      const response = await videoApi.getVideoTranscript(
-        videoDetail.external_source_id
-      );
+      const response = await videoApi.getVideoTranscript(videoDetail.external_source_id);
       setTranscript(response.transcript);
-    } catch (err: any) {
+    } catch {
       setTranscriptError("Failed to load transcript. Please try again.");
     } finally {
       setIsLoadingTranscript(false);
     }
   }, [videoDetail?.external_source_id]);
 
-  // Initialize chat when videoId changes - only after video validation
-  useEffect(() => {
-    if (currentVideoId && !chatInitialized && isVideoValidated) {
-      console.log('Initializing chat after video validation...');
-      initializeChat();
+  // --------------------- Video Player Logic ---------------------
+  // 1. Seek on initial load
+  const handleYouTubeReady = useCallback((event: any) => {
+    const player = event.target;
+    ytPlayerRef.current = player;
+    // Seek to saved position/percent if available
+    const duration = player.getDuration?.() || 0;
+    if (!resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration) {
+      player.seekTo(resumePosition, true);
+      resumeSeekAppliedRef.current = true;
+    } else if (!resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0) {
+      const seekTime = Math.min(duration - 1, Math.max(0, (resumePercent / 100) * duration));
+      player.seekTo(seekTime, true);
+      resumeSeekAppliedRef.current = true;
     }
-  }, [currentVideoId, chatInitialized, isVideoValidated]);
+  }, [resumePosition, resumePercent]);
 
-  // Reset chat state when videoId changes
+  // ----------------- Save Progress Logic (Throttled) -----------------
+  const lastSavedProgressRef = useRef<{ percentage: number; position: number; timestamp: number } | null>(null);
+  const saveVideoProgress = useCallback(async () => {
+    if (!currentVideoId || !ytPlayerRef.current) return;
+    try {
+      const currentTime = ytPlayerRef.current.getCurrentTime();
+      const duration = ytPlayerRef.current.getDuration();
+      if (duration > 0 && currentTime >= 0.1) {
+        const watchPercentage = (currentTime / duration) * 100;
+        const now = Date.now();
+        /*
+        const lastSaved = lastSavedProgressRef.current;
+        const shouldSave = !lastSaved ||
+          Math.abs(watchPercentage - lastSaved.percentage) >= 5 ||
+          Math.abs(currentTime - lastSaved.position) >= 30 ||
+          (now - lastSaved.timestamp) >= 60000;
+        if (!shouldSave) return;
+        */
+        await videoProgressApi.trackProgress({
+          video_id: currentVideoId,
+          watch_percentage: Math.round(watchPercentage * 100) / 100,
+          total_duration: Math.round(duration),
+          current_position: Math.round(currentTime),
+          page_url: window.location.href,
+        });
+        lastSavedProgressRef.current = {
+          percentage: watchPercentage,
+          position: currentTime,
+          timestamp: now
+        };
+        // mirror to localStorage
+        localStorage.setItem(
+          `video_progress_${currentVideoId}`,
+          JSON.stringify({
+            videoId: currentVideoId,
+            title: videoDetail?.title || `Video ${currentVideoId}`,
+            thumbnailUrl: `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`,
+            watchPercentage: Math.round(watchPercentage * 100) / 100,
+            currentTime: Math.round(currentTime),
+            totalDuration: Math.round(duration),
+            lastUpdated: new Date().toISOString(),
+            subject: videoDetail?.topics?.[0] || "General",
+            description: videoDetail?.description || "Video content",
+          })
+        );
+      }
+    } catch (error: any) {
+      // fallback to localStorage
+      const progressData = {
+        videoId: currentVideoId,
+        title: videoDetail?.title || `Video ${currentVideoId}`,
+        thumbnailUrl: `https://img.youtube.com/vi/${currentVideoId}/maxresdefault.jpg`,
+        watchPercentage: 0,
+        currentTime: 0,
+        totalDuration: 0,
+        lastUpdated: new Date().toISOString(),
+        subject: videoDetail?.topics?.[0] || "General",
+        description: videoDetail?.description || "Video content",
+      };
+      localStorage.setItem(
+        `video_progress_${currentVideoId}`,
+        JSON.stringify(progressData)
+      );
+    }
+  }, [currentVideoId, videoDetail]);
+
+  // 2. Save progress every 60 seconds ONLY if playing
   useEffect(() => {
-    setChatInitialized(false);
-    setChatMessages([]);
-    setChatError(null);
+    function getPlayerState() {
+      try {
+        return ytPlayerRef.current?.getPlayerState?.();
+      } catch { return undefined; }
+    }
+    const startAutoSave = () => {
+      if (!periodicSaveIntervalRef.current) {
+        periodicSaveIntervalRef.current = setInterval(() => {
+          if (getPlayerState() === 1) saveVideoProgress();
+        }, 60000);
+      }
+    };
+    const stopAutoSave = () => {
+      if (periodicSaveIntervalRef.current) {
+        clearInterval(periodicSaveIntervalRef.current);
+        periodicSaveIntervalRef.current = null;
+      }
+    };
+    // Listen for play/pause from player, fallback: always start and rely on IF, else always clear
+    startAutoSave();
+    return () => stopAutoSave();
+  }, [currentVideoId, saveVideoProgress]);
 
-    // Reset transcript state when video changes
-    setTranscript("");
-    setTranscriptError(null);
-    setIsLoadingTranscript(false);
-  }, [currentVideoId]);
+  // 3. Save progress on navigation, unload or unmount
+  useEffect(() => {
+    const saveOnLeave = () => { saveVideoProgress(); };
+    window.addEventListener("beforeunload", saveOnLeave);
+    window.addEventListener("pagehide", saveOnLeave);
+    return () => {
+      window.removeEventListener("beforeunload", saveOnLeave);
+      window.removeEventListener("pagehide", saveOnLeave);
+      saveVideoProgress();
+    };
+  }, [currentVideoId, saveVideoProgress]);
 
-  const initializeChat = async () => {
-    if (!currentVideoId) return;
+  // React Router navigation block
+  useBlocker(() => {
+    saveVideoProgress();
+    return false;
+  });
+
+  // --------------------- UI & Component Trees ---------------------
+  const handleSeekTo = useCallback((seconds: number) => {
+    if (ytPlayerRef.current && typeof seconds === 'number' && seconds >= 0) {
+      try { ytPlayerRef.current.seekTo(seconds, true); } catch {}
+    }
+  }, []);
+
+  // Chat initialization
+  const initializeChat = useCallback(async () => {
+    if (!currentVideoId || chatInitialized) return;
 
     setIsChatLoading(true);
     setChatError(null);
@@ -965,7 +486,6 @@ const VideoPage: React.FC = () => {
         }));
         setChatMessages(convertedMessages);
       } else {
-        // If no history, start a new chat
         try {
           const startResponse = await chatApi.startChat(currentVideoId);
           setChatMessages([{ text: startResponse.content, isUser: false }]);
@@ -975,8 +495,6 @@ const VideoPage: React.FC = () => {
       }
     } catch (err) {
       setChatError("Failed to load chat history. Starting new chat.");
-
-      // Try to start a new chat if history fails
       try {
         const startResponse = await chatApi.startChat(currentVideoId);
         setChatMessages([{ text: startResponse.content, isUser: false }]);
@@ -987,115 +505,37 @@ const VideoPage: React.FC = () => {
       setIsChatLoading(false);
       setChatInitialized(true);
     }
-  };
+  }, [currentVideoId, chatInitialized]);
+
+  // Initialize chat when video loads
+  useEffect(() => {
+    if (currentVideoId && !chatInitialized) {
+      initializeChat();
+    }
+  }, [currentVideoId, chatInitialized, initializeChat]);
 
   const handleSendMessage = useCallback(
     async (message: string) => {
-      if (!message.trim() || !currentVideoId) {
-        return;
-      }
+      if (!message.trim() || !currentVideoId) return;
 
-      // Add user message immediately
       const userMessage = { text: message, isUser: true };
-
-      setChatMessages((prev) => {
-        const newMessages = [...prev, userMessage];
-
-        return newMessages;
-      });
-
+      setChatMessages((prev) => [...prev, userMessage]);
       setIsChatLoading(true);
       setChatError(null);
 
       try {
         const response = await chatApi.sendMessage(currentVideoId, message);
-
         const assistantMessage = { text: response.content, isUser: false };
-
-        setChatMessages((prev) => {
-          const newMessages = [...prev, assistantMessage];
-
-          return newMessages;
-        });
+        setChatMessages((prev) => [...prev, assistantMessage]);
       } catch (err) {
         setChatError("Failed to send message. Please try again.");
-        // Remove the user message if sending failed
-        setChatMessages((prev) => {
-          const newMessages = prev.slice(0, -1);
-
-          return newMessages;
-        });
+        setChatMessages((prev) => prev.slice(0, -1));
       } finally {
         setIsChatLoading(false);
       }
     },
     [currentVideoId]
   );
-
-  // Create refs to track the latest feedback states without causing re-renders
-  const feedbackStatesRef = useRef({
-    chat: chatFeedbackState,
-    flashcards: flashcardFeedbackState,
-    quiz: quizFeedbackState,
-    summary: summaryFeedbackState,
-  });
-
-  // Update refs when feedback states change
-  useEffect(() => {
-    feedbackStatesRef.current = {
-      chat: chatFeedbackState,
-      flashcards: flashcardFeedbackState,
-      quiz: quizFeedbackState,
-      summary: summaryFeedbackState,
-    };
-  }, [
-    chatFeedbackState,
-    flashcardFeedbackState,
-    quizFeedbackState,
-    summaryFeedbackState,
-  ]);
-
-  // Start a resilient 60s periodic saver tied to the current video id - only after video validation
-  useEffect(() => {
-    if (periodicSaveIntervalRef.current) {
-      clearInterval(periodicSaveIntervalRef.current);
-      periodicSaveIntervalRef.current = null;
-    }
-    if (currentVideoId && isVideoValidated) {
-      console.log('Starting periodic progress saving after video validation...');
-      // Don't save immediately on video load - wait for user interaction
-      // Then continue saving every 60 seconds while playing
-      periodicSaveIntervalRef.current = setInterval(() => {
-        if (isPlayerActivelyPlaying()) {
-          saveVideoProgress();
-        }
-      }, 60000);
-    }
-    return () => {
-      if (periodicSaveIntervalRef.current) {
-        clearInterval(periodicSaveIntervalRef.current);
-        periodicSaveIntervalRef.current = null;
-      }
-    };
-  }, [currentVideoId, isVideoValidated, saveVideoProgress, isPlayerActivelyPlaying]);
-
-  // Save on tab backgrounding or page lifecycle transitions
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden) {
-        saveVideoProgress();
-      }
-    };
-    const handlePageHide = () => {
-      saveVideoProgress();
-    };
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("pagehide", handlePageHide);
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("pagehide", handlePageHide);
-    };
-  }, [saveVideoProgress]);
 
   // Create components that update when videoDetail changes
   const components = useMemo(() => {
@@ -1109,9 +549,9 @@ const VideoPage: React.FC = () => {
           error={chatError}
           onSendMessage={handleSendMessage}
           isLeftColumnVisible={isLeftColumnVisible}
-          canSubmitFeedback={chatFeedbackState?.canSubmitFeedback}
-          existingFeedback={chatFeedbackState?.existingFeedback}
-          markAsSubmitted={chatMarkAsSubmitted}
+          canSubmitFeedback={feedbackStates[ComponentName.Chat]?.canSubmitFeedback}
+          existingFeedback={feedbackStates[ComponentName.Chat]?.existingFeedback}
+          markAsSubmitted={() => markAsSubmitted(ComponentName.Chat)}
         />
       ),
       flashcards: (
@@ -1120,18 +560,16 @@ const VideoPage: React.FC = () => {
           videoId={currentVideoId || ""}
         />
       ),
-      quiz: (() => {
-        return (
-          <Quiz
-            key={`quiz-${currentVideoId}`}
-            videoId={currentVideoId || ""}
-            canSubmitFeedback={quizFeedbackState?.canSubmitFeedback}
-            existingFeedback={quizFeedbackState?.existingFeedback}
-            markAsSubmitted={quizMarkAsSubmitted}
-            topics={videoDetail?.topics}
-          />
-        );
-      })(),
+      quiz: (
+        <Quiz
+          key={`quiz-${currentVideoId}`}
+          videoId={currentVideoId || ""}
+          canSubmitFeedback={feedbackStates[ComponentName.Quiz]?.canSubmitFeedback}
+          existingFeedback={feedbackStates[ComponentName.Quiz]?.existingFeedback}
+          markAsSubmitted={() => markAsSubmitted(ComponentName.Quiz)}
+          topics={videoDetail?.topics}
+        />
+      ),
       summary: (
         <SummaryWrapper
           key={`summary-${currentVideoId}`}
@@ -1146,20 +584,10 @@ const VideoPage: React.FC = () => {
     isChatLoading,
     chatError,
     isLeftColumnVisible,
-    chatFeedbackState,
-    chatMarkAsSubmitted,
-    quizFeedbackState,
-    quizMarkAsSubmitted,
-  ]); // Include all dependencies that affect component rendering
-
-  // Public seek handler for chapters/transcript
-  const handleSeekTo = useCallback((seconds: number) => {
-    if (ytPlayerRef.current && typeof seconds === "number" && seconds >= 0) {
-      try {
-        ytPlayerRef.current.seekTo(seconds, true);
-      } catch {}
-    }
-  }, []);
+    feedbackStates,
+    markAsSubmitted,
+    handleSendMessage,
+  ]);
 
   const handleShare = useCallback(() => {
     setIsShareModalOpen(true);
@@ -1177,70 +605,9 @@ const VideoPage: React.FC = () => {
     setCurrentMode(mode);
   }, []);
 
-  // Enhanced video progress tracking with user interaction detection
-  const handleVideoInteraction = useCallback(() => {
-    // This function can be called when user interacts with video controls
-    // to ensure accurate progress tracking
-    if (ytPlayerRef.current && videoDurationRef.current > 0) {
-      try {
-        // Video interaction detected
-      } catch (error) {}
-    }
-  }, [openFeedbackModal]);
-
-  // Listen for video player events to catch user interactions
-  useEffect(() => {
-    const handleVideoEvents = () => {
-      // This will be called when user interacts with video
-      handleVideoInteraction();
-    };
-
-    // Add event listeners to video iframe
-    const videoIframe = document.querySelector('iframe[src*="youtube.com"]');
-    if (videoIframe) {
-      videoIframe.addEventListener("load", handleVideoEvents);
-      videoIframe.addEventListener("click", handleVideoEvents);
-
-      return () => {
-        videoIframe.removeEventListener("load", handleVideoEvents);
-        videoIframe.removeEventListener("click", handleVideoEvents);
-      };
-    }
-  }, [handleVideoInteraction]);
-
-  // Effect to inject CSS for custom animations
-  useEffect(() => {
-    const styleId = "engaging-loading-screen-styles";
-    if (document.getElementById(styleId)) return;
-
-    const styleSheet = document.createElement("style");
-    styleSheet.id = styleId;
-    styleSheet.innerHTML = `
-      @keyframes fadeInScaleUp {
-        from { opacity: 0; transform: scale(0.95) translateY(10px); }
-        to { opacity: 1; transform: scale(1) translateY(0); }
-      }
-      .animate-fadeInScaleUp { animation: fadeInScaleUp 0.3s ease-out forwards; }
-    `;
-    document.head.appendChild(styleSheet);
-
-    return () => {
-      const style = document.getElementById(styleId);
-      if (style) style.remove();
-    };
-  }, []);
-
   // Show loading screen while video details are being fetched
   if (isLoadingVideo) {
     return <SkeletonLoaderVideoPage />;
-    return (
-      <div className="bg-background min-h-screen font-sans flex flex-col justify-center items-center p-4 gap-4">
-        <CustomLoader className="h-15 w-15" />
-        <span className="text-muted-foreground text-lg">
-          {isVideoValidated ? "Preparing lessons..." : "Validating video content..."}
-        </span>
-      </div>
-    );
   }
 
   return (
@@ -1256,16 +623,18 @@ const VideoPage: React.FC = () => {
               videoDetail={videoDetail}
               isLoading={isLoadingVideo}
               onToggleFullScreen={handleToggleFullScreen}
-              onNavigate={navigateWithProgress}
+              onNavigate={(to: string, options?: any) => {
+                saveVideoProgress();
+                navigate(to, options);
+              }}
             />
             {/* YouTube Video Player with Progress Tracking */}
             <div className="mb-4">
               <YouTube
                 videoId={currentVideoId}
-                onReady={onYouTubeReady}
-                onEnd={onYouTubeEnd}
-                onStateChange={onYouTubeStateChange}
+                onReady={handleYouTubeReady}
                 className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg w-full h-full"
+                style={{ borderRadius: "12px" }}
                 opts={{
                   height: "100%",
                   width: "100%",
@@ -1288,8 +657,8 @@ const VideoPage: React.FC = () => {
               isLoadingTranscript={isLoadingTranscript}
               chaptersError={chaptersError}
               transcriptError={transcriptError}
-              onFeedbackSubmit={() => handleFeedbackComplete("submit")}
-              onFeedbackSkip={() => handleFeedbackComplete("skip")}
+              onFeedbackSubmit={() => {}}
+              onFeedbackSkip={() => {}}
               onFetchTranscript={fetchTranscript}
               onSeekTo={handleSeekTo}
             />
@@ -1319,8 +688,6 @@ const VideoPage: React.FC = () => {
               </h1>
             </div>
             <div className="flex items-center gap-2 self-start sm:self-center">
-              {/* Upgrade Button */}
-
               <style>{`.glow-purple:hover {
                 box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 
                 0 0 20px rgba(168, 85, 247, 0.6), 
@@ -1329,7 +696,8 @@ const VideoPage: React.FC = () => {
               {window.innerWidth > 640 ? (
                 <button
                   onClick={() => {
-                    navigateWithProgress(ROUTES.PREMIUM);
+                    saveVideoProgress();
+                    navigate(ROUTES.PREMIUM);
                   }}
                   className="flex items-center gap-1 rounded-full py-2 ps-2.5 pe-3 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer glow-purple transition-transform transform hover:scale-105 focus:outline-none"
                 >
@@ -1339,7 +707,8 @@ const VideoPage: React.FC = () => {
               ) : (
                 <button
                   onClick={() => {
-                    navigateWithProgress(ROUTES.PREMIUM);
+                    saveVideoProgress();
+                    navigate(ROUTES.PREMIUM);
                   }}
                   className="flex items-center gap-1 rounded-full p-2 text-sm font-semibold bg-gray-200 hover:bg-[#E4E4F6] dark:bg-[#373669] text-gray hover:text-white dark:hover:bg-[#414071] hover:bg-gradient-to-r from-blue-600 to-purple-700 cursor-pointer glow-purple transition-transform transform hover:scale-105 focus:outline-none"
                 >
@@ -1353,10 +722,9 @@ const VideoPage: React.FC = () => {
             <div className="">
               <YouTube
                 videoId={currentVideoId}
-                onReady={onYouTubeReady}
-                onEnd={onYouTubeEnd}
-                onStateChange={onYouTubeStateChange}
+                onReady={handleYouTubeReady}
                 className="aspect-video bg-black overflow-hidden w-full h-full"
+                style={{ borderRadius: "12px" }}
                 opts={{
                   height: "100%",
                   width: "100%",
@@ -1403,24 +771,17 @@ const VideoPage: React.FC = () => {
 
       {/* Feedback Modal */}
       <VideoFeedbackModal
-        isOpen={isFeedbackModalOpen}
-        onClose={() => setIsFeedbackModalOpen(false)}
+        isOpen={false}
+        onClose={() => {}}
         videoId={currentVideoId}
         videoTitle={videoDetail?.title}
         playPercentage={videoProgress}
-        onSubmit={async () => {
-          try {
-            videoMarkAsSubmitted();
-            setIsFeedbackModalOpen(false);
-          } catch {
-            // Ignore feedback submission errors
-          }
-        }}
-        onSkip={() => setIsFeedbackModalOpen(false)}
-        onDismiss={() => setIsFeedbackModalOpen(false)}
+        onSubmit={async () => {}}
+        onSkip={() => {}}
+        onDismiss={() => {}}
         canSubmitFeedback={videoCanSubmitFeedback}
         existingFeedback={videoExistingFeedback}
-        markAsSubmitted={videoMarkAsSubmitted}
+        markAsSubmitted={() => {}}
         componentName="Video"
       />
 

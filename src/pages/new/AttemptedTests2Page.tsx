@@ -3,7 +3,6 @@ import { EllipsisVertical, RefreshCcw, TrendingUp } from "lucide-react";
 import { useEffect, useRef, useState, useMemo, FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { attemptedTestsApi } from "@/lib/api-client";
-import CustomLoader from "@/components/icons/customloader";
 
 // --- TYPE DEFINITIONS ---
 type MockTestStatus = "Completed" | "In Progress";
@@ -57,7 +56,7 @@ const aiRecommendedTests: AiRecommendation[] = [
 // Helper to calculate days since the test was taken
 const calculateDaysSince = (dateString: string): string => {
   if (!dateString) return "";
-  const today = new Date("2025-09-11T16:58:00"); // Current fixed time
+  const today = new Date();
   const testDate = new Date(dateString);
   today.setHours(0, 0, 0, 0);
   testDate.setHours(0, 0, 0, 0);
