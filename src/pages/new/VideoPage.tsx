@@ -19,6 +19,7 @@ import Header from "@/components/learning/Header";
 import SparklesIcon from "@/components/icons/SparklesIcon";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { useApiProgress } from "@/hooks/useApiProgress";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 declare global {
   interface Window {
@@ -75,6 +76,8 @@ const VideoPage: React.FC = () => {
   const ytPlayerRef = useRef<any>(null);
   const resumeSeekAppliedRef = useRef(false);
   const periodicSaveIntervalRef = useRef<any>(null);
+
+  const isMobile = useIsMobile();
 
   const [resumePosition, setResumePosition] = useState(0);
   const [resumePercent, setResumePercent] = useState(0);
@@ -291,16 +294,30 @@ const VideoPage: React.FC = () => {
   const handleYouTubeReady = useCallback((event: any) => {
     const player = event.target;
     ytPlayerRef.current = player;
+    resumeSeekAppliedRef.current = false;
     // Seek to saved position/percent if available
+    console.log('handleYouTubeReady is called')
     const duration = player.getDuration?.() || 0;
+    console.log('duration', duration);
+    console.log('resumePosition', resumePosition);
+    console.log('resumePercent', resumePercent);
     if (!resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration) {
       player.seekTo(resumePosition, true);
+      console.log('seeked to resumePosition', resumePosition);
       resumeSeekAppliedRef.current = true;
     } else if (!resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0) {
       const seekTime = Math.min(duration - 1, Math.max(0, (resumePercent / 100) * duration));
       player.seekTo(seekTime, true);
+      console.log('seeked to resumePercent', seekTime);
       resumeSeekAppliedRef.current = true;
     }
+    console.log('case 1: !resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration', !resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration)
+    console.log('case 2: !resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0', !resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0)
+    console.log('resumeSeekAppliedRef.current', resumeSeekAppliedRef.current)
+    console.log('resumePosition', resumePosition)
+    console.log('resumePercent', resumePercent)
+    console.log('duration', duration)
+    console.log('did not do anything');
   }, [resumePosition, resumePercent]);
 
 
@@ -668,7 +685,7 @@ const VideoPage: React.FC = () => {
 
   return (
     <div className="bg-background text-foreground min-h-screen font-sans">
-      <div className="mx-auto hidden w-full h-full sm:block">
+      {!isMobile ? <div className="mx-auto hidden w-full h-full sm:block">
         <main className="grid grid-cols-1 xl:grid-cols-5">
           <div
             className={`p-4 xl:col-span-3 overflow-y-auto h-[100vh] ${
@@ -764,7 +781,7 @@ const VideoPage: React.FC = () => {
             />
           </div>
         </main>
-      </div>
+      </div> :
       <div className="sm:hidden">
         <div className="flex flex-col h-[100vh]">
           <header className="flex flex-row gap-3 justify-between p-4 items-center ">
@@ -854,7 +871,7 @@ const VideoPage: React.FC = () => {
             />
           </div>
         </div>
-      </div>
+      </div> }
 
       {/* Feedback Modal */}
       <VideoFeedbackModal
