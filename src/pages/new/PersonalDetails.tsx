@@ -14,7 +14,6 @@ import {
 } from "lucide-react";
 import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg";
 import CustomLoader from "../../components/icons/customloader";
-import Dropdown from "@/components/ui/dropdown";
 import { theme } from "@/styles/theme";
 
 // --- TYPE DEFINITIONS (for TypeScript) ---
@@ -29,15 +28,6 @@ interface InputFieldProps {
   error?: string;
 }
 
-interface SelectFieldProps {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-  error?: string;
-}
 
 interface FormData {
   name: string;
@@ -219,62 +209,6 @@ const InputField: React.FC<InputFieldProps> = ({
 /**
  * A reusable, styled select dropdown component with validation error display.
  */
-const SelectField: React.FC<SelectFieldProps> = ({
-  id,
-  label,
-  icon,
-  value,
-  onChange,
-  children,
-  error,
-}) => {
-  const errorClasses = error
-    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-    : "border-gray-600 focus:border-blue-400 focus:ring-blue-400";
-  return (
-    <div>
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium text-gray-400 mb-2"
-      >
-        {label}
-      </label>
-      <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-          {icon}
-        </span>
-        <select
-          id={id}
-          value={value}
-          onChange={onChange}
-          className={`block w-full appearance-none rounded-lg bg-gray-700 py-3 pl-10 pr-8 text-white transition duration-150 ease-in-out focus:outline-none focus:ring-2 sm:text-sm ${errorClasses}`}
-        >
-          {children}
-        </select>
-        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-          <svg
-            className="h-5 w-5 text-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </span>
-      </div>
-      {error && (
-        <p className="mt-2 text-xs text-red-500 transition-opacity duration-300 ease-in-out opacity-100">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-};
 
 // --- MAIN FORM COMPONENT ---
 

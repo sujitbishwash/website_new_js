@@ -131,7 +131,6 @@ const TestConfigurationPageComponent = () => {
 
   // State to hold user selections
   const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedSubTopic, setSelectedSubTopic] = useState("");
   const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
@@ -168,9 +167,6 @@ const TestConfigurationPageComponent = () => {
         // Set default selections if data is available
         if (data.subjects.length > 0) {
           setSelectedSubject(data.subjects[0].subject);
-          if (data.subjects[0].sub_topic.length > 0) {
-            setSelectedSubTopic(data.subjects[0].sub_topic[0]);
-          }
         }
         if (data.level.length > 0) {
           // Set "Medium" as default if available, otherwise use first option
@@ -190,17 +186,6 @@ const TestConfigurationPageComponent = () => {
     fetchData();
   }, []);
 
-  // Effect to update sub-topic when subject changes
-  useEffect(() => {
-    if (testData) {
-      const newSubTopics =
-        testData.subjects.find((subject) => subject.subject === selectedSubject)
-          ?.sub_topic || [];
-
-      // Set the default selected sub-topic to the first one in the list, or empty if none exist.
-      setSelectedSubTopic(newSubTopics.length > 0 ? newSubTopics[0] : "");
-    }
-  }, [selectedSubject, testData]);
 
   // Handler for the continue button click
   const handleContinue = async () => {

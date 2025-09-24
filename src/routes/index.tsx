@@ -29,7 +29,6 @@ import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
 import Stats  from "../pages/new/Stats";
 import VideoPage from "@/pages/new/VideoPage";
-import TestAnalysis2 from "@/pages/new/TestAnalysisPage";
 import AttemptedTests from "@/pages/new/AttemptedTestsPage";
 import OutOfSyllabusPage from "@/pages/new/OutOfSyllabusPage";
 import TestAnalysisPage from "@/pages/new/TestAnalysisPage";

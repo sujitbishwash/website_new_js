@@ -1,4 +1,3 @@
-import { ChevronDown } from "lucide-react";
 import React, { useEffect, useState, useRef } from "react";
 import VideoFeedbackModal from "@/components/feedback/VideoFeedbackModal";
 import { videoApi } from "@/lib/api-client";
@@ -106,6 +105,8 @@ const longSummaryData: SummarySectionData[] = [
 // Removed unused demo data arrays
 
 // --- SVG ICON ---
+
+/*
 const SourceIcon = () => (
   <span
     style={{
@@ -125,6 +126,8 @@ const SourceIcon = () => (
     S
   </span>
 );
+
+*/
 
 // --- MODULAR COMPONENTS ---
 

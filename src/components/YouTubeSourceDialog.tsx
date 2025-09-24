@@ -66,7 +66,6 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   //loading thins
 
   //loading
-  const [isRendered, setIsRendered] = useState(isLoading);
   // Initialize with a random index, but only once.
   const [currentIndex, setCurrentIndex] = useState(() =>
     Math.floor(Math.random() * eventsList.length)

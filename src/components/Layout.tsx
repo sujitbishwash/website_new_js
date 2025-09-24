@@ -19,7 +19,7 @@ const Layout: React.FC = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const appContainerRef = useRef(null);
+  const appContainerRef = useRef<HTMLDivElement>(null);
   // Hide sidebar on exam goal page
   const shouldHideSidebar = location.pathname === ROUTES.EXAM_GOAL;
 

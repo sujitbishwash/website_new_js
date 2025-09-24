@@ -354,7 +354,6 @@ import {
   CircleUserRound,
   GaugeCircle,
   KeyRound,
-  RefreshCcw,
   Settings,
   Wrench,
   X,
@@ -421,12 +420,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     const value = e;
 
     const newUserProfileData = { ...userProfile, ["gender"]: value };
-    setUserProfile(newUserProfileData);
-  };
-  const handleAnyChange = (e: string, id: string) => {
-    const value = e;
-
-    const newUserProfileData = { ...userProfile, [id]: value };
     setUserProfile(newUserProfileData);
   };
   const handleCountryChange = (e: string) => {

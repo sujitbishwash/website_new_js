@@ -1,10 +1,17 @@
-import { Bug, Check, CircleCheck, File, Paperclip, X } from "lucide-react";
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+import { CircleCheck, Paperclip, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+
+// Extend Window interface for domtoimage
+declare global {
+  interface Window {
+    domtoimage: any;
+  }
+}
 
 interface BugReportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  appContainerRef: React.RefObject<null>;
+  appContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 export default function BugReportModal({
@@ -13,11 +20,10 @@ export default function BugReportModal({
   appContainerRef,
 }: BugReportModalProps) {
   const [description, setDescription] = useState("");
-  const [attachment, setAttachment] = useState(null);
-  const [attachmentPreview, setAttachmentPreview] = useState(null);
+  const [attachment, setAttachment] = useState<File | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
   const [attachScreenshot, setAttachScreenshot] = useState(false);
 
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
@@ -38,15 +44,15 @@ export default function BugReportModal({
     };
   }, []); // Empty dependency array ensures this runs only once
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (file) {
       setAttachScreenshot(false); // Turn off screenshot if a file is manually selected
       setAttachment(file);
       if (file.type.startsWith("image/")) {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setAttachmentPreview(reader.result);
+          setAttachmentPreview(reader.result as string);
         };
         reader.readAsDataURL(file);
       } else {
@@ -55,7 +61,7 @@ export default function BugReportModal({
     }
   };
 
-  const formatFileSize = (bytes) => {
+  const formatFileSize = (bytes: number) => {
     if (bytes === 0) return "0 Bytes";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
@@ -67,7 +73,7 @@ export default function BugReportModal({
     setAttachmentPreview(null);
   };
 
-  const handleScreenshotToggle = async (checked) => {
+  const handleScreenshotToggle = async (checked: boolean) => {
     setAttachScreenshot(checked);
 
     if (checked) {
@@ -89,7 +95,7 @@ export default function BugReportModal({
 
       try {
         // Filter function to exclude the modal from the screenshot
-        const filter = (node) => {
+        const filter = (node: Element) => {
           // Return false for the modal container to exclude it
           if (
             node.classList &&
@@ -110,9 +116,11 @@ export default function BugReportModal({
         setAttachmentPreview(screenshotDataUrl);
 
         const blob = await (await fetch(screenshotDataUrl)).blob();
-        const screenshotFile = new File([blob], "screenshot.png", {
-          type: "image/png",
-        });
+        // Create a file-like object
+        const screenshotFile = Object.assign(blob, {
+          name: "screenshot.png",
+          type: "image/png"
+        }) as File;
         setAttachment(screenshotFile);
       } catch (err) {
         console.error(
@@ -127,14 +135,13 @@ export default function BugReportModal({
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!description) {
       setError("Please fill out all required fields.");
       return;
     }
     setIsSubmitting(true);
-    setError("");
     setError("");
     setIsSubmitted(true);
 
@@ -145,14 +152,6 @@ export default function BugReportModal({
     }, 2000);
   };
 
-  const handleNewReport = () => {
-    setDescription("");
-    setAttachment(null);
-    setAttachmentPreview(null);
-    setError("");
-    setIsSubmitted(false);
-    setAttachScreenshot(false);
-  };
 
   const closeModal = () => {
     // The timeout prevents the image from disappearing before the modal fade-out animation completes.
@@ -164,7 +163,6 @@ export default function BugReportModal({
       setAttachmentPreview(null);
       setIsSubmitted(false); // Reset submission status on close
     }, 300);
-    setIsModalOpen(false);
   };
 
   if (!isOpen) return null;
@@ -292,10 +290,10 @@ export default function BugReportModal({
                     </div>
                     <div className="mt-2 text-center">
                       <p className="text-sm font-medium text-foreground truncate">
-                        {attachment.name}
+                        {attachment?.name}
                       </p>
                       <p className="text-xs text-border-high">
-                        {formatFileSize(attachment.size)}
+                        {attachment ? formatFileSize(attachment.size) : ''}
                       </p>
                     </div>
                   </div>

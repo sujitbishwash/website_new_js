@@ -6,19 +6,7 @@ import {
 } from "@/lib/api-client";
 import {
   Box,
-  Typography,
-  Button,
-  Grid,
-  Card,
-  CardActionArea,
-  CardMedia,
-  CardContent,
   Skeleton,
-  CircularProgress,
-  IconButton,
-  Tooltip,
-  Container,
-  CssBaseline,
 } from "@mui/material";
 import React, { FC, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";

@@ -1,4 +1,3 @@
-import { theme } from "@/styles/theme";
 import { ChevronDown } from "lucide-react";
 import { FC, useEffect, useRef, useState } from "react";
 
