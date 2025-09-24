@@ -672,7 +672,7 @@ const TestMainPage = () => {
       const apiResponse = await submitTestToAPI();
 
       if (apiResponse) {
-        navigate(ROUTES.ANALYSIS2, {
+        navigate(ROUTES.ANALYSIS, {
           state: { sessionId: apiResponse.session_id || sessionId },
         });
         // setShowTestResultDialog(true);
@@ -690,7 +690,7 @@ const TestMainPage = () => {
       const apiResponse = await submitTestToAPI();
 
       if (apiResponse) {
-        navigate(ROUTES.ANALYSIS2, {
+        navigate(ROUTES.ANALYSIS, {
           state: { sessionId: apiResponse.session_id || sessionId },
         });
       }
@@ -1453,7 +1453,7 @@ const TestMainPage = () => {
           }}
           onClose={handleCloseTestResultDialog}
           navigate={() => {
-            navigate(ROUTES.ANALYSIS2, { state: { sessionId } });
+            navigate(ROUTES.ANALYSIS, { state: { sessionId } });
           }}
         />
       )}

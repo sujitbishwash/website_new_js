@@ -10,8 +10,8 @@ export const ROUTES = {
     EXAM_RECONFIRM: "/exam-reconfirm",
     TEST_MAIN_PAGE: "/test-main-page/:id",
     TEST_SOLUTION: "/test-main-page/:id/solutions",
+    ANALYSIS_ARCHIVE: "/analysis_archive",
     ANALYSIS: "/analysis",
-    ANALYSIS2: "/analysis2",
 
     // Learning routes
     HISTORY: "/history",
@@ -33,8 +33,8 @@ export const ROUTES = {
 
     // Coming soon routes
     PREVIOUS_YEAR_PAPERS: "/previous-year-papers",
+    ATTEMPTED_TESTS_ARCHIVE: "/attempted-tests_archive",
     ATTEMPTED_TESTS: "/attempted-tests",
-    ATTEMPTED_TESTS2: "/attempted-tests2",
 
     // Auth routes
     LOGIN: "/login",
@@ -57,8 +57,8 @@ export const ROUTE_NAMES = {
     [ROUTES.EXAM_INFO]: "Exam Information",
     [ROUTES.EXAM_RECONFIRM]: "Exam Reconfirmation",
     [ROUTES.TEST_MAIN_PAGE]: "Test Main Page",
-    [ROUTES.ANALYSIS]: "Detailed Analysis",
-    [ROUTES.ANALYSIS2]: "Detailed Analysis2",
+    [ROUTES.ANALYSIS_ARCHIVE]: "Detailed Analysis",
+    [ROUTES.ANALYSIS]: "Detailed Analysis2",
     [ROUTES.HISTORY]: "History",
     [ROUTES.BOOKS]: "Books",
     [ROUTES.VIDEO_LEARNING]: "Video Learning",
@@ -70,8 +70,8 @@ export const ROUTE_NAMES = {
     [ROUTES.CHAT]: "Chat",
     [ROUTES.FLASHCARDS]: "Flashcards",
     [ROUTES.PREVIOUS_YEAR_PAPERS]: "Previous Year Papers",
-    [ROUTES.ATTEMPTED_TESTS]: "Attempted Tests",
-    [ROUTES.ATTEMPTED_TESTS2]: "Attempted Tests2",
+    [ROUTES.ATTEMPTED_TESTS_ARCHIVE]: "Attempted Tests",
+    [ROUTES.ATTEMPTED_TESTS]: "Attempted Tests2",
     [ROUTES.LOGIN]: "Login",
     [ROUTES.PERSONAL_DETAILS]: "Personal Details",
     [ROUTES.EXAM_GOAL]: "Exam Goal",

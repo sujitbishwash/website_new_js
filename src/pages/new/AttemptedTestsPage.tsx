@@ -170,7 +170,7 @@ const ActionButton = ({
       {isMoreOpen && (
         <div className="absolute right-0 mt-2 w-48 bg-card border border-border rounded-lg shadow-xl z-20 ">
           <span
-            onClick={() => navigate(ROUTES.ANALYSIS2, {
+            onClick={() => navigate(ROUTES.ANALYSIS, {
           state: { sessionId: sessionId },
         })}
             className="cursor-pointer flex items-center px-4 py-2 text-sm hover:bg-foreground/10 rounded-t-lg gap-4"
@@ -317,7 +317,7 @@ const Pagination = ({
 };
 
 // Main App Component
-const AttemptedTests2 = () => {
+const AttemptedTests = () => {
   const [filter, setFilter] = useState<MockTestStatus | "All">("All");
   const [currentPage, setCurrentPage] = useState(1);
   const TESTS_PER_PAGE = 10;
@@ -495,4 +495,4 @@ const AttemptedTests2 = () => {
   );
 };
 
-export default AttemptedTests2;
+export default AttemptedTests;

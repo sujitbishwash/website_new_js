@@ -1,4 +1,4 @@
-import AttemptedTests from "@/pages/archive/AttemptedTests";
+import AttemptedTestsArchive from "@/pages/archive/AttemptedTestsArchive";
 import AuthCallbackPage from "@/pages/new/AuthCallbackPage";
 import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
@@ -29,9 +29,11 @@ import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
 import Stats  from "../pages/new/Stats";
 import VideoPage from "@/pages/new/VideoPage";
-import TestAnalysis2 from "@/pages/new/Analysis2Page";
-import AttemptedTests2 from "@/pages/new/AttemptedTests2Page";
+import TestAnalysis2 from "@/pages/new/TestAnalysisPage";
+import AttemptedTests from "@/pages/new/AttemptedTestsPage";
 import OutOfSyllabusPage from "@/pages/new/OutOfSyllabusPage";
+import TestAnalysisPage from "@/pages/new/TestAnalysisPage";
+import TestAnalysisPageArchive from "@/pages/archive/TestAnalysisPageArchive";
 
 // Route configuration object for easy maintenance
 export const routes = [
@@ -98,16 +100,16 @@ export const routes = [
             description: "Main test taking interface",
           },
           {
-            path: "analysis",
-            element: <TestAnalysis2 />,
-            name: "Detailed Analysis",
+            path: "analysis_archive",
+            element: <TestAnalysisPageArchive />,
+            name: "Detailed Analysis Archive",
             description: "View detailed test analysis and results",
           },
           
           {
-            path: "analysis2",
-            element: <TestAnalysis2 />,
-            name: "Detailed Analysis2",
+            path: "analysis",
+            element: <TestAnalysisPage />,
+            name: "Detailed Analysis",
             description: "View detailed test analysis and results",
           },
           {
@@ -166,17 +168,17 @@ export const routes = [
             description: "Previous year question papers",
           },
           {
-            path: "attempted-tests",
-            element: <AttemptedTests />,
-            name: "Attempted Tests",
+            path: "attempted-tests_archive",
+            element: <AttemptedTestsArchive />,
+            name: "Attempted Tests Archive",
             description: "Attempted Tests",
           },
           
           {
-            path: "attempted-tests2",
-            element: <AttemptedTests2 />,
-            name: "Attempted Tests2",
-            description: "Attempted Tests2",
+            path: "attempted-tests",
+            element: <AttemptedTests />,
+            name: "Attempted Tests",
+            description: "Attempted Tests",
           },
           {
             path: "stats",

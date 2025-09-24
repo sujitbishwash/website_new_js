@@ -1317,7 +1317,7 @@ const TestHistoryList: React.FC<{
 //==============================================================================
 // 9. MAIN APP COMPONENT
 //==============================================================================
-const AttemptedTests = () => {
+const AttemptedTestsArchive = () => {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [selectedTest, setSelectedTest] = useState<TestData | null>(null);
   const { profile } = useUser();
@@ -1353,4 +1353,4 @@ const AttemptedTests = () => {
   );
 };
 
-export default AttemptedTests;
+export default AttemptedTestsArchive;

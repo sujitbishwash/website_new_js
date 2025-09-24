@@ -707,7 +707,7 @@ export default function HomePage() {
                 Refresh
               </button>
               <button
-                onClick={() => navigate(ROUTES.ATTEMPTED_TESTS2)}
+                onClick={() => navigate(ROUTES.ATTEMPTED_TESTS)}
                 className="text-sm text-primary hover:opacity-80 transition-colors hover:cursor-pointer"
               >
                 View all
@@ -772,7 +772,7 @@ export default function HomePage() {
                   </div>
                   <button
                     onClick={() =>
-                      navigate(ROUTES.ANALYSIS2, {
+                      navigate(ROUTES.ANALYSIS, {
                         state: { sessionId: test.session_id },
                       })
                     }
