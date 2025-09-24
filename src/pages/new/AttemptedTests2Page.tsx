@@ -320,7 +320,7 @@ const Pagination = ({
 const AttemptedTests2 = () => {
   const [filter, setFilter] = useState<MockTestStatus | "All">("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const TESTS_PER_PAGE = 12;
+  const TESTS_PER_PAGE = 10;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [attemptedTests, setAttemptedTests] = useState<MockTest[]>([]);

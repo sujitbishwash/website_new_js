@@ -173,7 +173,9 @@ const TestConfigurationPageComponent = () => {
           }
         }
         if (data.level.length > 0) {
-          setSelectedDifficulty(data.level[0]);
+          // Set "Medium" as default if available, otherwise use first option
+          const mediumIndex = data.level.findIndex(level => level.toLowerCase() === 'medium');
+          setSelectedDifficulty(mediumIndex !== -1 ? data.level[mediumIndex] : data.level[0]);
         }
         if (data.language.length > 0) {
           setSelectedLanguage(data.language[0]);
