@@ -17,7 +17,7 @@ import ContentTabs from "@/components/learning/ContentTabs";
 import AITutorPanel from "@/components/learning/AITutorPanel";
 import Header from "@/components/learning/Header";
 import SparklesIcon from "@/components/icons/SparklesIcon";
-import LoadingScreen from "@/components/ui/LoadingScreen";
+import LoadingScreen from "@/components/ui/LoadingScreen1";
 import { useApiProgress } from "@/hooks/useApiProgress";
 import { useIsMobile } from "@/hooks/use-mobile";
 import ProgressBar from "@/components/ui/ProgressBar";
@@ -667,7 +667,6 @@ const VideoPage: React.FC = () => {
   }, []);
 
   // Show loading screen while APIs are loading
-  /*
   if (isLoadingVideo || (isApiLoading && apiProgress < 90)) {
     return (
       <LoadingScreen
@@ -675,10 +674,10 @@ const VideoPage: React.FC = () => {
         progress={apiProgress}
         message={apiMessage}
         showSkeleton={true}
+        skeletonType="full-page"
       />
     );
   }
-    */
 
 
   // If video is not validated but we've been loading for a while, show fallback
