@@ -1,5 +1,5 @@
-import React from 'react';
-import ProgressBar from './ProgressBar';
+import React from "react";
+import ProgressBar from "./ProgressBar";
 
 interface LoadingScreenProps {
   isLoading: boolean;
@@ -8,13 +8,47 @@ interface LoadingScreenProps {
   showSkeleton?: boolean;
   children?: React.ReactNode;
 }
+const SkeletonHeader: React.FC = () => (
+  <div className="flex justify-between items-center pb-4">
+    <div className="h-5 bg-muted rounded w-3/4"></div>
+    <div className="flex space-x-4">
+      <div className="w-7 h-7 bg-muted rounded-full"></div>
+      <div className="w-7 h-7 bg-muted rounded-full"></div>
+    </div>
+  </div>
+);
+const SkeletonTabs: React.FC = () => (
+  <div className="flex space-x-2">
+    <div className="h-8 bg-muted rounded w-16"></div>
+    <div className="h-8 bg-muted rounded w-16"></div>
+    <div className="h-8 bg-muted rounded w-16"></div>
+    <div className="h-8 bg-muted rounded w-16"></div>
+  </div>
+);
+const SkeletonVideoPlayer: React.FC = () => (
+  <div className="aspect-video bg-muted rounded-xl"></div>
+);
 
+const SkeletonControls: React.FC = () => (
+  <div className="flex space-x-4">
+    <div className="h-10 bg-muted rounded w-32"></div>
+    <div className="h-10 bg-muted rounded w-32"></div>
+  </div>
+);
+
+const SkeletonContent: React.FC = () => (
+  <div className="space-y-3">
+    <div className="h-5 bg-muted rounded w-full"></div>
+    <div className="h-5 bg-muted rounded w-4/5"></div>
+    <div className="h-5 bg-muted rounded w-3/5"></div>
+  </div>
+);
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
   isLoading,
   progress,
   message,
   showSkeleton = false,
-  children
+  children,
 }) => {
   if (!isLoading) {
     return <>{children}</>;
@@ -43,23 +77,12 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
             {/* Left Column Skeleton */}
             <div className="xl:col-span-3">
               <div className="space-y-4">
-                {/* Header Skeleton */}
-                <div className="flex justify-between items-center pb-4">
-                  <div className="h-5 bg-muted rounded w-3/4"></div>
-                  <div className="flex space-x-4">
-                    <div className="w-7 h-7 bg-muted rounded-full"></div>
-                    <div className="w-7 h-7 bg-muted rounded-full"></div>
-                  </div>
-                </div>
-                
+                <SkeletonHeader />
                 {/* Video Player Skeleton */}
-                <div className="aspect-video bg-muted rounded-xl"></div>
-                
+                <SkeletonVideoPlayer />
+
                 {/* Controls Skeleton */}
-                <div className="flex space-x-4">
-                  <div className="h-10 bg-muted rounded w-32"></div>
-                  <div className="h-10 bg-muted rounded w-32"></div>
-                </div>
+                <SkeletonControls />
               </div>
             </div>
 
@@ -67,19 +90,10 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
             <div className="xl:col-span-2 bg-muted/20 p-4 rounded-lg">
               <div className="space-y-4">
                 {/* Tabs Skeleton */}
-                <div className="flex space-x-2">
-                  <div className="h-8 bg-muted rounded w-16"></div>
-                  <div className="h-8 bg-muted rounded w-16"></div>
-                  <div className="h-8 bg-muted rounded w-16"></div>
-                  <div className="h-8 bg-muted rounded w-16"></div>
-                </div>
-                
+                <SkeletonTabs />
+
                 {/* Content Skeleton */}
-                <div className="space-y-3">
-                  <div className="h-5 bg-muted rounded w-full"></div>
-                  <div className="h-5 bg-muted rounded w-4/5"></div>
-                  <div className="h-5 bg-muted rounded w-3/5"></div>
-                </div>
+                <SkeletonContent />
               </div>
             </div>
           </div>
