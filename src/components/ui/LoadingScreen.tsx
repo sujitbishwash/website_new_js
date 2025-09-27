@@ -1,14 +1,16 @@
 import React from "react";
-import ProgressBar from "./ProgressBar";
+
+type SkeletonType = 'video-player' | 'header' | 'content-tabs' | 'ai-tutor-panel' | 'generic';
 
 interface LoadingScreenProps {
   isLoading: boolean;
   progress: number;
   message: string;
   showSkeleton?: boolean;
+  skeletonType?: SkeletonType;
   children?: React.ReactNode;
 }
-const SkeletonHeader: React.FC = () => (
+const SkeletonHeader = () => (
   <div className="flex justify-between items-center pb-4">
     <div className="h-5 bg-muted rounded w-3/4"></div>
     <div className="flex space-x-4">
@@ -17,7 +19,7 @@ const SkeletonHeader: React.FC = () => (
     </div>
   </div>
 );
-const SkeletonTabs: React.FC = () => (
+const SkeletonTabs = () => (
   <div className="flex space-x-2">
     <div className="h-8 bg-muted rounded w-16"></div>
     <div className="h-8 bg-muted rounded w-16"></div>
@@ -25,28 +27,59 @@ const SkeletonTabs: React.FC = () => (
     <div className="h-8 bg-muted rounded w-16"></div>
   </div>
 );
-const SkeletonVideoPlayer: React.FC = () => (
+const SkeletonVideoPlayer = () => (
   <div className="aspect-video bg-muted rounded-xl"></div>
 );
-
-const SkeletonControls: React.FC = () => (
+const SkeletonControls = () => (
   <div className="flex space-x-4">
     <div className="h-10 bg-muted rounded w-32"></div>
     <div className="h-10 bg-muted rounded w-32"></div>
   </div>
 );
-
-const SkeletonContent: React.FC = () => (
+const SkeletonContent = () => (
   <div className="space-y-3">
     <div className="h-5 bg-muted rounded w-full"></div>
     <div className="h-5 bg-muted rounded w-4/5"></div>
     <div className="h-5 bg-muted rounded w-3/5"></div>
   </div>
 );
+
+const AITutorPanelSkeleton = () => (<>
+<SkeletonContent />
+<SkeletonTabs />
+<SkeletonControls />
+</>);
+
+const GenericSkeleton = () => (
+  <div className="w-full max-w-4xl mt-8">
+    <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+      {/* Left Column Skeleton */}
+      
+
+      {/* Right Column Skeleton */}
+      
+    </div>
+  </div>
+);
+
+const renderSkeleton = (skeletonType: SkeletonType) => {
+  switch (skeletonType) {
+    case 'header':
+      return <SkeletonHeader />;
+    case 'video-player':
+      return <SkeletonVideoPlayer />;
+    case 'content-tabs':
+      return <SkeletonTabs />;
+    case 'ai-tutor-panel':
+      return <AITutorPanelSkeleton />;
+    case 'generic':
+    default:
+      return <GenericSkeleton />;
+  }
+};
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
   isLoading,
-  progress,
-  message,
+  skeletonType = 'generic',
   showSkeleton = false,
   children,
 }) => {
@@ -55,51 +88,8 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
   }
 
   return (
-    <div className="bg-background min-h-screen font-sans flex flex-col justify-center items-center p-4 gap-6">
-      {/* Logo or Icon */}
-
-      {/* Progress Section */}
-      <div className="w-full max-w-md">
-        <ProgressBar
-          isLoading={true}
-          progress={progress}
-          message={message}
-          showPercentage={true}
-          height={6}
-          className="mb-4"
-        />
-      </div>
-
-      {/* Skeleton content if needed */}
-      {showSkeleton && (
-        <div className="w-full max-w-4xl mt-8">
-          <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
-            {/* Left Column Skeleton */}
-            <div className="xl:col-span-3">
-              <div className="space-y-4">
-                <SkeletonHeader />
-                {/* Video Player Skeleton */}
-                <SkeletonVideoPlayer />
-
-                {/* Controls Skeleton */}
-                <SkeletonControls />
-              </div>
-            </div>
-
-            {/* Right Column Skeleton */}
-            <div className="xl:col-span-2 bg-muted/20 p-4 rounded-lg">
-              <div className="space-y-4">
-                {/* Tabs Skeleton */}
-                <SkeletonTabs />
-
-                {/* Content Skeleton */}
-                <SkeletonContent />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
+    <>{showSkeleton && renderSkeleton(skeletonType)}</>
+    
   );
 };
 
