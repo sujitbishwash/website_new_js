@@ -1,5 +1,5 @@
 import { Menu } from "lucide-react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { ROUTES } from "../routes/constants";
@@ -7,17 +7,19 @@ import LogoutModal from "./LogoutModal";
 import ExamConfigurationModal from "./modals/ExamConfigurationModal";
 import ProfileModal from "./ProfilePage";
 import Sidebar from "./sidebar/Sidebar"; // Adjust path as needed
+import BugReportModal from "./modals/BugReportModal";
 
 const Layout: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isContracted, setIsContracted] = useState(false); // Sidebar is expanded by default on desktop
   const [isLogoutModalOpen, setLogoutModalOpen] = useState(false);
   const [isProfileModalOpen, setProfileModalOpen] = useState(false);
-  const [isExamModalOpen, setIsExamModalOpen] = useState(false);
+  const [isExamModalOpen, setExamModalOpen] = useState(false);
+  const [isBugReportModalOpen, setBugReportModalOpen] = useState(false);
   const { logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-
+  const appContainerRef = useRef<HTMLDivElement>(null);
   // Hide sidebar on exam goal page
   const shouldHideSidebar = location.pathname === ROUTES.EXAM_GOAL;
 
@@ -29,6 +31,10 @@ const Layout: React.FC = () => {
     setProfileModalOpen(true);
   };
 
+  const onBugReportClick = () => {
+    setBugReportModalOpen(true);
+  };
+
   const handleUpgradeClick = () => {
     navigate(ROUTES.PREMIUM);
     setIsContracted(true);
@@ -36,7 +42,7 @@ const Layout: React.FC = () => {
   };
 
   const handleExamConfigurationClick = () => {
-    setIsExamModalOpen(true);
+    setExamModalOpen(true);
   };
 
   const handleLogoutConfirm = async () => {
@@ -54,9 +60,10 @@ const Layout: React.FC = () => {
     setProfileModalOpen(false);
   };
 
+
   return (
     <>
-      <div className="flex h-screen">
+      <div className="flex h-screen" ref={appContainerRef}>
         {!shouldHideSidebar && (
           <Sidebar
             isOpen={isOpen}
@@ -67,6 +74,7 @@ const Layout: React.FC = () => {
             onProfileClick={handleProfileClick}
             onUpgradeClick={handleUpgradeClick}
             onExamConfigurationClick={handleExamConfigurationClick}
+            onBugReportClick={onBugReportClick}
           />
         )}
         <div className="flex-1 flex flex-col min-w-0">
@@ -107,7 +115,13 @@ const Layout: React.FC = () => {
       {/* Exam Configuration Modal - positioned at root level for proper full-screen coverage */}
       <ExamConfigurationModal
         isOpen={isExamModalOpen}
-        onClose={() => setIsExamModalOpen(false)}
+        onClose={() => setExamModalOpen(false)}
+      />
+
+      <BugReportModal
+        isOpen={isBugReportModalOpen}
+        onClose={() => setBugReportModalOpen(false)}
+        appContainerRef={appContainerRef}
       />
     </>
   );

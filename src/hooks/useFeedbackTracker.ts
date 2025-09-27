@@ -88,18 +88,18 @@ export const useFeedbackTracker = ({
     
     // Prevent multiple API calls for the same component/sourceId
     if (hasCheckedRef.current && sourceIdRef.current === sourceId && componentRef.current === component) {
-      console.log(`🔄 Skipping feedback check - already checked for ${component}:${sourceId}`);
+      
       return;
     }
 
     // Debounce: prevent API calls within 2 seconds of each other
     const now = Date.now();
     if (now - lastCheckTimeRef.current < 2000) {
-      console.log(`⏱️ Debouncing feedback check for ${component}:${sourceId} - too soon since last call`);
+      
       return;
     }
 
-    console.log(`🔍 Checking feedback for ${component}:${sourceId} at ${pageUrl}`);
+    
     lastCheckTimeRef.current = now;
     setLastCheckTime(now);
     setIsLoading(true);
@@ -123,16 +123,16 @@ export const useFeedbackTracker = ({
         
         if (componentData.existing_feedback) {
           onFeedbackExists?.(componentData.existing_feedback);
-          console.log(`✅ Found existing feedback for ${component}:${sourceId}`, componentData.existing_feedback);
+          
         } else {
-          console.log(`ℹ️ No existing feedback found for ${component}:${sourceId}`);
+          
         }
       } else {
-        console.error(`❌ Component ${component} not found in API response`);
+        
         setError('Component not found in API response');
       }
     } catch (err: any) {
-      console.error(`❌ Error checking feedback for ${component}:${sourceId}:`, err);
+      
       setError(err.message || 'Failed to check existing feedback');
       // Don't set canSubmitFeedback to false on error - let user try again
     } finally {
@@ -144,7 +144,7 @@ export const useFeedbackTracker = ({
   const markAsSubmitted = useCallback(() => {
     setCanSubmitFeedback(false); // Prevent duplicate submissions
     // Keep existingFeedback as is - don't override API data
-    console.log(`✅ Feedback marked as submitted for ${component}:${sourceId} - preventing duplicates`);
+    
   }, [component, sourceId]);
 
   // Reset feedback state (useful for testing or admin purposes)
@@ -159,7 +159,7 @@ export const useFeedbackTracker = ({
     setLastCheckTime(0);
     sourceIdRef.current = '';
     componentRef.current = '' as ComponentName;
-    console.log(`🔄 Feedback state reset for ${component}:${sourceId}`);
+    
   }, [component, sourceId]);
 
   // Check for existing feedback only when sourceId or component changes
@@ -171,7 +171,7 @@ export const useFeedbackTracker = ({
         lastCheckTimeRef.current = 0;
         setHasChecked(false);
         setLastCheckTime(0);
-        console.log(`🔄 Dependencies changed, resetting feedback check for ${component}:${sourceId}`);
+        
       }
       
       // Only check if we haven't already checked for this combination
@@ -238,17 +238,17 @@ export const useMultiFeedbackTracker = ({
     // Prevent multiple API calls for the same components/sourceId
     if (hasCheckedRef.current && sourceIdRef.current === sourceId && 
         JSON.stringify(componentsRef.current) === JSON.stringify(components)) {
-      console.log(`🔄 Skipping multi-feedback check - already checked for ${components.join(',')}:${sourceId}`);
+      
       return;
     }
 
     const now = Date.now();
     if (now - lastCheckTimeRef.current < 2000) {
-      console.log(`⏱️ Debouncing multi-feedback check for ${components.join(',')}:${sourceId} - too soon since last call`);
+      
       return;
     }
 
-    console.log(`🔍 Checking feedback for multiple components ${components.join(',')}:${sourceId} at ${pageUrl}`);
+    
     lastCheckTimeRef.current = now;
     setLastCheckTime(now);
     setIsLoading(true);
@@ -257,7 +257,7 @@ export const useMultiFeedbackTracker = ({
     try {
       const response = await feedbackApi.canSubmitFeedbackMulti(sourceId, components, pageUrl);
 
-      console.log("🔍 Multi-feedback response:", response);
+      
       
       const newStates: {
         [key in ComponentName]?: {
@@ -284,9 +284,9 @@ export const useMultiFeedbackTracker = ({
 
           if (componentData.existing_feedback) {
             onFeedbackExists?.(component, componentData.existing_feedback);
-            console.log(`✅ Found existing feedback for ${component}:${sourceId}`, componentData.existing_feedback);
+            
           } else {
-            console.log(`ℹ️ No existing feedback found for ${component}:${sourceId}`);
+            
           }
         }
       });
@@ -297,7 +297,7 @@ export const useMultiFeedbackTracker = ({
       sourceIdRef.current = sourceId;
       componentsRef.current = [...components];
     } catch (err: any) {
-      console.error(`❌ Error checking multi-feedback for ${components.join(',')}:${sourceId}:`, err);
+      
       setError(err.message || 'Failed to check existing feedback');
     } finally {
       setIsLoading(false);
@@ -317,7 +317,7 @@ export const useMultiFeedbackTracker = ({
         }
       };
     });
-    console.log(`✅ Feedback marked as submitted for ${component}:${sourceId} - preventing duplicates`);
+    
   }, [sourceId]);
 
   const resetFeedback = useCallback(() => {
@@ -329,7 +329,7 @@ export const useMultiFeedbackTracker = ({
     setLastCheckTime(0);
     sourceIdRef.current = '';
     componentsRef.current = [];
-    console.log(`🔄 Multi-feedback state reset for ${components.join(',')}:${sourceId}`);
+    
   }, [components, sourceId]);
 
   // Check for existing feedback only when sourceId or components change
@@ -342,7 +342,7 @@ export const useMultiFeedbackTracker = ({
         lastCheckTimeRef.current = 0;
         setHasChecked(false);
         setLastCheckTime(0);
-        console.log(`🔄 Dependencies changed, resetting multi-feedback check for ${components.join(',')}:${sourceId}`);
+        
       }
       
       // Only check if we haven't already checked for this combination
@@ -387,10 +387,10 @@ export const useFeedbackChips = (rating?: number) => {
         convertedChips[key] = items.map(item => item.label);
       });
       setChips(convertedChips);
-      console.log(`🎯 Fetched feedback chips${rating ? ` for rating ${rating}` : ' for all ratings'}:`, response);
+      
     } catch (err: unknown) {
       const error = err as { message?: string };
-      console.error(`❌ Error fetching feedback chips:`, err);
+      
       setError(error.message || 'Failed to fetch feedback chips');
     } finally {
       setIsLoading(false);

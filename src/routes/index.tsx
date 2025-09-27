@@ -1,4 +1,4 @@
-import AttemptedTests from "@/pages/new/AttemptedTests";
+import AttemptedTestsArchive from "@/pages/archive/AttemptedTestsArchive";
 import AuthCallbackPage from "@/pages/new/AuthCallbackPage";
 import BookPage from "@/pages/new/BookPage";
 import ComingSoonPage from "@/pages/new/ComingSoonPage";
@@ -29,7 +29,10 @@ import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
 import Stats  from "../pages/new/Stats";
 import VideoPage from "@/pages/new/VideoPage";
-import TestAnalysis2 from "@/pages/new/Analysis2Page";
+import AttemptedTests from "@/pages/new/AttemptedTestsPage";
+import OutOfSyllabusPage from "@/pages/new/OutOfSyllabusPage";
+import TestAnalysisPage from "@/pages/new/TestAnalysisPage";
+import TestAnalysisPageArchive from "@/pages/archive/TestAnalysisPageArchive";
 
 // Route configuration object for easy maintenance
 export const routes = [
@@ -83,22 +86,29 @@ export const routes = [
             description: "Confirm exam details before starting",
           },
           {
-            path: "test-main-page",
+            path: "test-main-page/:id",
+            element: <TestMainPage />,
+            name: "Test Main Page",
+            description: "Main test taking interface",
+          },
+          
+          {
+            path: "test-main-page/:id/solutions",
             element: <TestMainPage />,
             name: "Test Main Page",
             description: "Main test taking interface",
           },
           {
-            path: "analysis",
-            element: <TestAnalysis2 />,
-            name: "Detailed Analysis",
+            path: "analysis_archive",
+            element: <TestAnalysisPageArchive />,
+            name: "Detailed Analysis Archive",
             description: "View detailed test analysis and results",
           },
           
           {
-            path: "analysis2",
-            element: <TestAnalysis2 />,
-            name: "Detailed Analysis2",
+            path: "analysis",
+            element: <TestAnalysisPage />,
+            name: "Detailed Analysis",
             description: "View detailed test analysis and results",
           },
           {
@@ -143,6 +153,12 @@ export const routes = [
             name: "Video Learning",
             description: "Video Learning Page",
           },
+          {
+            path: "out-of-syllabus",
+            element: <OutOfSyllabusPage />,
+            name: "Out of Syllabus",
+            description: "Content not part of current syllabus",
+          },
           // Coming Soon Routes - Pages not yet implemented
           {
             path: "previous-year-papers",
@@ -150,6 +166,13 @@ export const routes = [
             name: "Previous Year Papers",
             description: "Previous year question papers",
           },
+          {
+            path: "attempted-tests_archive",
+            element: <AttemptedTestsArchive />,
+            name: "Attempted Tests Archive",
+            description: "Attempted Tests",
+          },
+          
           {
             path: "attempted-tests",
             element: <AttemptedTests />,

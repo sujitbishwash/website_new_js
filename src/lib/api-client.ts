@@ -2,7 +2,7 @@ import axios from "axios";
 
 // API configuration
 const API_CONFIG = {
-  // baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  //baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
   baseURL: 'https://api.krishak.in',
   headers: {
     "Content-Type": "application/json",
@@ -19,23 +19,107 @@ const activeRequests = new Map<string, Promise<unknown>>();
 apiClient.interceptors.request.use((config) => {
   const token = localStorage.getItem("authToken");
 
-  console.log("🔑 Request interceptor - Checking auth token:", {
-    hasToken: !!token,
-    tokenLength: token?.length,
-    url: config.url,
-    method: config.method
-  });
+  
 
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-    console.log("🔑 Request interceptor - Token added to request");
+    
   } else {
-    console.log(
-      "🔑 Request interceptor - No token found, request will be unauthorized"
-    );
+    
   }
   return config;
 });
+
+// Global auth error handler registration
+let authErrorHandler: ((status: number, endpoint: string) => void) | null = null;
+export const setAuthErrorHandler = (handler: (status: number, endpoint: string) => void) => {
+  authErrorHandler = handler;
+};
+
+// Endpoints that should trigger logout on 401/403 (critical auth endpoints)
+const CRITICAL_AUTH_ENDPOINTS = [
+  '/ums/me',
+  '/ums/refresh-token',
+  '/ums/logout',
+  '/ums/verify-otp',
+  '/ums/login'
+];
+
+// Endpoints that should NOT trigger logout on 401/403 (resource-specific endpoints)
+const RESOURCE_ENDPOINTS = [
+  '/video/',
+  '/chapter/',
+  '/test-series/',
+  '/learning/',
+  '/feedback/',
+  '/progress/',
+  '/history/',
+  '/suggested/',
+  '/can-feedback/',
+  '/detail/'
+];
+
+// Function to check if endpoint should trigger logout
+const shouldTriggerLogout = (endpoint: string, status: number): boolean => {
+  // Always logout on critical auth endpoints
+  if (CRITICAL_AUTH_ENDPOINTS.some(critical => endpoint.includes(critical))) {
+    return true;
+  }
+  
+  // For resource endpoints, only logout on 401 (not 403)
+  if (RESOURCE_ENDPOINTS.some(resource => endpoint.includes(resource))) {
+    return status === 401; // 403 might be permission-related, not auth-related
+  }
+  
+  // For other endpoints, logout on both 401 and 403
+  return status === 401 || status === 403;
+};
+
+// Function to validate if token exists and is not expired
+const isTokenValid = (): boolean => {
+  const token = localStorage.getItem("authToken");
+  if (!token) return false;
+  
+  try {
+    // Basic JWT token validation (check if it's not expired)
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    const currentTime = Math.floor(Date.now() / 1000);
+    return payload.exp > currentTime;
+  } catch {
+    return false;
+  }
+};
+
+// Response interceptor to catch auth errors globally
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    try {
+      const status = error?.response?.status;
+      const endpoint = error?.config?.url || '';
+      
+      if ((status === 401 || status === 403) && typeof authErrorHandler === 'function') {
+        // Only trigger logout if:
+        // 1. The endpoint should trigger logout based on our rules
+        // 2. AND the token is actually invalid (not just a permission issue)
+        if (shouldTriggerLogout(endpoint, status)) {
+          // For 401 on resource endpoints, check if token is actually invalid
+          if (status === 401 && RESOURCE_ENDPOINTS.some(resource => endpoint.includes(resource))) {
+            if (!isTokenValid()) {
+              authErrorHandler(status, endpoint);
+            } else {
+              console.warn(`401 on ${endpoint} but token appears valid - not logging out`);
+            }
+          } else {
+            // For critical auth endpoints or 403s, always logout
+            authErrorHandler(status, endpoint);
+          }
+        }
+      }
+    } catch {}
+    return Promise.reject(error);
+  }
+);
 
 // Response interface
 export interface ApiResponse<T> {
@@ -60,27 +144,23 @@ export const apiRequest = async <T>(
   const maxRetries = 2;
   let lastError: unknown;
 
-  console.log(`🌐 API Request: ${method} ${endpoint}`, {
-    data,
-    config,
-    baseURL: API_CONFIG.baseURL,
-    fullURL: `${API_CONFIG.baseURL}${endpoint}`
-  });
+  
 
+  const requestKey = `${method}:${endpoint}:${data ? JSON.stringify(data) : ''}`;
+
+  // De-duplicate identical in-flight requests
+  if (activeRequests.has(requestKey)) {
+    return (await activeRequests.get(requestKey)) as ApiResponse<T>;
+  }
+
+  const runner = (async (): Promise<ApiResponse<T>> => {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
-      console.log(`🌐 API Request: Attempt ${attempt}/${maxRetries} for ${method} ${endpoint}`);
-
       const response = await apiClient.request({
         method,
         url: endpoint,
         data,
         headers: config?.headers,
-      });
-
-      console.log(`✅ API Request: Success for ${method} ${endpoint}`, {
-        status: response.status,
-        data: response.data
       });
 
       return {
@@ -91,28 +171,21 @@ export const apiRequest = async <T>(
       lastError = error;
       const axiosError = error as { response?: { status?: number; data?: { message?: string } } };
 
-      console.error(`❌ API Request: Error for ${method} ${endpoint} (attempt ${attempt})`, {
-        error,
-        status: axiosError.response?.status,
-        data: axiosError.response?.data
-      });
-
       // Don't retry on authentication errors
       if (axiosError.response?.status === 401 || axiosError.response?.status === 403) {
-        console.log("🔒 Authentication error - not retrying");
+        
         break;
       }
 
       // Don't retry on client errors (4xx except 401/403)
       if (axiosError.response?.status && axiosError.response.status >= 400 && axiosError.response.status < 500) {
-        console.log("🚫 Client error - not retrying");
+        
         break;
       }
 
       // Retry on server errors (5xx) and network errors
       if (attempt < maxRetries) {
         const delay = Math.pow(2, attempt) * 1000; // Exponential backoff
-        console.log(`⏳ API Request: Retrying in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
@@ -120,11 +193,20 @@ export const apiRequest = async <T>(
 
   // If all retries failed, throw the last error
   const finalError = lastError as { response?: { status?: number; data?: { message?: string } } };
-  console.error(`💥 API Request: All retries failed for ${method} ${endpoint}`, finalError);
+
   throw {
     message: finalError.response?.data?.message || "An error occurred",
     status: finalError.response?.status || 500,
   } as ApiError;
+  })();
+
+  activeRequests.set(requestKey, runner);
+  try {
+    const result = await runner;
+    return result;
+  } finally {
+    activeRequests.delete(requestKey);
+  }
 };
 
 // Auth related API calls
@@ -164,6 +246,7 @@ export const authApi = {
     // This avoids CORS issues with Google's OAuth endpoint
     // Determine environment for backend routing (Vite)
     const mode: string = import.meta.env.MODE;
+    //const envParam = 'prod';
     const envParam = mode === 'production' ? 'prod' : 'dev';
     const redirectUrl = `${API_CONFIG.baseURL}/ums/auth/login?env=${envParam}`;
     window.location.href = redirectUrl;
@@ -177,10 +260,7 @@ export const authApi = {
 
   // Get authenticated user data (for exam goal check)
   getAuthenticatedUser: async () => {
-    console.log(
-      "🚨 DIRECT API CALL to getAuthenticatedUser",
-      new Date().toISOString()
-    );
+    
     return apiRequest<{
       exam?: string;
       group_type?: string;
@@ -393,7 +473,7 @@ export const videoApi = {
     
     // Check if request is already in progress
     if (activeRequests.has(requestKey)) {
-      console.log("🔍 ULTRA AGGRESSIVE: Reusing existing summary request for:", videoId);
+      
       return activeRequests.get(requestKey)! as Promise<{ summary: string; sections: Array<{ title: string; content: string }>; transcript?: string }>;
     }
 
@@ -405,7 +485,7 @@ export const videoApi = {
         );
         return response.data;
       } catch (error: unknown) {
-        console.error("❌ getVideoSummary API error:", error);
+        
         // Return a fallback structure to prevent component crashes
         return {
           summary: "Summary not available",
@@ -433,7 +513,7 @@ export const videoApi = {
     
     // Check if request is already in progress
     if (activeRequests.has(requestKey)) {
-      console.log("🔍 ULTRA AGGRESSIVE: Reusing existing flashcards request for:", videoId);
+      
       return activeRequests.get(requestKey)! as Promise<{ cards: Array<{ id: number; question: string; answer: string; hint?: string; difficulty?: string }>; video_id: string }>;
     }
 
@@ -445,7 +525,7 @@ export const videoApi = {
         );
         return response.data;
       } catch (error: unknown) {
-        console.error("❌ getVideoFlashcards API error:", error);
+        
         // Return a fallback structure to prevent component crashes
         return {
           cards: [{
@@ -654,7 +734,7 @@ export const validateUrl = async (
   url: string
 ): Promise<UrlValidationResponse> => {
   try {
-    console.log("Validating URL:", url); // Debug log
+    
     // For now, implement dummy logic
     // In a real implementation, this would call the backend API
     const lowerUrl = url.toLowerCase();
@@ -666,7 +746,7 @@ export const validateUrl = async (
       lowerUrl.includes("out-of-syllabus") ||
       lowerUrl.includes("out_of_syllabus")
     ) {
-      console.log("Out of syllabus detected!"); // Debug log
+      
       return {
         isValid: false,
         isOutOfSyllabus: true,
@@ -691,7 +771,7 @@ export const validateUrl = async (
       isOutOfSyllabus: false,
     };
   } catch (error) {
-    console.error("URL validation error:", error);
+    
     return {
       isValid: false,
       isOutOfSyllabus: false,
@@ -729,9 +809,9 @@ export interface Option {
 }
 
 export const quizApi = {
-  startTest: async (
+  initiateTest: async (
     testConfig: TestData
-  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+  ): Promise<{"session_id": number}> => {
     // Accept either legacy flat questions or new grouped-sections payload
     const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
       "POST",
@@ -741,12 +821,26 @@ export const quizApi = {
     return response.data as any;
   },
 
-  getQuestions: async (sessionId: number): Promise<QuestionResponse> => {
-    const response = await apiRequest<QuestionResponse>(
+  startTest: async (
+    sessionId: number
+  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+    // Accept either legacy flat questions or new grouped-sections payload
+    const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
       "GET",
-      `/test-series/question/${sessionId}`
+      `/test-series/session/${sessionId}`,
     );
-    return response.data;
+    return response.data as any;
+  },
+
+  getTestSolutions: async (
+    sessionId: number
+  ): Promise<QuestionResponse | StartTestSessionResponseV3> => {
+    // Accept either legacy flat questions or new grouped-sections payload
+    const response = await apiRequest<QuestionResponse | StartTestSessionResponseV3>(
+      "GET",
+      `/test-series/view-solution/${sessionId}`,
+    );
+    return response.data as any;
   },
 
   submitTest: async (data: SubmitTestRequest): Promise<SubmitTestResponse> => {
@@ -779,45 +873,32 @@ export const quizApi = {
       metadata
     };
     
-    console.log("🚀 Enhanced Test Submission:", {
-      sessionId,
-      answersCount: answers.length,
-      metadata,
-      submitData
-    });
-    
     const response = await apiRequest<SubmitTestResponse>(
       "POST",
       "/test-series/submit-test-session",
       submitData
     );
     
-    console.log("✅ Enhanced Test Submission Success:", response.data);
+    
     return response.data;
   },
 
   // New API for dynamic quiz generation
   generateQuiz: async (topics: string[]): Promise<QuizResponse> => {
     const requestKey = `quiz-${topics.join(',')}`;
-    
-    console.log(`🆕 Quiz API: generateQuiz called with topics:`, topics);
-    console.log(`🆕 Quiz API: Request key:`, requestKey);
-    console.log(`🆕 Quiz API: API base URL:`, API_CONFIG.baseURL);
-    
     // Check if there's already an active request for the same topics
 
     /*
     if (activeRequests.has(requestKey)) {
-      console.log(`🔄 Quiz API: Reusing existing request for topics: ${topics.join(',')}`);
+      
       return activeRequests.get(requestKey)! as Promise<QuizResponse>;
     }
       */
 
-    console.log(`🆕 Quiz API: Creating new request for topics: ${topics.join(',')}`);
+    
     const requestPromise = (async () => {
       try {
-        console.log(`🆕 Quiz API: About to make API request to /test-series/quiz`);
-        console.log(`🆕 Quiz API: Request payload:`, { topics });
+        
         
         const response = await apiRequest<QuizResponse>(
           "POST",
@@ -825,15 +906,15 @@ export const quizApi = {
           { topics }
         );
         
-        console.log(`✅ Quiz API: Response received:`, response);
+        
         return response.data;
       } catch (error) {
-        console.error(`❌ Quiz API: Error in generateQuiz:`, error);
+        
         throw error;
       } finally {
         // Clean up the request from active requests
         activeRequests.delete(requestKey);
-        console.log(`🧹 Quiz API: Cleaned up request key:`, requestKey);
+        
       }
     })();
 
@@ -954,11 +1035,28 @@ export interface FeedbackChipsResponse {
 
 // Video Progress Tracking API
 export const videoProgressApi = {
-  // Track video watch progress
+  // Track video watch progress with deduplication
   trackProgress: async (data: VideoProgressRequest): Promise<VideoProgressResponse> => {
-    console.log("📊 Tracking video progress:", data);
-    const response = await apiRequest<VideoProgressResponse>('POST', '/video/progress', data);
-    return response.data;
+    const requestKey = `progress-${data.video_id}`;
+    
+    // Check if request is already in progress
+    if (activeRequests.has(requestKey)) {
+      return activeRequests.get(requestKey)! as Promise<VideoProgressResponse>;
+    }
+
+    const requestPromise = (async (): Promise<VideoProgressResponse> => {
+      try {
+        const response = await apiRequest<VideoProgressResponse>('POST', '/video/progress', data);
+        return response.data;
+      } finally {
+        // Remove from active requests when done
+        activeRequests.delete(requestKey);
+      }
+    })();
+
+    // Store the promise to prevent duplicate requests
+    activeRequests.set(requestKey, requestPromise);
+    return requestPromise;
   },
 
   // Get video progress for a specific video
@@ -1016,6 +1114,39 @@ export const feedbackApi = {
   // Get specific feedback by ID
   getFeedbackById: async (id: string): Promise<FeedbackResponse> => {
     const response = await apiRequest<FeedbackResponse>('GET', `/feedback/${id}`);
+    return response.data;
+  },
+};
+
+// Attempted Tests API interfaces
+export interface AttemptedTest {
+  id: string;
+  title: string;
+  positive_score: number;
+  date: string;
+  questions: number;
+  wrong: number;
+  session_id: number;
+  total_marks: number;
+  total_marks_scored: number;
+  attempt: number;
+  subject: string;
+  topics: string[];
+  level: string;
+  language?: string;
+}
+
+export interface AttemptedTestsResponse {
+  tests: AttemptedTest[];
+  total: number;
+  page: number;
+  size: number;
+}
+
+export const attemptedTestsApi = {
+  // Get user's attempted tests
+  getAttemptedTests: async (page: number = 1, size: number = 10): Promise<AttemptedTestsResponse> => {
+    const response = await apiRequest<AttemptedTestsResponse>('GET', `/test-series/attempted-tests?page=${page}&size=${size}`);
     return response.data;
   },
 };

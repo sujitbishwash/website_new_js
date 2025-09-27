@@ -57,7 +57,7 @@ export const getUserData = (): any => {
     try {
       return JSON.parse(userData);
     } catch (error) {
-      console.error('Error parsing user data:', error);
+      
       return null;
     }
   }

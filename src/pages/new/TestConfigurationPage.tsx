@@ -4,6 +4,7 @@ import { useUser } from "../../contexts/UserContext";
 import { fetchTestSeriesFormData } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 import { Pen } from "lucide-react";
+import ExamConfigurationModal from "../../components/modals/ExamConfigurationModal";
 
 // --- Type Definitions ---
 interface ChipProps {
@@ -13,7 +14,6 @@ interface ChipProps {
   onClick: (value: string) => void;
   disabled?: boolean;
 }
-
 
 interface SubTopic {
   subject: string;
@@ -28,7 +28,8 @@ interface TestSeriesFormData {
 interface SelectionPanelProps {
   title: string;
   options: string[];
-  selectedValue: string | null;
+  selectedValue?: string | null;
+  selectedValues?: string[] | null;
   onSelect: (value: string) => void;
   optionalLabel?: string;
   emptyMessage?: string;
@@ -39,13 +40,17 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
   title,
   options,
   selectedValue,
+  selectedValues,
   onSelect,
   optionalLabel,
   emptyMessage,
   mapper,
 }) => {
   return (
-    <div className="p-4 bg-background border-1 rounded-xl mb-4">
+    <div
+      className="p-4 bg-background border-1 rounded-xl mb-4 max-h-82 overflow-y-auto
+    "
+    >
       <h2 className="text-xl font-semibold text-card-foreground dark:text-gray-200 mb-4">
         {title}{" "}
         {optionalLabel && (
@@ -54,17 +59,32 @@ const SelectionPanel: React.FC<SelectionPanelProps> = ({
           </span>
         )}
       </h2>
-      <div className="flex flex-wrap gap-4 text-white">
+      <div className="flex flex-wrap gap-1 sm:gap-4 text-white">
         {options.length > 0 ? (
-          options.map((option) => (
-            <Chip
-              key={option}
-              value={option}
-              label={mapper ? mapper(option) : option}
-              checked={selectedValue === option}
-              onClick={onSelect}
-            />
-          ))
+          options.map((option) => {
+            // If you really need to check selectedValues:
+            if (selectedValues) {
+              return (
+                <Chip
+                  key={option}
+                  value={option}
+                  label={mapper ? mapper(option) : option}
+                  checked={selectedValues.includes(option)}
+                  onClick={() => onSelect(option)}
+                />
+              );
+            } else {
+              return (
+                <Chip
+                  key={option}
+                  value={option}
+                  label={mapper ? mapper(option) : option}
+                  checked={selectedValue === option}
+                  onClick={() => onSelect(option)}
+                />
+              );
+            }
+          })
         ) : (
           <p className="text-gray-500">
             {emptyMessage || "No options available."}
@@ -104,8 +124,6 @@ const Chip: React.FC<ChipProps> = ({
   </button>
 );
 
-
-
 // --- Main Page Component ---
 const TestConfigurationPageComponent = () => {
   const navigate = useNavigate();
@@ -113,7 +131,7 @@ const TestConfigurationPageComponent = () => {
 
   // State to hold user selections
   const [selectedSubject, setSelectedSubject] = useState("");
-  const [selectedSubTopic, setSelectedSubTopic] = useState("");
+  const [selectedSubtopics, setSelectedSubtopics] = useState<string[]>([]);
   const [selectedDifficulty, setSelectedDifficulty] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
 
@@ -122,6 +140,7 @@ const TestConfigurationPageComponent = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isExamConfigModalOpen, setIsExamConfigModalOpen] = useState(false);
 
   // Get available subjects from API data
   const subjects = testData?.subjects.map((subject) => subject.subject) || [];
@@ -148,18 +167,16 @@ const TestConfigurationPageComponent = () => {
         // Set default selections if data is available
         if (data.subjects.length > 0) {
           setSelectedSubject(data.subjects[0].subject);
-          if (data.subjects[0].sub_topic.length > 0) {
-            setSelectedSubTopic(data.subjects[0].sub_topic[0]);
-          }
         }
         if (data.level.length > 0) {
-          setSelectedDifficulty(data.level[0]);
+          // Set "Medium" as default if available, otherwise use first option
+          const mediumIndex = data.level.findIndex(level => level.toLowerCase() === 'medium');
+          setSelectedDifficulty(mediumIndex !== -1 ? data.level[mediumIndex] : data.level[0]);
         }
         if (data.language.length > 0) {
           setSelectedLanguage(data.language[0]);
         }
       } catch (err: any) {
-        console.error("Failed to fetch test configuration data:", err);
         setError("Failed to load test configuration. Please try again.");
       } finally {
         setIsLoading(false);
@@ -169,17 +186,6 @@ const TestConfigurationPageComponent = () => {
     fetchData();
   }, []);
 
-  // Effect to update sub-topic when subject changes
-  useEffect(() => {
-    if (testData) {
-      const newSubTopics =
-        testData.subjects.find((subject) => subject.subject === selectedSubject)
-          ?.sub_topic || [];
-
-      // Set the default selected sub-topic to the first one in the list, or empty if none exist.
-      setSelectedSubTopic(newSubTopics.length > 0 ? newSubTopics[0] : "");
-    }
-  }, [selectedSubject, testData]);
 
   // Handler for the continue button click
   const handleContinue = async () => {
@@ -194,8 +200,8 @@ const TestConfigurationPageComponent = () => {
 
       const testData = {
         subject: selectedSubject,
-        // sub_topic: selectedSubTopic ? [selectedSubTopic] : [],
-        sub_topic: [],
+        sub_topic: selectedSubtopics,
+        //sub_topic: [],
         level: selectedDifficulty.toLowerCase(),
         language: selectedLanguage,
       };
@@ -210,7 +216,6 @@ const TestConfigurationPageComponent = () => {
         },
       });
     } catch (err: any) {
-      console.error("Failed to create test:", err);
       setError(err.message || "Failed to create test. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -231,20 +236,20 @@ const TestConfigurationPageComponent = () => {
 
   return (
     <div className="bg-background text-foreground min-h-screen font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-7xl mx-auto bg-card border border-divider rounded-2xl shadow-2xl p-4 mt-15 sm:mt-0 sm:p-8 space-y-6 ">
+      <div className="w-full max-w-7xl mx-auto bg-card border border-divider rounded-2xl shadow-2xl p-4 mt-15 mb-10 sm:mb-0 sm:mt-0 sm:p-8 sm:space-y-6 ">
         {/* --- Header --- */}
-        <div className="text-center">
+        <div className="text-center mb-6 sm:mb-0">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Configure Your Test
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground">
+          <p className="mt-2 text-lg text-muted-foreground hidden sm:block">
             Select your preferences to start a practice test.
           </p>
         </div>
 
         {/* --- User Profile Section --- */}
         {profile && examGoal && (
-          <div className="mt-4 flex justify-start items-center gap-3">
+          <div className="mt-4 flex justify-start items-center gap-3 hidden sm:block">
             <span className="text-xs font-medium px-3 py-1">
               Exam Goal: {examGoal.exam}
             </span>
@@ -252,12 +257,9 @@ const TestConfigurationPageComponent = () => {
               Group Type: {examGoal.groupType}
             </span>*/}
             <button
-              onClick={() => {
-                console.log("🔄 ProfilePage: Manual refresh requested");
-                // This will trigger a re-render when profile changes
-              }}
+              onClick={() => setIsExamConfigModalOpen(true)}
               className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
-              title="Refresh profile data"
+              title="Edit exam goal"
             >
               <Pen className="w-4 h-4" />
             </button>
@@ -272,7 +274,7 @@ const TestConfigurationPageComponent = () => {
         )}
 
         {/* --- Form Sections --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 sm:gap-6">
           <SelectionPanel
             title="1. Select Subject"
             options={subjects}
@@ -283,8 +285,14 @@ const TestConfigurationPageComponent = () => {
           <SelectionPanel
             title="2. Select Topic"
             options={currentSubTopics}
-            selectedValue={selectedSubTopic}
-            onSelect={setSelectedSubTopic}
+            selectedValues={selectedSubtopics}
+            onSelect={(topic) =>
+              setSelectedSubtopics((prev) =>
+                prev.includes(topic)
+                  ? prev.filter((t) => t !== topic)
+                  : [...prev, topic]
+              )
+            }
             optionalLabel="Optional"
             emptyMessage="No sub-topics available for this subject."
           />
@@ -315,7 +323,7 @@ const TestConfigurationPageComponent = () => {
               !selectedDifficulty ||
               !selectedLanguage
             }
-            className={`px-4 py-2 text-xl font-semibold rounded-lg backdrop-blur-sm border-1  transition-all duration-300 ${
+            className={`w-full sm:w-auto px-4 py-2 text-xl font-semibold rounded-lg backdrop-blur-sm border-1  transition-all duration-300 ${
               isSubmitting ||
               !selectedSubject ||
               !selectedDifficulty ||
@@ -328,6 +336,12 @@ const TestConfigurationPageComponent = () => {
           </button>
         </div>
       </div>
+
+      {/* Exam Configuration Modal */}
+      <ExamConfigurationModal
+        isOpen={isExamConfigModalOpen}
+        onClose={() => setIsExamConfigModalOpen(false)}
+      />
     </div>
   );
 };

@@ -33,7 +33,7 @@ interface UserProfile {
   city: string;
   state: string;
   country: string;
-  gender: "Male" | "Female" | "Other" | "Prefer not to say" | "Not set" | "";
+  gender: string;
   dob: string; // Date of Birth, format YYYY-MM-DD
 }
 
@@ -50,8 +50,8 @@ interface SelectFieldProps {
   label: string;
   value: string;
   isEditing: boolean;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  name: keyof UserProfile;
+  onChange: (e: string) => void;
+  id: keyof UserProfile;
   options: string[];
 }
 
@@ -71,15 +71,13 @@ interface NotificationSettingRowProps {
   title: string;
   description: string;
   value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  onChange: (e: string) => void;
   options: string[];
   manageLink?: boolean;
 }
 
 // --- DYNAMIC USER PROFILE CREATION ---
 const createInitialUserProfile = (profile: any): UserProfile => {
-  console.log("🔄 ProfilePage: Creating user profile from data:", profile);
-
   // Handle gender field - convert to proper format if needed
   let genderValue:
     | "Male"
@@ -121,7 +119,6 @@ const createInitialUserProfile = (profile: any): UserProfile => {
     dob: dobValue,
   };
 
-  console.log("✅ ProfilePage: Created user profile:", userProfile);
   return userProfile;
 };
 
@@ -180,7 +177,7 @@ const ProfileField: React.FC<ProfileFieldProps> = ({
         name={name}
         value={value}
         onChange={onChange}
-        className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className={`mt-1 block w-full text-foreground border border-border focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 justify-between items-center text-left rounded-xl px-4 py-3 bg-background-subtle transition-colors cursor-pointer disabled:cursor-not-allowed`}
         autoComplete="off"
       />
     ) : (
@@ -202,11 +199,11 @@ const SelectField: React.FC<SelectFieldProps> = ({
   value,
   isEditing,
   onChange,
-  name,
+  id,
   options,
 }) => (
   <div>
-    <label className="text-sm font-medium text-muted-foreground flex items-center flex-row gap-2">
+    <label className="text-sm font-medium text-muted-foreground flex items-center flex-row gap-2 mb-1">
       {label}
       {value == "Not set" ? (
         <CircleAlert className="text-destructive w-3 h-3" />
@@ -215,21 +212,13 @@ const SelectField: React.FC<SelectFieldProps> = ({
       )}
     </label>
     {isEditing ? (
-      <select
-        name={name}
+      <Dropdown
+        id={id}
         value={value}
         onChange={onChange}
-        className="mt-1 block w-full pl-3 pr-10 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-      >
-        <option value="" disabled>
-          Select...
-        </option>
-        {options.map((opt) => (
-          <option key={opt} value={opt}>
-            {opt}
-          </option>
-        ))}
-      </select>
+        options={options}
+        defaultPosition={0}
+      />
     ) : (
       <p
         className={`mt-1 text-base ${
@@ -242,6 +231,23 @@ const SelectField: React.FC<SelectFieldProps> = ({
   </div>
 );
 
+{
+  /**<select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="mt-1 block w-full pl-3 pr-10 py-2 rounded-md bg-background text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <option value="" disabled>
+          Select...
+        </option>
+        {options.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
+      </select>*/
+}
 const DateField: React.FC<{
   label: string;
   value: string;
@@ -264,7 +270,7 @@ const DateField: React.FC<{
         name={name}
         value={value}
         onChange={onChange}
-        className="mt-1 block w-full px-3 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className={`mt-1 block w-full text-foreground border border-border focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 justify-between items-center text-left rounded-xl px-4 py-3 bg-background-subtle transition-colors cursor-pointer disabled:cursor-not-allowed`}
       />
     ) : (
       <p
@@ -284,7 +290,7 @@ const SettingRow: React.FC<SettingRowProps> = ({
   description,
   children,
 }) => (
-  <div className="py-4 flex justify-between items-center border-b border-border-medium">
+  <div className="py-4 flex justify-between items-center border-b border-border">
     <div>
       <h3 className="text-base text-foreground">{title}</h3>
       {description && (
@@ -304,10 +310,10 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
   options,
   manageLink,
 }) => (
-  <div className="py-4 flex justify-between items-center border-b border-border-medium">
+  <div className="py-4 flex justify-between items-center border-b border-border">
     <div>
-      <h3 className="text-base font-semibold text-white">{title}</h3>
-      <p className="text-sm text-foreground max-w-md">{description}</p>
+      <h3 className="text-base font-semibold text-foreground mb-4">{title}</h3>
+      <p className="text-sm text-muted-foreground max-w-md">{description}</p>
       {manageLink && (
         <a
           href="#"
@@ -317,7 +323,16 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
         </a>
       )}
     </div>
-    <select
+    <div className="w-40 ">
+      <Dropdown
+        id="responses-select"
+        value={value}
+        onChange={onChange}
+        options={options}
+        defaultPosition={0}
+      />
+    </div>
+    {/**<select
       value={value}
       onChange={onChange}
       className="w-40 pl-3 pr-10 py-2 rounded-md shadow-sm bg-background text-foreground border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -327,7 +342,7 @@ const NotificationSettingRow: React.FC<NotificationSettingRowProps> = ({
           {opt}
         </option>
       ))}
-    </select>
+    </select>*/}
   </div>
 );
 
@@ -339,13 +354,13 @@ import {
   CircleUserRound,
   GaugeCircle,
   KeyRound,
-  RefreshCcw,
   Settings,
   Wrench,
   X,
 } from "lucide-react";
 import { AccentToggle } from "./Accent-toggle";
 import { ModeToggle } from "./mode-toggle";
+import Dropdown from "./ui/dropdown";
 
 const ProfileModal: React.FC<ProfileModalProps> = ({
   isOpen,
@@ -364,29 +379,27 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
   // Update userProfile when profile from UserContext changes
   useEffect(() => {
     if (profile) {
-      console.log("🔄 ProfilePage: Profile updated from UserContext:", profile);
       const newUserProfile = createInitialUserProfile(profile);
       setUserProfile(newUserProfile);
-      console.log(
-        "✅ ProfilePage: User profile state updated:",
-        newUserProfile
-      );
     } else {
       console.log("⚠️ ProfilePage: No profile data available from UserContext");
     }
   }, [profile]);
 
   // State for new "General" settings
-  const [language, setLanguage] = useState("Auto-detect");
+
+  const allLanguages = ["English", "Hindi"];
+  const [language, setLanguage] = useState(allLanguages[0]);
   const [showSuggestions, setShowSuggestions] = useState(true);
   // State for new notification settings
   const [responseNotifications, setResponseNotifications] = useState("Push");
   const [taskNotifications, setTaskNotifications] = useState("Push, Email");
   const { logout } = useAuth();
-
   // State for "Privacy and Security" settings
   const [mfaEnabled, setMfaEnabled] = useState(false);
-
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+  };
   const handleLogoutConfirm = async () => {
     await logout();
     // Navigate to login page after logout is complete
@@ -403,10 +416,22 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
     }));
   };
 
+  const handleGenderChange = (e: string) => {
+    const value = e;
+
+    const newUserProfileData = { ...userProfile, ["gender"]: value };
+    setUserProfile(newUserProfileData);
+  };
+  const handleCountryChange = (e: string) => {
+    const value = e;
+
+    const newUserProfileData = { ...userProfile, ["country"]: value };
+    setUserProfile(newUserProfileData);
+  };
+
   const toggleEditMode = () => {
     setIsEditing(!isEditing);
     if (isEditing) {
-      console.log("Saving data:", userProfile);
       // Here you would typically also handle saving the data to a backend
     }
   };
@@ -467,14 +492,21 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               <AccentToggle />
             </SettingRow>
             <SettingRow title="Language">
-              <select
+              <Dropdown
+                id="language-select"
+                value={language}
+                onChange={handleLanguageChange}
+                options={allLanguages}
+                defaultPosition={0}
+              />
+              {/**<select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
                 className="w-40 pl-3 pr-10 py-2 rounded-lg shadow-sm bg-background text-foreground border border-border focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
                 <option>English</option>
                 <option>Hindi</option>
-              </select>
+              </select>*/}
             </SettingRow>
             {/*<SettingRow title="Voice">
               <button className="flex items-center gap-2 text-foreground hover:bg-gray-700 px-3 py-1.5 rounded-md transition-colors">
@@ -506,7 +538,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Account":
         return (
           <div>
-            <div className="items-end mb-6 pb-4 flex justify-between items-center border-b border-border-medium">
+            <div className="mb-6 pb-4 flex justify-between items-end border-b border-border">
               <div>
                 <h1 className="text-3xl  text-foreground">Your Account</h1>
                 <p className="mt-1 text-muted-foreground">
@@ -530,16 +562,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 )*/}
               </div>
               <div className="flex gap-3">
-                <button
-                  onClick={() => {
-                    console.log("🔄 ProfilePage: Manual refresh requested");
-                    // This will trigger a re-render when profile changes
-                  }}
+                {/**<button
                   className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
                   title="Refresh profile data"
                 >
-                  <RefreshCcw className="w-4 h-4" />
-                </button>
+                  <RefreshCcw className="" />
+                </button>*/}
                 <button
                   onClick={toggleEditMode}
                   className="px-5 py-2 rounded-lg text-sm font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer"
@@ -591,12 +619,32 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               />
               <SelectField
                 label="Gender"
-                name="gender"
+                id="gender"
                 value={userProfile.gender}
                 isEditing={isEditing}
-                onChange={handleInputChange}
+                onChange={handleGenderChange}
                 options={genders}
               />
+              {/**isEditing ? (
+                <Dropdown
+                  id="gender-select"
+                  label="Gender"
+                  value={userProfile.gender}
+                  onChange={handleGenderChange}
+                  options={genders}
+                  defaultPosition={0}
+                />
+              ) : (
+                <p
+                  className={`mt-1 text-base ${
+                    userProfile.gender === "Not set"
+                      ? "text-foreground italic"
+                      : "text-foreground"
+                  }`}
+                >
+                  {userProfile.gender}
+                </p>
+              )*/}
               <ProfileField
                 label="Address"
                 name="address"
@@ -620,15 +668,14 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               />
               <SelectField
                 label="Country"
-                name="country"
+                id="country"
                 value={userProfile.country}
                 isEditing={isEditing}
-                onChange={handleInputChange}
+                onChange={handleCountryChange}
                 options={countries}
               />
-
               {/* Debug Information */}
-              {process.env.NODE_ENV === "development" && profile && (
+              {/**process.env.NODE_ENV === "development" && profile && (
                 <div className="col-span-1 md:col-span-2 mt-6 p-4 bg-accent rounded-lg border border-divider">
                   <h4 className="text-sm font-medium text-gray-400 mb-2">
                     Debug Info (Development Only)
@@ -648,7 +695,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     </div>
                   </div>
                 </div>
-              )}
+              )*/}
             </div>
           </div>
         );
@@ -656,18 +703,41 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
         return (
           <div>
             <h1 className="text-3xl text-foreground mb-6">Notifications</h1>
-            <NotificationSettingRow
-              title="Responses"
-              description="Get notified when chatbot responds to requests that take time, like research or image generation."
-              value={responseNotifications}
-              onChange={(e) => setResponseNotifications(e.target.value)}
-              options={["Push", "Email", "None"]}
-            />
+            {
+              <NotificationSettingRow
+                title="Responses"
+                description="Get notified when chatbot responds to requests that take time, like research or image generation."
+                value={responseNotifications}
+                onChange={(value) => setResponseNotifications(value)}
+                options={["Push", "Email", "None"]}
+              />
+            }
+            {/**<div className="py-4 flex justify-between items-center border-b border-border-medium">
+              <div>
+                <h3 className="text-base font-semibold text-white">
+                  Responses
+                </h3>
+                <p className="text-sm text-foreground max-w-md">
+                  Get notified when chatbot responds to requests that take time,
+                  like research or image generation.
+                </p>
+              </div>
+              <div className="w-40 ">
+                <Dropdown
+                  id="responses-select"
+                  value={responseNotifications}
+                  onChange={(value: string) => setResponseNotifications(value)}
+                  options={["Push", "Email", "None"]}
+                  defaultPosition={0}
+                />
+              </div>
+            </div>*/}
+
             <NotificationSettingRow
               title="Tasks"
               description="Get notified when tasks you've created have updates."
               value={taskNotifications}
-              onChange={(e) => setTaskNotifications(e.target.value)}
+              onChange={(value) => setTaskNotifications(value)}
               options={["Push, Email", "Push", "Email", "None"]}
               manageLink
             />
@@ -682,9 +752,9 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
               0 0 20px rgba(168, 85, 247, 0.6), 
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
-            <div className="flex justify-between items-end border-b border-border-medium pb-4">
+            <div className="flex justify-between items-end border-b border-border pb-4">
               <div>
-                <h1 className="text-3xl  text-foreground">Upgrade</h1>
+                <h1 className="text-3xl text-foreground">Upgrade</h1>
                 <p className="mt-1 text-muted-foreground">
                   You are currently on the free plan
                 </p>
@@ -759,11 +829,12 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
       case "Development":
         return (
           <div>
-            <h1 className="text-3xl text-foreground mb-3">Development Tools</h1>
-            <p className="text-muted-foreground mb-6">
-              Development and testing utilities for debugging purposes.
-            </p>
-
+            <div className="border-b border-border pb-4">
+              <h1 className="text-3xl text-foreground">Development Tools</h1>
+              <p className="text-muted-foreground mt-1">
+                Development and testing utilities for debugging purposes.
+              </p>
+            </div>
             <div className="space-y-6">
               <SettingRow
                 title="Splash Screen Management"
@@ -777,7 +848,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         "Splash screen state has been reset. Refresh the page to see the splash screen again."
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
                   >
                     Reset Splash State
                   </button>
@@ -789,7 +860,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         'Splash screen state has been set to "completed". User will not see splash again.'
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
                   >
                     Mark Splash as Completed
                   </button>
@@ -797,7 +868,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                     onClick={() => {
                       navigate(ROUTES.SPLASH);
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
                   >
                     View Splash Screen
                   </button>
@@ -855,7 +926,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         "Authentication data has been cleared. You will need to login again."
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
                   >
                     Clear Auth Data
                   </button>
@@ -869,7 +940,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                         }\nUser Data: ${userData ? "Present" : "Not found"}`
                       );
                     }}
-                    className="px-4 py-2 text-sm font-semibold text-foreground bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
+                    className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
                   >
                     Check Auth Status
                   </button>

@@ -659,18 +659,16 @@ function Stats() {
           tooltipText="Your daily study streak. Consistency is the most important factor for success!"
         >
           <CardContent>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-center sm:justify-between">
               
-              <div className="flex items-center space-x-2 bg-background bg-opacity-20 px-3 py-1.5 rounded-full">
+              <div className="items-center space-x-2 bg-background bg-opacity-20 px-3 py-1.5 rounded-full hidden sm:flex">
                 <Flame className="w-5 h-5 text-yellow-300" />
                 <span className="font-bold text-md">
                   {dashboardData.user.streak} Day Streak
                 </span>
               </div>
-              <div>
-                <p className="opacity-90 mt-1">
-                  You’ve been consistent for {dashboardData.user.streak} days.
-                </p>
+              <div className="text-muted-foreground flex gap-2">
+                  <Flame className="w-5 h-5 text-yellow-300 sm:hidden" />You’ve been consistent for {dashboardData.user.streak} days.
               </div>
             </div>
             <StreakTracker

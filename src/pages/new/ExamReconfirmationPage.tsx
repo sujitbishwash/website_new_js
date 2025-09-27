@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useUser } from "../../contexts/UserContext";
 import { ROUTES } from "../../routes/constants";
 import { ChevronDown, CircleUser } from "lucide-react";
+import { quizApi } from "@/lib/api-client";
 
 // --- Type Definitions ---
 interface ExamDetails {
@@ -55,6 +56,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
   const location = useLocation();
   const { profile } = useUser();
   const testConfig = location.state?.testConfig;
+  const [isStarting, setIsStarting] = useState(false);
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
     setIsLangDropdownOpen(false);
@@ -85,9 +87,9 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
         {/*<div className="flex items-center justify-between ml-18 lg:ml-0">
           <Hexagon width={48} height={48} className="text-muted-foreground" />
         </div>*/}
-        <div className="flex text-center px-2">
-          <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
-            {examDetails.title}
+        <div className="flex-1 text-center px-2">
+          <h1 className="text-lg sm:text-xl font-bold text-foreground">
+            {testConfig?.subject}-{testConfig?.sub_topic.join(", ")}-{testConfig?.level}
           </h1>
         </div>
         <div className=" items-center space-x-4 hidden sm:flex">
@@ -121,7 +123,14 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
               </div>
 
               {/* Right: Controls */}
-              <div className="flex items-center justify-end gap-2 sm:gap-4 w-full sm:w-auto">
+              <div
+                className="
+      hidden sm:flex
+      flex-row items-center justify-end
+      gap-4 relative
+    "
+              >
+                {/* Text Size Dropdown */}
                 <select
                   onChange={(e) => setTextSize(e.target.value)}
                   value={textSize}
@@ -133,7 +142,7 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
                 </select>
 
                 {/* Language Dropdown */}
-                <div ref={langDropdownRef} className="relative hidden md:block">
+                <div ref={langDropdownRef} className="relative">
                   <button
                     onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
                     className="flex items-center bg-background-subtle hover:bg-blue-400/20 px-2 py-1 rounded-md text-sm"
@@ -178,13 +187,13 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
         {/* The student info section has been removed as requested. */}
       </div>
       {/* Footer Buttons */}
-      <footer className="flex-shrink-0 p-6 border-t border-border space-y-4">
+      <footer className="flex-shrink-0 p-2 sm:p-6 border-t border-border space-y-4">
         {/* Language Note */}
-        <div className="text-destructive">
+        <div className="text-destructive hidden sm:block">
           <p>{examDetails.languageNote}</p>
         </div>
         {/* Confirmation Checkbox */}
-        <div className="flex items-start space-x-4 mb-8">
+        <div className="flex items-start space-x-4 mb-4">
           <input
             type="checkbox"
             id="confirmation"
@@ -207,19 +216,39 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
             Previous
           </button>
           <button
-            disabled={!isConfirmed}
-            onClick={() =>
-              navigate(ROUTES.TEST_MAIN_PAGE, {
-                state: { testConfig: testConfig },
-              })
-            }
+            disabled={!isConfirmed || isStarting}
+            onClick={async () => {
+              if (!isConfirmed || isStarting) return;
+              try {
+                setIsStarting(true);
+                // Generate test session and obtain session_id
+                const payload = {
+                  subject: testConfig?.subject,
+                  topics: testConfig?.sub_topic,
+                  level: testConfig?.level,
+                  language: (testConfig?.language || "en") as any,
+                } as any;
+                const response = await quizApi.initiateTest(payload);
+                const sessionId = (response as any)?.session_id;
+                if (!sessionId) {
+                  throw new Error("Failed to start test session");
+                }
+                navigate(`/test-main-page/${encodeURIComponent(sessionId)}`, {
+                  state: { sessionId },
+                });
+              } catch (e) {
+                // Optionally handle error UI here
+              } finally {
+                setIsStarting(false);
+              }
+            }}
             className={`font-bold py-2 px-6 rounded-lg transition-all ${
-              isConfirmed
+              isConfirmed && !isStarting
                 ? "bg-primary hover:bg-primary/80 text-white cursor-pointer"
                 : "bg-border-medium text-border cursor-not-allowed"
             }`}
           >
-            I am ready to begin
+            {isStarting ? "Starting..." : "I am ready to begin"}
           </button>
         </div>
       </footer>

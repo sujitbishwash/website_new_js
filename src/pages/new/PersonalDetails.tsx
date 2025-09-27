@@ -1,92 +1,20 @@
-import React, { useEffect, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { authApi } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 import { useAuth } from "../../contexts/AuthContext";
-
-// --- ICONS (using SVG for self-containment) ---
-const UserIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-    <circle cx="12" cy="7" r="4" />
-  </svg>
-);
-
-const GenderIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <circle cx="12" cy="12" r="10" />
-    <path d="m14.31 8-3.02 6" />
-    <path d="m11.29 16 3.02-6" />
-    <path d="m9 12h.01" />
-    <path d="m15 12h.01" />
-  </svg>
-);
-
-const CalendarIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <rect width="18" height="18" x="3" y="4" rx="2" ry="2" />
-    <line x1="16" x2="16" y1="2" y2="6" />
-    <line x1="8" x2="8" y1="2" y2="6" />
-    <line x1="3" x2="21" y1="10" y2="10" />
-  </svg>
-);
-
-const LoaderIcon = ({ className }: { className?: string }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={`${className} animate-spin`}
-  >
-    <line x1="12" y1="2" x2="12" y2="6"></line>
-    <line x1="12" y1="18" x2="12" y2="22"></line>
-    <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-    <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-    <line x1="2" y1="12" x2="6" y2="12"></line>
-    <line x1="18" y1="12" x2="22" y2="12"></line>
-    <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-    <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-  </svg>
-);
+import {
+  Calendar,
+  ChevronDown,
+  User,
+  VenusAndMars,
+  Mars,
+  Venus,
+  CircleSmall,
+} from "lucide-react";
+import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg";
+import CustomLoader from "../../components/icons/customloader";
+import { theme } from "@/styles/theme";
 
 // --- TYPE DEFINITIONS (for TypeScript) ---
 interface InputFieldProps {
@@ -100,15 +28,6 @@ interface InputFieldProps {
   error?: string;
 }
 
-interface SelectFieldProps {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-  error?: string;
-}
 
 interface FormData {
   name: string;
@@ -121,7 +40,126 @@ interface FormErrors {
   gender?: string;
   dob?: string;
 }
+// Props for the Dropdown component
+interface DropdownOption {
+  label: string;
+  icon?: React.ReactNode;
+}
 
+interface Dropdown3Props {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: DropdownOption[];
+  placeholder: DropdownOption; // 👈 now also an object
+  disabled?: boolean;
+  id: string;
+}
+
+// Custom Dropdown Component
+const Dropdown3: FC<Dropdown3Props> = ({
+  label,
+  value,
+  onChange,
+  options,
+  placeholder,
+  disabled = false,
+  id,
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Effect to handle clicks outside the dropdown to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const handleOptionClick = (option: string) => {
+    onChange(option);
+    setIsOpen(false);
+  };
+
+  function capitalizeFirstLetter(str:string) {
+  if (!str) return "";
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}
+
+  return (
+    <div className="w-full">
+      <label
+        htmlFor={id}
+        className="block text-sm font-medium text-border-medium"
+      >
+        {label}
+      </label>
+      <div className="relative" ref={dropdownRef}>
+        
+        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+          {value
+              ? options.find((o) => o.label === value)?.icon
+              : placeholder.icon}
+        </span>
+        <button
+          type="button"
+          id={id}
+          disabled={disabled}
+          onClick={() => !disabled && setIsOpen(!isOpen)}
+          className={`w-full flex justify-between items-center text-left rounded-lg py-3 pl-10 pr-3 focus:outline-none focus:ring-1 bg-background-subtle transition-colors cursor-pointer disabled:cursor-not-allowed sm:text-sm ${
+            value ? "text-foreground" : "text-muted-foreground"
+          } ${isOpen ? "border border-blue-400" : "border border-border"}`}
+        >
+          <span className="flex items-center gap-2 first-letter:uppercase">
+            {/* when value selected show its icon, else placeholder icon */}
+            
+            {capitalizeFirstLetter(value || placeholder.label)}
+          </span>
+          <ChevronDown className="w-5 h-5"/>
+        </button>
+
+        {isOpen && !disabled && (
+          <div className="absolute z-10 mt-2 w-full bg-card rounded-md shadow-lg border-border border">
+            <div className="py-1 max-h-60 overflow-auto">
+              {options.map((option) => (
+                <div
+                  key={option.label}
+                  className={`px-4 py-2 text-sm cursor-pointer transition-colors text-foreground hover:bg-border-medium 
+    flex items-center gap-2 ${
+      value === option.label ? "bg-border-medium" : "transparent"
+    }`}
+                  onClick={() => handleOptionClick(option.label)}
+                  onMouseEnter={(e) => {
+                    if (value !== option.label) {
+                      e.currentTarget.style.backgroundColor = theme.dividerHigh;
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (value !== option.label) {
+                      e.currentTarget.style.backgroundColor = "transparent";
+                    }
+                  }}
+                >
+                  {option.icon}
+                  {capitalizeFirstLetter(option.label)}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 // --- REUSABLE MODULAR COMPONENTS ---
 
 /**
@@ -136,12 +174,12 @@ const InputField: React.FC<InputFieldProps> = ({
 }) => {
   const errorClasses = error
     ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-    : "border-gray-600 focus:border-blue-400 focus:ring-blue-400";
+    : "border-border focus:border-blue-400 focus:ring-blue-400";
   return (
     <div>
       <label
         htmlFor={id}
-        className="block text-sm font-medium text-gray-400 mb-2"
+        className="block text-sm font-medium text-border-medium"
       >
         {label}
       </label>
@@ -152,7 +190,8 @@ const InputField: React.FC<InputFieldProps> = ({
         <input
           id={id}
           {...props}
-          className={`block w-full rounded-lg bg-gray-700 py-3 pl-10 pr-3 text-white placeholder-gray-500 transition duration-150 ease-in-out focus:outline-none focus:ring-2 sm:text-sm ${errorClasses}`}
+          className={`block w-full rounded-lg bg-background-subtle py-3 pl-10 pr-3 text-foreground placeholder-muted-foreground transition duration-150 ease-in-out border border-border focus:border-blue-400 focus:outline-none focus:ring-1 sm:text-sm ${errorClasses}`}
+
         />
       </div>
       {error && (
@@ -163,66 +202,13 @@ const InputField: React.FC<InputFieldProps> = ({
     </div>
   );
 };
-
+/**
+          className={`w-full flex justify-between items-center text-left rounded-xl px-4 py-3 focus:outline-none focus:ring-1 bg-background-subtle transition-colors cursor-pointer disabled:cursor-not-allowed ${
+            value ? "text-foreground" : "text-muted-foreground"
+          } ${isOpen ? "border border-blue-400" : "border border-border"}`} */
 /**
  * A reusable, styled select dropdown component with validation error display.
  */
-const SelectField: React.FC<SelectFieldProps> = ({
-  id,
-  label,
-  icon,
-  value,
-  onChange,
-  children,
-  error,
-}) => {
-  const errorClasses = error
-    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-    : "border-gray-600 focus:border-blue-400 focus:ring-blue-400";
-  return (
-    <div>
-      <label
-        htmlFor={id}
-        className="block text-sm font-medium text-gray-400 mb-2"
-      >
-        {label}
-      </label>
-      <div className="relative">
-        <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-          {icon}
-        </span>
-        <select
-          id={id}
-          value={value}
-          onChange={onChange}
-          className={`block w-full appearance-none rounded-lg bg-gray-700 py-3 pl-10 pr-8 text-white transition duration-150 ease-in-out focus:outline-none focus:ring-2 sm:text-sm ${errorClasses}`}
-        >
-          {children}
-        </select>
-        <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
-          <svg
-            className="h-5 w-5 text-gray-500"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              fillRule="evenodd"
-              d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z"
-              clipRule="evenodd"
-            />
-          </svg>
-        </span>
-      </div>
-      {error && (
-        <p className="mt-2 text-xs text-red-500 transition-opacity duration-300 ease-in-out opacity-100">
-          {error}
-        </p>
-      )}
-    </div>
-  );
-};
 
 // --- MAIN FORM COMPONENT ---
 
@@ -286,7 +272,6 @@ const PersonalInfoForm: React.FC = () => {
     const fetchUserData = async () => {
       try {
         setIsLoadingUserData(true);
-        console.log("🔍 PersonalDetails: Using cached user data from AuthContext...");
 
         // Use getUserData from AuthContext instead of direct API call
         const response = await getUserData();
@@ -298,7 +283,6 @@ const PersonalInfoForm: React.FC = () => {
           response.data
         ) {
           const userData = response.data;
-          console.log("📋 PersonalDetails: User data received from context:", userData);
 
           // Populate form with existing user data if available
           const updatedFormData: FormData = {
@@ -308,12 +292,9 @@ const PersonalInfoForm: React.FC = () => {
           };
 
           setFormData(updatedFormData);
-          console.log("✅ PersonalDetails: Form populated with user data:", updatedFormData);
         } else {
-          console.log("⚠️ PersonalDetails: No user data found in context");
         }
       } catch (error) {
-        console.error("❌ PersonalDetails: Error fetching user data:", error);
       } finally {
         setIsLoadingUserData(false);
       }
@@ -366,6 +347,15 @@ const PersonalInfoForm: React.FC = () => {
     // Validate on change for instant feedback
     setErrors(validate(newFormData));
   };
+  const handleChange2 = (e: string) => {
+    const value = e;
+    const newFormData = { ...formData, ["gender"]: value };
+    setFormData(newFormData);
+    // Clear submit error when user starts typing
+    if (submitError) setSubmitError(null);
+    // Validate on change for instant feedback
+    setErrors(validate(newFormData));
+  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -378,7 +368,6 @@ const PersonalInfoForm: React.FC = () => {
 
       try {
         // Call API to update user details
-        console.log("Submitting user details:", formData);
 
         const response = await authApi.updateUserDetails({
           name: formData.name,
@@ -392,8 +381,6 @@ const PersonalInfoForm: React.FC = () => {
           );
         }
 
-        console.log("✅ User details saved successfully");
-
         // Update localStorage with the new user data to ensure validation passes
         try {
           const existingUserData = localStorage.getItem("userData");
@@ -406,14 +393,8 @@ const PersonalInfoForm: React.FC = () => {
               date_of_birth: formData.dob,
             };
             localStorage.setItem("userData", JSON.stringify(updatedUserData));
-            console.log(
-              "✅ Updated localStorage with new user details:",
-              updatedUserData
-            );
           }
-        } catch (error) {
-          console.error("❌ Error updating localStorage:", error);
-        }
+        } catch (error) {}
 
         // Also update the form data to reflect the saved state
         setFormData((prevData) => ({
@@ -429,7 +410,6 @@ const PersonalInfoForm: React.FC = () => {
         // Navigate to exam goal page
         navigate(ROUTES.EXAM_GOAL, { replace: true });
       } catch (error) {
-        console.error("❌ Error saving user details:", error);
         setSubmitError("Failed to save your details. Please try again.");
       } finally {
         setIsLoading(false);
@@ -437,36 +417,36 @@ const PersonalInfoForm: React.FC = () => {
     }
   };
 
+  
   // Show loading state while fetching user data
   if (isLoadingUserData) {
     return (
-      <div className="w-full max-w-md space-y-8 rounded-2xl bg-gray-800 p-6 sm:p-8 shadow-2xl transition-all duration-500">
-        <div className="text-center">
-          <LoaderIcon className="h-12 w-12 text-blue-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">
+      <div className="text-center">
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+        </div>
+        {/**<h2 className="text-2xl font-bold text-white mb-2">
             Loading Profile...
           </h2>
-          <p className="text-gray-400">Fetching your existing information</p>
-        </div>
+          <p className="text-gray-400">Fetching your existing information</p>*/}
       </div>
     );
   }
 
   return (
-    <div className="w-full max-w-md space-y-8 rounded-2xl bg-gray-800 p-6 sm:p-8 shadow-2xl transition-all duration-500">
+    <div className="w-full max-w-md space-y-8 rounded-2xl bg-card p-4 sm:p-8 shadow-2xl transition-all duration-500 border border-divider">
       <div>
-        <h2 className="text-center text-3xl font-bold tracking-tight text-white">
+        <h2 className="text-center text-3xl font-bold tracking-tight text-foreground">
           Complete Your Profile
         </h2>
-        <p className="mt-2 text-center text-sm text-gray-400">
-          Please provide your personal information to continue. This information
-          is required.
+        <p className="mt-2 text-center text-sm sm:text-md text-muted-foreground">
+          Please provide your personal information to continue.
         </p>
-        {(formData.name || formData.gender || formData.dob) && (
+        {/*(formData.name || formData.gender || formData.dob) && (
           <p className="mt-2 text-center text-xs text-blue-400">
             ✓ Your existing information has been loaded
           </p>
-        )}
+        )*/}
       </div>
 
       {submitError && (
@@ -484,15 +464,15 @@ const PersonalInfoForm: React.FC = () => {
             value={formData.name}
             onChange={handleChange}
             placeholder="Enter your full name"
-            icon={<UserIcon className="h-5 w-5 text-gray-500" />}
+            icon={<User className="h-5 w-5 text-muted-foreground" />}
             error={errors.name}
           />
-          <SelectField
+          {/**<SelectField
             id="gender"
             label="Gender *"
             value={formData.gender}
             onChange={handleChange}
-            icon={<GenderIcon className="h-5 w-5 text-gray-500" />}
+            icon={<VenusAndMars className="h-5 w-5 text-muted-foreground" />}
             error={errors.gender}
           >
             <option value="" disabled>
@@ -501,7 +481,22 @@ const PersonalInfoForm: React.FC = () => {
             <option value="male">Male</option>
             <option value="female">Female</option>
             <option value="other">Other</option>
-          </SelectField>
+          </SelectField>*/}
+          <Dropdown3
+            id="gender"
+            label="Gender"
+            value={formData.gender}
+            onChange={handleChange2}
+            options={[
+              { label: "male", icon: <Mars className="h-5 w-5 text-muted-foreground"/> },
+              { label: "female", icon: <Venus className="h-5 w-5 text-muted-foreground"/> },
+              { label: "other", icon: <VenusAndMars className="h-5 w-5 text-muted-foreground"/> },
+            ]}
+            placeholder={{
+              label: "Select Your Gender",
+              icon: <CircleSmall className="h-5 w-5 text-muted-foreground"/>,
+            }}
+          />
           <div>
             <InputField
               id="dob"
@@ -510,11 +505,11 @@ const PersonalInfoForm: React.FC = () => {
               value={formData.dob}
               onChange={handleChange}
               placeholder="Select a date"
-              icon={<CalendarIcon className="h-5 w-5 text-gray-500" />}
+              icon={<Calendar className="h-5 w-5 text-muted-foreground" />}
               error={errors.dob}
             />
             {age !== null && !errors.dob && (
-              <p className="mt-2 text-xs text-blue-400">
+              <p className="mt-2 text-xs text-primary">
                 You are {age} years old.
               </p>
             )}
@@ -525,15 +520,15 @@ const PersonalInfoForm: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative flex w-full justify-center rounded-md border border-transparent bg-gradient-to-r from-blue-600 to-blue-700 py-3 px-4 text-sm font-semibold text-white transition-all duration-300 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer group relative flex w-full justify-center rounded-md border border-transparent bg-primary py-3 px-4 text-sm font-semibold text-white transition-all duration-300 hover:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
             {isLoading ? (
               <>
-                <LoaderIcon className="h-5 w-5 mr-2" />
+                <CustomLoader className="h-5 w-5"/>
                 Saving...
               </>
             ) : (
-              "Continue to Exam Goal"
+              "Next"
             )}
           </button>
         </div>
@@ -546,7 +541,7 @@ const PersonalInfoForm: React.FC = () => {
 
 export default function PersonalDetails() {
   return (
-    <main className="flex min-h-screen w-full items-center justify-center bg-gray-900 p-4 font-sans">
+    <main className="flex min-h-screen w-full items-center justify-center bg-background p-4">
       <style>{`
             @keyframes fadeIn {
                 from { opacity: 0; transform: translateY(-10px); }
@@ -556,6 +551,18 @@ export default function PersonalDetails() {
                 animation: fadeIn 0.5s ease-in-out;
             }
         `}</style>
+      <header className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
+        <div
+          className={`flex items-center gap-2 overflow-hidden transition-all duration-300 lg:w-auto`}
+        >
+          <img src={AiPadhaiLogo} alt="Logo" width={30} height={30} />
+          <h1
+            className={`text-xl font-semibold whitespace-nowrap overflow-hidden transition-all duration-300 lg:w-auto`}
+          >
+            AI Padhai
+          </h1>
+        </div>
+      </header>
       <PersonalInfoForm />
     </main>
   );

@@ -1,3 +1,4 @@
+import CustomLoader from "@/components/icons/customloader";
 import { theme } from "@/styles/theme";
 import {
   BookOpen,
@@ -5,7 +6,6 @@ import {
   BrainCircuit,
   FileText,
   Lightbulb,
-  Loader,
   Send,
   Sparkle,
   Sparkles,
@@ -161,7 +161,7 @@ const BookPage: React.FC = () => {
         };
         reader.readAsArrayBuffer(file);
       } catch (err) {
-        console.error("Error processing PDF:", err);
+        
         setError(
           "Sorry, I had trouble reading that PDF. Please try another file."
         );
@@ -233,7 +233,7 @@ const BookPage: React.FC = () => {
         throw new Error("No content in API response.");
       }
     } catch (err) {
-      console.error(`Error with ${type}:`, err);
+      
       setChatHistory((prev) => [
         ...prev,
         {
@@ -391,7 +391,7 @@ const BookPage: React.FC = () => {
           className="mt-4 flex items-center justify-center space-x-2"
           style={{ color: theme.accent }}
         >
-          <Loader className="animate-spin h-5 w-5" />
+          <CustomLoader className="h-5 w-5"/>
           <span>Reading your book...</span>
         </div>
       )}
@@ -484,10 +484,7 @@ const BookPage: React.FC = () => {
               className="p-3 rounded-lg"
               style={{ backgroundColor: theme.inputBackground }}
             >
-              <Loader
-                className="animate-spin h-5 w-5"
-                style={{ color: theme.accent }}
-              />
+              <CustomLoader className="h-5 w-5"/>
             </div>
           </div>
         )}

@@ -46,7 +46,7 @@ const OnboardingRoute: React.FC<OnboardingRouteProps> = ({
 
   if (isLoading || validating) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <LoadingSpinner size="lg" text="Preparing your experience..." />
       </div>
     );

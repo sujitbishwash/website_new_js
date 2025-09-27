@@ -8,14 +8,16 @@ export const ROUTES = {
     TEST_SERIES: "/test-series",
     EXAM_INFO: "/exam-info",
     EXAM_RECONFIRM: "/exam-reconfirm",
-    TEST_MAIN_PAGE: "/test-main-page",
+    TEST_MAIN_PAGE: "/test-main-page/:id",
+    TEST_SOLUTION: "/test-main-page/:id/solutions",
+    ANALYSIS_ARCHIVE: "/analysis_archive",
     ANALYSIS: "/analysis",
-    ANALYSIS2: "/analysis2",
 
     // Learning routes
     HISTORY: "/history",
     BOOKS: "/books",
     VIDEO_LEARNING: "/video-learning",
+    OUT_OF_SYLLABUS: "/out-of-syllabus",
 
     // User routes
     REFER_AND_EARN: "/refer-and-earn",
@@ -31,6 +33,7 @@ export const ROUTES = {
 
     // Coming soon routes
     PREVIOUS_YEAR_PAPERS: "/previous-year-papers",
+    ATTEMPTED_TESTS_ARCHIVE: "/attempted-tests_archive",
     ATTEMPTED_TESTS: "/attempted-tests",
 
     // Auth routes
@@ -54,11 +57,12 @@ export const ROUTE_NAMES = {
     [ROUTES.EXAM_INFO]: "Exam Information",
     [ROUTES.EXAM_RECONFIRM]: "Exam Reconfirmation",
     [ROUTES.TEST_MAIN_PAGE]: "Test Main Page",
-    [ROUTES.ANALYSIS]: "Detailed Analysis",
-    [ROUTES.ANALYSIS2]: "Detailed Analysis2",
+    [ROUTES.ANALYSIS_ARCHIVE]: "Detailed Analysis",
+    [ROUTES.ANALYSIS]: "Detailed Analysis2",
     [ROUTES.HISTORY]: "History",
     [ROUTES.BOOKS]: "Books",
     [ROUTES.VIDEO_LEARNING]: "Video Learning",
+    [ROUTES.OUT_OF_SYLLABUS]: "Out of Syllabus",
     [ROUTES.REFER_AND_EARN]: "Refer and Earn",
     [ROUTES.PREMIUM]: "Premium",
     [ROUTES.PAYMENT]: "Payment",
@@ -66,7 +70,8 @@ export const ROUTE_NAMES = {
     [ROUTES.CHAT]: "Chat",
     [ROUTES.FLASHCARDS]: "Flashcards",
     [ROUTES.PREVIOUS_YEAR_PAPERS]: "Previous Year Papers",
-    [ROUTES.ATTEMPTED_TESTS]: "Attempted Tests",
+    [ROUTES.ATTEMPTED_TESTS_ARCHIVE]: "Attempted Tests",
+    [ROUTES.ATTEMPTED_TESTS]: "Attempted Tests2",
     [ROUTES.LOGIN]: "Login",
     [ROUTES.PERSONAL_DETAILS]: "Personal Details",
     [ROUTES.EXAM_GOAL]: "Exam Goal",
@@ -74,6 +79,7 @@ export const ROUTE_NAMES = {
     [ROUTES.TERMS_AND_CONDITIONS]: "Terms and Conditions",
     [ROUTES.AUTH_CALLBACK]: "Auth Callback",
     [ROUTES.STATS]: "Stats",
+    [ROUTES.TEST_SOLUTION]: "Test Solution",
 } as const;
 
 // Helper function to build video learning route with ID

@@ -1,10 +1,6 @@
 import { authApi } from "@/lib/api-client";
 import { theme } from "@/styles/theme";
-import React, {
-  useState,
-  useEffect,
-  KeyboardEvent,
-} from "react";
+import React, { useState, useEffect, KeyboardEvent } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
 import { ROUTES } from "../../routes/constants";
@@ -15,11 +11,7 @@ import AiPadhaiLogo from "../../assets/ai_padhai_logo.svg"; // Adjust path as ne
 // --- Main App Component ---
 
 const LoginPage: React.FC = () => {
-  const {
-    isAuthenticated,
-    isLoading,
-    checkUserState,
-  } = useAuth();
+  const { isAuthenticated, isLoading, checkUserState } = useAuth();
   const navigate = useNavigate();
 
   // Redirect to appropriate page if already authenticated
@@ -29,21 +21,21 @@ const LoginPage: React.FC = () => {
         try {
           // Use the stored user data from AuthContext
           const userState = await checkUserState();
-          console.log("User state:", userState);
+          
 
           // Navigate based on user state
           if (userState.nextStep === "dashboard") {
-            console.log("User has exam goal, redirecting to dashboard");
+            
             navigate(ROUTES.HOME, { replace: true });
           } else if (userState.nextStep === "exam-goal") {
-            console.log("Redirecting to exam goal page");
+            
             navigate(ROUTES.EXAM_GOAL, { replace: true });
           } else {
-            console.log("Redirecting to personal details page");
+            
             navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
           }
         } catch (error) {
-          console.error("Error checking user state:", error);
+          
           // Fallback to personal details page if exam goal API fails
           navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
@@ -86,7 +78,7 @@ const LoginPage: React.FC = () => {
           }
         `}
       </style>
-      <div className="bg-gradient-to-br from-background to-foreground min-h-screen text-white font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
+      <div className="bg-gradient-to-br from-background to-foreground min-h-screen text-foreground font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
         <LoginCard />
       </div>
     </>
@@ -124,7 +116,9 @@ const EmailInput: React.FC<EmailInputProps> = ({
       value={email}
       onChange={(e) => setEmail(e.target.value)}
       placeholder="Enter your email"
-      className={`bg-card text-foreground w-full py-3 px-4 rounded-lg box-border focus:outline-none focus:ring-2 focus:ring-primary ${hasError ? errorClasses : normalClasses}`}
+      className={`bg-card text-foreground w-full py-3 px-4 rounded-lg box-border focus:outline-none focus:ring-2 focus:ring-primary ${
+        hasError ? errorClasses : normalClasses
+      }`}
       onKeyDown={handleKeyDown}
     />
   );
@@ -180,22 +174,25 @@ const OtpInput: React.FC<OtpInputProps> = ({ otp, setOtp, onOtpComplete }) => {
     }
   };
 
-    return (
-    <div className="flex justify-between gap-2 mb-6">
+  return (
+    <div className="flex justify-between gap-2 mb-4">
       {otp.map((data, index) => (
         <input
           key={index}
-          className={`otp-input-box bg-background text-foreground w-12 h-14 rounded-lg border text-center text-2xl font-bold transition-all ${
+          className={`otp-input-box bg-background text-foreground w-full h-14 rounded-lg border text-center text-2xl font-bold transition-all ${
             data ? "border-primary" : "border-border-medium"
           }`}
           type="text"
           name="otp"
+          inputMode="numeric" // shows number keypad on mobile
+          pattern="[0-9]*"
           maxLength={1}
           value={data}
           onChange={(e) => handleChange(e.target, index)}
           onKeyDown={(e) => handleKeyDown(e, index)}
           onFocus={(e) => e.currentTarget.select()}
           onPaste={index === 0 ? handlePaste : (e) => e.preventDefault()}
+          autoFocus={index === 0} // ✅ only true for first input
         />
       ))}
     </div>
@@ -217,27 +214,28 @@ const ActionButton: React.FC<ActionButtonProps> = ({
   disabled = false,
   loading = false,
 }) => {
-    const baseClasses = "w-full font-bold py-3 px-4 rounded-lg border-none transition-all";
-    
-    const getButtonClasses = () => {
-        if (loading) {
-            return `${baseClasses} bg-gray-600 text-foreground cursor-not-allowed opacity-80`;
-        }
-        if (disabled) {
-            return `${baseClasses} bg-gray-600 text-foreground cursor-not-allowed opacity-60`;
-        }
-        return `${baseClasses} bg-primary hover:bg-primary/80 text-white cursor-pointer`;
-    }
+  const baseClasses =
+    "w-full font-bold py-3 px-4 rounded-lg border-none transition-all";
 
-    return (
-      <button
-        onClick={onClick}
-        className={getButtonClasses()}
-        disabled={disabled || loading}
-      >
-        {loading ? loadingText : text}
-      </button>
-    );
+  const getButtonClasses = () => {
+    if (loading) {
+      return `${baseClasses} bg-gray-600 text-foreground cursor-not-allowed opacity-80`;
+    }
+    if (disabled) {
+      return `${baseClasses} bg-gray-600 text-foreground cursor-not-allowed opacity-60`;
+    }
+    return `${baseClasses} bg-primary hover:bg-primary/80 text-white cursor-pointer`;
+  };
+
+  return (
+    <button
+      onClick={onClick}
+      className={getButtonClasses()}
+      disabled={disabled || loading}
+    >
+      {loading ? loadingText : text}
+    </button>
+  );
 };
 
 const LoginCard: React.FC = () => {
@@ -277,12 +275,12 @@ const LoginCard: React.FC = () => {
       return;
     }
     try {
-      console.log("📧 Sending OTP to:", email);
+      
 
       // Call the API to send OTP
       const response = await authApi.sendOtp(email);
 
-      console.log("📧 OTP Response:", response);
+      
 
       setSuccess(response.data.message || "OTP sent successfully!");
       setOtpSent(true);
@@ -304,12 +302,12 @@ const LoginCard: React.FC = () => {
       return;
     }
     try {
-      console.log("🔐 Verifying OTP:", finalOtp, "for email:", email);
+      
 
       // Call the API to verify OTP
       const response = await authApi.verifyOtp(email, finalOtp);
 
-      console.log("🔐 Verify OTP Response:", response);
+      
 
       // Store the token in localStorage and update auth context
       localStorage.setItem("authToken", response.data.access_token);
@@ -323,21 +321,21 @@ const LoginCard: React.FC = () => {
       try {
         const { checkUserState } = useAuth();
         const userState = await checkUserState();
-        console.log("User state:", userState);
+        
 
         // Navigate based on user state
         if (userState.nextStep === "dashboard") {
-          console.log("User has exam goal, redirecting to dashboard");
+          
           navigate(from, { replace: true });
         } else if (userState.nextStep === "exam-goal") {
-          console.log("Redirecting to exam goal page");
+          
           navigate(ROUTES.EXAM_GOAL, { replace: true });
         } else {
-          console.log("Redirecting to personal details page");
+          
           navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
       } catch (error) {
-        console.error("Error checking user state:", error);
+        
         // Fallback to personal details page if API fails
         navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
       }
@@ -362,8 +360,8 @@ const LoginCard: React.FC = () => {
   };
 
   return (
-    <div className="bg-background text-foreground rounded-[1.25rem] shadow-lg p-10 max-w-[26rem] w-full border border-border box-border">
-   <Header />
+    <div className="bg-background text-foreground rounded-[1.25rem] shadow-lg p-4 sm:p-10 max-w-[26rem] w-full border border-border box-border">
+      <Header />
       <div className="mt-8">
         <GoogleSignInButton />
         <OrDivider />
@@ -407,7 +405,7 @@ const LoginCard: React.FC = () => {
               </span>
               <button
                 onClick={handleChangeEmail}
-                className="text-accent bg-none border-none cursor-pointer no-underline ml-2 text-sm font-medium"
+                className="text-blue-400 bg-none border-none cursor-pointer no-underline ml-2 text-sm font-medium"
               >
                 Change
               </button>
@@ -417,16 +415,16 @@ const LoginCard: React.FC = () => {
               setOtp={setOtp}
               onOtpComplete={handleVerifyOtp}
             />
-            {error && (
-              <div className="text-[#d93025] text-sm mt-2 mb-2 text-center">
-                {error}
+            {(error || success) && (
+              <div
+                className={`text-sm mb-2 text-center ${
+                  error ? "text-[#d93025]" : "text-[#34c759]"
+                }`}
+              >
+                {error || success}
               </div>
             )}
-            {success && !error && (
-              <div className="text-[#34c759] text-sm mt-2 mb-2 text-center">
-                {success}
-              </div>
-            )}
+
             <ActionButton
               text="Verify"
               onClick={handleVerifyOtp}
@@ -468,19 +466,19 @@ const GoogleSignInButton: React.FC = () => {
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await signInWithGoogle();
+      const { error } = await signInWithGoogle();
 
-      console.log("Google sign-in data:", data);
+      
 
       if (error) {
-        console.error("Google sign-in error:", error);
+        
         // You can add error handling here (e.g., show a toast notification)
       }
 
       // If successful, the user will be redirected to the callback URL
       // and the auth state will be updated automatically
     } catch (error) {
-      console.error("Google sign-in error:", error);
+      
     } finally {
       setIsLoading(false);
     }
@@ -492,13 +490,31 @@ const GoogleSignInButton: React.FC = () => {
       onClick={handleGoogleSignIn}
       disabled={isLoading}
     >
-        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24"  style={{marginRight: "0.75rem" }}>
-  <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09" fill="#4285F4"/>
-  <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23" fill="#34A853"/>
-  <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22z" fill="#FBBC05"/>
-  <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53" fill="#EA4335"/>
-  <path d="M1 1h22v22H1z" fill="none"/>
-</svg>
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        height="24"
+        viewBox="0 0 24 24"
+        width="24"
+        style={{ marginRight: "0.75rem" }}
+      >
+        <path
+          d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09"
+          fill="#4285F4"
+        />
+        <path
+          d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23"
+          fill="#34A853"
+        />
+        <path
+          d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22z"
+          fill="#FBBC05"
+        />
+        <path
+          d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53"
+          fill="#EA4335"
+        />
+        <path d="M1 1h22v22H1z" fill="none" />
+      </svg>
 
       {isLoading ? "Signing in..." : "Continue with Google"}
     </button>

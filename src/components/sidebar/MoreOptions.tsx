@@ -2,6 +2,7 @@ import { useUser } from "@/contexts/UserContext";
 import { ROUTES } from "@/routes/constants";
 import { theme } from "@/styles/theme";
 import {
+  Bug,
   CircleUserRound,
   Ellipsis,
   ExternalLink,
@@ -54,6 +55,7 @@ interface ProfileMenuProps {
   onProfileClick: () => void;
   onUpgradeClick: () => void;
   onExamConfigurationClick: () => void;
+  onBugReportClick: () => void;
   onToggle: () => void;
 }
 
@@ -63,15 +65,13 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   onProfileClick,
   onUpgradeClick,
   onExamConfigurationClick,
+  onBugReportClick,
   onToggle,
 }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { profile, isLoading, error, isDataLoaded } =
-    useUser();
-
-
+  const { profile, isLoading, error, isDataLoaded } = useUser();
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -88,7 +88,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  
+
   const handleExamConfigurationClick = () => {
     onToggle(); // Close the sidebar if it's open
     onExamConfigurationClick();
@@ -107,6 +107,12 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
     setMenuOpen(false);
   };
 
+   const handleBugReportClick = () => {
+    onToggle(); // Close the sidebar if it's open
+    onBugReportClick();
+    setMenuOpen(false);
+  };
+
   const handlePrivacyPolicyClick = () => {
     onToggle(); // Close the sidebar if it's open
     window.open(ROUTES.PRIVACY_POLICY, "_blank");
@@ -116,12 +122,18 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
     onToggle(); // Close the sidebar if it's open
     window.open(ROUTES.TERMS_AND_CONDITIONS, "_blank");
   };
-const handleLogoutClick = () => {
+  const handleLogoutClick = () => {
     onToggle(); // Close the sidebar if it's open
-        onLogoutClick();
-        setMenuOpen(false);
-      };
+    onLogoutClick();
+    setMenuOpen(false);
+  };
   const menuOptions: MenuItem[] = [
+    
+    {
+      icon: <Bug className="w-5 h-5" />,
+      label: "Report Bug",
+      action: handleBugReportClick,
+    },
     {
       icon: (
         <svg
@@ -169,7 +181,7 @@ const handleLogoutClick = () => {
     {
       icon: <LogOut className="w-5 h-5" />,
       label: "Log Out",
-      action: handleLogoutClick
+      action: handleLogoutClick,
     },
   ];
 
@@ -185,11 +197,14 @@ const handleLogoutClick = () => {
           className={`flex items-center justify-center"
             }`}
         >
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center"}`}>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center"}`}
+          >
             <CircleUserRound className="w-8 h-8 text-muted-foreground" />
           </div>
 
-          <div className={`flex-1 text-left whitespace-nowrap transition-opacity mx-2 ${
+          <div
+            className={`flex-1 text-left whitespace-nowrap transition-opacity mx-2 ${
               isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
             }`}
           >
@@ -310,6 +325,7 @@ const Moreoptions = ({
   onProfileClick,
   onUpgradeClick,
   onExamConfigurationClick,
+  onBugReportClick,
   onToggle,
 }: {
   isContracted: boolean;
@@ -317,13 +333,12 @@ const Moreoptions = ({
   onProfileClick: () => void;
   onUpgradeClick: () => void;
   onExamConfigurationClick: () => void;
+  onBugReportClick: () => void;
   onToggle: () => void;
 }) => {
   return (
     // Set the background on the main container
-    <div
-      className="flex flex-col justify-end"
-    >
+    <div className="flex flex-col justify-end">
       <style>{`
           @keyframes fade-in {
             0% { opacity: 0; }
@@ -343,6 +358,7 @@ const Moreoptions = ({
           onProfileClick={onProfileClick}
           onUpgradeClick={onUpgradeClick}
           onExamConfigurationClick={onExamConfigurationClick}
+          onBugReportClick={onBugReportClick}
           onToggle={onToggle}
         />
       </div>

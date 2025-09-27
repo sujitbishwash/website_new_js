@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { ApiResponse, authApi } from "../lib/api-client";
+import { ApiResponse, authApi, setAuthErrorHandler } from "../lib/api-client";
 
 interface User {
   id: string;
@@ -74,10 +74,8 @@ export const useAuth = () => {
   return context;
 };
 
-
-
-// Global flag to prevent multiple simultaneous API calls
-let isGlobalFetching = false;
+// Global promise to dedupe /ums/me calls across the app
+let globalUserFetchPromise: Promise<ApiResponse<any> | null> | null = null;
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -91,68 +89,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Get user data with localStorage optimization
   const getUserData = async () => {
-    console.log("🔍 getUserData called", new Date().toISOString());
-
-
-
-    // Prevent multiple simultaneous API calls
-    if (isGlobalFetching) {
-      console.log("⏳ Global API call already in progress, waiting...");
-      // Wait for the current request to complete
-      while (isGlobalFetching) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
+    if (globalUserFetchPromise) {
+      return await globalUserFetchPromise;
     }
-
-    try {
-      console.log(
-        "📡 Fetching fresh user data from API",
-        new Date().toISOString()
-      );
-
-      // Mark as fetching to prevent duplicate calls
-      isGlobalFetching = true;
-
-      const { authApi } = await import("../lib/api-client");
-      const response = await authApi.getAuthenticatedUser();
-      console.log("✅ API call completed", new Date().toISOString());
-
-
-
-      // Also update localStorage with the fresh data
-      updateLocalStorageUserData(response.data);
-
-      // Clear global fetching flag
-      isGlobalFetching = false;
-
-      return response;
-    } catch (error) {
-      console.error("❌ Error fetching user data:", error);
-
-              // If it's an authentication error, clear auth data
-      if (error && typeof error === "object" && "status" in error) {
-        const apiError = error as any;
-        if (apiError.status === 401 || apiError.status === 403) {
-          console.log(
-            "🔒 Authentication error - clearing stored data and auth data"
-          );
-
-          // Don't call logout here as it might cause infinite loops
-          // The calling function (checkUserState) will handle logout
-        }
+    const { authApi } = await import("../lib/api-client");
+    globalUserFetchPromise = (async () => {
+      try {
+        const response = await authApi.getAuthenticatedUser();
+        updateLocalStorageUserData(response.data);
+        return response;
+      } finally {
+        globalUserFetchPromise = null;
       }
-
-      // Clear global fetching flag on error
-      isGlobalFetching = false;
-      return null;
-    }
+    })();
+    return await globalUserFetchPromise;
   };
-
-
 
   // Force refresh user data (bypass localStorage and fetch fresh data)
   const refreshUserData = async () => {
-    console.log("🔄 Refreshing user data from API");
     return await getUserData(); // This will fetch fresh data
   };
 
@@ -166,45 +120,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           name: userData.name || "",
         };
         localStorage.setItem("userData", JSON.stringify(userInfo));
-        console.log("✅ Updated user data in localStorage:", userInfo);
       }
     } catch (error) {
-      console.error("❌ Error updating user data in localStorage:", error);
     }
   };
 
   const checkAuth = async (): Promise<boolean> => {
     try {
-      console.log("🔍 Checking authentication...");
 
       const token = localStorage.getItem("authToken");
       const userData = localStorage.getItem("userData");
 
-      console.log("🔑 Token exists:", !!token);
-      console.log("👤 User data exists:", !!userData);
-
       if (token && userData) {
         try {
           const parsedUser = JSON.parse(userData);
-          console.log("👤 Parsed user data:", parsedUser.email);
 
           // Set user immediately from localStorage (optimistic approach)
           setUser(parsedUser);
-          console.log("✅ User set from localStorage, will validate in background");
 
           // Validate token in background without blocking UI
-          console.log("🔍 Validating token with API in background...");
           try {
             const response = await getUserData();
-            console.log("📡 Background API validation response:", response);
 
             // Only logout if we get a clear authentication error
             if (response && (response.status === 401 || response.status === 403)) {
-              console.log("🔒 Authentication error detected, clearing storage");
               logout();
               return false;
             } else if (response && response.status >= 200 && response.status < 300) {
-              console.log("✅ Background validation successful");
               // Update user data with fresh data from API
               if (response.data && response.data.id && response.data.email) {
                 updateLocalStorageUserData(response.data);
@@ -217,38 +159,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             }
             // For other errors (network, server), keep user logged in
           } catch (validationError: any) {
-            console.log("🌐 Background validation failed, keeping user logged in:", validationError.message);
             // Don't logout on validation errors - keep user logged in
           }
 
           return true;
         } catch (error: any) {
-          console.error("❌ Error in checkAuth:", error);
           // Only logout on clear authentication errors, not on parsing errors
           if (error.status === 401 || error.status === 403) {
-            console.log("🔒 Authentication error, clearing storage");
             logout();
             return false;
           } else {
-            console.log("🌐 Non-auth error, keeping user logged in");
             // For any other errors, keep user logged in
             try {
               const parsedUser = JSON.parse(userData);
               setUser(parsedUser);
               return true;
             } catch (parseError) {
-              console.error("❌ Error parsing user data:", parseError);
               // Even if parsing fails, don't logout - just return false
               return false;
             }
           }
         }
       }
-
-      console.log("❌ No valid authentication found");
       return false;
     } catch (error) {
-      console.error("❌ Error checking auth:", error);
       return false;
     }
   };
@@ -268,7 +202,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // After login, fetch and store the complete user profile
     try {
-      console.log("🔄 Fetching complete user profile after login...");
       const response = await getUserData();
 
       if (
@@ -278,7 +211,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         response.data
       ) {
         const completeUserData = response.data;
-        console.log("📋 Complete user data fetched:", completeUserData);
 
         // Update localStorage with complete user data
         const updatedUserInfo = {
@@ -290,14 +222,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem("userData", JSON.stringify(updatedUserInfo));
         setUser(updatedUserInfo);
 
-        console.log("✅ Complete user profile stored in localStorage");
       }
     } catch (error) {
-      console.error(
-        "❌ Error fetching complete user profile after login:",
-        error
-      );
-      // Don't fail login if profile fetch fails
     }
   };
 
@@ -306,7 +232,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     setHasExamGoal(false);
     setHasName(false);
-
 
     // Clear localStorage
     localStorage.removeItem("authToken");
@@ -325,7 +250,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // but we return it for consistency
       return { data: response.data, error: null };
     } catch (error) {
-      console.error("Google sign-in error:", error);
       return { data: null, error };
     }
   };
@@ -338,23 +262,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const response = await getUserData();
       const userData = response?.data;
 
-      console.log("🎯 Exam goal check from /ums/me:", userData);
-
       const hasExamGoal = !!(
         userData?.exam_goal?.exam && userData?.exam_goal?.group
       );
-
-      if (hasExamGoal) {
-        console.log("✅ User has exam goal:", userData.exam_goal);
-        setHasExamGoal(true);
-        return true;
-      } else {
-        console.log("❌ User does not have exam goal");
-        setHasExamGoal(false);
-        return false;
-      }
+      setHasExamGoal(hasExamGoal);
+      return hasExamGoal;
     } catch (error) {
-      console.error("Error checking exam goal:", error);
       setHasExamGoal(false);
       return false;
     } finally {
@@ -369,18 +282,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     nextStep: "personal-details" | "exam-goal" | "dashboard";
   }> => {
     try {
-      console.log("🔍 Starting checkUserState...");
 
       // First check if user is authenticated (has valid token)
       const token = localStorage.getItem("authToken");
       const userData = localStorage.getItem("userData");
 
-      console.log("🔑 Token exists:", !!token);
-      console.log("👤 User data exists:", !!userData);
-
       // If no token or user data, user is not authenticated
       if (!token || !userData) {
-        console.log("❌ User not authenticated - no token or user data");
         return {
           hasName: false,
           hasExamGoal: false,
@@ -392,12 +300,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       let parsedUserData: any;
       try {
         parsedUserData = JSON.parse(userData);
-        console.log("📋 Parsed user data from localStorage:", parsedUserData);
       } catch (parseError) {
-        console.error(
-          "❌ Error parsing user data from localStorage:",
-          parseError
-        );
         return {
           hasName: false,
           hasExamGoal: false,
@@ -408,20 +311,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       // Check if user has gender and date_of_birth from localStorage FIRST
       const hasPersonalDetailsFromStorage =
         parsedUserData?.gender && parsedUserData?.date_of_birth;
-      console.log(
-        "📝 Has personal details from localStorage:",
-        hasPersonalDetailsFromStorage,
-        "Gender:",
-        parsedUserData?.gender,
-        "DateOfBirth:",
-        parsedUserData?.date_of_birth
-      );
 
       // If user has personal details in localStorage, we don't need to call the API for personal details check
       if (hasPersonalDetailsFromStorage) {
-        console.log(
-          "✅ User has personal details in localStorage, skipping API call for personal details check"
-        );
 
         // Check exam goal from localStorage (if available)
         let hasExamGoal: boolean = false;
@@ -429,29 +321,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           hasExamGoal = !!(
             parsedUserData.exam_goal.exam && parsedUserData.exam_goal.group
           );
-          console.log(
-            "🎯 Exam goal check from localStorage:",
-            hasExamGoal,
-            "Exam:",
-            parsedUserData.exam_goal.exam,
-            "Group:",
-            parsedUserData.exam_goal.group
-          );
         }
 
         if (hasExamGoal) {
-          console.log(
-            "✅ User has both personal details (from localStorage) and exam goal, going to dashboard"
-          );
           return {
             hasName: true,
             hasExamGoal: true,
             nextStep: "dashboard",
           };
         } else {
-          console.log(
-            "✅ User has personal details (from localStorage) but no exam goal, going to exam goal"
-          );
           return {
             hasName: true,
             hasExamGoal: false,
@@ -461,19 +339,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       // If we reach here, user doesn't have personal details in localStorage, so we need to call API
-      console.log(
-        "📡 User doesn't have personal details in localStorage, calling API to check..."
-      );
       const response = await getUserData();
-      console.log("📊 /ums/me API response:", response);
 
       // Check if API call failed (including 401/403 authentication errors)
       if (!response || response.status < 200 || response.status >= 300) {
-        console.log("❌ API call failed or unauthorized");
 
         // Only logout on clear authentication errors
         if (response?.status === 401 || response?.status === 403) {
-          console.log("🔒 Authentication error - user logged out");
           // Clear authentication data
           logout();
           return {
@@ -484,7 +356,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
 
         // For other errors (network, server), don't logout - use fallback data
-        console.log("🌐 Non-auth error, using fallback data");
         return {
           hasName: false,
           hasExamGoal: false,
@@ -493,19 +364,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       const userDataFromAPI = response.data;
-      console.log("📋 User data from API:", userDataFromAPI);
 
       // Check if user has personal details from API
       const hasPersonalDetailsFromAPI =
         userDataFromAPI?.gender && userDataFromAPI?.date_of_birth;
-      console.log(
-        "📝 Has personal details from API:",
-        hasPersonalDetailsFromAPI,
-        "Gender:",
-        userDataFromAPI?.gender,
-        "DateOfBirth:",
-        userDataFromAPI?.date_of_birth
-      );
 
       // Check if user has exam goal from /ums/me response
       let hasExamGoal: boolean = false;
@@ -513,36 +375,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         hasExamGoal = !!(
           userDataFromAPI.exam_goal.exam && userDataFromAPI.exam_goal.group
         );
-        console.log(
-          "🎯 Exam goal check from /ums/me:",
-          hasExamGoal,
-          "Exam:",
-          userDataFromAPI.exam_goal.exam,
-          "Group:",
-          userDataFromAPI.exam_goal.group
-        );
       }
 
       if (hasPersonalDetailsFromAPI && hasExamGoal) {
-        console.log(
-          "✅ User has both personal details (from API) and exam goal, going to dashboard"
-        );
         return {
           hasName: true,
           hasExamGoal: true,
           nextStep: "dashboard",
         };
       } else if (hasPersonalDetailsFromAPI && !hasExamGoal) {
-        console.log(
-          "✅ User has personal details (from API) but no exam goal, going to exam goal"
-        );
         return {
           hasName: true,
           hasExamGoal: false,
           nextStep: "exam-goal",
         };
       } else {
-        console.log("❌ User needs personal details");
         return {
           hasName: false,
           hasExamGoal: false,
@@ -550,15 +397,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         };
       }
     } catch (error) {
-      console.error("❌ Error checking user state:", error);
 
       // Only logout on clear authentication errors
       if (error && typeof error === "object" && "status" in error) {
         const apiError = error as any;
         if (apiError.status === 401 || apiError.status === 403) {
-          console.log(
-            "🔒 Authentication error in catch block - clearing auth data"
-          );
           logout();
           return {
             hasName: false,
@@ -569,7 +412,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       // For other errors, don't logout - use fallback data
-      console.log("🌐 Non-auth error in catch block, using fallback data");
       // Fallback to personal details page
       return {
         hasName: false,
@@ -582,9 +424,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const checkUserDetails = async (): Promise<boolean> => {
     try {
       setNameLoading(true);
-      console.log("Checking user details...");
       const response = await getUserData();
-      console.log("User details API response:", response);
 
       const hasPersonalDetails =
         response &&
@@ -594,20 +434,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         response.data?.date_of_birth;
 
       if (hasPersonalDetails) {
-        console.log(
-          "User has personal details:",
-          response.data?.gender,
-          response.data?.date_of_birth
-        );
         setHasName(true);
         return true;
       } else {
-        console.log("User does not have personal details");
         setHasName(false);
         return false;
       }
     } catch (error) {
-      console.error("Error checking user details:", error);
       setHasName(false);
       return false;
     } finally {
@@ -617,6 +450,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   useEffect(() => {
     const initializeAuth = async () => {
+      // Register global auth error handler to logout on token expiry
+      setAuthErrorHandler((status, endpoint) => {
+        console.log(`Auth error on ${endpoint}: ${status}`);
+        logout();
+      });
       await checkAuth();
       setIsLoading(false);
     };
