@@ -677,6 +677,13 @@ const VideoPage: React.FC = () => {
     );
   }
 
+  return (<LoadingScreen
+    isLoading={true}
+    progress={apiProgress}
+    message={apiMessage}
+    showSkeleton={true}
+  />)
+
   // If video is not validated but we've been loading for a while, show fallback
   if (!isVideoValidated && apiProgress > 50) {
     setVideoDetail({ title: `Video ${currentVideoId}`, description: "Loading..." });
@@ -701,35 +708,6 @@ const VideoPage: React.FC = () => {
                 navigate(to, options);
               }}
             />
-            {/* Debug: Manual save button */}
-            <div className="mb-2 flex justify-center gap-2">
-              <button
-                onClick={() => {
-                  saveVideoProgress(true);
-                }}
-                className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                💾 Save Progress (Debug)
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    const testData = {
-                      video_id: currentVideoId || 'test',
-                      watch_percentage: 25.5,
-                      total_duration: 300,
-                      current_position: 75,
-                      page_url: window.location.href,
-                    };
-                    await videoProgressApi.trackProgress(testData);
-                  } catch (error) {
-                  }
-                }}
-                className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                🧪 Test API
-              </button>
-            </div>
             {/* YouTube Video Player with Progress Tracking */}
             <div className="mb-4">
               <YouTube

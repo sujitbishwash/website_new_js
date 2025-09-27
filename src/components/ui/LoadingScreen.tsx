@@ -56,10 +56,13 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
                 <div className="aspect-video bg-muted rounded-xl"></div>
                 
                 {/* Controls Skeleton */}
+                
                 <div className="flex space-x-4">
                   <div className="h-10 bg-muted rounded w-32"></div>
                   <div className="h-10 bg-muted rounded w-32"></div>
                 </div>
+
+                
               </div>
             </div>
 
@@ -67,19 +70,23 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
             <div className="xl:col-span-2 bg-muted/20 p-4 rounded-lg">
               <div className="space-y-4">
                 {/* Tabs Skeleton */}
+                {/*
                 <div className="flex space-x-2">
                   <div className="h-8 bg-muted rounded w-16"></div>
                   <div className="h-8 bg-muted rounded w-16"></div>
                   <div className="h-8 bg-muted rounded w-16"></div>
                   <div className="h-8 bg-muted rounded w-16"></div>
                 </div>
+                */}
                 
                 {/* Content Skeleton */}
+                
                 <div className="space-y-3">
                   <div className="h-5 bg-muted rounded w-full"></div>
                   <div className="h-5 bg-muted rounded w-4/5"></div>
                   <div className="h-5 bg-muted rounded w-3/5"></div>
                 </div>
+                
               </div>
             </div>
           </div>
