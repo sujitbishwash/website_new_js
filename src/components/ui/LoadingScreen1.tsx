@@ -1,11 +1,9 @@
 import React from 'react';
 
-type SkeletonType = 'video-player' | 'content-tabs' | 'ai-tutor-panel' | 'full-page';
+type SkeletonType = 'video-player' | 'header' | 'content-tabs' | 'ai-tutor-panel' | 'generic';
 
 interface LoadingScreenProps {
   isLoading: boolean;
-  progress: number;
-  message: string;
   showSkeleton?: boolean;
   skeletonType?: SkeletonType;
   children?: React.ReactNode;
@@ -13,35 +11,28 @@ interface LoadingScreenProps {
 
 const LoadingScreen: React.FC<LoadingScreenProps> = ({
   isLoading,
-  progress,
-  message,
   showSkeleton = false,
-  skeletonType = 'full-page',
+  skeletonType = 'generic',
   children
 }) => {
   if (!isLoading) {
     return <>{children}</>;
   }
 
-  // Video Player Skeleton
-  const VideoPlayerSkeleton = () => (
-    <div className="space-y-4">
-      {/* Video Player */}
-      <div className="aspect-video bg-muted rounded-xl animate-pulse"></div>
-      
-      {/* Video Controls */}
-      <div className="flex items-center justify-between">
-        <div className="flex space-x-2">
-          <div className="h-8 w-8 bg-muted rounded-full animate-pulse"></div>
-          <div className="h-8 w-8 bg-muted rounded-full animate-pulse"></div>
-          <div className="h-8 w-8 bg-muted rounded-full animate-pulse"></div>
-        </div>
-        <div className="flex items-center space-x-2">
-          <div className="h-6 bg-muted rounded w-16 animate-pulse"></div>
-          <div className="h-6 bg-muted rounded w-16 animate-pulse"></div>
-        </div>
+  // Header Skeleton
+  const HeaderSkeleton = () => (
+    <div className="flex justify-between items-center pb-4">
+      <div className="h-5 bg-muted rounded w-3/4 animate-pulse"></div>
+      <div className="flex space-x-4">
+        <div className="w-7 h-7 bg-muted rounded-full animate-pulse"></div>
+        <div className="w-7 h-7 bg-muted rounded-full animate-pulse"></div>
       </div>
     </div>
+  );
+
+  // Video Player Skeleton
+  const VideoPlayerSkeleton = () => (
+    <div className="aspect-video bg-muted rounded-xl animate-pulse"></div>
   );
 
   // Content Tabs Skeleton
@@ -145,38 +136,24 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
 
   const renderSkeleton = () => {
     switch (skeletonType) {
+      case 'header':
+        return <HeaderSkeleton />;
       case 'video-player':
         return <VideoPlayerSkeleton />;
       case 'content-tabs':
         return <ContentTabsSkeleton />;
       case 'ai-tutor-panel':
         return <AITutorPanelSkeleton />;
-      case 'full-page':
+      case 'generic':
       default:
         return <FullPageSkeleton />;
     }
   };
 
   return (
-    <div className="bg-background min-h-screen font-sans flex flex-col justify-center items-center p-4 gap-6">
-      {/* Progress indicator */}
-      <div className="w-full max-w-md">
-        <div className="flex justify-between text-sm text-muted-foreground mb-2">
-          <span>Loading...</span>
-          <span>{Math.round(progress)}%</span>
-        </div>
-        <div className="w-full bg-muted rounded-full h-2">
-          <div 
-            className="bg-primary h-2 rounded-full transition-all duration-300 ease-out"
-            style={{ width: `${progress}%` }}
-          ></div>
-        </div>
-        <p className="text-sm text-muted-foreground mt-2 text-center">{message}</p>
-      </div>
-
-      {/* Skeleton content */}
+    <>
       {showSkeleton && renderSkeleton()}
-    </div>
+    </>
   );
 };
 

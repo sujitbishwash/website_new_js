@@ -4,8 +4,6 @@ type SkeletonType = 'video-player' | 'header' | 'content-tabs' | 'ai-tutor-panel
 
 interface LoadingScreenProps {
   isLoading: boolean;
-  progress: number;
-  message: string;
   showSkeleton?: boolean;
   skeletonType?: SkeletonType;
   children?: React.ReactNode;
