@@ -20,6 +20,7 @@ import SparklesIcon from "@/components/icons/SparklesIcon";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 import { useApiProgress } from "@/hooks/useApiProgress";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ProgressBar from "@/components/ui/ProgressBar";
 
 declare global {
   interface Window {
@@ -666,6 +667,7 @@ const VideoPage: React.FC = () => {
   }, []);
 
   // Show loading screen while APIs are loading
+  /*
   if (isLoadingVideo || (isApiLoading && apiProgress < 90)) {
     return (
       <LoadingScreen
@@ -676,13 +678,8 @@ const VideoPage: React.FC = () => {
       />
     );
   }
+    */
 
-  return (<LoadingScreen
-    isLoading={true}
-    progress={apiProgress}
-    message={apiMessage}
-    showSkeleton={true}
-  />)
 
   // If video is not validated but we've been loading for a while, show fallback
   if (!isVideoValidated && apiProgress > 50) {
@@ -691,7 +688,19 @@ const VideoPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-background text-foreground min-h-screen font-sans">
+    <>
+    {/* Progress Section */}
+    <div className="w-full">
+        <ProgressBar
+          isLoading={true}
+          progress={apiProgress}
+          message={apiMessage}
+          showPercentage={true}
+          height={6}
+          className="mb-4"
+        />
+      </div>
+      <div className="bg-background text-foreground min-h-screen font-sans">
       {!isMobile ? <div className="mx-auto hidden w-full h-full sm:block">
         <main className="grid grid-cols-1 xl:grid-cols-5">
           <div
@@ -903,6 +912,8 @@ const VideoPage: React.FC = () => {
                   .aspect-w-16 > *, .aspect-h-9 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
               `}</style>
     </div>
+    </>
+    
   );
 };
 

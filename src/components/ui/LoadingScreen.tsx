@@ -24,17 +24,7 @@ const LoadingScreen: React.FC<LoadingScreenProps> = ({
     <div className="bg-background min-h-screen font-sans flex flex-col justify-center items-center p-4 gap-6">
       {/* Logo or Icon */}
 
-      {/* Progress Section */}
-      <div className="w-full max-w-md">
-        <ProgressBar
-          isLoading={true}
-          progress={progress}
-          message={message}
-          showPercentage={true}
-          height={6}
-          className="mb-4"
-        />
-      </div>
+      
 
       {/* Skeleton content if needed */}
       {showSkeleton && (
