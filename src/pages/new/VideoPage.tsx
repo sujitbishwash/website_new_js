@@ -17,9 +17,10 @@ import ContentTabs from "@/components/learning/ContentTabs";
 import AITutorPanel from "@/components/learning/AITutorPanel";
 import Header from "@/components/learning/Header";
 import SparklesIcon from "@/components/icons/SparklesIcon";
-import LoadingScreen from "@/components/ui/LoadingScreen";
+import LoadingScreen from "@/components/ui/LoadingScreen1";
 import { useApiProgress } from "@/hooks/useApiProgress";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ProgressBar from "@/components/ui/ProgressBar";
 
 declare global {
   interface Window {
@@ -673,9 +674,11 @@ const VideoPage: React.FC = () => {
         progress={apiProgress}
         message={apiMessage}
         showSkeleton={true}
+        skeletonType="full-page"
       />
     );
   }
+
 
   // If video is not validated but we've been loading for a while, show fallback
   if (!isVideoValidated && apiProgress > 50) {
@@ -684,7 +687,19 @@ const VideoPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-background text-foreground min-h-screen font-sans">
+    <>
+    {/* Progress Section */}
+    <div className="w-full">
+        <ProgressBar
+          isLoading={true}
+          progress={apiProgress}
+          message={apiMessage}
+          showPercentage={true}
+          height={6}
+          className="mb-4"
+        />
+      </div>
+      <div className="bg-background text-foreground min-h-screen font-sans">
       {!isMobile ? <div className="mx-auto hidden w-full h-full sm:block">
         <main className="grid grid-cols-1 xl:grid-cols-5">
           <div
@@ -701,35 +716,6 @@ const VideoPage: React.FC = () => {
                 navigate(to, options);
               }}
             />
-            {/* Debug: Manual save button */}
-            <div className="mb-2 flex justify-center gap-2">
-              <button
-                onClick={() => {
-                  saveVideoProgress(true);
-                }}
-                className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                💾 Save Progress (Debug)
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    const testData = {
-                      video_id: currentVideoId || 'test',
-                      watch_percentage: 25.5,
-                      total_duration: 300,
-                      current_position: 75,
-                      page_url: window.location.href,
-                    };
-                    await videoProgressApi.trackProgress(testData);
-                  } catch (error) {
-                  }
-                }}
-                className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                🧪 Test API
-              </button>
-            </div>
             {/* YouTube Video Player with Progress Tracking */}
             <div className="mb-4">
               <YouTube
@@ -925,6 +911,8 @@ const VideoPage: React.FC = () => {
                   .aspect-w-16 > *, .aspect-h-9 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
               `}</style>
     </div>
+    </>
+    
   );
 };
 
