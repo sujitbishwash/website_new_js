@@ -12,6 +12,7 @@ import { useLocation, useNavigate, useParams, useBlocker } from "react-router-do
 import { chatApi, videoApi, videoProgressApi } from "../../lib/api-client";
 import YouTube from "react-youtube";
 import { useMultiFeedbackTracker } from "../../hooks/useFeedbackTracker";
+import { useAnalytics } from "../../hooks/useAnalytics";
 import ShareModal from "@/components/modals/ShareModal";
 import ContentTabs from "@/components/learning/ContentTabs";
 import AITutorPanel from "@/components/learning/AITutorPanel";
@@ -45,6 +46,7 @@ const VideoPage: React.FC = () => {
   const { videoId } = useParams<{ videoId: string }>();
   const location = useLocation();
   const navigate = useNavigate();
+  const { trackVideoStart, trackVideoProgress } = useAnalytics();
 
   const currentVideoId = videoId || location.state?.videoId;
 
@@ -295,6 +297,16 @@ const VideoPage: React.FC = () => {
     const player = event.target;
     ytPlayerRef.current = player;
     resumeSeekAppliedRef.current = false;
+    
+    // Track video start
+    if (videoDetail) {
+      trackVideoStart(
+        currentVideoId || '',
+        videoDetail.title || '',
+        videoDetail.subject
+      );
+    }
+    
     // Seek to saved position/percent if available
     console.log('handleYouTubeReady is called')
     const duration = player.getDuration?.() || 0;
@@ -358,6 +370,9 @@ const VideoPage: React.FC = () => {
           current_position: Math.round(currentTime),
           page_url: window.location.href,
         });
+
+        // Track video progress analytics
+        trackVideoProgress(currentVideoId, watchPercentage, duration);
 
         lastSavedProgressRef.current = {
           percentage: watchPercentage,

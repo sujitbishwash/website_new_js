@@ -8,6 +8,7 @@ import ExamConfigurationModal from "./modals/ExamConfigurationModal";
 import ProfileModal from "./ProfilePage";
 import Sidebar from "./sidebar/Sidebar"; // Adjust path as needed
 import BugReportModal from "./modals/BugReportModal";
+import PageTracker from "./PageTracker";
 
 const Layout: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -63,6 +64,7 @@ const Layout: React.FC = () => {
 
   return (
     <>
+      <PageTracker />
       <div className="flex h-screen" ref={appContainerRef}>
         {!shouldHideSidebar && (
           <Sidebar

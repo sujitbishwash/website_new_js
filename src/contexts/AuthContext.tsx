@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ApiResponse, authApi, setAuthErrorHandler } from "../lib/api-client";
+import { usePostHog } from "./PostHogContext";
 
 interface User {
   id: string;
@@ -86,6 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [examGoalLoading, setExamGoalLoading] = useState(false);
   const [hasName, setHasName] = useState(false);
   const [nameLoading, setNameLoading] = useState(false);
+  const { capture, identify, reset } = usePostHog();
 
   // Get user data with localStorage optimization
   const getUserData = async () => {
@@ -222,12 +224,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         localStorage.setItem("userData", JSON.stringify(updatedUserInfo));
         setUser(updatedUserInfo);
 
+        // Track successful login
+        capture('user_logged_in', {
+          login_method: 'email',
+          user_id: updatedUserInfo.id,
+        });
+        
+        // Identify user in PostHog
+        identify(updatedUserInfo.id, {
+          email: updatedUserInfo.email,
+          name: updatedUserInfo.name,
+        });
+
       }
     } catch (error) {
+      // Track login error
+      capture('login_error', {
+        error: 'Failed to fetch user data after login',
+      });
     }
   };
 
   const logout = async () => {
+    // Track logout event
+    capture('user_logged_out', {});
+    
+    // Reset PostHog session
+    reset();
+    
     // Clear state immediately
     setUser(null);
     setHasExamGoal(false);

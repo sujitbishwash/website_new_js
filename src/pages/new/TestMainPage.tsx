@@ -5,6 +5,7 @@ import { useNavigate, useLocation, useParams } from "react-router-dom";
 import ExamSubmitDialog from "../../components/ExamSubmitDialog";
 import TestResultDialog from "../../components/TestResultDialog";
 import { useUser } from "../../contexts/UserContext";
+import { useAnalytics } from "../../hooks/useAnalytics";
 import { ROUTES } from "../../routes/constants";
 import {
   Check,
@@ -198,6 +199,8 @@ const useOutsideClick = (
 // --- Main Application Component ---
 
 const TestMainPage = () => {
+  const { trackTestStart, trackTestSubmit } = useAnalytics();
+  
   // --- State Management ---
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [allQuestions, setAllQuestions] = useState<{
@@ -288,6 +291,11 @@ const TestMainPage = () => {
         const v3 = isSolutionMode
           ? await quizApi.getTestSolutions(sid)
           : await quizApi.startTest(sid);
+          
+        // Track test start
+        if (!isSolutionMode) {
+          trackTestStart(sid.toString(), 'practice_test', 'medium');
+        }
         // Handle grouped sections (v3)
         if (v3 && (v3 as any).sections) {
           const sections = (v3 as any).sections as Record<string, any>;
@@ -668,6 +676,11 @@ const TestMainPage = () => {
     try {
       setShowSubmitDialog(false);
       setIsSubmitting(true);
+
+      // Track test submit
+      if (sessionId) {
+        trackTestSubmit(sessionId.toString(), questions);
+      }
 
       const apiResponse = await submitTestToAPI();
 
