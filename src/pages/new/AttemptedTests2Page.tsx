@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useMemo, FC } from "react";
 import { useNavigate } from "react-router-dom";
 import { attemptedTestsApi } from "@/lib/api-client";
 import CustomLoader from "@/components/icons/customloader";
+import calculateDaysSince from "@/lib/calculateDaysSince";
 
 // --- TYPE DEFINITIONS ---
 type MockTestStatus = "Completed" | "In Progress";
@@ -53,22 +54,6 @@ const aiRecommendedTests: AiRecommendation[] = [
 ];
 
 // --- HELPER & VIEW COMPONENTS ---
-
-// Helper to calculate days since the test was taken
-const calculateDaysSince = (dateString: string): string => {
-  if (!dateString) return "";
-  const today = new Date(); // Current fixed time
-  const testDate = new Date(dateString);
-  today.setHours(0, 0, 0, 0);
-  testDate.setHours(0, 0, 0, 0);
-
-  const diffTime = today.getTime() - testDate.getTime();
-  const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
-
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  return `${diffDays} days ago`;
-};
 
 const SkeletonCard: FC = () => (
     <div className="animate-pulse bg-card border border-border rounded-xl sm:rounded-2xl shadow-sm p-3 sm:p-5 flex flex-col sm:flex-row items-start justify-between gap-5">
