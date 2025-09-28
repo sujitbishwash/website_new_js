@@ -301,21 +301,22 @@ const VideoPage: React.FC = () => {
     ytPlayerRef.current = player;
     resumeSeekAppliedRef.current = false;
     // Seek to saved position/percent if available
-    console.log('handleYouTubeReady is called')
+    // console.log('handleYouTubeReady is called')
     const duration = player.getDuration?.() || 0;
-    console.log('duration', duration);
-    console.log('resumePosition', resumePosition);
-    console.log('resumePercent', resumePercent);
+    // console.log('duration', duration);
+    // console.log('resumePosition', resumePosition);
+    // console.log('resumePercent', resumePercent);
     if (!resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration) {
       player.seekTo(resumePosition, true);
-      console.log('seeked to resumePosition', resumePosition);
+      // console.log('seeked to resumePosition', resumePosition);
       resumeSeekAppliedRef.current = true;
     } else if (!resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0) {
       const seekTime = Math.min(duration - 1, Math.max(0, (resumePercent / 100) * duration));
       player.seekTo(seekTime, true);
-      console.log('seeked to resumePercent', seekTime);
+      // console.log('seeked to resumePercent', seekTime);
       resumeSeekAppliedRef.current = true;
     }
+    /*
     console.log('case 1: !resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration', !resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration)
     console.log('case 2: !resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0', !resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0)
     console.log('resumeSeekAppliedRef.current', resumeSeekAppliedRef.current)
@@ -323,6 +324,7 @@ const VideoPage: React.FC = () => {
     console.log('resumePercent', resumePercent)
     console.log('duration', duration)
     console.log('did not do anything');
+    */
   }, [resumePosition, resumePercent]);
 
 
