@@ -5,6 +5,7 @@ import { fetchTestSeriesFormData } from "../../lib/api-client";
 import { ROUTES } from "../../routes/constants";
 import { Pen } from "lucide-react";
 import ExamConfigurationModal from "../../components/modals/ExamConfigurationModal";
+import { saveTestConfig, getTestConfig } from "../../lib/testConfigStorage";
 
 // --- Type Definitions ---
 interface ChipProps {
@@ -164,17 +165,26 @@ const TestConfigurationPageComponent = () => {
         const data = await fetchTestSeriesFormData();
         setTestData(data);
 
-        // Set default selections if data is available
-        if (data.subjects.length > 0) {
-          setSelectedSubject(data.subjects[0].subject);
-        }
-        if (data.level.length > 0) {
-          // Set "Medium" as default if available, otherwise use first option
-          const mediumIndex = data.level.findIndex(level => level.toLowerCase() === 'medium');
-          setSelectedDifficulty(mediumIndex !== -1 ? data.level[mediumIndex] : data.level[0]);
-        }
-        if (data.language.length > 0) {
-          setSelectedLanguage(data.language[0]);
+        // Check if there's a saved test configuration
+        const savedConfig = getTestConfig();
+        if (savedConfig) {
+          setSelectedSubject(savedConfig.subject);
+          setSelectedSubtopics(savedConfig.sub_topic);
+          setSelectedDifficulty(savedConfig.level);
+          setSelectedLanguage(savedConfig.language);
+        } else {
+          // Set default selections if data is available
+          if (data.subjects.length > 0) {
+            setSelectedSubject(data.subjects[0].subject);
+          }
+          if (data.level.length > 0) {
+            // Set "Medium" as default if available, otherwise use first option
+            const mediumIndex = data.level.findIndex(level => level.toLowerCase() === 'medium');
+            setSelectedDifficulty(mediumIndex !== -1 ? data.level[mediumIndex] : data.level[0]);
+          }
+          if (data.language.length > 0) {
+            setSelectedLanguage(data.language[0]);
+          }
         }
       } catch (err: any) {
         setError("Failed to load test configuration. Please try again.");
@@ -205,6 +215,9 @@ const TestConfigurationPageComponent = () => {
         level: selectedDifficulty.toLowerCase(),
         language: selectedLanguage,
       };
+
+      // Save test configuration to localStorage
+      saveTestConfig(testData);
 
       //const response = await testSeriesApi.createTest(testData);
 
