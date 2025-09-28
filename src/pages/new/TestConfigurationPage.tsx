@@ -170,8 +170,12 @@ const TestConfigurationPageComponent = () => {
         }
         if (data.level.length > 0) {
           // Set "Medium" as default if available, otherwise use first option
-          const mediumIndex = data.level.findIndex(level => level.toLowerCase() === 'medium');
-          setSelectedDifficulty(mediumIndex !== -1 ? data.level[mediumIndex] : data.level[0]);
+          const mediumIndex = data.level.findIndex(
+            (level) => level.toLowerCase() === "medium"
+          );
+          setSelectedDifficulty(
+            mediumIndex !== -1 ? data.level[mediumIndex] : data.level[0]
+          );
         }
         if (data.language.length > 0) {
           setSelectedLanguage(data.language[0]);
@@ -185,7 +189,6 @@ const TestConfigurationPageComponent = () => {
 
     fetchData();
   }, []);
-
 
   // Handler for the continue button click
   const handleContinue = async () => {
@@ -236,85 +239,90 @@ const TestConfigurationPageComponent = () => {
 
   return (
     <div className="bg-background text-foreground min-h-screen font-sans p-4 sm:p-4 md:p-8 flex items-center justify-center">
-      <div className="w-full max-w-7xl mx-auto bg-card border border-divider rounded-2xl shadow-2xl p-4 mt-15 mb-10 sm:mb-0 sm:mt-0 sm:p-8 sm:space-y-6 ">
+      <div
+        className={`w-full max-w-7xl mx-auto bg-card border border-divider rounded-2xl shadow-2xl mt-15 mb-10 max-h-[80vh] `}
+      >
         {/* --- Header --- */}
-        <div className="text-center mb-6 sm:mb-0">
+        <div className="text-center p-4 border-border border-b sm:border-b-0">
           <h1 className="text-3xl sm:text-4xl font-bold text-foreground">
             Configure Your Test
           </h1>
-          <p className="mt-2 text-lg text-muted-foreground hidden sm:block">
+          <p className="mt-2 text-lg text-muted-foreground hidden lg:block">
             Select your preferences to start a practice test.
           </p>
         </div>
-
-        {/* --- User Profile Section --- */}
-        {profile && examGoal && (
-          <div className="mt-4 flex justify-start items-center gap-3 hidden sm:block">
-            <span className="text-xs font-medium px-3 py-1">
-              Exam Goal: {examGoal.exam}
-            </span>
-            {/*<span className="text-xs font-medium px-3 py-1">
+        <div className="overflow-y-auto max-h-[60vh] px-4 py-4 sm:py-0 space-y-6">
+          {/* --- User Profile Section --- */}
+          {profile && examGoal && (
+            <div className="mt-4 flex justify-start items-center gap-3 hidden sm:block">
+              <span className="text-xs font-medium px-3 py-1">
+                Exam Goal: {examGoal.exam}
+              </span>
+              {/*<span className="text-xs font-medium px-3 py-1">
               Group Type: {examGoal.groupType}
             </span>*/}
-            <button
-              onClick={() => setIsExamConfigModalOpen(true)}
-              className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
-              title="Edit exam goal"
-            >
-              <Pen className="w-4 h-4" />
-            </button>
+              <button
+                onClick={() => setIsExamConfigModalOpen(true)}
+                className="px-2 py-2 rounded-lg bg-background border border-divider hover:bg-foreground/20 transition-colors cursor-pointer"
+                title="Edit exam goal"
+              >
+                <Pen className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
+          {/* --- Error Display --- */}
+          {error && (
+            <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
+              <p className="text-red-400 text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* --- Form Sections --- */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 sm:gap-6">
+            <SelectionPanel
+              title="1. Select Subject"
+              options={subjects}
+              selectedValue={selectedSubject}
+              onSelect={setSelectedSubject}
+            />
+
+            <SelectionPanel
+              title="2. Select Topic"
+              options={currentSubTopics}
+              selectedValues={selectedSubtopics}
+              onSelect={(topic) =>
+                setSelectedSubtopics((prev) =>
+                  prev.includes(topic)
+                    ? prev.filter((t) => t !== topic)
+                    : [...prev, topic]
+                )
+              }
+              optionalLabel="Optional"
+              emptyMessage="No sub-topics available for this subject."
+            />
+
+            <SelectionPanel
+              title="3. Select Difficulty"
+              options={difficulties}
+              selectedValue={selectedDifficulty}
+              onSelect={setSelectedDifficulty}
+            />
+
+            <SelectionPanel
+              title="4. Select Language"
+              options={languages}
+              selectedValue={selectedLanguage}
+              onSelect={setSelectedLanguage}
+              mapper={languageMapper}
+            />
           </div>
-        )}
-
-        {/* --- Error Display --- */}
-        {error && (
-          <div className="bg-red-900/20 border border-red-500/50 rounded-lg p-4">
-            <p className="text-red-400 text-sm">{error}</p>
-          </div>
-        )}
-
-        {/* --- Form Sections --- */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 sm:gap-6">
-          <SelectionPanel
-            title="1. Select Subject"
-            options={subjects}
-            selectedValue={selectedSubject}
-            onSelect={setSelectedSubject}
-          />
-
-          <SelectionPanel
-            title="2. Select Topic"
-            options={currentSubTopics}
-            selectedValues={selectedSubtopics}
-            onSelect={(topic) =>
-              setSelectedSubtopics((prev) =>
-                prev.includes(topic)
-                  ? prev.filter((t) => t !== topic)
-                  : [...prev, topic]
-              )
-            }
-            optionalLabel="Optional"
-            emptyMessage="No sub-topics available for this subject."
-          />
-
-          <SelectionPanel
-            title="3. Select Difficulty"
-            options={difficulties}
-            selectedValue={selectedDifficulty}
-            onSelect={setSelectedDifficulty}
-          />
-
-          <SelectionPanel
-            title="4. Select Language"
-            options={languages}
-            selectedValue={selectedLanguage}
-            onSelect={setSelectedLanguage}
-            mapper={languageMapper}
-          />
         </div>
 
         {/* --- Continue Button --- */}
-        <div className="flex justify-end">
+        <div
+          className={`flex justify-end px-4 py-4 border-t border-divider lg:border-t-0`}
+        >
           <button
             onClick={handleContinue}
             disabled={

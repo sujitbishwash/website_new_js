@@ -1661,7 +1661,9 @@ const ScoreDonutChart = ({ data, size = 200, maxScore = 100 }) => {
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-sm text-[#8e8e93] font-medium">Total Score</span>
         <span className="text-5xl font-bold">{formatScore(currentScore)}</span>
-        <span className="text-2xl text-[#8e8e93] font-medium">/{formatScore(maxScore)}</span>
+        <span className="text-2xl text-[#8e8e93] font-medium">
+          /{formatScore(maxScore)}
+        </span>
       </div>
     </div>
   );
@@ -1688,10 +1690,14 @@ export default function TestAnalysis2() {
     return fromQuery ? Number(fromQuery) : undefined;
   }, [location.state, location.search]);
   // Feedback availability for Test component
-  const { feedbackStates, isLoading: isFeedbackLoading, checkFeedback } = useMultiFeedbackTracker({
+  const {
+    feedbackStates,
+    isLoading: isFeedbackLoading,
+    checkFeedback,
+  } = useMultiFeedbackTracker({
     components: [ComponentName.Test],
     sourceId: String(sessionId ?? ""),
-    pageUrl: typeof window !== 'undefined' ? window.location.href : '',
+    pageUrl: typeof window !== "undefined" ? window.location.href : "",
     onFeedbackExists: () => {},
   });
   const testFeedbackState = feedbackStates[ComponentName.Test];
@@ -1699,9 +1705,17 @@ export default function TestAnalysis2() {
   // Open feedback modal only when tracker confirms eligibility and no prior feedback
   useEffect(() => {
     if (!sessionId || isFeedbackLoading) return;
-    const canOpen = !!(testFeedbackState?.canSubmitFeedback && !testFeedbackState?.existingFeedback);
+    const canOpen = !!(
+      testFeedbackState?.canSubmitFeedback &&
+      !testFeedbackState?.existingFeedback
+    );
     setIsFeedbackOpen(canOpen);
-  }, [sessionId, isFeedbackLoading, testFeedbackState?.canSubmitFeedback, testFeedbackState?.existingFeedback]);
+  }, [
+    sessionId,
+    isFeedbackLoading,
+    testFeedbackState?.canSubmitFeedback,
+    testFeedbackState?.existingFeedback,
+  ]);
 
   // Ensure the tracker actually calls the API once sessionId is known
   useEffect(() => {
@@ -1709,8 +1723,6 @@ export default function TestAnalysis2() {
       checkFeedback();
     }
   }, [sessionId, checkFeedback]);
-
-  
 
   // Fetch test analysis after page load, then hydrate UI dataset
   useEffect(() => {
@@ -1784,8 +1796,10 @@ export default function TestAnalysis2() {
     return (
       <div className="fixed inset-0 flex flex-1 flex-col z-10 items-center justify-center bg-background bg-opacity-70 h-full">
         <CustomLoader className="h-15 w-15" />
-        <p className="text-lg text-muted-foreground mt-8">Fetching analysis...</p>
-        </div>
+        <p className="text-lg text-muted-foreground mt-8">
+          Fetching analysis...
+        </p>
+      </div>
     );
   }
 
@@ -1891,9 +1905,25 @@ export default function TestAnalysis2() {
               <button
                 onClick={() => {
                   const params = new URLSearchParams(location.search);
-                  const sid = (location.state as any)?.sessionId || params.get("sessionId");
+                  const sid =
+                    (location.state as any)?.sessionId ||
+                    params.get("sessionId");
                   if (sid) {
-                    navigate(`/test-main-page/${encodeURIComponent(String(sid))}/solutions`);
+                    //navigate(`/test-main-page/${encodeURIComponent(String(sid))}/solutions`);
+                    console.log(
+                      "Navigating to solutions for session:",
+                      sid,
+                      `${ROUTES.TEST_MAIN_PAGE.replace(
+                        ":id",
+                        String(sid)
+                      )}/solutions`
+                    );
+                    navigate(
+                      `${ROUTES.TEST_MAIN_PAGE.replace(
+                        ":id",
+                        String(sid)
+                      )}/solutions`
+                    );
                   } else {
                     navigate(ROUTES.TEST_SOLUTION.replace(":id", ""));
                   }

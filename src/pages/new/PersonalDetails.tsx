@@ -28,7 +28,6 @@ interface InputFieldProps {
   error?: string;
 }
 
-
 interface FormData {
   name: string;
   gender: string;
@@ -90,10 +89,10 @@ const Dropdown3: FC<Dropdown3Props> = ({
     setIsOpen(false);
   };
 
-  function capitalizeFirstLetter(str:string) {
-  if (!str) return "";
-  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
-}
+  function capitalizeFirstLetter(str: string) {
+    if (!str) return "";
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
 
   return (
     <div className="w-full">
@@ -104,11 +103,10 @@ const Dropdown3: FC<Dropdown3Props> = ({
         {label}
       </label>
       <div className="relative" ref={dropdownRef}>
-        
         <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
           {value
-              ? options.find((o) => o.label === value)?.icon
-              : placeholder.icon}
+            ? options.find((o) => o.label === value)?.icon
+            : placeholder.icon}
         </span>
         <button
           type="button"
@@ -121,10 +119,10 @@ const Dropdown3: FC<Dropdown3Props> = ({
         >
           <span className="flex items-center gap-2 first-letter:uppercase">
             {/* when value selected show its icon, else placeholder icon */}
-            
+
             {capitalizeFirstLetter(value || placeholder.label)}
           </span>
-          <ChevronDown className="w-5 h-5"/>
+          <ChevronDown className="w-5 h-5" />
         </button>
 
         {isOpen && !disabled && (
@@ -191,7 +189,6 @@ const InputField: React.FC<InputFieldProps> = ({
           id={id}
           {...props}
           className={`block w-full rounded-lg bg-background-subtle py-3 pl-10 pr-3 text-foreground placeholder-muted-foreground transition duration-150 ease-in-out border border-border focus:border-blue-400 focus:outline-none focus:ring-1 sm:text-sm ${errorClasses}`}
-
         />
       </div>
       {error && (
@@ -326,9 +323,20 @@ const PersonalInfoForm: React.FC = () => {
   // --- Validation Logic ---
   const validate = (data: FormData): FormErrors => {
     const newErrors: FormErrors = {};
-    if (!data.name.trim()) newErrors.name = "Full name is required.";
+    /**if (!data.name.trim()) newErrors.name = "Full name is required.";
     else if (data.name.trim().length < 3)
+      newErrors.name = "Full name must be at least 3 characters.";*/
+
+    // --- Name Validation ---
+    const namePattern = /^[a-zA-ZÀ-žà-ž' -]{2,}$/; // letters, spaces, hyphens, apostrophes
+
+    if (!data.name.trim()) {
+      newErrors.name = "Full name is required.";
+    } else if (data.name.trim().length < 3) {
       newErrors.name = "Full name must be at least 3 characters.";
+    } else if (!namePattern.test(data.name.trim())) {
+      newErrors.name = "Please enter a valid full name (letters only).";
+    }
     if (!data.gender) newErrors.gender = "Please select a gender.";
     if (!data.dob) newErrors.dob = "Date of birth is required.";
     else if (new Date(data.dob) > new Date())
@@ -417,7 +425,6 @@ const PersonalInfoForm: React.FC = () => {
     }
   };
 
-  
   // Show loading state while fetching user data
   if (isLoadingUserData) {
     return (
@@ -488,13 +495,24 @@ const PersonalInfoForm: React.FC = () => {
             value={formData.gender}
             onChange={handleChange2}
             options={[
-              { label: "male", icon: <Mars className="h-5 w-5 text-muted-foreground"/> },
-              { label: "female", icon: <Venus className="h-5 w-5 text-muted-foreground"/> },
-              { label: "other", icon: <VenusAndMars className="h-5 w-5 text-muted-foreground"/> },
+              {
+                label: "male",
+                icon: <Mars className="h-5 w-5 text-muted-foreground" />,
+              },
+              {
+                label: "female",
+                icon: <Venus className="h-5 w-5 text-muted-foreground" />,
+              },
+              {
+                label: "other",
+                icon: (
+                  <VenusAndMars className="h-5 w-5 text-muted-foreground" />
+                ),
+              },
             ]}
             placeholder={{
               label: "Select Your Gender",
-              icon: <CircleSmall className="h-5 w-5 text-muted-foreground"/>,
+              icon: <CircleSmall className="h-5 w-5 text-muted-foreground" />,
             }}
           />
           <div>
@@ -524,7 +542,7 @@ const PersonalInfoForm: React.FC = () => {
           >
             {isLoading ? (
               <>
-                <CustomLoader className="h-5 w-5"/>
+                <CustomLoader className="h-5 w-5" />
                 Saving...
               </>
             ) : (
