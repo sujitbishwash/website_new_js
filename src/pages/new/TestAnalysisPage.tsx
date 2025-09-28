@@ -736,14 +736,14 @@ const SectionalSummary = () => {
           </button>
 
           <div
-            className={`transition-all duration-500 ease-in-out overflow-hidden ${
+            className={`transition-all duration-500 ease-in-out overflow-x-auto ${
               isTopicAnalysisOpen ? "max-h-screen mt-4 " : "max-h-0"
             }`}
           >
-            <div className="bg-background-subtle p-1 rounded-lg">
-              <table className="w-full text-md text-left">
+            <div className="bg-background-subtle p-1 rounded-lg min-w-full">
+              <table className="w-full text-md text-left min-w-full">
                 <thead className="text-xs text-muted-foreground uppercase">
-                  <tr>
+                  <tr className="bg-background-subtle">
                     <th scope="col" className="px-4 py-3">
                       Topic
                     </th>
@@ -769,7 +769,7 @@ const SectionalSummary = () => {
                   {activeSection.topics.map((topic) => (
                     <tr
                       key={topic.name}
-                      className="border-b border-border last:border-b-0"
+                      className="border-b border-border last:border-b-0 bg-background-subtle"
                     >
                       <th
                         scope="row"
@@ -794,10 +794,7 @@ const SectionalSummary = () => {
                       <td className="px-4 py-4 text-center">{topic.time}</td>
                       <td className="px-4 py-4 text-center">{`${topic.correct}/${topic.attempted}`}</td>
 
-                      <td className="block text-right relative py-2 md:table-cell md:text-center md:px-4 md:py-4">
-                        <span className="font-bold text-[#8e8e93] md:hidden absolute left-0">
-                          Skipped
-                        </span>
+                      <td className="px-4 py-4 text-center">
                         {topic.totalQs - topic.attempted}
                       </td>
                     </tr>
