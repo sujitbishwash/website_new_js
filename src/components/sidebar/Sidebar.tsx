@@ -32,12 +32,12 @@ interface SidebarProps {
   onBugReportClick: () => void;
 }
 
-const generatefirstPart = (str: string) => {
+export const generatefirstPart = (str: string) => {
   const parts = str.split("/");
   return "/" + parts[1];
 };
 
-const isAllowedRoute = (firstPart: string): boolean => {
+export const isAllowedRoute = (firstPart: string): boolean => {
   const disallowedRoutes = [
     ROUTES.VIDEO_LEARNING,
     ROUTES.PREMIUM,

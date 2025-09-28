@@ -1881,7 +1881,7 @@ export default function TestAnalysis2() {
             <h3 className="text-left">Attempted on 27/08/25</h3>
           </div>
         </div>
-        <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6">
+        <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 overflow-y-auto mb-10">
           <OverallPerformance />
           <SectionalSummary />
           <ComparisonAnalysis />
@@ -1897,63 +1897,76 @@ export default function TestAnalysis2() {
 
           <Leaderboard />
           {/**<ReviewAndRelearn onClickGoToSolution={()=>useNavigate(ROUTES.TEST_SOLUTION)}/>*/}
-          <div className="lg:col-span-12">
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <button
-                onClick={() => {
-                  const params = new URLSearchParams(location.search);
-                  const sid =
-                    (location.state as any)?.sessionId ||
-                    params.get("sessionId");
-                  if (sid) {
-                    //navigate(`/test-main-page/${encodeURIComponent(String(sid))}/solutions`);
-                    console.log(
-                      "Navigating to solutions for session:",
-                      sid,
-                      `${ROUTES.TEST_MAIN_PAGE.replace(
-                        ":id",
-                        String(sid)
-                      )}/solutions`
-                    );
-                    navigate(
-                      `${ROUTES.TEST_MAIN_PAGE.replace(
-                        ":id",
-                        String(sid)
-                      )}/solutions`
-                    );
-                  } else {
-                    navigate(ROUTES.TEST_SOLUTION.replace(":id", ""));
-                  }
-                }}
-                className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 text-lg font-semibold rounded-lg backdrop-blur-sm border-1 transition-all duration-300 text-white hover:opacity-90 bg-primary hover:bg-primary/80 cursor-pointer"
-              >
-                <Text className="w-5 h-5" />
-                Full Answer Review
-              </button>
-              <button className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg text-lg font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer">
-                <RefreshCcw className="w-5 h-5" />
-                Re-Attempt
-              </button>
-              <button className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg text-lg font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer">
-                Next Test
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-          <ShareModal
-            isOpen={isShareModalOpen}
-            onClose={handleCloseShareModal}
-            url={`https://www.youtube.com`}
-          />
-          {/* Test Feedback Modal */}
-          <VideoFeedbackModal
-            isOpen={isFeedbackOpen}
-            onClose={() => setIsFeedbackOpen(false)}
-            videoId={String(sessionId ?? "")}
-            onSubmit={async () => Promise.resolve()}
-            componentName="Test"
-          />
         </div>
+        <div className="fixed bottom-0 lg:relative bg-background lg:bg-transparent border-t border-1 left-0 w-full p-2 lg:p-0 lg:w-auto lg:rounded-t-lg lg:border-0 lg:mx-auto max-w-7xl">
+          <div className="flex flex-row items-center gap-3">
+            <button
+              onClick={() => {
+                const params = new URLSearchParams(location.search);
+                const sid =
+                  (location.state as any)?.sessionId || params.get("sessionId");
+                if (sid) {
+                  navigate(
+                    `${ROUTES.TEST_MAIN_PAGE.replace(
+                      ":id",
+                      String(sid)
+                    )}/solutions`
+                  );
+                } else {
+                  navigate(ROUTES.TEST_SOLUTION.replace(":id", ""));
+                }
+              }}
+              className="
+    w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 
+    text-lg font-semibold rounded-lg backdrop-blur-sm border-1 transition-all 
+    duration-300 text-white hover:opacity-90 bg-primary hover:bg-primary/80 cursor-pointer
+  "
+            >
+              {/* Icon hidden on small screens */}
+              <Text className="hidden sm:block w-5 h-5" />
+              {/* Shorter text on mobile */}
+              <span className="sm:inline hidden">Full Answer Review</span>
+              <span className="inline sm:hidden">Review</span>
+            </button>
+
+            <button
+              className="
+    w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg 
+    text-lg font-semibold text-foreground bg-background border border-divider 
+    hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer
+  "
+            >
+              <RefreshCcw className="hidden sm:block w-5 h-5" />
+              <span className="sm:inline hidden">Re-Attempt</span>
+              <span className="inline sm:hidden">Retry</span>
+            </button>
+
+            <button
+              className="
+    w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg 
+    text-lg font-semibold text-foreground bg-background border border-divider 
+    hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer
+  "
+            >
+              <span className="sm:inline hidden">Next Test</span>
+              <span className="inline sm:hidden">Next</span>
+              <ArrowRight className="hidden sm:block w-5 h-5" />
+            </button>
+          </div>
+        </div>
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={handleCloseShareModal}
+          url={`https://www.youtube.com`}
+        />
+        {/* Test Feedback Modal */}
+        <VideoFeedbackModal
+          isOpen={isFeedbackOpen}
+          onClose={() => setIsFeedbackOpen(false)}
+          videoId={String(sessionId ?? "")}
+          onSubmit={async () => Promise.resolve()}
+          componentName="Test"
+        />
       </div>
     </div>
   );
