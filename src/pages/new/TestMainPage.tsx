@@ -1099,7 +1099,7 @@ const TestMainPage = () => {
               {questions.map((q, index) => {
                 const buttonProps = {
                   number: index + 1,
-                  onClick: () => handlePaletteClick(index),
+                  onClick: () => {handlePaletteClick(index); setIsMobileMenuOpen(false);},
                   size: 40,
                 };
 
