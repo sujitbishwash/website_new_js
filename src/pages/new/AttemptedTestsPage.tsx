@@ -160,7 +160,7 @@ const ActionButton = ({
   }
 
   return (
-    <div className="relative sm:block hidden" ref={dropdownRef}>
+    <div className="relative " ref={dropdownRef}>
       <button
         onClick={() => setMoreOpen(!isMoreOpen)}
         className="p-1 rounded-full hover:bg-foreground/10 cursor-pointer"
@@ -233,7 +233,7 @@ const TestFeedCard = ({ test }: { test: MockTest }) => {
       </div>
 
       {/* Score / Percentile */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-center">
+      <div className="flex flex-row sm:items-center gap-4 text-center">
         {test.status === "Completed" && (
           <>
             <div className="text-end sm:text-center">
