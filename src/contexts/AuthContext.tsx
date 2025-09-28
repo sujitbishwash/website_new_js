@@ -144,6 +144,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
             // Only logout if we get a clear authentication error
             if (response && (response.status === 401 || response.status === 403)) {
+              console.log("Token invalid or expired, logging out", response.status);
               logout();
               return false;
             } else if (response && response.status >= 200 && response.status < 300) {
@@ -166,6 +167,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         } catch (error: any) {
           // Only logout on clear authentication errors, not on parsing errors
           if (error.status === 401 || error.status === 403) {
+            
             logout();
             return false;
           } else {
@@ -232,7 +234,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     setHasExamGoal(false);
     setHasName(false);
-
+    console.log("User logged out");
     // Clear localStorage
     localStorage.removeItem("authToken");
     localStorage.removeItem("userData");

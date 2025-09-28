@@ -31,7 +31,7 @@ const LoginPage: React.FC = () => {
             
             navigate(ROUTES.EXAM_GOAL, { replace: true });
           } else {
-            
+            console.log("Navigating to personal details in handle authenticated user");
             navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
           }
         } catch (error) {
@@ -332,6 +332,7 @@ const LoginCard: React.FC = () => {
           navigate(ROUTES.EXAM_GOAL, { replace: true });
         } else {
           
+            console.log("Navigating to personal details in handleVerifyOtp");
           navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
       } catch (error) {

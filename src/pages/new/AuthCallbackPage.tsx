@@ -56,6 +56,7 @@ const AuthCallbackPage: React.FC = () => {
           navigate(ROUTES.EXAM_GOAL, { replace: true });
         } else {
           
+            console.log("Navigating to personal details in AuthCallbackPage");
           navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
         }
         return;

@@ -15,6 +15,8 @@ import {
   ChevronsRight,
   ChevronUpIcon,
   CircleUser,
+  Info,
+  Lightbulb,
   Maximize,
   Minimize,
   X,
@@ -25,6 +27,8 @@ import {
   Button3,
   Button4,
   Button5,
+  Button6,
+  Button7,
 } from "@/components/test/buttons";
 import CustomLoader from "@/components/icons/customloader";
 
@@ -174,7 +178,51 @@ interface ApiQuestion {
   selected?: string | null;
   isCorrect?: boolean;
 }
+interface IYouTubeVideo {
+  id: string;
+  title: string;
+  thumbnailUrl: string;
+  channel: string;
+  videoUrl: string;
+}
+// --- TYPE DEFINITIONS ---
+interface IConcept {
+  id: number;
+  title: string;
+  problemStatement: string;
+  solution: string;
+  explanation: string;
+}
+// --- MOCK DATA for a Class 10 Student ---
+const mockConcept: IConcept = {
+  id: 1,
+  title: "Balancing Chemical Equations",
+  problemStatement: `Balance the following chemical equation:
+Mg + O₂ → MgO`,
+  solution: `The correct balanced equation is:
+2Mg + O₂ → 2MgO
 
+Reactants side: Mg = 2, O = 2
+Products side: Mg = 2, O = 2
+The equation is now balanced.`,
+  explanation: `The Law of Conservation of Mass states that mass is neither created nor destroyed in a chemical reaction. To balance an equation, you must have the same number of atoms of each element on both the reactant (left) and product (right) side. We use coefficients (numbers in front of formulas) to adjust these counts until they are equal.`,
+};
+const mockYouTubeVideos: IYouTubeVideo[] = [
+  {
+    id: "2s_yD-Y8_p0",
+    title: "How to Balance Chemical Equations",
+    thumbnailUrl: "https://img.youtube.com/vi/2s_yD-Y8_p0/mqdefault.jpg",
+    channel: "Najam Academy",
+    videoUrl: "https://www.youtube.com/watch?v=2s_yD-Y8_p0",
+  },
+  {
+    id: "zmdj_hN_2No",
+    title: "Introduction to Balancing Chemical Equations",
+    thumbnailUrl: "https://img.youtube.com/vi/zmdj_hN_2No/mqdefault.jpg",
+    channel: "Tyler DeWitt",
+    videoUrl: "https://www.youtube.com/watch?v=zmdj_hN_2No",
+  },
+];
 // --- Helper Components ---
 
 // --- Custom Hook for detecting outside clicks ---
@@ -197,8 +245,37 @@ const useOutsideClick = (
 
 // --- Main Application Component ---
 
+const YouTubeCard: React.FC<{ video: IYouTubeVideo }> = ({ video }) => (
+  <a
+    href={video.videoUrl}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="group relative overflow-hidden rounded-lg border border-border bg-none transition-all hover:bg-accent hover:shadow-lg hover:border-primary cursor-pointer"
+    onMouseEnter={(e) => {
+      e.currentTarget.style.transform = "translateY(-5px)";
+      e.currentTarget.style.boxShadow = `0 8px 25px rgba(0, 0, 0, 0.2)`;
+    }}
+    onMouseLeave={(e) => {
+      e.currentTarget.style.transform = "translateY(0)";
+      e.currentTarget.style.boxShadow = "none";
+    }}
+  >
+    <img
+      src={video.thumbnailUrl}
+      alt={video.title}
+      className="h-24 w-full object-cover transition-transform group-hover:scale-105"
+    />
+    <div className="p-3">
+      <h4 className="truncate font-semibold text-foreground">{video.title}</h4>
+      <p className="text-xs text-muted-foreground">{video.channel}</p>
+    </div>
+  </a>
+);
+
 const TestMainPage = () => {
   // --- State Management ---
+
+  const [showExplanation, setShowExplanation] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [allQuestions, setAllQuestions] = useState<{
     [key in SectionName]?: Question[];
@@ -281,7 +358,9 @@ const TestMainPage = () => {
     try {
       // Prefer sessionId route param/state → fetch by session id
       const paramSessionId = id ? parseInt(id, 10) : null;
-      const stateSessionId = (location.state as any)?.sessionId as number | null;
+      const stateSessionId = (location.state as any)?.sessionId as
+        | number
+        | null;
       const sid = paramSessionId || stateSessionId || sessionId;
 
       if (sid) {
@@ -324,7 +403,9 @@ const TestMainPage = () => {
           const metaTopics = (v3 as any)?.topics;
           const metaLevel = (v3 as any)?.level;
           if (metaSubject && metaTopics && metaLevel) {
-            setHeaderTitle(`${metaSubject}-${(metaTopics || []).join(", ")}-${metaLevel}`);
+            setHeaderTitle(
+              `${metaSubject}-${(metaTopics || []).join(", ")}-${metaLevel}`
+            );
           } else {
             setHeaderTitle(isSolutionMode ? "Solutions" : "Test");
           }
@@ -384,7 +465,9 @@ const TestMainPage = () => {
         }
         setHeaderTitle(
           testConfig?.subject && testConfig?.sub_topic?.length
-            ? `${testConfig?.subject}-${testConfig?.sub_topic.join(", ")}-${testConfig?.level}`
+            ? `${testConfig?.subject}-${testConfig?.sub_topic.join(", ")}-${
+                testConfig?.level
+              }`
             : isSolutionMode
             ? "Solutions"
             : "Test"
@@ -398,7 +481,9 @@ const TestMainPage = () => {
         setSessionId((response as any).session_id);
         setHeaderTitle(
           testConfig?.subject && testConfig?.sub_topic?.length
-            ? `${testConfig?.subject}-${testConfig?.sub_topic.join(", ")}-${testConfig?.level}`
+            ? `${testConfig?.subject}-${testConfig?.sub_topic.join(", ")}-${
+                testConfig?.level
+              }`
             : isSolutionMode
             ? "Solutions"
             : "Test"
@@ -799,7 +884,13 @@ const TestMainPage = () => {
             {headerTitle || (isSolutionMode ? "Solutions" : "Test")}
           </h1>
         </div>
-        <div className="flex items-center">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowInstructionsModal(true)}
+            className="hidden md:flex bg-background-subtle hover:bg-blue-400/20 text-sm py-2 px-4 rounded-lg transition-colorsr"
+          >
+            Instructions <Info className="ml-2" />
+          </button>
           <button
             onClick={toggleFullScreen}
             className="z-30 hidden md:flex items-center bg-background-subtle hover:bg-blue-400/20 px-3 py-2 rounded-md ml-2 text-sm"
@@ -866,7 +957,10 @@ const TestMainPage = () => {
                   <div className="flex items-center gap-2">
                     <span className="text-sm mr-2 hidden sm:inline text-foreground">
                       Time
-                      <span className="text-sm mr-2 hidden lg:inline"> Left</span>
+                      <span className="text-sm mr-2 hidden lg:inline">
+                        {" "}
+                        Left
+                      </span>
                       :
                     </span>
 
@@ -881,6 +975,14 @@ const TestMainPage = () => {
                     </span>
                   </div>
                 )}
+
+                <button
+                  className={`bg-background-subtle hover:bg-blue-400/20 text-sm py-1 px-2 rounded-lg transition-colorsr ${
+                    isSolutionMode ? "" : "hidden"
+                  }`}
+                >
+                  Question View
+                </button>
                 <select
                   onChange={(e) => setTextSize(e.target.value)}
                   value={textSize}
@@ -946,20 +1048,20 @@ const TestMainPage = () => {
               <div className="p-4 sm:p-6 h-full overflow-y-auto space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800">
                 {currentQuestion.options.map((option, index) => (
                   <label
-                  key={index}
-                  className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 border text-foreground ${
-                    currentQuestion.answer === index
-                      ? "bg-blue-400 text-white"
-                      : "bg-background-subtle hover:bg-blue-400/20 hover:border-blue-400"
-                  }`}
-                >
+                    key={index}
+                    className={`flex items-center p-3 sm:p-4 rounded-lg cursor-pointer transition-all duration-200 border text-foreground ${
+                      currentQuestion.answer === index
+                        ? "bg-blue-400 text-white"
+                        : "bg-background-subtle hover:bg-blue-400/20 hover:border-blue-400"
+                    }`}
+                  >
                     <input
-                    type="radio"
-                    name={`question-${currentQuestion.id}`}
-                    className="h-5 w-5 mr-4 border-gray-500 bg-card text-blue-500 focus:ring-blue-400"
-                    checked={currentQuestion.answer === index}
-                    onChange={() => handleOptionSelect(index)}
-                  />
+                      type="radio"
+                      name={`question-${currentQuestion.id}`}
+                      className="h-5 w-5 mr-4 border-gray-500 bg-card text-blue-500 focus:ring-blue-400"
+                      checked={currentQuestion.answer === index}
+                      onChange={() => handleOptionSelect(index)}
+                    />
                     <span>{option}</span>
                   </label>
                 ))}
@@ -976,8 +1078,10 @@ const TestMainPage = () => {
                   </p>
                   <div className="space-y-4">
                     {currentQuestion.options.map((option, index) => {
-                      const isUserSelected = currentQuestion.selectedOption === option;
-                      const isCorrectOption = currentQuestion.correctAnswer === option;
+                      const isUserSelected =
+                        currentQuestion.selectedOption === option;
+                      const isCorrectOption =
+                        currentQuestion.correctAnswer === option;
                       const highlightClass = isCorrectOption
                         ? "bg-green-700 text-white border-green-600"
                         : isUserSelected
@@ -1005,19 +1109,63 @@ const TestMainPage = () => {
                   </div>
                 </div>
 
-                <div className="border-t-2 md:border-t-0 md:border-l-2 border-border border-dashed pt-6 md:pt-0 md:pl-8">
-                  <h3 className="text-lg font-bold text-primary mb-4">
-                    Solution
+                <div className="border-t-2 md:border-t-0 md:border-l-2 border-border border-dashed pt-6 md:pt-0 md:pl-8 flex flex-col">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center gap-3 text-primary">
+                    <Lightbulb /> Solution
                   </h3>
-                  <div className="prose prose-invert text-muted-foreground">
-                    <p>
-                      Correct Answer: <span className="font-semibold text-green-400">{currentQuestion.correctAnswer || "Not available"}</span>
-                    </p>
-                    {typeof currentQuestion.isCorrect === "boolean" && (
-                      <p>
-                        Your Answer: {currentQuestion.selectedOption || "Not Attempted"} {currentQuestion.selectedOption == null ? "" : currentQuestion.isCorrect ? "✓" : "✗"}
+
+                  <div className="p-4 bg-background-subtle rounded-lg animate-fadeInUp border border-border mb-4">
+                    <div className="grid grid-cols-2 space-y-2 w-fit">
+                      <p>Correct Answer:</p>
+                      <p className="font-semibold text-green-400">
+                        {currentQuestion.correctAnswer || "Not available"}
                       </p>
+                      {typeof currentQuestion.isCorrect === "boolean" && (
+                        <p>Your Answer:</p>
+                      )}
+                      {typeof currentQuestion.isCorrect === "boolean" && (
+                        <p
+                          className={`font-semibold ${
+                            currentQuestion.isCorrect
+                              ? `text-green-400`
+                              : `text-red-400`
+                          }`}
+                        >
+                          {currentQuestion.selectedOption || "Not Attempted"}{" "}
+                          {currentQuestion.selectedOption == null
+                            ? ""
+                            : currentQuestion.isCorrect
+                            ? "✓"
+                            : "✗"}
+                        </p>
+                      )}
+                    </div>
+                    <button
+                      className="cursor-pointer text-sm font-semibold transition-colors duration-200 trasnition-ease flex items-center gap-2 mt-8 hover:text-primary"
+                      onClick={() => setShowExplanation(!showExplanation)}
+                    >
+                      {showExplanation ? "Hide Explanation" : "See Explanation"}
+                      <ChevronDownIcon
+                        className={`transition-transform duration-300 ease-in-out ${
+                          showExplanation ? "rotate-180" : ""
+                        }`}
+                      />
+                    </button>
+                    {showExplanation && (
+                      <div className="animate-fadeInUp mt-4 text-lg">
+                        <p>{mockConcept.explanation}</p>
+                      </div>
                     )}
+                  </div>
+                  <div className="mt-auto">
+                    <h3 className="font-semibold text-muted-foreground">
+                      Recommended Videos
+                    </h3>
+                    <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      {mockYouTubeVideos.map((video) => (
+                        <YouTubeCard key={video.id} video={video} />
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1066,23 +1214,39 @@ const TestMainPage = () => {
           {/* --- RESPONSIVE LEGEND SECTION --- */}
           <div className="flex-shrink-0 bg-background-subtle p-4 rounded-lg mb-3 border">
             <div className="grid grid-cols-2 gap-3 text-xs sm:text-sm text-foreground">
-              <div className="flex items-center gap-2">
-                <Button3 size={24} number={2} />
-                <span>Answered</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button2 size={24} number={0} />
-                <span>Not Answered</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button4 size={24} number={0} />
-                <span>Marked</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button5 size={24} number={0} />
-                <span>Marked & Answered</span>
-              </div>
+              {isSolutionMode && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Button7 size={24} number={2} />
+                    <span>Correct</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button6 size={24} number={0} />
+                    <span>Incorrect</span>
+                  </div>
+                </>
+              )}
 
+              {!isSolutionMode && (
+                <>
+                  <div className="flex items-center gap-2">
+                    <Button3 size={24} number={2} />
+                    <span>Answered</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button2 size={24} number={0} />
+                    <span>Not Answered</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button4 size={24} number={0} />
+                    <span>Marked</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button5 size={24} number={0} />
+                    <span>Marked & Answered</span>
+                  </div>
+                </>
+              )}
               <div className="flex items-center gap-2">
                 <Button1 size={24} number={28} />
                 <span>Not Visited</span>
@@ -1099,29 +1263,42 @@ const TestMainPage = () => {
               {questions.map((q, index) => {
                 const buttonProps = {
                   number: index + 1,
-                  onClick: () => handlePaletteClick(index),
+                  onClick: () => {handlePaletteClick(index); setIsMobileMenuOpen(false);},
                   size: 40,
                 };
 
                 let ButtonComponent;
-                switch (q.status) {
-                  case "not-visited":
-                    ButtonComponent = <Button1 {...buttonProps} />;
-                    break;
-                  case "not-answered":
-                    ButtonComponent = <Button2 {...buttonProps} />;
-                    break;
-                  case "answered":
-                    ButtonComponent = <Button3 {...buttonProps} />;
-                    break;
-                  case "marked":
-                    ButtonComponent = <Button4 {...buttonProps} />;
-                    break;
-                  case "marked-answered":
-                    ButtonComponent = <Button5 {...buttonProps} />;
-                    break;
-                  default:
-                    ButtonComponent = null;
+                if (!isSolutionMode) {
+                  switch (q.status) {
+                    case "not-visited":
+                      ButtonComponent = <Button1 {...buttonProps} />;
+                      break;
+                    case "not-answered":
+                      ButtonComponent = <Button2 {...buttonProps} />;
+                      break;
+                    case "answered":
+                      ButtonComponent = <Button3 {...buttonProps} />;
+                      break;
+                    case "marked":
+                      ButtonComponent = <Button4 {...buttonProps} />;
+                      break;
+                    case "marked-answered":
+                      ButtonComponent = <Button5 {...buttonProps} />;
+                      break;
+                    default:
+                      ButtonComponent = null;
+                  }
+                } else {
+                  // In solution mode, highlight based on correctness
+                  if (!!q.selectedOption) {
+                    if (q.isCorrect) {
+                      ButtonComponent = <Button7 {...buttonProps} />; // Green for correct
+                    } else if (q.selectedOption) {
+                      ButtonComponent = <Button6 {...buttonProps} />; // Red for incorrect
+                    }
+                  } else {
+                    ButtonComponent = <Button1 {...buttonProps} />; // Grey for not attempted
+                  }
                 }
 
                 return (
@@ -1158,18 +1335,6 @@ const TestMainPage = () => {
                 </button>
               ))}
             </div> */}
-
-          <div className="flex-shrink-0 mt-4 flex gap-2">
-            <button className="flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors">
-              Question Paper
-            </button>
-            <button
-              onClick={() => setShowInstructionsModal(true)}
-              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition-colors"
-            >
-              Instructions
-            </button>
-          </div>
 
           {/**<div className="space-y-3 mt-auto">
             <button className="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg">
@@ -1213,7 +1378,9 @@ const TestMainPage = () => {
                   onClick={handlePrevious}
                   disabled={currentQuestionIndex === 0}
                   className={`flex-1 bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs ${
-                    currentQuestionIndex === 0 ? "opacity-50 cursor-not-allowed" : ""
+                    currentQuestionIndex === 0
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
                   }`}
                 >
                   Prev
@@ -1222,7 +1389,9 @@ const TestMainPage = () => {
                   onClick={handleSaveAndNext}
                   disabled={currentQuestionIndex === questions.length - 1}
                   className={`flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs ${
-                    currentQuestionIndex === questions.length - 1 ? "opacity-50 cursor-not-allowed" : ""
+                    currentQuestionIndex === questions.length - 1
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
                   }`}
                 >
                   Next

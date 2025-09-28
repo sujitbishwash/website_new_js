@@ -7,6 +7,7 @@ interface ProgressBarProps {
   progress: number; // 0-100
   message?: string;
   showPercentage?: boolean;
+  showMessage?: boolean;
   height?: number;
   className?: string;
 }
@@ -16,6 +17,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   progress,
   message = "Loading...",
   showPercentage = true,
+  showMessage = false,
   height = 4,
   className = ""
 }) => {
@@ -43,7 +45,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
   return (
     <div className={`w-full ${className}`}>
       <Box className="mb-2">
-        <div className="flex justify-between items-center mb-1">
+        {showMessage && <div className="flex justify-between items-center mb-1">
           <Typography 
             variant="body2" 
             className="text-muted-foreground text-sm"
@@ -58,7 +60,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({
               {Math.round(displayProgress)}%
             </Typography>
           )}
-        </div>
+        </div>}
         <LinearProgress
           variant="determinate"
           value={displayProgress}
