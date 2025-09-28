@@ -4,6 +4,7 @@ import { useUser } from "../../contexts/UserContext";
 import { ROUTES } from "../../routes/constants";
 import { ChevronDown, CircleUser } from "lucide-react";
 import { quizApi } from "@/lib/api-client";
+import { getTestConfig, clearTestConfigOnTestStart } from "../../lib/testConfigStorage";
 
 // --- Type Definitions ---
 interface ExamDetails {
@@ -55,8 +56,23 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
   const [textSize, setTextSize] = useState("text-base");
   const location = useLocation();
   const { profile } = useUser();
-  const testConfig = location.state?.testConfig;
+  const [testConfig, setTestConfig] = useState(location.state?.testConfig);
   const [isStarting, setIsStarting] = useState(false);
+
+  // Load testConfig from localStorage if not available in location state
+  useEffect(() => {
+    if (!testConfig) {
+      const savedConfig = getTestConfig();
+      if (savedConfig) {
+        setTestConfig(savedConfig);
+      } else {
+        // If no testConfig found, redirect back to test configuration
+        navigate(ROUTES.TEST_SERIES, {
+          state: { isDemo: false }
+        });
+      }
+    }
+  }, [testConfig, navigate]);
   const handleLanguageChange = (lang: string) => {
     setLanguage(lang);
     setIsLangDropdownOpen(false);
@@ -233,6 +249,10 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
                 if (!sessionId) {
                   throw new Error("Failed to start test session");
                 }
+                
+                // Clear testConfig when test actually starts
+                clearTestConfigOnTestStart();
+                
                 navigate(`/test-main-page/${encodeURIComponent(sessionId)}`, {
                   state: { sessionId },
                 });

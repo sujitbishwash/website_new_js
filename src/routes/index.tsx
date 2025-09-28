@@ -185,28 +185,28 @@ export const routes = [
             name: "Stats",
             description: "Stats",
           },
+          // Public onboarding pages (accessible without full authentication)
+          {
+            path: "personal-details",
+            element: (
+              <OnboardingRoute requiredStep="personal-details">
+                <PersonalDetails />
+              </OnboardingRoute>
+            ),
+            name: "Personal Details",
+            description: "User personal details page",
+          },
+          {
+            path: "exam-goal",
+            element: (
+              <OnboardingRoute requiredStep="exam-goal">
+                <ExamGoalPage />
+              </OnboardingRoute>
+            ),
+            name: "Exam Goal",
+            description: "Select Exam Goal",
+          },
         ],
-      },
-      // Public onboarding pages (accessible without full authentication)
-      {
-        path: "personal-details",
-        element: (
-          <OnboardingRoute requiredStep="personal-details">
-            <PersonalDetails />
-          </OnboardingRoute>
-        ),
-        name: "Personal Details",
-        description: "User personal details page",
-      },
-      {
-        path: "exam-goal",
-        element: (
-          <OnboardingRoute requiredStep="exam-goal">
-            <ExamGoalPage />
-          </OnboardingRoute>
-        ),
-        name: "Exam Goal",
-        description: "Select Exam Goal",
       },
       // Public informational pages
       {

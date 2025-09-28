@@ -8,6 +8,7 @@ import ExamConfigurationModal from "./modals/ExamConfigurationModal";
 import ProfileModal from "./ProfilePage";
 import Sidebar from "./sidebar/Sidebar"; // Adjust path as needed
 import BugReportModal from "./modals/BugReportModal";
+import { useTestConfigCleanup } from "../hooks/useTestConfigCleanup";
 
 const Layout: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,8 +21,12 @@ const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const appContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Clean up testConfig when leaving test flow pages
+  useTestConfigCleanup();
+  
   // Hide sidebar on exam goal page
-  const shouldHideSidebar = location.pathname === ROUTES.EXAM_GOAL;
+  const shouldHideSidebar = location.pathname === ROUTES.EXAM_GOAL || location.pathname === ROUTES.PERSONAL_DETAILS;
 
   const handleLogoutClick = () => {
     setLogoutModalOpen(true);
