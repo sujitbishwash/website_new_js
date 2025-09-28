@@ -86,7 +86,7 @@ const VideoPage: React.FC = () => {
 
   // API Progress Tracking
   const {
-    isLoading: isApiLoading,
+    // isLoading: isApiLoading,
     progress: apiProgress,
     message: apiMessage,
     registerApi,
@@ -670,21 +670,6 @@ const VideoPage: React.FC = () => {
     setCurrentMode(mode);
   }, []);
 
-  // Show loading screen while APIs are loading
-  /*
-  if (isLoadingVideo || (isApiLoading && apiProgress < 90)) {
-    return (
-      <LoadingScreen
-        isLoading={true}
-        progress={apiProgress}
-        message={apiMessage}
-        showSkeleton={true}
-        skeletonType="generic"
-      />
-    );
-  }
-    */
-
 
   // If video is not validated but we've been loading for a while, show fallback
   if (!isVideoValidated && apiProgress > 50) {
@@ -696,6 +681,7 @@ const VideoPage: React.FC = () => {
     <>
     {/* Progress Section */}
     <div className="w-full">
+      {apiProgress >= 0 && apiProgress < 100 &&
         <ProgressBar
           isLoading={true}
           progress={apiProgress}
@@ -703,7 +689,7 @@ const VideoPage: React.FC = () => {
           showPercentage={true}
           height={6}
           className="mb-4"
-        />
+        />}
       </div>
       <div className="bg-background text-foreground min-h-screen font-sans">
       {!isMobile ? <div className="mx-auto hidden w-full h-full sm:block">
