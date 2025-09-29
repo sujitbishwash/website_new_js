@@ -29,7 +29,7 @@ import {
   Text,
   X,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { quizApi } from "@/lib/api-client";
 
@@ -44,6 +44,7 @@ import { ROUTES } from "@/routes/constants";
 import CustomLoader from "@/components/icons/customloader";
 import formatScore from "@/lib/formatScore";
 import calculateDaysSince from "@/lib/calculateDaysSince";
+import Leaderboard2 from "./AnalysisComponents/Leaderboard2";
 
 // --- MOCK DATA ---
 let userPerformance: any = {
@@ -500,6 +501,7 @@ let userPerformance: any = {
 // --- MAIN APP COMPONENT ---
 
 export default function TestAnalysis2() {
+  const shareDropdownRef = useRef<HTMLDivElement>(null);
   const [isShareOpen, setShareOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -545,7 +547,20 @@ export default function TestAnalysis2() {
     testFeedbackState?.canSubmitFeedback,
     testFeedbackState?.existingFeedback,
   ]);
-
+useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        shareDropdownRef.current &&
+        !shareDropdownRef.current.contains(event.target as Node)
+      ) {
+        setShareOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
   // Ensure the tracker actually calls the API once sessionId is known
   useEffect(() => {
     if (sessionId) {
@@ -673,7 +688,7 @@ export default function TestAnalysis2() {
             <h1 className="text-2xl sm:text-3xl font-bold">
               Detailed Test Report
             </h1>
-            <div className="relative">
+            <div ref={shareDropdownRef} className="relative">
               <button
                 onClick={() => setShareOpen(!isShareOpen)}
                 className="flex border-1 items-center space-x-2 bg-background text-foreground font-semibold p-2.5 rounded-lg hover:bg-foreground/20 transition cursor-pointer"
@@ -756,7 +771,13 @@ export default function TestAnalysis2() {
           plan={overallScores.learningPlan}
         />*/}
 
-          <Leaderboard
+          {/**<Leaderboard
+            leaderboard={userPerformance.leaderboard}
+            currentUser={userPerformance.user}
+            currentRank={userPerformance.overall.rank}
+            currentScore={userPerformance.overall.score}
+          />*/}
+          <Leaderboard2
             leaderboard={userPerformance.leaderboard}
             currentUser={userPerformance.user}
             currentRank={userPerformance.overall.rank}

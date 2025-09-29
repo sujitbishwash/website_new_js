@@ -6,10 +6,16 @@ interface StatsCardProps {
   children: ReactNode;
   className?: string;
   tooltipText?: string;
+  noteText?: string;
   style?: React.CSSProperties;
 }
 
-const StatsCard: React.FC<StatsCardProps> = ({ children, className = "", tooltipText }) => (
+const StatsCard: React.FC<StatsCardProps> = ({
+  children,
+  className = "",
+  tooltipText,
+  noteText,
+}) => (
   <div
     className={`group transition-all duration-300 relative bg-card rounded-xl shadow-sm border border-border overflow-hidden hover:shadow-xl ${className}`}
   >
@@ -24,10 +30,12 @@ const StatsCard: React.FC<StatsCardProps> = ({ children, className = "", tooltip
       </div>
     )}
     {children}
+    {noteText && (
+      <div className="absolute bottom-4 right-4 ">
+        <h3 className="text-muted-foreground italic text-sm">*{noteText}</h3>
+      </div>
+    )}
   </div>
 );
-
-
-
 
 export default StatsCard;
