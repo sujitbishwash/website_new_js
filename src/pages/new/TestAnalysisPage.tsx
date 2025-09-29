@@ -736,14 +736,14 @@ const SectionalSummary = () => {
           </button>
 
           <div
-            className={`transition-all duration-500 ease-in-out overflow-hidden ${
+            className={`transition-all duration-500 ease-in-out overflow-x-auto ${
               isTopicAnalysisOpen ? "max-h-screen mt-4 " : "max-h-0"
             }`}
           >
-            <div className="bg-background-subtle p-1 rounded-lg">
-              <table className="w-full text-md text-left">
+            <div className="bg-background-subtle p-1 rounded-lg min-w-full">
+              <table className="w-full text-md text-left min-w-full">
                 <thead className="text-xs text-muted-foreground uppercase">
-                  <tr>
+                  <tr className="bg-background-subtle">
                     <th scope="col" className="px-4 py-3">
                       Topic
                     </th>
@@ -769,7 +769,7 @@ const SectionalSummary = () => {
                   {activeSection.topics.map((topic) => (
                     <tr
                       key={topic.name}
-                      className="border-b border-border last:border-b-0"
+                      className="border-b border-border last:border-b-0 bg-background-subtle"
                     >
                       <th
                         scope="row"
@@ -794,10 +794,7 @@ const SectionalSummary = () => {
                       <td className="px-4 py-4 text-center">{topic.time}</td>
                       <td className="px-4 py-4 text-center">{`${topic.correct}/${topic.attempted}`}</td>
 
-                      <td className="block text-right relative py-2 md:table-cell md:text-center md:px-4 md:py-4">
-                        <span className="font-bold text-[#8e8e93] md:hidden absolute left-0">
-                          Skipped
-                        </span>
+                      <td className="px-4 py-4 text-center">
                         {topic.totalQs - topic.attempted}
                       </td>
                     </tr>
@@ -1661,7 +1658,9 @@ const ScoreDonutChart = ({ data, size = 200, maxScore = 100 }) => {
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-sm text-[#8e8e93] font-medium">Total Score</span>
         <span className="text-5xl font-bold">{formatScore(currentScore)}</span>
-        <span className="text-2xl text-[#8e8e93] font-medium">/{formatScore(maxScore)}</span>
+        <span className="text-2xl text-[#8e8e93] font-medium">
+          /{formatScore(maxScore)}
+        </span>
       </div>
     </div>
   );
@@ -1688,10 +1687,14 @@ export default function TestAnalysis2() {
     return fromQuery ? Number(fromQuery) : undefined;
   }, [location.state, location.search]);
   // Feedback availability for Test component
-  const { feedbackStates, isLoading: isFeedbackLoading, checkFeedback } = useMultiFeedbackTracker({
+  const {
+    feedbackStates,
+    isLoading: isFeedbackLoading,
+    checkFeedback,
+  } = useMultiFeedbackTracker({
     components: [ComponentName.Test],
     sourceId: String(sessionId ?? ""),
-    pageUrl: typeof window !== 'undefined' ? window.location.href : '',
+    pageUrl: typeof window !== "undefined" ? window.location.href : "",
     onFeedbackExists: () => {},
   });
   const testFeedbackState = feedbackStates[ComponentName.Test];
@@ -1699,9 +1702,17 @@ export default function TestAnalysis2() {
   // Open feedback modal only when tracker confirms eligibility and no prior feedback
   useEffect(() => {
     if (!sessionId || isFeedbackLoading) return;
-    const canOpen = !!(testFeedbackState?.canSubmitFeedback && !testFeedbackState?.existingFeedback);
+    const canOpen = !!(
+      testFeedbackState?.canSubmitFeedback &&
+      !testFeedbackState?.existingFeedback
+    );
     setIsFeedbackOpen(canOpen);
-  }, [sessionId, isFeedbackLoading, testFeedbackState?.canSubmitFeedback, testFeedbackState?.existingFeedback]);
+  }, [
+    sessionId,
+    isFeedbackLoading,
+    testFeedbackState?.canSubmitFeedback,
+    testFeedbackState?.existingFeedback,
+  ]);
 
   // Ensure the tracker actually calls the API once sessionId is known
   useEffect(() => {
@@ -1709,8 +1720,6 @@ export default function TestAnalysis2() {
       checkFeedback();
     }
   }, [sessionId, checkFeedback]);
-
-  
 
   // Fetch test analysis after page load, then hydrate UI dataset
   useEffect(() => {
@@ -1784,8 +1793,10 @@ export default function TestAnalysis2() {
     return (
       <div className="fixed inset-0 flex flex-1 flex-col z-10 items-center justify-center bg-background bg-opacity-70 h-full">
         <CustomLoader className="h-15 w-15" />
-        <p className="text-lg text-muted-foreground mt-8">Fetching analysis...</p>
-        </div>
+        <p className="text-lg text-muted-foreground mt-8">
+          Fetching analysis...
+        </p>
+      </div>
     );
   }
 
@@ -1870,7 +1881,7 @@ export default function TestAnalysis2() {
             <h3 className="text-left">Attempted on 27/08/25</h3>
           </div>
         </div>
-        <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6">
+        <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 overflow-y-auto mb-10">
           <OverallPerformance />
           <SectionalSummary />
           <ComparisonAnalysis />
@@ -1886,47 +1897,76 @@ export default function TestAnalysis2() {
 
           <Leaderboard />
           {/**<ReviewAndRelearn onClickGoToSolution={()=>useNavigate(ROUTES.TEST_SOLUTION)}/>*/}
-          <div className="lg:col-span-12">
-            <div className="flex flex-col sm:flex-row items-center gap-3">
-              <button
-                onClick={() => {
-                  const params = new URLSearchParams(location.search);
-                  const sid = (location.state as any)?.sessionId || params.get("sessionId");
-                  if (sid) {
-                    navigate(`/test-main-page/${encodeURIComponent(String(sid))}/solutions`);
-                  } else {
-                    navigate(ROUTES.TEST_SOLUTION.replace(":id", ""));
-                  }
-                }}
-                className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 text-lg font-semibold rounded-lg backdrop-blur-sm border-1 transition-all duration-300 text-white hover:opacity-90 bg-primary hover:bg-primary/80 cursor-pointer"
-              >
-                <Text className="w-5 h-5" />
-                Full Answer Review
-              </button>
-              <button className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg text-lg font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer">
-                <RefreshCcw className="w-5 h-5" />
-                Re-Attempt
-              </button>
-              <button className="w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg text-lg font-semibold text-foreground bg-background border border-divider hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer">
-                Next Test
-                <ArrowRight className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-          <ShareModal
-            isOpen={isShareModalOpen}
-            onClose={handleCloseShareModal}
-            url={`https://www.youtube.com`}
-          />
-          {/* Test Feedback Modal */}
-          <VideoFeedbackModal
-            isOpen={isFeedbackOpen}
-            onClose={() => setIsFeedbackOpen(false)}
-            videoId={String(sessionId ?? "")}
-            onSubmit={async () => Promise.resolve()}
-            componentName="Test"
-          />
         </div>
+        <div className="fixed bottom-0 lg:relative bg-background lg:bg-transparent border-t border-1 left-0 w-full p-2 lg:p-0 lg:w-auto lg:rounded-t-lg lg:border-0 lg:mx-auto max-w-7xl">
+          <div className="flex flex-row items-center gap-3">
+            <button
+              onClick={() => {
+                const params = new URLSearchParams(location.search);
+                const sid =
+                  (location.state as any)?.sessionId || params.get("sessionId");
+                if (sid) {
+                  navigate(
+                    `${ROUTES.TEST_MAIN_PAGE.replace(
+                      ":id",
+                      String(sid)
+                    )}/solutions`
+                  );
+                } else {
+                  navigate(ROUTES.TEST_SOLUTION.replace(":id", ""));
+                }
+              }}
+              className="
+    w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 
+    text-lg font-semibold rounded-lg backdrop-blur-sm border-1 transition-all 
+    duration-300 text-white hover:opacity-90 bg-primary hover:bg-primary/80 cursor-pointer
+  "
+            >
+              {/* Icon hidden on small screens */}
+              <Text className="hidden sm:block w-5 h-5" />
+              {/* Shorter text on mobile */}
+              <span className="sm:inline hidden">Full Answer Review</span>
+              <span className="inline sm:hidden">Review</span>
+            </button>
+
+            <button
+              className="
+    w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg 
+    text-lg font-semibold text-foreground bg-background border border-divider 
+    hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer
+  "
+            >
+              <RefreshCcw className="hidden sm:block w-5 h-5" />
+              <span className="sm:inline hidden">Re-Attempt</span>
+              <span className="inline sm:hidden">Retry</span>
+            </button>
+
+            <button
+              className="
+    w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg 
+    text-lg font-semibold text-foreground bg-background border border-divider 
+    hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer
+  "
+            >
+              <span className="sm:inline hidden">Next Test</span>
+              <span className="inline sm:hidden">Next</span>
+              <ArrowRight className="hidden sm:block w-5 h-5" />
+            </button>
+          </div>
+        </div>
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={handleCloseShareModal}
+          url={`https://www.youtube.com`}
+        />
+        {/* Test Feedback Modal */}
+        <VideoFeedbackModal
+          isOpen={isFeedbackOpen}
+          onClose={() => setIsFeedbackOpen(false)}
+          videoId={String(sessionId ?? "")}
+          onSubmit={async () => Promise.resolve()}
+          componentName="Test"
+        />
       </div>
     </div>
   );

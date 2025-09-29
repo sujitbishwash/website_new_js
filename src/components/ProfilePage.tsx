@@ -1,15 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
-import {
-  clearAuthData,
-  getAuthToken,
-  getUserData,
-  hasValidAuthToken,
-  markAsReturningUser,
-  markSplashAsSeen,
-  resetFirstTimeUser,
-} from "../lib/utils";
 import { ROUTES } from "../routes/constants";
 
 const SparklesIcon = () => (
@@ -140,7 +131,6 @@ const navItems = [
   { name: "Personalization", icon: GaugeCircle },
   { name: "Plan and Billing", icon: SparklesIcon },
   { name: "Privacy and Security", icon: KeyRound },
-  { name: "Development", icon: Wrench },
 ];
 
 const features = [
@@ -355,7 +345,6 @@ import {
   GaugeCircle,
   KeyRound,
   Settings,
-  Wrench,
   X,
 } from "lucide-react";
 import { AccentToggle } from "./Accent-toggle";
@@ -674,28 +663,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 onChange={handleCountryChange}
                 options={countries}
               />
-              {/* Debug Information */}
-              {/**process.env.NODE_ENV === "development" && profile && (
-                <div className="col-span-1 md:col-span-2 mt-6 p-4 bg-accent rounded-lg border border-divider">
-                  <h4 className="text-sm font-medium text-gray-400 mb-2">
-                    Debug Info (Development Only)
-                  </h4>
-                  <div className="text-xs text-foreground space-y-1">
-                    <div>
-                      <strong>Profile ID:</strong> {profile.id || "N/A"}
-                    </div>
-                    <div>
-                      <strong>Last Updated:</strong>{" "}
-                      {profile.updatedAt
-                        ? new Date(profile.updatedAt).toLocaleString()
-                        : "N/A"}
-                    </div>
-                    <div>
-                      <strong>Data Source:</strong> UserContext
-                    </div>
-                  </div>
-                </div>
-              )*/}
             </div>
           </div>
         );
@@ -824,157 +791,6 @@ const ProfileModal: React.FC<ProfileModalProps> = ({
                 Log out all
               </button>
             </SettingRow>
-          </div>
-        );
-      case "Development":
-        return (
-          <div>
-            <div className="border-b border-border pb-4">
-              <h1 className="text-3xl text-foreground">Development Tools</h1>
-              <p className="text-muted-foreground mt-1">
-                Development and testing utilities for debugging purposes.
-              </p>
-            </div>
-            <div className="space-y-6">
-              <SettingRow
-                title="Splash Screen Management"
-                description="Reset splash screen state to test the onboarding flow again."
-              >
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={() => {
-                      resetFirstTimeUser();
-                      alert(
-                        "Splash screen state has been reset. Refresh the page to see the splash screen again."
-                      );
-                    }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
-                  >
-                    Reset Splash State
-                  </button>
-                  <button
-                    onClick={() => {
-                      markSplashAsSeen();
-                      markAsReturningUser();
-                      alert(
-                        'Splash screen state has been set to "completed". User will not see splash again.'
-                      );
-                    }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
-                  >
-                    Mark Splash as Completed
-                  </button>
-                  <button
-                    onClick={() => {
-                      navigate(ROUTES.SPLASH);
-                    }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-purple-600 hover:bg-purple-700 rounded-lg transition-colors"
-                  >
-                    View Splash Screen
-                  </button>
-                </div>
-              </SettingRow>
-
-              <SettingRow
-                title="Local Storage Status"
-                description="Current state of splash screen related localStorage values."
-              >
-                <div className="bg-gray-700 p-4 rounded-lg">
-                  <div className="text-sm space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">First Time User:</span>
-                      <span className="text-white">
-                        {localStorage.getItem("aipadhai_first_time_user") ===
-                        null
-                          ? "Yes (null)"
-                          : "No (false)"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Has Seen Splash:</span>
-                      <span className="text-white">
-                        {localStorage.getItem("aipadhai_has_seen_splash") ===
-                        "true"
-                          ? "Yes"
-                          : "No"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Should Show Splash:</span>
-                      <span className="text-white">
-                        {localStorage.getItem("aipadhai_first_time_user") ===
-                          null &&
-                        localStorage.getItem("aipadhai_has_seen_splash") !==
-                          "true"
-                          ? "Yes"
-                          : "No"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </SettingRow>
-
-              <SettingRow
-                title="Authentication Management"
-                description="Manage authentication state and tokens for testing."
-              >
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={() => {
-                      clearAuthData();
-                      alert(
-                        "Authentication data has been cleared. You will need to login again."
-                      );
-                    }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
-                  >
-                    Clear Auth Data
-                  </button>
-                  <button
-                    onClick={() => {
-                      const token = getAuthToken();
-                      const userData = getUserData();
-                      alert(
-                        `Auth Token: ${
-                          token ? "Present" : "Not found"
-                        }\nUser Data: ${userData ? "Present" : "Not found"}`
-                      );
-                    }}
-                    className="px-4 py-2 text-sm font-semibold text-white bg-yellow-600 hover:bg-yellow-700 rounded-lg transition-colors"
-                  >
-                    Check Auth Status
-                  </button>
-                </div>
-              </SettingRow>
-
-              <SettingRow
-                title="Authentication Status"
-                description="Current authentication state."
-              >
-                <div className="bg-gray-700 p-4 rounded-lg">
-                  <div className="text-sm space-y-2">
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Has Valid Token:</span>
-                      <span className="text-white">
-                        {hasValidAuthToken() ? "Yes" : "No"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">Auth Token:</span>
-                      <span className="text-white">
-                        {getAuthToken() ? "Present" : "Not found"}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-gray-300">User Data:</span>
-                      <span className="text-white">
-                        {getUserData() ? "Present" : "Not found"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </SettingRow>
-            </div>
           </div>
         );
       default:

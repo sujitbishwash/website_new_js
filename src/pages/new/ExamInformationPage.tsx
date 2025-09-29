@@ -12,6 +12,8 @@ import {
   Button5,
 } from "../../components/test/buttons";
 import { CircleUser } from "lucide-react";
+import { getTestConfig, clearTestConfig } from "../../lib/testConfigStorage";
+import { useEffect, useState } from "react";
 // Icon components for the legend - using inline SVG for simplicity
 
 // Main component for the instructions page
@@ -19,7 +21,22 @@ export default function ExamInformationPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { profile } = useUser();
-  const testConfig = location.state?.testConfig;
+  const [testConfig, setTestConfig] = useState(location.state?.testConfig);
+
+  // Load testConfig from localStorage if not available in location state
+  useEffect(() => {
+    if (!testConfig) {
+      const savedConfig = getTestConfig();
+      if (savedConfig) {
+        setTestConfig(savedConfig);
+      } else {
+        // If no testConfig found, redirect back to test configuration
+        navigate(ROUTES.TEST_SERIES, {
+          state: { isDemo: false }
+        });
+      }
+    }
+  }, [testConfig, navigate]);
 
   return (
     <div
@@ -112,13 +129,15 @@ export default function ExamInformationPage() {
       {/* Footer with Navigation Buttons - This part will not scroll */}
       <footer className="flex-shrink-0 flex justify-between items-center p-2 sm:p-6 border-t border-border gap-2">
         <button
-          onClick={() =>
+          onClick={() => {
+            // Clear testConfig when going back to test series
+            clearTestConfig();
             navigate(ROUTES.TEST_SERIES, {
               state: {
                 isDemo: false,
               },
-            })
-          }
+            });
+          }}
           className="w-full sm:w-auto px-6 py-2 font-semibold text-white bg-border-high hover:bg-border-medium rounded-lg transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-border-medium"
         >
           Back

@@ -6,8 +6,9 @@ import { ROUTES } from "../routes/constants";
 import LogoutModal from "./LogoutModal";
 import ExamConfigurationModal from "./modals/ExamConfigurationModal";
 import ProfileModal from "./ProfilePage";
-import Sidebar from "./sidebar/Sidebar"; // Adjust path as needed
+import Sidebar, { generatefirstPart } from "./sidebar/Sidebar"; // Adjust path as needed
 import BugReportModal from "./modals/BugReportModal";
+import { useTestConfigCleanup } from "../hooks/useTestConfigCleanup";
 
 const Layout: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -20,8 +21,17 @@ const Layout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const appContainerRef = useRef<HTMLDivElement>(null);
+
+  const str = location.pathname;
+  const firstPart = generatefirstPart(str);
+
+  // Clean up testConfig when leaving test flow pages
+  useTestConfigCleanup();
+
   // Hide sidebar on exam goal page
-  const shouldHideSidebar = location.pathname === ROUTES.EXAM_GOAL;
+  const shouldHideSidebar =
+    location.pathname === ROUTES.EXAM_GOAL ||
+    location.pathname === ROUTES.PERSONAL_DETAILS;
 
   const handleLogoutClick = () => {
     setLogoutModalOpen(true);
@@ -60,7 +70,6 @@ const Layout: React.FC = () => {
     setProfileModalOpen(false);
   };
 
-
   return (
     <>
       <div className="flex h-screen" ref={appContainerRef}>
@@ -78,17 +87,18 @@ const Layout: React.FC = () => {
           />
         )}
         <div className="flex-1 flex flex-col min-w-0">
-              
           {/* Header with hamburger menu */}
           {!shouldHideSidebar && (
-            
-            <header className="absolute top-0 left-0 right-0 z-10 p-4 lg:hidden flex-shrink-0 flex items-center">
-              
+            <header
+              className={`absolute top-0 left-0 right-0 z-10 ${
+                firstPart != ROUTES.TEST_MAIN_PAGE ? "p-4" : "p-2"
+              } lg:hidden flex-shrink-0 flex items-center`}
+            >
               <button
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-muted-foreground bg-card border border-gray hover:text-foreground focus:outline-none focus:ring-2 focus:ring-ring rounded-lg p-2"
               >
-                 <Menu className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
+                <Menu className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7" />
               </button>
             </header>
           )}

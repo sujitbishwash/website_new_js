@@ -36,8 +36,10 @@ const RootLayout: React.FC = () => {
 
           switch (userState.nextStep) {
             case "personal-details":
-              navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
-              break;
+              {
+            console.log("Navigating to personal details in RootLayout");
+                navigate(ROUTES.PERSONAL_DETAILS, { replace: true });
+              break;}
             case "exam-goal":
               navigate(ROUTES.EXAM_GOAL, { replace: true });
               break;

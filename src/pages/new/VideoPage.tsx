@@ -17,9 +17,10 @@ import ContentTabs from "@/components/learning/ContentTabs";
 import AITutorPanel from "@/components/learning/AITutorPanel";
 import Header from "@/components/learning/Header";
 import SparklesIcon from "@/components/icons/SparklesIcon";
-import LoadingScreen from "@/components/ui/LoadingScreen";
 import { useApiProgress } from "@/hooks/useApiProgress";
 import { useIsMobile } from "@/hooks/use-mobile";
+import ProgressBar from "@/components/ui/ProgressBar";
+import LoadingScreen from "@/components/ui/LoadingScreen";
 
 declare global {
   interface Window {
@@ -53,6 +54,7 @@ const VideoPage: React.FC = () => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [transcript, setTranscript] = useState("");
   const [isLoadingVideo, setIsLoadingVideo] = useState(true);
+  const [isLoadingVideoProgress, setIsLoadingVideoProgress] = useState(true);
   const [isLoadingChapters, setIsLoadingChapters] = useState(false);
   const [isLoadingTranscript, setIsLoadingTranscript] = useState(false);
   const [isVideoVisible, setIsVideoVisible] = useState(true);
@@ -84,7 +86,7 @@ const VideoPage: React.FC = () => {
 
   // API Progress Tracking
   const {
-    isLoading: isApiLoading,
+    // isLoading: isApiLoading,
     progress: apiProgress,
     message: apiMessage,
     registerApi,
@@ -175,6 +177,7 @@ const VideoPage: React.FC = () => {
     const fetchProgress = async () => {
       try {
         // Register progress API
+        setIsLoadingVideoProgress(true);
         registerApi('video-progress', 'Video Progress', 0.2);
         setApiLoading('video-progress', true, 'Loading video progress...');
         
@@ -206,6 +209,7 @@ const VideoPage: React.FC = () => {
             }
           }
           setApiCompleted('video-progress', 'Video progress loaded!');
+          setIsLoadingVideoProgress(false);
         }
       } catch (err) {
         if (!didCancel) {
@@ -224,6 +228,7 @@ const VideoPage: React.FC = () => {
             } catch {}
           }
           setApiCompleted('video-progress', 'Video progress loaded from cache!');
+          setIsLoadingVideoProgress(false);
         }
       }
     };
@@ -296,21 +301,22 @@ const VideoPage: React.FC = () => {
     ytPlayerRef.current = player;
     resumeSeekAppliedRef.current = false;
     // Seek to saved position/percent if available
-    console.log('handleYouTubeReady is called')
+    // console.log('handleYouTubeReady is called')
     const duration = player.getDuration?.() || 0;
-    console.log('duration', duration);
-    console.log('resumePosition', resumePosition);
-    console.log('resumePercent', resumePercent);
+    // console.log('duration', duration);
+    // console.log('resumePosition', resumePosition);
+    // console.log('resumePercent', resumePercent);
     if (!resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration) {
       player.seekTo(resumePosition, true);
-      console.log('seeked to resumePosition', resumePosition);
+      // console.log('seeked to resumePosition', resumePosition);
       resumeSeekAppliedRef.current = true;
     } else if (!resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0) {
       const seekTime = Math.min(duration - 1, Math.max(0, (resumePercent / 100) * duration));
       player.seekTo(seekTime, true);
-      console.log('seeked to resumePercent', seekTime);
+      // console.log('seeked to resumePercent', seekTime);
       resumeSeekAppliedRef.current = true;
     }
+    /*
     console.log('case 1: !resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration', !resumeSeekAppliedRef.current && resumePosition > 0 && duration > 0 && resumePosition < duration)
     console.log('case 2: !resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0', !resumeSeekAppliedRef.current && resumePercent > 0 && duration > 0)
     console.log('resumeSeekAppliedRef.current', resumeSeekAppliedRef.current)
@@ -318,6 +324,7 @@ const VideoPage: React.FC = () => {
     console.log('resumePercent', resumePercent)
     console.log('duration', duration)
     console.log('did not do anything');
+    */
   }, [resumePosition, resumePercent]);
 
 
@@ -665,17 +672,6 @@ const VideoPage: React.FC = () => {
     setCurrentMode(mode);
   }, []);
 
-  // Show loading screen while APIs are loading
-  if (isLoadingVideo || (isApiLoading && apiProgress < 90)) {
-    return (
-      <LoadingScreen
-        isLoading={true}
-        progress={apiProgress}
-        message={apiMessage}
-        showSkeleton={true}
-      />
-    );
-  }
 
   // If video is not validated but we've been loading for a while, show fallback
   if (!isVideoValidated && apiProgress > 50) {
@@ -684,7 +680,20 @@ const VideoPage: React.FC = () => {
   }
 
   return (
-    <div className="bg-background text-foreground min-h-screen font-sans">
+    <>
+    {/* Progress Section */}
+    <div className="w-full">
+      {apiProgress >= 0 && apiProgress < 100 &&
+        <ProgressBar
+          isLoading={true}
+          progress={apiProgress}
+          message={apiMessage}
+          showPercentage={true}
+          height={6}
+          className="mb-4"
+        />}
+      </div>
+      <div className="bg-background text-foreground min-h-screen font-sans">
       {!isMobile ? <div className="mx-auto hidden w-full h-full sm:block">
         <main className="grid grid-cols-1 xl:grid-cols-5">
           <div
@@ -692,104 +701,105 @@ const VideoPage: React.FC = () => {
               isLeftColumnVisible ? "" : "hidden"
             }`}
           >
-            <Header
-              videoDetail={videoDetail}
+            <LoadingScreen
               isLoading={isLoadingVideo}
-              onToggleFullScreen={handleToggleFullScreen}
-              onNavigate={(to: string, options?: any) => {
-                saveVideoProgress();
-                navigate(to, options);
-              }}
-            />
-            {/* Debug: Manual save button */}
-            <div className="mb-2 flex justify-center gap-2">
-              <button
-                onClick={() => {
-                  saveVideoProgress(true);
-                }}
-                className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                💾 Save Progress (Debug)
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    const testData = {
-                      video_id: currentVideoId || 'test',
-                      watch_percentage: 25.5,
-                      total_duration: 300,
-                      current_position: 75,
-                      page_url: window.location.href,
-                    };
-                    await videoProgressApi.trackProgress(testData);
-                  } catch (error) {
-                  }
-                }}
-                className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                🧪 Test API
-              </button>
-            </div>
-            {/* YouTube Video Player with Progress Tracking */}
-            <div className="mb-4">
-              <YouTube
-                videoId={currentVideoId}
-                onReady={handleYouTubeReady}
-                onStateChange={handleYouTubeStateChange}
-                className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg w-full h-full"
-                style={{ borderRadius: "12px" }}
-                opts={{
-                  height: "100%",
-                  width: "100%",
-                  playerVars: {
-                    autoplay: 0,
-                    controls: 1,
-                    modestbranding: 1,
-                    rel: 0,
-                    showinfo: 0,
-                    playsinline: 1,
-                    enablejsapi: 1,
-                  },
+              showSkeleton={true}
+              skeletonType="header"
+            >
+              <Header
+                videoDetail={videoDetail}
+                isLoading={isLoadingVideo}
+                onToggleFullScreen={handleToggleFullScreen}
+                onNavigate={(to: string, options?: any) => {
+                  saveVideoProgress();
+                  navigate(to, options);
                 }}
               />
+            </LoadingScreen>
+            {/* YouTube Video Player with Progress Tracking */}
+            <div className="mb-4">
+              <LoadingScreen
+                  isLoading={isLoadingVideo || isLoadingVideoProgress}
+                  showSkeleton={true}
+                  skeletonType="video-player"
+                >
+                  <YouTube
+                    videoId={currentVideoId}
+                    onReady={handleYouTubeReady}
+                    onStateChange={handleYouTubeStateChange}
+                    className="aspect-video bg-black sm:rounded-xl overflow-hidden shadow-lg w-full h-full"
+                    style={{ borderRadius: "12px" }}
+                    opts={{
+                      height: "100%",
+                      width: "100%",
+                      playerVars: {
+                        autoplay: 0,
+                        controls: 1,
+                        modestbranding: 1,
+                        rel: 0,
+                        showinfo: 0,
+                        playsinline: 1,
+                        enablejsapi: 1,
+                      },
+                    }}
+                  />
+              </LoadingScreen>
             </div>
-            <ContentTabs
-              chapters={chapters}
-              transcript={transcript}
-              isLoadingChapters={isLoadingChapters}
-              isLoadingTranscript={isLoadingTranscript}
-              chaptersError={chaptersError}
-              transcriptError={transcriptError}
-              onFeedbackSubmit={() => {}}
-              onFeedbackSkip={() => {}}
-              onFetchTranscript={fetchTranscript}
-              onSeekTo={handleSeekTo}
-            />
+              <LoadingScreen
+                isLoading={isLoadingChapters}
+                showSkeleton={true}
+                skeletonType="content-tabs"
+              >
+              <ContentTabs
+                chapters={chapters}
+                transcript={transcript}
+                isLoadingChapters={isLoadingChapters}
+                isLoadingTranscript={isLoadingTranscript}
+                chaptersError={chaptersError}
+                transcriptError={transcriptError}
+                onFeedbackSubmit={() => {}}
+                onFeedbackSkip={() => {}}
+                onFetchTranscript={fetchTranscript}
+                onSeekTo={handleSeekTo}
+              />
+              </LoadingScreen>
           </div>
           <div
             className={`${
               isLeftColumnVisible ? "xl:col-span-2" : "xl:col-span-5"
             } w-full h-[100vh]`}
           >
-            <AITutorPanel
-              currentMode={currentMode}
-              onModeChange={handleModeChange}
-              isLeftColumnVisible={isLeftColumnVisible}
-              onToggleFullScreen={handleToggleFullScreen}
-              onShare={handleShare}
-              components={components}
-            />
+            <LoadingScreen
+              isLoading={!chatInitialized}
+              showSkeleton={true}
+              skeletonType="ai-tutor-panel"
+            >
+              <AITutorPanel
+                currentMode={currentMode}
+                onModeChange={handleModeChange}
+                isLeftColumnVisible={isLeftColumnVisible}
+                onToggleFullScreen={handleToggleFullScreen}
+                onShare={handleShare}
+                components={components}
+              />
+            </LoadingScreen>
           </div>
         </main>
       </div> :
       <div className="sm:hidden">
         <div className="flex flex-col h-[100vh]">
           <header className="flex flex-row gap-3 justify-between p-4 items-center ">
-            <div className="flex-1 min-w-0 overflow-ellipsis">
-              <h1 className="text-md text-gray-500 truncate px-14 ">
-                {videoDetail?.title || "Video Title Not Available"}
-              </h1>
-            </div>
+            <LoadingScreen
+                isLoading={isLoadingVideo}
+                showSkeleton={true}
+                skeletonType="header"
+              >
+                <div className="flex-1 min-w-0 overflow-ellipsis">
+                  <h1 className="text-md text-gray-500 truncate px-14 ">
+                    {videoDetail?.title || "Video Title Not Available"}
+                  </h1>
+                </div>
+            </LoadingScreen>
             <div className="flex items-center gap-2 self-start sm:self-center">
               <style>{`.glow-purple:hover {
                 box-shadow: 0 0 10px rgba(168, 85, 247, 0.8), 
@@ -820,55 +830,69 @@ const VideoPage: React.FC = () => {
               )}
             </div>
           </header>
-          <div className={`flex-shrink-0 ${isVideoVisible ? "" : "hidden"}`}>
-            {/* YouTube Video Player with Progress Tracking - Mobile */}
-            <div className="">
-              <YouTube
-                videoId={currentVideoId}
-                onReady={handleYouTubeReady}
-                onStateChange={handleYouTubeStateChange}
-                className="aspect-video bg-black overflow-hidden w-full h-full"
-                style={{ borderRadius: "12px" }}
-                opts={{
-                  height: "100%",
-                  width: "100%",
-                  playerVars: {
-                    autoplay: 0,
-                    controls: 1,
-                    modestbranding: 1,
-                    rel: 0,
-                    showinfo: 0,
-                    playsinline: 1,
-                    enablejsapi: 1,
-                  },
-                }}
-              />
-            </div>
-          </div>
-          <div className="p-1">
-            <button
-              onClick={() => setIsVideoVisible(!isVideoVisible)}
-              className="flex w-full items-center justify-center gap-2 px-4 py-2 rounded-lg border-1 text-sm font-medium text-foreground transition-colors"
-            >
-              {isVideoVisible ? (
-                <EyeOff className="w-4 h-4" />
-              ) : (
-                <Eye className="w-4 h-4" />
-              )}
-              <span>{isVideoVisible ? "Hide" : "Show"} Video</span>
-            </button>
-          </div>
+          <LoadingScreen
+            isLoading={isLoadingVideo || isLoadingVideoProgress}
+            showSkeleton={true}
+            skeletonType="video-player"
+          >
+            <>
+              <div className={`flex-shrink-0 ${isVideoVisible ? "" : "hidden"}`}>
+                {/* YouTube Video Player with Progress Tracking - Mobile */}
+                <div className="">
+                    <YouTube
+                      videoId={currentVideoId}
+                      onReady={handleYouTubeReady}
+                      onStateChange={handleYouTubeStateChange}
+                      className="aspect-video bg-black overflow-hidden w-full h-full"
+                      style={{ borderRadius: "12px" }}
+                      opts={{
+                        height: "100%",
+                        width: "100%",
+                        playerVars: {
+                          autoplay: 0,
+                          controls: 1,
+                          modestbranding: 1,
+                          rel: 0,
+                          showinfo: 0,
+                          playsinline: 1,
+                          enablejsapi: 1,
+                        },
+                      }}
+                    />
+                </div>
+              </div>
+              <div className="p-1">
+                <button
+                  onClick={() => setIsVideoVisible(!isVideoVisible)}
+                  className="flex w-full items-center justify-center gap-2 px-4 py-2 rounded-lg border-1 text-sm font-medium text-foreground transition-colors"
+                >
+                  {isVideoVisible ? (
+                    <EyeOff className="w-4 h-4" />
+                  ) : (
+                    <Eye className="w-4 h-4" />
+                  )}
+                  <span>{isVideoVisible ? "Hide" : "Show"} Video</span>
+                </button>
+              </div>
+            </>
+          </LoadingScreen>
           <div className="flex-grow overflow-hidden">
-            <AITutorPanel
-              currentMode={currentMode}
-              onModeChange={handleModeChange}
-              isLeftColumnVisible={isLeftColumnVisible}
-              onToggleFullScreen={() =>
-                setIsLeftColumnVisible(!isLeftColumnVisible)
-              }
-              onShare={() => setIsShareModalOpen(true)}
-              components={components}
-            />
+          <LoadingScreen
+            isLoading={!chatInitialized}
+            showSkeleton={true}
+            skeletonType="ai-tutor-panel"
+            >
+              <AITutorPanel
+                currentMode={currentMode}
+                onModeChange={handleModeChange}
+                isLeftColumnVisible={isLeftColumnVisible}
+                onToggleFullScreen={() =>
+                  setIsLeftColumnVisible(!isLeftColumnVisible)
+                }
+                onShare={() => setIsShareModalOpen(true)}
+                components={components}
+              />
+            </LoadingScreen>
           </div>
         </div>
       </div> }
@@ -925,6 +949,8 @@ const VideoPage: React.FC = () => {
                   .aspect-w-16 > *, .aspect-h-9 > * { position: absolute; height: 100%; width: 100%; top: 0; right: 0; bottom: 0; left: 0; }
               `}</style>
     </div>
+    </>
+    
   );
 };
 

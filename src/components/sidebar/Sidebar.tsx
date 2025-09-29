@@ -32,6 +32,25 @@ interface SidebarProps {
   onBugReportClick: () => void;
 }
 
+export const generatefirstPart = (str: string) => {
+  const parts = str.split("/");
+  return "/" + parts[1];
+};
+
+export const isAllowedRoute = (firstPart: string): boolean => {
+  const disallowedRoutes = [
+    ROUTES.VIDEO_LEARNING,
+    ROUTES.PREMIUM,
+    ROUTES.EXAM_INFO,
+    ROUTES.EXAM_RECONFIRM,
+    ROUTES.TEST_MAIN_PAGE,
+    ROUTES.TEST_SOLUTION,
+  ];
+
+  return !disallowedRoutes
+    .map((e) => generatefirstPart(e))
+    .includes(generatefirstPart(firstPart));
+};
 const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   isContracted,
@@ -41,7 +60,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   onProfileClick,
   onUpgradeClick,
   onExamConfigurationClick,
-  onBugReportClick
+  onBugReportClick,
 }) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -52,8 +71,8 @@ const Sidebar: React.FC<SidebarProps> = ({
     return location.pathname === path;
   };
   const str = location.pathname;
-  const parts = str.split("/");
-  const firstPart = "/" + parts[1];
+  const firstPart = generatefirstPart(str);
+  console.log(firstPart);
   const navItems = [
     { path: ROUTES.HOME, icon: Home, label: "Home" },
     { path: ROUTES.HISTORY, icon: History, label: "History" },
@@ -81,16 +100,12 @@ const Sidebar: React.FC<SidebarProps> = ({
               0 0 20px rgba(168, 85, 247, 0.6), 
               0 0 30px rgba(168, 85, 247, 0.4);
             `}</style>
-      {firstPart != ROUTES.VIDEO_LEARNING &&
-        firstPart != ROUTES.PREMIUM &&
-        firstPart != ROUTES.EXAM_INFO &&
-        firstPart != ROUTES.EXAM_RECONFIRM &&
-        firstPart != ROUTES.TEST_MAIN_PAGE && (
-          <button
-            onClick={() => {
-              navigate(ROUTES.PREMIUM);
-            }}
-            className={`
+      {isAllowedRoute(firstPart) && (
+        <button
+          onClick={() => {
+            navigate(ROUTES.PREMIUM);
+          }}
+          className={`
             fixed top-4 right-4 sm:right-8 z-30 flex items-center gap-1 rounded-full 
              text-sm font-semibold
             bg-gray-200/50 dark:bg-[#373669]/50 backdrop-blur-md
@@ -101,14 +116,26 @@ const Sidebar: React.FC<SidebarProps> = ({
             hover:backdrop-blur-0 hover:bg-opacity-100
             cursor-pointer transition-all duration-300
             glow-purple transform hover:scale-105 focus:outline-none
-              ${(window.innerWidth<640 && firstPart != ROUTES.HOME) ? "p-2" : "py-2 ps-2.5 pe-3"}
+              ${
+                window.innerWidth < 640 && firstPart != ROUTES.HOME
+                  ? "p-2"
+                  : "py-2 ps-2.5 pe-3"
+              }
           `}
+        >
+          <SparklesIcon />
+          <span className="hidden sm:inline">Upgrade plan</span>
+          <span
+            className={`sm:hidden ${
+              window.innerWidth < 640 && firstPart == ROUTES.HOME
+                ? ""
+                : "hidden"
+            }`}
           >
-            <SparklesIcon />
-            <span className="hidden sm:inline">Upgrade plan</span>
-            <span className={`sm:hidden ${(window.innerWidth<640 && firstPart == ROUTES.HOME) ? "" : "hidden"}`}>Upgrade</span>
-          </button>
-        )}
+            Upgrade
+          </span>
+        </button>
+      )}
       {/* Overlay for mobile */}
       {isOpen && (
         <div
