@@ -50,7 +50,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({
   const UserRow = ({ user }: { user: any }) => (
     <div
       key={user.rank}
-      className="flex items-center justify-between text-lg  rounded-lg hover:bg-accent transition-colors duration-200"
+      className="flex items-center justify-between text-lg pr-4 rounded-lg hover:bg-accent transition-colors duration-200"
     >
       <div className="flex items-center space-x-3">
         <RankBadge color={getBadgeClasses(user.rank)} number={user.rank} />

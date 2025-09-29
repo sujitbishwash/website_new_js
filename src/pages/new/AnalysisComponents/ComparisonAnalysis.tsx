@@ -96,7 +96,7 @@ const ComparisonAnalysis = ({ comparisons }: ComparisonAnalysisProps) => {
     >
       <CardContent>
         <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
-          Comparison Analysis
+          Comparison Analysis Demo
         </h3>
         <div className="flex flex-wrap gap-2 mb-6">
           {tabs.map((tab) => (

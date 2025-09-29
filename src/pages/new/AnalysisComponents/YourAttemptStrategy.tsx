@@ -1,15 +1,65 @@
 import StatsCard from "@/components/stats/Card";
 import CardContent from "@/components/stats/CardContent";
-const DifficultyTimeGraph = ({ data, maxTime }) => {
+import { useState } from "react";
+// If you don’t have a shared types file you can inline:
+type TopicType = {
+  name: string;
+  accuracy: number;
+  time: string;
+  totalQs: number;
+  attempted: number;
+  correct: number;
+  score: number;
+};
+
+type SectionDataType = {
+  key: string;
+  name: string;
+  color?: string;
+  marks_scored: number;
+  maxScore: number;
+  rank: number;
+  maxRank: number;
+  percentile: number;
+  accuracy: number;
+  time: string;
+  maxTime: string;
+  topics: TopicType[];
+  difficultyTrend?: {
+    maxTime: number;
+    user: { time: number; difficulty: number }[];
+    topper: { time: number; difficulty: number }[];
+  };
+};
+type Point = {
+  time: number;
+  difficulty: number; // assuming 1 (Easy) to 3 (Hard)
+};
+
+type Data = {
+  user: Point[];
+  topper: Point[];
+};
+
+type DifficultyTimeGraphProps = {
+  data: Data;
+  maxTime: number;
+};
+
+const DifficultyTimeGraph: React.FC<DifficultyTimeGraphProps> = ({
+  data,
+  maxTime,
+}) => {
   const width = 500;
   const height = 200;
   const padding = 35;
 
-  const scaleX = (time) => (time / maxTime) * (width - padding * 2) + padding;
-  const scaleY = (difficulty) =>
+  const scaleX = (time: number) =>
+    (time / maxTime) * (width - padding * 2) + padding;
+  const scaleY = (difficulty: number) =>
     height - padding - ((difficulty - 1) / 2) * (height - padding * 2.5);
 
-  const createPath = (dataset) => {
+  const createPath = (dataset: Point[]) => {
     if (!dataset || dataset.length === 0) return "";
     let pathD = `M ${scaleX(dataset[0].time)} ${scaleY(dataset[0].difficulty)}`;
     dataset.slice(1).forEach((point) => {
@@ -109,14 +159,16 @@ const DifficultyTimeGraph = ({ data, maxTime }) => {
     </div>
   );
 };
-
-const YourAttemptStrategy = () => {
-  const sectionTabs = Object.values(userPerformance.sections).map(
-    (s) => s.name
-  );
+interface YourAttemptStrategyProps {
+  sections: Record<string, SectionDataType>;
+}
+const YourAttemptStrategy: React.FC<YourAttemptStrategyProps> = ({
+  sections,
+}) => {
+  const sectionTabs = Object.values(sections).map((s) => s.name);
   const [activeGraphTab, setActiveGraphTab] = useState(sectionTabs[0]);
 
-  const activeSection = Object.values(userPerformance.sections).find(
+  const activeSection = Object.values(sections).find(
     (s) => s.name === activeGraphTab
   );
   const activeGraphData = activeSection?.difficultyTrend;
@@ -165,7 +217,7 @@ const YourAttemptStrategy = () => {
         </div>
         <div className="border-t border-1 my-6"></div>*/}
         <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
-          Question Difficulty vs. Time
+          Question Difficulty vs. Time Demo
         </h3>
         <div className="flex bg-background-subtle rounded-lg p-1 space-x-1 text-sm">
           {sectionTabs.map((tab) => (

@@ -39,7 +39,7 @@ const CognitiveSkills: React.FC<{
   >
     <CardContent>
       <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
-        Cognitive Skill Profile
+        Cognitive Skill Profile Demo
       </h3>
       <div>
         {skills.map((skill) => (

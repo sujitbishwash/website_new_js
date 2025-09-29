@@ -9,7 +9,7 @@ const ActionableInsights = () => (
     <CardContent>
       <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
         <Sparkle className="w-7 h-7 text-primary mr-3" />
-        <span>Actionable Insights</span>
+        <span>Actionable Insights Demo</span>
       </h3>
       <div className="space-y-4 text-md">
         <div className="flex">

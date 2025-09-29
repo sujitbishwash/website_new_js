@@ -397,9 +397,9 @@ let userPerformance: any = {
     metrics: ["Your Score", "Accuracy", "Correct", "Incorrect", "Time Spent"],
     maxValues: {
       "Your Score": 35,
-      "Accuracy": 100,
-      "Correct": 35,
-      "Incorrect": 10,
+      Accuracy: 100,
+      Correct: 35,
+      Incorrect: 10,
       "Time Spent": 1320,
     },
     data: {
@@ -423,7 +423,7 @@ let userPerformance: any = {
           generalAwareness: 35.0,
         },
       },
-      "Accuracy": {
+      Accuracy: {
         you: {
           english: 87.32,
           numerical: 80.15,
@@ -443,7 +443,7 @@ let userPerformance: any = {
           generalAwareness: 95,
         },
       },
-      "Correct": {
+      Correct: {
         you: {
           english: 28,
           numerical: 22,
@@ -463,7 +463,7 @@ let userPerformance: any = {
           generalAwareness: 35,
         },
       },
-      "Incorrect": {
+      Incorrect: {
         you: { english: 4, numerical: 5, reasoning: 5, generalAwareness: 9 },
         average: {
           english: 6,
@@ -708,21 +708,37 @@ export default function TestAnalysis2() {
               )}
             </div>
           </div>
-          <div className="flex flex-col sm:flex-row sm:items-center gap-x-4 text-muted-foreground mt-2 md:mt-0 text-sm sm:text-base">
-            <div className="text-left">
-              Topics:{" "}
-              {Object.values(userPerformance.sections)
-                .map((s) => s.name)
-                .join(", ")}
-            </div>
-            |<span>Level: {userPerformance.level}</span>
-            <span className="hidden sm:block">|</span>
-            <h3 className="text-left">
-              Attempted {calculateDaysSince(userPerformance.date)}
-            </h3>
+          <div className="flex flex-wrap items-center text-muted-foreground text-sm sm:text-base gap-x-2 gap-y-1 mt-2 md:mt-0">
+            {/* Topics */}
+            <span className="flex items-center">
+              <span className="font-semibold mr-1">Topics:</span>
+              <span>
+                {Object.values(userPerformance.sections)
+                  .map((s) => s.name)
+                  .join(", ")}
+              </span>
+            </span>
+
+            {/* Separator */}
+            <span className="hidden sm:inline">|</span>
+
+            {/* Level */}
+            <span className="flex items-center">
+              <span className="font-semibold mr-1">Level:</span>
+              <span>{userPerformance.level}</span>
+            </span>
+
+            {/* Separator */}
+            <span className="hidden sm:inline">|</span>
+
+            {/* Attempted */}
+            <span className="flex items-center">
+              <span className="font-semibold mr-1">Attempted</span>
+              <span>{calculateDaysSince(userPerformance.date)}</span>
+            </span>
           </div>
         </div>
-        <div className="space-y-6 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 overflow-y-auto mb-10">
+        <div className="space-y-6 gap-0 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 overflow-y-auto pb-10">
           <OverallPerformance
             overallData={userPerformance.overall}
             sectionsData={userPerformance.sections}
@@ -732,7 +748,7 @@ export default function TestAnalysis2() {
           <ComparisonAnalysis comparisons={userPerformance.comparisons} />
           <CognitiveSkills skills={userPerformance.overall.cognitiveSkills} />
 
-          {/**<YourAttemptStrategy />*/}
+          <YourAttemptStrategy sections={userPerformance.sections} />
           {/**<TopperStrategy />*/}
           {<ActionableInsights />}
           {/*<LearningPlan
@@ -781,7 +797,7 @@ export default function TestAnalysis2() {
             <button
               className="
     w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg 
-    text-lg font-semibold text-foreground bg-background border border-divider 
+    text-lg font-semibold text-foreground bg-background border border-divider bg-card
     hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer
   "
             >
@@ -793,7 +809,7 @@ export default function TestAnalysis2() {
             <button
               className="
     w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg 
-    text-lg font-semibold text-foreground bg-background border border-divider 
+    text-lg font-semibold text-foreground bg-background border border-divider bg-card 
     hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer
   "
             >
