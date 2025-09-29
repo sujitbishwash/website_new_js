@@ -1,6 +1,15 @@
 import StatsCard from "@/components/stats/Card";
 import CardContent from "@/components/stats/CardContent";
-const ComparisonAnalysis = () => {
+import { Check, Clock, Star, Target, X } from "lucide-react";
+import { useState } from "react";
+interface ComparisonAnalysisProps {
+    comparisons: {
+      data: Record<string, any>;
+      maxValues: Record<string, number>;
+    };
+}
+
+const ComparisonAnalysis = ({ comparisons }: ComparisonAnalysisProps) => {
   const [activeTab, setActiveTab] = useState("Your Score");
   const tabs = [
     { id: "Your Score", icon: <Star className="w-4 h-4" /> },
@@ -10,9 +19,9 @@ const ComparisonAnalysis = () => {
     { id: "Time Spent", icon: <Clock className="w-4 h-4" /> },
   ];
 
-  const chartData = userPerformance.comparisons.data[activeTab];
-  const maxValue = userPerformance.comparisons.maxValues[activeTab];
-
+  const chartData = comparisons.data[activeTab];
+  const maxValue = comparisons.maxValues[activeTab];
+  //console.log(chartData, maxValue);
   // FIX: Add a guard clause to prevent crash if data for a tab is not found.
   if (!chartData || !maxValue) {
     return (

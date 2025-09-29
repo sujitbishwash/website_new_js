@@ -1,13 +1,35 @@
 import StatsCard from "@/components/stats/Card";
 import CardContent from "@/components/stats/CardContent";
-const Leaderboard = () => {
-  const leaderboardData = (userPerformance as any)?.leaderboard || [];
-  const currentUser = (userPerformance as any)?.user || { name: "" };
+import RankBadge from "@/components/stats/RankBadge";
+import formatScore from "@/lib/formatScore";
+import { Crown } from "lucide-react";
+// Types for a leaderboard entry
+interface LeaderboardUser {
+  rank: number;
+  name: string;
+  score: number;
+}
+
+// Props: pass in data instead of using a global
+interface LeaderboardProps {
+  leaderboard: LeaderboardUser[];
+  currentUser: { name: string; message?: string };
+  currentRank: number;
+  currentScore: number;
+}
+
+const Leaderboard: React.FC<LeaderboardProps> = ({
+  leaderboard,
+  currentUser,
+  currentRank,
+  currentScore,
+}) => {
   const chunkSize = 5;
-  const column1 = leaderboardData.slice(0, chunkSize);
-  const column2 = leaderboardData.slice(chunkSize, chunkSize * 2);
-  // Helper function to determine badge styles based on rank
-  const getBadgeClasses = (rank) => {
+  const column1 = leaderboard.slice(0, chunkSize);
+  const column2 = leaderboard.slice(chunkSize, chunkSize * 2);
+  console.log(leaderboard,currentRank,currentScore,currentUser);
+  // Helper to determine badge color
+  const getBadgeClasses = (rank: number): string => {
     switch (rank) {
       case 1: // Gold
         return "#FFD60A";
@@ -57,7 +79,11 @@ const Leaderboard = () => {
         </h3>
 
         {/* Leaderboard Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 md:gap-x-6">
+        <div
+          className={`grid grid-cols-1 ${
+            column2.length > 0 ? "md:grid-cols-2" : "md:grid-cols-1"
+          } md:gap-x-6`}
+        >
           {/* Column 1 */}
           <div className="space-y-2">
             {column1.map((user) => (
@@ -65,6 +91,7 @@ const Leaderboard = () => {
             ))}
           </div>
           {/* Column 2 */}
+
           <div className="space-y-2 mt-2 md:mt-0">
             {column2.map((user) => (
               <UserRow key={user.rank} user={user} />
@@ -77,12 +104,10 @@ const Leaderboard = () => {
           <div className="border-t border-1 my-2"></div>
         </div>
         {/* Current User Row */}
+        {/**color={getBadgeClasses(userPerformance.overall.rank)} */}
         <div className="flex items-center justify-between text-sm p-3 rounded-lg bg-accent border border-primary/50">
           <div className="flex items-center space-x-3">
-            <RankBadge
-              color={getBadgeClasses(userPerformance.overall.rank)}
-              number={userPerformance.overall.rank}
-            />
+            <RankBadge number={currentRank} />
             <div className="font-semibold text-gray-100 flex items-center space-x-2">
               <p className="font-bold text-lg text-foreground">
                 {currentUser.name}
@@ -93,7 +118,7 @@ const Leaderboard = () => {
             </div>
           </div>
           <span className="font-bold text-primary tracking-wider">
-            {formatScore(userPerformance.overall.score)}
+            {formatScore(currentScore)}
           </span>
         </div>
       </CardContent>

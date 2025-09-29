@@ -1,17 +1,73 @@
 import StatsCard from "@/components/stats/Card";
 import CardContent from "@/components/stats/CardContent";
-const SectionalSummary = () => {
-  const sectionTabs = Object.values(userPerformance.sections).map(
+import { ArrowDown } from "lucide-react";
+import { useState } from "react";
+
+// SummaryItem props
+type SummaryItemProps = {
+  value: string | number;
+  label: string;
+  total?: string | number;
+};
+// If you don’t have a shared types file you can inline:
+type TopicType = {
+  name: string;
+  accuracy: number;
+  time: string;
+  totalQs: number;
+  attempted: number;
+  correct: number;
+  score: number;
+};
+
+type SectionDataType = {
+  key: string;
+  name: string;
+  color?: string;
+  marks_scored: number;
+  maxScore: number;
+  rank: number;
+  maxRank: number;
+  percentile: number;
+  accuracy: number;
+  time: string;
+  maxTime: string;
+  topics: TopicType[];
+};
+const SummaryItem: React.FC<SummaryItemProps> = ({ value, label, total }) => (
+  <div className="flex flex-col items-center justify-center p-2">
+    <p className="text-xs text-[#8e8e93] font-medium uppercase tracking-wider">
+      {label}
+    </p>
+    <p className="text-lg font-bold">
+      {value}
+      {total && (
+        <span className="text-sm font-normal text-[#8e8e93]">/{total}</span>
+      )}
+    </p>
+  </div>
+);
+// Props so you can pass in data instead of reading a global:
+interface SectionalSummaryProps {
+  sections: Record<string, SectionDataType>;
+}
+
+const SectionalSummary: React.FC<SectionalSummaryProps> = ({ sections }) => {
+  const sectionTabs = Object.values(sections).map(
     (s) => s.name
   );
-  const [activeTab, setActiveTab] = useState(sectionTabs[0]);
-  const [isTopicAnalysisOpen, setTopicAnalysisOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState<string>(sectionTabs[0]);
+  const [isTopicAnalysisOpen, setTopicAnalysisOpen] = useState<boolean>(true);
 
-  const activeSection = Object.values(userPerformance.sections).find(
+  // find the active section
+  const activeSection = Object.values(sections).find(
     (s) => s.name === activeTab
   );
 
   if (!activeSection) return null; // Or a loading/error state
+  //console.log(allTopics, totalCorrect, totalAttempted, totalQs);
+  //console.log(sections);
+  //console.log(activeSection);
 
   return (
     <StatsCard
@@ -41,9 +97,9 @@ const SectionalSummary = () => {
           <div className="flex flex-col md:flex-row items-center justify-around gap-6">
             <div className="flex flex-col items-center justify-center p-2">
               <p className={`text-4xl font-bold ${activeSection?.color ?? ""}`}>
-                {typeof activeSection?.score === "number"
-                  ? activeSection.score.toFixed(2)
-                  : String(activeSection?.score ?? "0")}
+                {typeof activeSection?.marks_scored === "number"
+                  ? activeSection.marks_scored.toFixed(2)
+                  : String(activeSection?.marks_scored ?? "0")}
                 <span className="text-sm font-normal text-[#8e8e93]">
                   /{String(activeSection?.maxScore ?? "")}
                 </span>
@@ -55,7 +111,7 @@ const SectionalSummary = () => {
             <div className="w-full">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
                 <SummaryItem
-                  value={String(activeSection?.rank ?? "")}
+                  value={String(activeSection?.rank ?? "NA")}
                   label="Rank"
                   total={String(activeSection?.maxRank ?? "")}
                 />
@@ -63,7 +119,7 @@ const SectionalSummary = () => {
                   value={
                     typeof activeSection?.percentile === "number"
                       ? activeSection.percentile.toFixed(2)
-                      : String(activeSection?.percentile ?? "")
+                      : String(activeSection?.percentile ?? "NA")
                   }
                   label="Percentile"
                 />
@@ -100,7 +156,7 @@ const SectionalSummary = () => {
           </button>
 
           <div
-            className={`transition-all duration-500 ease-in-out overflow-hidden ${
+            className={`transition-all duration-500 ease-in-out overflow-x-auto ${
               isTopicAnalysisOpen ? "max-h-screen mt-4 " : "max-h-0"
             }`}
           >
@@ -158,10 +214,7 @@ const SectionalSummary = () => {
                       <td className="px-4 py-4 text-center">{topic.time}</td>
                       <td className="px-4 py-4 text-center">{`${topic.correct}/${topic.attempted}`}</td>
 
-                      <td className="block text-right relative py-2 md:table-cell md:text-center md:px-4 md:py-4">
-                        <span className="font-bold text-[#8e8e93] md:hidden absolute left-0">
-                          Skipped
-                        </span>
+                      <td className="px-4 py-4 text-center">
                         {topic.totalQs - topic.attempted}
                       </td>
                     </tr>

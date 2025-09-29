@@ -4,7 +4,7 @@ import StatsCard from "@/components/stats/Card";
 import CardContent from "@/components/stats/CardContent";
 import OverallPerformance from "./AnalysisComponents/OverallPerformance";
 import SectionalSummary from "./AnalysisComponents/SectionalSummary";
-import ComparisonAnalysis from "./AnalysisComponents/ComparisonAnlysis";
+import ComparisonAnalysis from "./AnalysisComponents/ComparisonAnalysis";
 import CognitiveSkills from "./AnalysisComponents/CognitiveSkills";
 import YourAttemptStrategy from "./AnalysisComponents/YourAttemptStrategy";
 import TopperStrategy from "./AnalysisComponents/TopperStrategy";
