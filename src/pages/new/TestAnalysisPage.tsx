@@ -45,7 +45,34 @@ import CustomLoader from "@/components/icons/customloader";
 import formatScore from "@/lib/formatScore";
 import calculateDaysSince from "@/lib/calculateDaysSince";
 import Leaderboard2 from "./AnalysisComponents/Leaderboard2";
+import AiTestCard from "@/components/test/AiTestCard";
+import { AiRecommendation } from "@/components/types/AiRecommendation";
 
+// --- SERVER DATA (Attempted tests) ---
+// Right side recommendations remain dummy below. Left side will be fetched from API.
+
+const aiRecommendedTests: AiRecommendation[] = [
+  {
+    id: "rec-1",
+    examName: "SBI PO Prelims: Sectional",
+    reason: "Improve your Quant speed",
+  },
+  {
+    id: "rec-2",
+    examName: "RBI Assistant: Full Mock",
+    reason: "High accuracy needed",
+  },
+  {
+    id: "rec-3",
+    examName: "IBPS Clerk Mains: Reasoning",
+    reason: "Focus on complex puzzles",
+  },
+  {
+    id: "rec-4",
+    examName: "General Awareness Quiz",
+    reason: "Based on recent news",
+  }, // This one will now be hidden
+];
 // --- MOCK DATA ---
 let userPerformance: any = {
   user: {
@@ -547,7 +574,7 @@ export default function TestAnalysis2() {
     testFeedbackState?.canSubmitFeedback,
     testFeedbackState?.existingFeedback,
   ]);
-useEffect(() => {
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
         shareDropdownRef.current &&
@@ -662,9 +689,9 @@ useEffect(() => {
       </div>
     );
   }
-
+  //<div className="p-4 sm:p-6 bg-background min-h-screen font-sans text-foreground mt-10 sm:mt-4">
   return (
-    <div className="p-4 sm:p-6 bg-background min-h-screen font-sans text-foreground mt-10 sm:mt-4">
+    <div className="bg-background overflow-hidden w-full flex flex-col max-h-[100vh]">
       {isLoadingAnalysis && (
         <div className="max-w-7xl mx-auto mb-4">
           <div className="text-sm text-muted-foreground">
@@ -682,177 +709,197 @@ useEffect(() => {
             You did great, {currentUser.name.split(" ")[0]}
           </h1>
         </div>*/}
-      <div className="max-w-7xl mx-auto">
-        <div className="lg:col-span-12 flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <h1 className="text-2xl sm:text-3xl font-bold">
-              Detailed Test Report
-            </h1>
-            <div ref={shareDropdownRef} className="relative">
-              <button
-                onClick={() => setShareOpen(!isShareOpen)}
-                className="flex border-1 items-center space-x-2 bg-background text-foreground font-semibold p-2.5 rounded-lg hover:bg-foreground/20 transition cursor-pointer"
-              >
-                <Share className="w-5 h-5" />
-              </button>
-              {isShareOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-background-subtle border border-border rounded-lg shadow-xl z-10">
-                  <a
-                    onClick={handleShare}
-                    href="#"
-                    className="flex items-center px-4 py-2 text-sm hover:bg-accent"
-                  >
-                    <Share className="w-4 h-4 mr-3" />
-                    Share
-                  </a>
-                  <a
-                    href="#"
-                    className="flex items-center px-4 py-2 text-sm hover:bg-accent"
-                  >
-                    <Copy className="w-4 h-4 mr-3" />
-                    Copy Link
-                  </a>
-                  <a
-                    href="#"
-                    className="flex items-center px-4 py-2 text-sm hover:bg-accent"
-                  >
-                    <Smile className="w-4 h-4 mr-3" />
-                    Help improve this
-                  </a>
+      <main className="w-full overflow-y-auto px-4 sm:px-6 lg:px-8 pb-10 grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 items-start">
+        {/* --- LEFT COLUMN: ATTEMPT HISTORY --- */}
+        <section className="lg:col-span-3">
+          <div className="max-w-7xl mx-auto mt-10 sm:mt-4">
+            <div>
+              <div className="lg:col-span-12 flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+                <div className="flex items-center gap-4">
+                  <h1 className="text-2xl sm:text-3xl font-bold">
+                    Detailed Test Report
+                  </h1>
+                  <div ref={shareDropdownRef} className="relative">
+                    <button
+                      onClick={() => setShareOpen(!isShareOpen)}
+                      className="flex items-center gap-2 p-2 text-sm font-medium text-primary bg-foreground/10 border border-primary/20 rounded-xl hover:bg-foreground/20 disabled:opacity-50 disabled:cursor-wait transition-colors cursor-pointer"
+                    >
+                      <Share className="w-5 h-5" />
+                    </button>
+                    {isShareOpen && (
+                      <div className="absolute right-0 mt-2 w-48 bg-background-subtle border border-border rounded-lg shadow-xl z-10">
+                        <a
+                          onClick={handleShare}
+                          href="#"
+                          className="flex items-center px-4 py-2 text-sm hover:bg-accent"
+                        >
+                          <Share className="w-4 h-4 mr-3" />
+                          Share
+                        </a>
+                        <a
+                          href="#"
+                          className="flex items-center px-4 py-2 text-sm hover:bg-accent"
+                        >
+                          <Copy className="w-4 h-4 mr-3" />
+                          Copy Link
+                        </a>
+                        <a
+                          href="#"
+                          className="flex items-center px-4 py-2 text-sm hover:bg-accent"
+                        >
+                          <Smile className="w-4 h-4 mr-3" />
+                          Help improve this
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
-            </div>
-          </div>
-          <div className="flex flex-wrap items-center text-muted-foreground text-sm sm:text-base gap-x-2 gap-y-1 mt-2 md:mt-0">
-            {/* Topics */}
-            <span className="flex items-center">
-              <span className="font-semibold mr-1">Topics:</span>
-              <span>
-                {Object.values(userPerformance.sections)
-                  .map((s) => s.name)
-                  .join(", ")}
-              </span>
-            </span>
+                <div className="flex flex-wrap items-center text-muted-foreground text-sm sm:text-base gap-x-2 gap-y-1 mt-2 md:mt-0">
+                  {/* Topics */}
+                  <span className="flex items-center">
+                    <span className="font-semibold mr-1">Topics:</span>
+                    <span>
+                      {Object.values(userPerformance.sections)
+                        .map((s) => s.name)
+                        .join(", ")}
+                    </span>
+                  </span>
 
-            {/* Separator */}
-            <span className="hidden sm:inline">|</span>
+                  {/* Separator */}
+                  <span className="hidden sm:inline">|</span>
 
-            {/* Level */}
-            <span className="flex items-center">
-              <span className="font-semibold mr-1">Level:</span>
-              <span>{userPerformance.level}</span>
-            </span>
+                  {/* Level */}
+                  <span className="flex items-center">
+                    <span className="font-semibold mr-1">Level:</span>
+                    <span>{userPerformance.level}</span>
+                  </span>
 
-            {/* Separator */}
-            <span className="hidden sm:inline">|</span>
+                  {/* Separator */}
+                  <span className="hidden sm:inline">|</span>
 
-            {/* Attempted */}
-            <span className="flex items-center">
-              <span className="font-semibold mr-1">Attempted</span>
-              <span>{calculateDaysSince(userPerformance.date)}</span>
-            </span>
-          </div>
-        </div>
-        <div className="space-y-6 gap-0 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 overflow-y-auto pb-10">
-          <OverallPerformance
-            overallData={userPerformance.overall}
-            sectionsData={userPerformance.sections}
-          />
+                  {/* Attempted */}
+                  <span className="flex items-center">
+                    <span className="font-semibold mr-1">Attempted</span>
+                    <span>{calculateDaysSince(userPerformance.date)}</span>
+                  </span>
+                </div>
+              </div>
+              <div className="space-y-6 gap-0 lg:space-y-0 lg:grid lg:grid-cols-12 lg:gap-6 overflow-y-auto pb-10">
+                <OverallPerformance
+                  overallData={userPerformance.overall}
+                  sectionsData={userPerformance.sections}
+                />
 
-          <SectionalSummary sections={userPerformance.sections} />
-          <ComparisonAnalysis comparisons={userPerformance.comparisons} />
-          <CognitiveSkills skills={userPerformance.overall.cognitiveSkills} />
+                <SectionalSummary sections={userPerformance.sections} />
+                <ComparisonAnalysis comparisons={userPerformance.comparisons} />
+                <CognitiveSkills
+                  skills={userPerformance.overall.cognitiveSkills}
+                />
 
-          <YourAttemptStrategy sections={userPerformance.sections} />
-          {/**<TopperStrategy />*/}
-          {<ActionableInsights />}
-          {/*<LearningPlan
+                <YourAttemptStrategy sections={userPerformance.sections} />
+                {/**<TopperStrategy />*/}
+                {<ActionableInsights />}
+                {/*<LearningPlan
           summary={overallScores.aiSummary}
           plan={overallScores.learningPlan}
         />*/}
 
-          {/**<Leaderboard
+                {/**<Leaderboard
             leaderboard={userPerformance.leaderboard}
             currentUser={userPerformance.user}
             currentRank={userPerformance.overall.rank}
             currentScore={userPerformance.overall.score}
           />*/}
-          <Leaderboard2
-            leaderboard={userPerformance.leaderboard}
-            currentUser={userPerformance.user}
-            currentRank={userPerformance.overall.rank}
-            currentScore={userPerformance.overall.score}
-          />
-        </div>
-        <div className="fixed bottom-0 lg:relative bg-background lg:bg-transparent border-t border-1 left-0 w-full p-2 lg:p-0 lg:w-auto lg:rounded-t-lg lg:border-0 lg:mx-auto max-w-7xl">
-          <div className="flex flex-row items-center gap-3">
-            <button
-              onClick={() => {
-                const params = new URLSearchParams(location.search);
-                const sid =
-                  (location.state as any)?.sessionId || params.get("sessionId");
-                if (sid) {
-                  navigate(
-                    `${ROUTES.TEST_MAIN_PAGE.replace(
-                      ":id",
-                      String(sid)
-                    )}/solutions`
-                  );
-                } else {
-                  navigate(ROUTES.TEST_SOLUTION.replace(":id", ""));
-                }
-              }}
-              className="
+                <Leaderboard2
+                  leaderboard={userPerformance.leaderboard}
+                  currentUser={userPerformance.user}
+                  currentRank={userPerformance.overall.rank}
+                  currentScore={userPerformance.overall.score}
+                />
+              </div>
+            </div>
+            <ShareModal
+              isOpen={isShareModalOpen}
+              onClose={handleCloseShareModal}
+              url={`https://www.youtube.com`}
+            />
+            {/* Test Feedback Modal */}
+            <VideoFeedbackModal
+              isOpen={isFeedbackOpen}
+              onClose={() => setIsFeedbackOpen(false)}
+              videoId={String(sessionId ?? "")}
+              onSubmit={async () => Promise.resolve()}
+              componentName="Test"
+            />
+          </div>
+        </section>
+        {/* --- RIGHT COLUMN: AI RECOMMENDATIONS --- */}
+        <section className="lg:col-span-1 lg:sticky top-8">
+          <h2 className="text-xl font-semibold text-foreground mb-4">
+            Recommended Tests
+          </h2>
+          <div className="flex flex-col gap-5">
+            {aiRecommendedTests.slice(0, 3).map((test) => (
+              <AiTestCard key={test.id} test={test} />
+            ))}
+          </div>
+        </section>
+      </main>
+      <div className="flex-shrink-0 p-2  border-t border-border">
+        <div className="flex flex-row items-center gap-3">
+          <button
+            onClick={() => {
+              const params = new URLSearchParams(location.search);
+              const sid =
+                (location.state as any)?.sessionId || params.get("sessionId");
+              if (sid) {
+                navigate(
+                  `${ROUTES.TEST_MAIN_PAGE.replace(
+                    ":id",
+                    String(sid)
+                  )}/solutions`
+                );
+              } else {
+                navigate(ROUTES.TEST_SOLUTION.replace(":id", ""));
+              }
+            }}
+            className="
     w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 
     text-lg font-semibold rounded-lg backdrop-blur-sm border-1 transition-all 
     duration-300 text-white hover:opacity-90 bg-primary hover:bg-primary/80 cursor-pointer
   "
-            >
-              {/* Icon hidden on small screens */}
-              <Text className="hidden sm:block w-5 h-5" />
-              {/* Shorter text on mobile */}
-              <span className="sm:inline hidden">Full Answer Review</span>
-              <span className="inline sm:hidden">Review</span>
-            </button>
+          >
+            {/* Icon hidden on small screens */}
+            <Text className="hidden sm:block w-5 h-5" />
+            {/* Shorter text on mobile */}
+            <span className="sm:inline hidden">Full Answer Review</span>
+            <span className="inline sm:hidden">Review</span>
+          </button>
 
-            <button
-              className="
+          <button
+            className="
     w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg 
     text-lg font-semibold text-foreground bg-background border border-divider bg-card
     hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer
   "
-            >
-              <RefreshCcw className="hidden sm:block w-5 h-5" />
-              <span className="sm:inline hidden">Re-Attempt</span>
-              <span className="inline sm:hidden">Retry</span>
-            </button>
+          >
+            <RefreshCcw className="hidden sm:block w-5 h-5" />
+            <span className="sm:inline hidden">Re-Attempt</span>
+            <span className="inline sm:hidden">Retry</span>
+          </button>
 
-            <button
-              className="
+          <button
+            className="
     w-full flex-1 px-4 py-3 flex items-center justify-center gap-2 rounded-lg 
     text-lg font-semibold text-foreground bg-background border border-divider bg-card 
     hover:bg-foreground/20 transition-transform transform focus:outline-none focus:shadow-sm cursor-pointer
   "
-            >
-              <span className="sm:inline hidden">Next Test</span>
-              <span className="inline sm:hidden">Next</span>
-              <ArrowRight className="hidden sm:block w-5 h-5" />
-            </button>
-          </div>
+          >
+            <span className="sm:inline hidden">Next Test</span>
+            <span className="inline sm:hidden">Next</span>
+            <ArrowRight className="hidden sm:block w-5 h-5" />
+          </button>
         </div>
-        <ShareModal
-          isOpen={isShareModalOpen}
-          onClose={handleCloseShareModal}
-          url={`https://www.youtube.com`}
-        />
-        {/* Test Feedback Modal */}
-        <VideoFeedbackModal
-          isOpen={isFeedbackOpen}
-          onClose={() => setIsFeedbackOpen(false)}
-          videoId={String(sessionId ?? "")}
-          onSubmit={async () => Promise.resolve()}
-          componentName="Test"
-        />
       </div>
     </div>
   );

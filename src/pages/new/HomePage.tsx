@@ -550,6 +550,7 @@ export default function HomePage() {
             <h2 className="text-md sm:text-2xl font-bold text-foreground">
               Continue Learning
             </h2>
+            <div className="flex items-center gap-2">
             <button
               onClick={refreshProgress}
               disabled={isLoadingProgress}
@@ -558,6 +559,14 @@ export default function HomePage() {
               <RefreshCcw className="w-4 h-4" />
               Refresh
             </button>
+            
+              <button
+                onClick={() => navigate(ROUTES.HISTORY)}
+                className="text-sm text-primary hover:opacity-80 transition-colors hover:cursor-pointer"
+              >
+                View all
+              </button>
+              </div>
           </div>
 
           {isLoadingProgress ? (

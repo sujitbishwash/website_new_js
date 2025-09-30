@@ -60,7 +60,7 @@ const Leaderboard2: React.FC<LeaderboardProps> = ({
             <th className="pb-4 pl-2 text-left text-sm font-medium uppercase text-muted-foreground">
               Name
             </th>
-            <th className="pb-4 text-left text-sm font-medium uppercase text-muted-foreground">
+            <th className="pb-4 pl-2 text-left text-sm font-medium uppercase text-muted-foreground">
               Score
             </th>
           </tr>
@@ -82,7 +82,7 @@ const Leaderboard2: React.FC<LeaderboardProps> = ({
               <td className="whitespace-nowrap py-4 px-2 font-bold text-foreground text-lg overflow-x-auto max-w-[200px]">
                 {user.name}
               </td>
-              <td className="whitespace-nowrap py-4 text-blue-500 font-bold tracking-wider text-xl">
+              <td className="whitespace-nowrap py-4 pl-2 text-blue-500 font-bold tracking-wider text-xl">
                 {formatScore(user.score)}
               </td>
             </tr>
