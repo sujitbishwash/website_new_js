@@ -12,7 +12,7 @@ import {
   ChevronDownIcon,
   ChevronLeft,
   ChevronRight,
-  ChevronsRight,
+  // ChevronsRight,
   ChevronUpIcon,
   CircleUser,
   Info,
@@ -731,6 +731,7 @@ const TestMainPage = () => {
     setCurrentQuestionIndex(0); // Reset index when changing section
   };
 
+  {/*}
   const handleSkipSection = () => {
     const sections: SectionName[] = [
       "english language",
@@ -741,6 +742,7 @@ const TestMainPage = () => {
     const nextSectionIndex = (currentSectionIndex + 1) % sections.length;
     handleSectionChange(sections[nextSectionIndex]);
   };
+  */}
   const handleSubmitTest = () => {
     setShowSubmitDialog(true);
   };
@@ -1405,12 +1407,12 @@ const TestMainPage = () => {
                 >
                   Mark & Next
                 </button>
-                <button
+                {/*<button
                   onClick={handleSkipSection}
                   className="flex-1 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs"
                 >
                   Skip Section
-                </button>
+                </button>*/}
                 <button
                   onClick={handleSubmitTest}
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-3 rounded-lg transition-colors duration-200 text-xs flex items-center justify-center gap-1"
@@ -1520,12 +1522,12 @@ const TestMainPage = () => {
           </div>
           {!isSolutionMode ? (
             <div className="flex flex-wrap justify-end gap-2">
-              <button
+              {/*<button
                 onClick={handleSkipSection}
                 className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm flex items-center justify-center gap-2"
               >
                 Skip Section <ChevronsRight />
-              </button>
+              </button>*/}
               <button
                 onClick={handleSubmitTest}
                 className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 text-sm flex items-center justify-center gap-2"
