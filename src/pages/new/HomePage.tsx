@@ -30,6 +30,7 @@ import {
 import PlayIcon from "@/components/icons/PlayIcon";
 import { theme } from "@/styles/theme";
 import formatScore from "@/lib/formatScore";
+import { useUser } from "@/contexts/UserContext";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -298,6 +299,7 @@ export default function HomePage() {
   const [videosError, setVideosError] = useState<string | null>(null);
   const [loadingVideoId, setLoadingVideoId] = useState<string | null>(null);
   const navigate = useNavigate();
+  const { examGoal } = useUser();
 
   // Use video progress hook
   const {
@@ -396,7 +398,7 @@ export default function HomePage() {
               <div>
                 <h2 className="font-semibold text-foreground">Paste Link</h2>
                 <p className="text-xs text-muted-foreground">
-                  Paste Youtube links
+                  Paste Youtube links for {examGoal?.groupType}
                 </p>
               </div>
             </div>

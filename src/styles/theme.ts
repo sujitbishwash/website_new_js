@@ -184,7 +184,7 @@ export const getAvailableColorThemes = (): ColorThemeName[] =>
   Object.keys(palettes) as ColorThemeName[];
 
 export const applyColorTheme = (name: ColorThemeName) => {
-  const palette = palettes[name] || palettes.default;
+  const palette = palettes[name] || palettes.lavender;
   const root = document.documentElement;
   const isDark = root.classList.contains("dark");
 

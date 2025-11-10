@@ -356,6 +356,10 @@ const VideoPage: React.FC = () => {
           return;
         }
 
+        // if(watchPercentage == 0 && chatMessages.length == 0) {
+        //   return;
+        // }
+
         isSavingRef.current = true;
 
         await videoProgressApi.trackProgress({
