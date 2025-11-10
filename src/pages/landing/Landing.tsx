@@ -196,7 +196,7 @@ const Footer = () => {
           </div>
           <button
             onClick={openLLMtxt}
-            className="hover:cursor-pointer mt-4 rounded-full hover:text-blue-200 transition"
+            className="hover:cursor-pointer mt-4 rounded-full text-sm hover:text-blue-200 transition"
           >
             LLM.txt
           </button>
