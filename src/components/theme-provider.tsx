@@ -1,7 +1,7 @@
 import { applyColorTheme, ColorThemeName } from "@/styles/theme";
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Theme = "dark" | "light" | "system";
+type Theme = "light" | "dark" | "system";
 
 type ThemeProviderProps = {
   children: React.ReactNode;

@@ -234,7 +234,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     setUser(null);
     setHasExamGoal(false);
     setHasName(false);
-    console.log("User logged out");
     // Clear localStorage
     localStorage.removeItem("authToken");
     localStorage.removeItem("userData");

@@ -22,12 +22,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ProgressBar from "@/components/ui/ProgressBar";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 
-declare global {
-  interface Window {
-    YT: any;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
+
 
 // Wrapper components to prevent unnecessary re-renders
 const FlashcardsWrapper = React.memo(({ videoId }: { videoId: string }) => {
@@ -73,6 +68,13 @@ const VideoPage: React.FC = () => {
   const [isChatLoading, setIsChatLoading] = useState(false);
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatInitialized, setChatInitialized] = useState(false);
+
+  // ⬇️ Add near your other refs
+  const chatMessagesRef = useRef(chatMessages);
+  useEffect(() => {
+    chatMessagesRef.current = chatMessages;
+  }, [chatMessages]);
+
 
   // Refs (persisted values across renders)
   const ytPlayerRef = useRef<any>(null);
@@ -355,6 +357,16 @@ const VideoPage: React.FC = () => {
         if (!shouldSave) {
           return;
         }
+
+        const hasUserNotInteracted = chatMessagesRef.current.filter(c => c.isUser).length == 0
+
+        if (watchPercentage == 0 && hasUserNotInteracted) {
+          return;
+        }
+
+        // if(watchPercentage == 0 && chatMessages.length == 0) {
+        //   return;
+        // }
 
         isSavingRef.current = true;
 

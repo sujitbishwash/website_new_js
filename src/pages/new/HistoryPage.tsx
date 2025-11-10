@@ -16,13 +16,13 @@ const HistoryPage = () => {
     isLoading,
     error,
     refreshProgress,
-    getWatchedVideos,
+    getAllWatchedVideos,
     formatDuration,
     formatLastUpdated,
   } = useVideoProgress();
 
   // Get all watched videos (including completed ones)
-  const allWatchedVideos = getWatchedVideos();
+  const allWatchedVideos = getAllWatchedVideos();
 
   const handleVideoClick = async (videoId: string) => {
     try {

@@ -7,9 +7,9 @@ import LoginPage from "@/pages/new/LoginPage";
 import PaymentPage from "@/pages/new/PaymentPage";
 import PaymentSuccessPage from "@/pages/new/PaymentSuccessPage";
 import PersonalDetails from "@/pages/new/PersonalDetails";
-import PrivacyPolicy from "@/pages/new/PrivacyPolicy";
+import PrivacyPolicy from "@/pages/landing/PrivacyPolicy";
 import Splash from "@/pages/new/Splash";
-import TermsAndConditions from "@/pages/new/TermsAndConditions";
+import TermsAndConditions from "@/pages/landing/TermsAndConditions";
 // import VideoPage from "@/pages/new/VideoPage";
 import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -27,12 +27,16 @@ import SubscriptionPage from "../pages/new/SubscriptionPage";
 import TestConfigurationPage from "../pages/new/TestConfigurationPage";
 import TestMainPage from "../pages/new/TestMainPage";
 import { ROUTES } from "./constants";
-import Stats  from "../pages/new/Stats";
+import Stats from "../pages/new/Stats";
 import VideoPage from "@/pages/new/VideoPage";
 import AttemptedTests from "@/pages/new/AttemptedTestsPage";
 import OutOfSyllabusPage from "@/pages/new/OutOfSyllabusPage";
 import TestAnalysisPage from "@/pages/new/TestAnalysisPage";
 import TestAnalysisPageArchive from "@/pages/archive/TestAnalysisPageArchive";
+import Landing from "@/pages/landing/Landing";
+import Home from "@/pages/landing/Home";
+import Features from "@/pages/landing/Features";
+import Contact from "@/pages/landing/Contact";
 
 // Route configuration object for easy maintenance
 export const routes = [
@@ -41,6 +45,42 @@ export const routes = [
     element: <RootLayout />,
     children: [
       // Public splash page - accessible without authentication
+      {
+        path: ROUTES.LANDING,
+        element: <Landing />,
+        name: "Landing",
+        description: "Welcome and onboarding page",
+        children: [
+          {
+            index: true,
+            element: <Home />,
+            name: "Home",
+            description: "Main dashboard page",
+          },
+          {
+            path: ROUTES.FEATURES,
+            element: <Features />,
+            name: "Features",
+          },
+          {
+            path: ROUTES.CONTACT,
+            element: <Contact />,
+            name: "Contact",
+          },
+          {
+            path: ROUTES.PRIVACY,
+            element: <PrivacyPolicy />,
+            name: "Privacy Policy",
+            description: "Privacy Policy",
+          },
+          {
+            path: ROUTES.TERMS,
+            element: <TermsAndConditions />,
+            name: "Terms and Conditions",
+            description: "Terms and Conditions",
+          },
+        ],
+      },
       {
         path: ROUTES.SPLASH,
         element: <Splash />,
@@ -91,7 +131,7 @@ export const routes = [
             name: "Test Main Page",
             description: "Main test taking interface",
           },
-          
+
           {
             path: "test-main-page/:id/solutions",
             element: <TestMainPage />,
@@ -104,7 +144,7 @@ export const routes = [
             name: "Detailed Analysis Archive",
             description: "View detailed test analysis and results",
           },
-          
+
           {
             path: "analysis",
             element: <TestAnalysisPage />,
@@ -172,7 +212,7 @@ export const routes = [
             name: "Attempted Tests Archive",
             description: "Attempted Tests",
           },
-          
+
           {
             path: "attempted-tests",
             element: <AttemptedTests />,

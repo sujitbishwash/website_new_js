@@ -12,8 +12,9 @@ import {
   Button5,
 } from "../../components/test/buttons";
 import { CircleUser } from "lucide-react";
-import { getTestConfig, clearTestConfig } from "../../lib/testConfigStorage";
+import { getTestConfig, clearTestConfig, clearTestConfigOnTestStart } from "../../lib/testConfigStorage";
 import { useEffect, useState } from "react";
+import { quizApi } from "@/lib/api-client";
 // Icon components for the legend - using inline SVG for simplicity
 
 // Main component for the instructions page
@@ -22,6 +23,7 @@ export default function ExamInformationPage() {
   const location = useLocation();
   const { profile } = useUser();
   const [testConfig, setTestConfig] = useState(location.state?.testConfig);
+  const [isStarting, setIsStarting] = useState(false);
 
   // Load testConfig from localStorage if not available in location state
   useEffect(() => {
@@ -34,9 +36,10 @@ export default function ExamInformationPage() {
         navigate(ROUTES.TEST_SERIES, {
           state: { isDemo: false }
         });
-      }
+        }
     }
   }, [testConfig, navigate]);
+
 
   return (
     <div
@@ -142,9 +145,13 @@ export default function ExamInformationPage() {
         >
           Back
         </button>
+        {/*
         <button
           onClick={() =>
-            navigate(ROUTES.EXAM_RECONFIRM, {
+            // navigate(ROUTES.EXAM_RECONFIRM, {
+            //   state: { testConfig: testConfig },
+            // })
+            navigate(ROUTES.TEST_MAIN_PAGE, {
               state: { testConfig: testConfig },
             })
           }
@@ -152,6 +159,47 @@ export default function ExamInformationPage() {
         >
           Next
         </button>
+
+        */}
+        <button
+            disabled={isStarting}
+            onClick={async () => {
+              if (isStarting) return;
+              try {
+                setIsStarting(true);
+                // Generate test session and obtain session_id
+                const payload = {
+                  subject: testConfig?.subject,
+                  topics: testConfig?.sub_topic,
+                  level: testConfig?.level,
+                  language: (testConfig?.language || "en") as any,
+                } as any;
+                const response = await quizApi.initiateTest(payload);
+                const sessionId = (response as any)?.session_id;
+                if (!sessionId) {
+                  throw new Error("Failed to start test session");
+                }
+                
+                // Clear testConfig when test actually starts
+                clearTestConfigOnTestStart();
+                
+                navigate(`/test-main-page/${encodeURIComponent(sessionId)}`, {
+                  state: { sessionId },
+                });
+              } catch (e) {
+                // Optionally handle error UI here
+              } finally {
+                setIsStarting(false);
+              }
+            }}
+            className={`font-bold py-2 px-6 rounded-lg transition-all ${
+              !isStarting
+                ? "bg-primary hover:bg-primary/80 text-white cursor-pointer"
+                : "bg-border-medium text-border cursor-not-allowed"
+            }`}
+          >
+            {isStarting ? "Starting..." : "I am ready to begin"}
+          </button>
       </footer>
     </div>
   );

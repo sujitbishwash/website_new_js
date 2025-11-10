@@ -331,6 +331,7 @@ const Quiz: React.FC<QuizProps> = ({
     setSelectedAnswerIndex(null);
   };
 
+  /*
   const retryQuiz = () => {
     if (!topicsToUse) {
       setQuizError("No topics available for quiz generation.");
@@ -357,6 +358,7 @@ const Quiz: React.FC<QuizProps> = ({
     };
     fetchQuizQuestions();
   };
+  */
 
   // Feedback handling for quiz completion
   const [isFeedbackModalOpen, setIsFeedbackModalOpen] = React.useState(false);
@@ -412,6 +414,7 @@ const Quiz: React.FC<QuizProps> = ({
   }
 
   // Error state
+  {/*
   if (quizError) {
     return (
       <div className="bg-background flex flex-col items-center justify-center p-4 text-neutral-100 min-h-[400px]">
@@ -425,9 +428,15 @@ const Quiz: React.FC<QuizProps> = ({
           >
             Try Again
           </button>
+          <p className="text-sm italic text-muted-foreground">The app is currently in beta; this feature will be available in the next update.</p>
         </div>
       </div>
     );
+  }
+  */}
+
+  if(quizError) {
+    console.log(quizError);
   }
 
   // No questions state
@@ -436,16 +445,20 @@ const Quiz: React.FC<QuizProps> = ({
       <div className="bg-background flex flex-col items-center justify-center p-4 text-neutral-100 min-h-[400px]">
         <div className="text-center">
           <div className="text-gray-400 text-6xl mb-4">📝</div>
+          {/*}
           <p className="text-lg font-semibold text-foreground mb-2">No Questions Available</p>
           <p className="text-sm text-muted-foreground mb-4">
             No quiz questions were generated for the selected topics.
           </p>
           <button
             onClick={retryQuiz}
+            disabled
             className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
           >
             Try Again
           </button>
+          */}
+          <p className="text-sm italic text-muted-foreground">The app is currently in beta; this feature will be available in the next update.</p>
         </div>
       </div>
     );

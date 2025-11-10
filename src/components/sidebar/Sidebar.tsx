@@ -72,7 +72,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   };
   const str = location.pathname;
   const firstPart = generatefirstPart(str);
-  console.log(firstPart);
   const navItems = [
     { path: ROUTES.HOME, icon: Home, label: "Home" },
     { path: ROUTES.HISTORY, icon: History, label: "History" },
@@ -179,6 +178,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               AI Padhai
             </h1>
+            <span className="text-xs text-primary pb-2 ">BETA</span>
           </div>
 
           {/* Desktop contract/expand button */}

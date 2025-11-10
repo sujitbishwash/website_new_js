@@ -1,5 +1,12 @@
 // Route constants for consistent usage across the application
 export const ROUTES = {
+    //Landing routes
+    LANDING: "/landing",
+    FEATURES: "features",
+    CONTACT: "contact",
+    BLOG: "blog",
+    TERMS: "terms-and-conditions",
+    PRIVACY: "privacy-policy",
     // Main routes
     HOME: "/",
     SPLASH: "/splash",
@@ -42,8 +49,8 @@ export const ROUTES = {
     EXAM_GOAL: "/exam-goal",
 
     // policy routes
-    PRIVACY_POLICY: "/privacy-policy",
-    TERMS_AND_CONDITIONS: "/terms-and-conditions",
+    PRIVACY_POLICY: "/landing/privacy-policy",
+    TERMS_AND_CONDITIONS: "/landing/terms-and-conditions",
     AUTH_CALLBACK: "/auth/callback",
 
     STATS: "/stats"
@@ -51,6 +58,12 @@ export const ROUTES = {
 
 // Route names for navigation
 export const ROUTE_NAMES = {
+    [ROUTES.LANDING]: "Landing",
+    [ROUTES.FEATURES]: "Features",
+    [ROUTES.CONTACT]: "Contact",
+    [ROUTES.BLOG]: "Blog",
+    [ROUTES.TERMS_AND_CONDITIONS]: "Terms and Conditions",
+    [ROUTES.PRIVACY_POLICY]: "Privacy Policy",
     [ROUTES.HOME]: "Home",
     [ROUTES.SPLASH]: "Welcome",
     [ROUTES.TEST_SERIES]: "Test Series",
@@ -75,8 +88,8 @@ export const ROUTE_NAMES = {
     [ROUTES.LOGIN]: "Login",
     [ROUTES.PERSONAL_DETAILS]: "Personal Details",
     [ROUTES.EXAM_GOAL]: "Exam Goal",
-    [ROUTES.PRIVACY_POLICY]: "Privacy Policy",
-    [ROUTES.TERMS_AND_CONDITIONS]: "Terms and Conditions",
+    //[ROUTES.PRIVACY_POLICY]: "Privacy Policy",
+    //[ROUTES.TERMS_AND_CONDITIONS]: "Terms and Conditions",
     [ROUTES.AUTH_CALLBACK]: "Auth Callback",
     [ROUTES.STATS]: "Stats",
     [ROUTES.TEST_SOLUTION]: "Test Solution",
