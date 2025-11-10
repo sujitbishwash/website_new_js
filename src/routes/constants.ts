@@ -2,11 +2,11 @@
 export const ROUTES = {
     //Landing routes
     LANDING: "/landing",
-    FEATURES: "/features",
-    CONTACT: "/contact",
-    BLOG: "/blog",
-    TERMS: "/terms-and-conditions",
-    PRIVACY: "/privacy-policy",
+    FEATURES: "features",
+    CONTACT: "contact",
+    BLOG: "blog",
+    TERMS: "terms-and-conditions",
+    PRIVACY: "privacy-policy",
     // Main routes
     HOME: "/",
     SPLASH: "/splash",

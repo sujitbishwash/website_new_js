@@ -68,13 +68,13 @@ export const routes = [
             name: "Contact",
           },
           {
-            path: ROUTES.PRIVACY_POLICY,
+            path: ROUTES.PRIVACY,
             element: <PrivacyPolicy />,
             name: "Privacy Policy",
             description: "Privacy Policy",
           },
           {
-            path: ROUTES.TERMS_AND_CONDITIONS,
+            path: ROUTES.TERMS,
             element: <TermsAndConditions />,
             name: "Terms and Conditions",
             description: "Terms and Conditions",

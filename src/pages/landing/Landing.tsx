@@ -13,6 +13,7 @@ import { Linkedin } from "lucide-react";
 import ScrollToTop from "@/components/landing/scrollToTop";
 import PrivacyPolicy from "@/pages/landing/PrivacyPolicy";
 import TermsAndConditions from "@/pages/landing/TermsAndConditions";
+import { ROUTES } from "@/routes/constants";
 
 // Type alias for theme
 type Theme = "light" | "dark";
@@ -29,10 +30,10 @@ window.addEventListener("error", (e) => console.warn("GLOBAL ERROR", e.error));
 const Header: React.FC<HeaderProps> = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navLinks = [
-    { name: "Home", path: "/" },
-    { name: "Features", path: "/features" },
+    { name: "Home", path: ROUTES.HOME },
+    { name: "Features", path: ROUTES.FEATURES },
 
-    { name: "Contact", path: "/contact" },
+    { name: "Contact", path: ROUTES.CONTACT },
   ];
 
   return (
@@ -59,12 +60,12 @@ const Header: React.FC<HeaderProps> = () => {
           {/*<button className="hover:cursor-pointer hidden md:block text-sm font-bold py-2 px-6 rounded-full transition-all shadow-md text-white bg-gradient-to-br from-blue-500/70 via-blue-600/50 to-indigo-700/70 backdrop-blur-lg border border-blue-400/50 hover:border-blue-400/80 hover:from-blue-500/80 hover:via-blue-600/60 hover:to-indigo-700/80">
             Login
           </button>*/}
-          <a
+          <Link
             className="hover:cursor-pointer hidden md:block text-sm font-semibold py-2 px-6 rounded-full transition-all shadow-md text-white bg-gradient-to-br from-white/50 via-white/30 to-white/20 dark:from-white/20 dark:via-white/10 dark:to-transparent backdrop-blur-lg border border-white/30 dark:border-white/20 hover:border-white/50 dark:hover:border-white/30"
-            href="https://krishak.in/login"
+             to={ROUTES.LOGIN}
           >
             Sign In
-          </a>
+          </Link>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="md:hidden p-2 rounded-full hover:bg-gray-200"
@@ -181,7 +182,7 @@ Our smart agent finds you questions, recommends the right videos, builds flashca
           <ul className="space-y-2 text-sm">
             <li>
               <Link
-                to="/features"
+                to={ROUTES.FEATURES}
                 className="hover:text-blue-200 dark:hover:text-white"
               >
                 Features
@@ -196,7 +197,7 @@ Our smart agent finds you questions, recommends the right videos, builds flashca
           <ul className="space-y-2 text-sm">
             <li>
               <Link
-                to="/contact"
+                to={ROUTES.CONTACT}
                 className="hover:text-blue-200 dark:hover:text-white"
               >
                 Contact
@@ -211,7 +212,7 @@ Our smart agent finds you questions, recommends the right videos, builds flashca
           <ul className="space-y-2 text-sm">
             <li>
               <Link
-                to="/privacypolicy"
+                to={ROUTES.PRIVACY}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-blue-200 dark:hover:text-white"
@@ -221,7 +222,7 @@ Our smart agent finds you questions, recommends the right videos, builds flashca
             </li>
             <li>
               <Link
-                to="/termsandconditions"
+                to={ROUTES.TERMS}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-blue-200 dark:hover:text-white"

@@ -20,6 +20,8 @@ import { Icon } from "@/components/landing/Icon";
 import { ICONS } from "@/components/landing/icons";
 import { useEffect, useRef, useState } from "react";
 import { FinalCTA } from "@/components/landing/FinalCTA";
+import { Link } from "react-router-dom";
+import { ROUTES } from "@/routes/constants";
 
 const BankLogosBackground = () => {
   const logos = [
@@ -73,13 +75,12 @@ const Hero = () => {
           more
         </p>
         <div className="mt-10 flex justify-center">
-          <a
-            href="https://krishak.in/login"
+          <Link to={ROUTES.LOGIN}
             className="hover:cursor-pointer flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-br from-blue-400/50 via-blue-500/30 to-indigo-600/20 py-3 px-8 font-semibold text-white shadow-xl backdrop-blur-xl transition-all duration-300 ease-in-out transform hover:scale-102 border border-blue-400/50 hover:border-blue-400/80 dark:text-white sm:w-auto"
           >
             Start Learning for Free
             <Icon path={ICONS.arrowRight} className="w-5 h-5" />
-          </a>
+          </Link>
         </div>
       </div>
     </section>
