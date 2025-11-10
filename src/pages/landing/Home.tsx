@@ -1,7 +1,7 @@
 import fromanycard1 from "@/assets/videos/fromanycard1.mp4";
 import fromanycard2 from "@/assets/videos/fromanycard2.mp4";
 import fromanycard3 from "@/assets/videos/fromanycard3.mp4";
-import fromanyvideo from "@/assets/videos/main.mp4";
+/*import fromanyvideo from "@/assets/videos/main.mp4";*/
 import kf1 from "@/assets/images/thumbnails/kf1.png";
 import kf2 from "@/assets/images/thumbnails/kf2.png";
 import kf3 from "@/assets/images/thumbnails/kf3.png";
@@ -64,9 +64,15 @@ const Hero = () => {
       <BankLogosBackground />
       <div className="pointer-events-none absolute inset-x-0 top-[-22rem] -z-10 h-[180vh] w-full bg-background"></div>
       <div className="relative z-10 mx-auto max-w-5xl px-4 py-24 sm:py-10 ">
-        <h2 className="pb-4 text-6xl font-semibold leading-none sm:text-7xl md:text-7xl relative z-10 flex flex-col text-white">
-          Prepare for government exams smarter, not harder with
-        </h2>
+        <span className="pb-4 text-6xl font-semibold leading-none sm:text-7xl md:text-7xl relative z-10 flex flex-col text-white">
+          Prepare for{" "}
+          <span className="font-serif text-6xl sm:text-7xl md:text-7xl italic leading-tight font-normal">
+            <span className="inline-block transform-none blur-0 opacity-100">
+              government exams
+            </span>
+          </span>
+          smarter, not harder with
+        </span>
         <h2 className="pb-4 text-6xl font-semibold leading-none sm:text-7xl md:text-8xl relative z-10 flex flex-col bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 bg-clip-text font-forma text-transparent filter-[url(#inset-shadow)]">
           YouTube and AI.
         </h2>
@@ -75,7 +81,8 @@ const Hero = () => {
           more
         </p>
         <div className="mt-10 flex justify-center">
-          <Link to={ROUTES.LOGIN}
+          <Link
+            to={ROUTES.LOGIN}
             className="hover:cursor-pointer flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-br from-blue-400/50 via-blue-500/30 to-indigo-600/20 py-3 px-8 font-semibold text-white shadow-xl backdrop-blur-xl transition-all duration-300 ease-in-out transform hover:scale-102 border border-blue-400/50 hover:border-blue-400/80 dark:text-white sm:w-auto"
           >
             Start Learning for Free
@@ -127,19 +134,19 @@ const LearnFromVideo = () => {
       title: "Understand Concepts",
       description:
         "Get simplified topic-focused explanations for better clarity.",
-      src: fromanycard1,
+      src: "https://www.youtube.com/embed/JTJG-OlSey8",
     },
     {
       title: "Ask Unlimited Questions",
       description:
         "Interact with our AI chatbot to resolve your doubts anytime.",
-      src: fromanycard2,
+      src: "https://www.youtube.com/embed/0nbhxYim_O8",
     },
     {
       title: "Be Personalised",
       description:
         "Receive questions and suggestions tailored to your progress and learning.",
-      src: fromanycard3,
+      src: "https://www.youtube.com/embed/NMo6tAV2-sk",
     },
   ];
 
@@ -200,15 +207,19 @@ const LearnFromVideo = () => {
             transform: `perspective(800px) rotateX(${rotationX}deg)`,
           }}
         >
-          <video
-            className="object-cover object-center w-full h-full bg-cover bg-center flex items-center justify-center"
-            src={fromanyvideo}
-          ></video>
+          <iframe
+            className="object-cover object-center w-full h-full"
+            src="https://www.youtube.com/embed/gWqeg1OvO7c?autoplay=1&mute=1&modestbranding=1&playsinline=1&rel=0"
+            allow="autoplay; encrypted-media"
+            allowFullScreen
+            frameBorder={0}
+          ></iframe>
         </div>
         <p className="md:mt-8 text-gray-400 max-w-2xl mx-auto text-2xl pt-10 md:pt-20 pb-20">
-         It just works. See it in action.
-         <div>Simply Paste the YouTube links — and watch the magic unfold!</div>
-
+          It just works. See it in action.
+          <div>
+            Simply Paste the YouTube links — and watch the magic unfold!
+          </div>
         </p>
         <div className="mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
           {features.map((feature, index) => (
@@ -217,12 +228,15 @@ const LearnFromVideo = () => {
                 {feature.title}
               </h4>
               <p className="text-lg text-zinc-400">{feature.description}</p>
-              <video
+              <iframe
                 className="aspect-[16/10] mt-6 bg-zinc-800 rounded-2xl flex items-center justify-center"
-                src={feature.src}
+                src={feature.src+"?autoplay=1&mute=1&controls=0&modestbranding=1&playsinline=1&rel=0"}
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                frameBorder={0}
               >
                 Image
-              </video>
+              </iframe>
             </div>
           ))}
         </div>
@@ -302,14 +316,12 @@ const Features = () => {
                 <p className="text-lg text-gray-400">{feature.description}</p>
               </div>
               <div className="aspect-video w-full relative overflow-hidden rounded-3xl bg-zinc-800">
-  <img
-    src={feature.src}
-    className="absolute inset-0 h-full w-full object-cover object-top object-left"
-    alt=""
-  />
-</div>
-
-
+                <img
+                  src={feature.src}
+                  className="absolute inset-0 h-full w-full object-cover object-top object-left"
+                  alt=""
+                />
+              </div>
             </div>
           </div>
         ))}
@@ -374,7 +386,6 @@ const FAQ = () => {
       answer:
         "Of course! You can upload your own notes or paste YouTube links directly. Our AI will summarize them, highlight key takeaways, and even create practice questions — turning your effort into real understanding.",
     },
-    
   ];
 
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -423,7 +434,7 @@ const FAQ = () => {
 };
 
 // Main App Component
-export default function App() {
+export default function Home() {
   // 🌟 NEW: Autoplay all videos on scroll
   useEffect(() => {
     const videos = document.querySelectorAll<HTMLVideoElement>("video");
@@ -453,7 +464,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="bg-black text-zinc-800 dark:text-zinc-200 transition-colors duration-300 relative isolate overflow-x-clip">
+    <div className="bg-black min-h-screen font-sans antialiased text-white transition-colors duration-300 relative text-center overflow-x-clip">
       {/* SVG filter definition for the inset shadow effect on text in the Hero section */}
       <svg width="0" height="0" style={{ position: "absolute" }}>
         <defs>

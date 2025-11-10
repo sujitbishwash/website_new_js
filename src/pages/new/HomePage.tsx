@@ -31,6 +31,7 @@ import PlayIcon from "@/components/icons/PlayIcon";
 import { theme } from "@/styles/theme";
 import formatScore from "@/lib/formatScore";
 import { useUser } from "@/contexts/UserContext";
+import BetaPopUp from "@/components/modals/BetaPopUp";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -812,6 +813,8 @@ export default function HomePage() {
         isOpen={isYouTubeModalOpen}
         onClose={() => setIsYouTubeModalOpen(false)}
       />
+
+      <BetaPopUp />
     </div>
   );
 }
