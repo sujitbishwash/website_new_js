@@ -29,9 +29,9 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   img,
 }) => (
   <div className="group overflow-hidden space-y-10  rounded-xl">
-    <div className="aspect-video bg-white/5 flex items-center justify-center rounded-xl ">
+    <div className="aspect-video bg-white/5 flex items-center justify-center rounded-xl overflow-hidden">
       {img ? (
-        <img src={img} alt={title} className="w-full h-full object-cover rounded-xl transition-transform duration-300 group-hover:scale-115" />
+        <img src={img} alt={title} className="w-full h-full object-cover object-top rounded-xl transition-transform duration-300 group-hover:scale-115" />
       ) : (
         <Image className="text-gray-400 text-sm w-8 h-8 group-hover:scale-115" />
       )}
@@ -56,7 +56,15 @@ const FeaturesHero: React.FC = () => (
     />
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <h1 className="text-5xl md:text-6xl font-bold mb-8">
-        The Unfair Advantage for Preparation
+        The {" "}
+          <span
+            className="font-[700] italic"
+            style={{ fontFamily: '"Instrument Serif", serif' }}
+          >
+            <span className="text-5xl md:text-6xl">
+              Unfair Advantage
+            </span>
+          </span>{" "} for Preparation
       </h1>
       <p className="mt-6 text-lg md:text-xl text-blue-100 max-w-2xl mx-auto">
         Everything you need to ace your government exams.

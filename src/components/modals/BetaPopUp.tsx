@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-
+import { theme } from "@/styles/theme";
 // Define the color palette for consistent usage
-const theme = {
+/*const theme = {
   background: "#161320",
   backgroundSubtle: "#1C1926",
   cardBackground: "#1E192B",
@@ -15,7 +15,7 @@ const theme = {
   buttonGradientFrom: "#A49AC4",
   buttonGradientTo: "#8C82AE",
   divider: "#3B3550",
-};
+};*/
 
 interface ModalProps {
   isOpen: boolean;
@@ -53,7 +53,7 @@ const BetaModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           
           <h2 
             className="text-3xl font-bold tracking-tight relative z-10 drop-shadow-sm"
-            style={{ color: theme.primaryText }}
+            style={{ color: theme.background }}
           >
             Important Notice
           </h2>
@@ -61,7 +61,7 @@ const BetaModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           {/* Close button positioned absolutely */}
           <button 
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 rounded-full bg-black/10 hover:bg-black/20 transition-colors text-white/80 hover:text-white"
+            className="hover:cursor-pointer absolute top-4 right-4 p-2 rounded-full bg-black/10 hover:bg-black/20 transition-colors text-white/80 hover:text-white"
           >
              <X size={20} />
           </button>
@@ -80,7 +80,7 @@ const BetaModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <div className="flex w-full gap-3 justify-center">
             <button
               onClick={onClose}
-              className="px-6 py-3 rounded-full text-sm font-semibold transition-colors duration-200 ease-in-out flex-1 max-w-[140px] border-2 hover:bg-white/5"
+              className="hover:cursor-pointer px-6 py-3 rounded-full text-sm font-semibold transition-colors duration-200 ease-in-out flex-1 max-w-[140px] border-2 hover:bg-white/5"
               style={{ 
                 color: theme.secondaryText,
                 borderColor: theme.divider
@@ -94,7 +94,7 @@ const BetaModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                 // Perform acceptance action here
                 onClose();
               }}
-              className="px-6 py-3 rounded-full text-sm font-bold transition-transform duration-200 ease-out active:scale-95 hover:brightness-110 flex-1 max-w-[140px] shadow-lg"
+              className="hover:cursor-pointer px-6 py-3 rounded-full text-sm font-bold transition-transform duration-200 ease-out active:scale-95 hover:brightness-110 flex-1 max-w-[140px] shadow-lg"
               style={{
                  background: `linear-gradient(to right, ${theme.buttonGradientFrom}, ${theme.buttonGradientTo})`,
                  color: theme.background, // Using dark background color for text contrast on bright button

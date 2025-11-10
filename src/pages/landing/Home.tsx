@@ -19,6 +19,8 @@ import { useEffect, useRef, useState } from "react";
 import { FinalCTA } from "@/components/landing/FinalCTA";
 import { Link } from "react-router-dom";
 import { ROUTES } from "@/routes/constants";
+import { useYouTubeAutoPlayOnScroll } from "@/hooks/useYouTubeAutoPlayOnScroll";
+
 
 const BankLogosBackground = () => {
   const logos = [
@@ -61,19 +63,20 @@ const Hero = () => {
       <BankLogosBackground />
       <div className="pointer-events-none absolute inset-x-0 top-[-22rem] -z-10 h-[180vh] w-full bg-background"></div>
       <div className="relative z-10 mx-auto max-w-5xl px-4 py-24 sm:py-10 ">
-        <span className="pb-4 text-6xl font-semibold leading-none sm:text-7xl md:text-7xl relative z-10 flex flex-col text-white">
+        <span className="pb-4 text-6xl font-semibold leading-none sm:text-7xl md:text-7xl relative z-10 text-white">
           Prepare for{" "}
-          <span className="font-serif text-6xl sm:text-7xl md:text-7xl italic leading-tight font-normal">
-            <span className="inline-block transform-none blur-0 opacity-100">
-              government exams
-            </span>
-          </span>
-          smarter, not harder with
+          <span
+            className="font-[100] italic"
+            style={{ fontFamily: '"Instrument Serif", serif' }}
+          >
+            <span className="text-6xl sm:text-7xl md:text-7xl">government</span>
+          </span>{" "}
+          exams smarter, not harder with
         </span>
         <h2 className="pb-4 text-6xl font-semibold leading-none sm:text-7xl md:text-8xl relative z-10 flex flex-col bg-gradient-to-r from-blue-600 via-blue-500 to-purple-600 bg-clip-text font-forma text-transparent filter-[url(#inset-shadow)]">
           YouTube and AI.
         </h2>
-        <p className="mt-6 text-xl font-semibold text-zinc-500">
+        <p className="mt-6 text-xl font-semibold text-gray-400">
           Comprehensive preparation resources for Banking, Railways, SSC and
           more
         </p>
@@ -149,6 +152,7 @@ const LearnFromVideo = () => {
 
   const videoRef = useRef<HTMLDivElement>(null);
   const [rotationX, setRotationX] = useState<number>(30);
+  useYouTubeAutoPlayOnScroll(".feature-video");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -205,8 +209,8 @@ const LearnFromVideo = () => {
           }}
         >
           <iframe
-            className="object-cover object-center w-full h-full"
-            src="https://www.youtube.com/embed/NFTPScYg7Lg?autoplay=1&mute=1&modestbranding=1&playsinline=1&rel=0"
+            className="feature-video object-cover object-center w-full h-full"
+            src="https://www.youtube.com/embed/NFTPScYg7Lg?autoplay=1&enablejsapi=1&mute=1&modestbranding=1&playsinline=1&rel=0"
             allow="autoplay; encrypted-media"
             allowFullScreen
             frameBorder={0}
@@ -226,8 +230,11 @@ const LearnFromVideo = () => {
               </h4>
               <p className="text-lg text-zinc-400">{feature.description}</p>
               <iframe
-                className="aspect-[16/10] mt-6 bg-zinc-800 rounded-2xl flex items-center justify-center"
-                src={feature.src+"?autoplay=1&mute=1&controls=0&modestbranding=1&playsinline=1&rel=0"}
+                className="feature-video aspect-[16/10] mt-6 bg-zinc-800 rounded-2xl flex items-center justify-center"
+                src={
+                  feature.src +
+                  "?autoplay=1&enablejsapi=1&mute=1&controls=1&modestbranding=1&playsinline=1&rel=0"
+                }
                 allow="autoplay; encrypted-media"
                 allowFullScreen
                 frameBorder={0}
@@ -315,7 +322,7 @@ const Features = () => {
               <div className="aspect-video w-full relative overflow-hidden rounded-3xl bg-zinc-800">
                 <img
                   src={feature.src}
-                  className="absolute inset-0 h-full w-full object-cover object-top object-left"
+                  className="absolute inset-0 h-full w-full object-cover object-top"
                   alt=""
                 />
               </div>
@@ -332,7 +339,7 @@ const Dialogue = () => {
   return (
     <section className="relative py-20 px-4 sm:px-8">
       <div
-        className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
+        className="absolute inset-x-0 top-[-10rem] z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
         aria-hidden="true"
       >
         <div
@@ -348,8 +355,15 @@ const Dialogue = () => {
         <span className="block text-blue-400 text-2xl px-4">
           Accurate feedback is more crucial than you think
         </span>
-        <h2 className="mt-10 text-transparent dark:text-white max-w-3xl pb-4 text-6xl font-semibold leading-none sm:text-7xl relative z-10 flex flex-col bg-[linear-gradient(183deg,rgba(20,20,30,0)_13.9%,rgba(30,30,50,0.3)_121.71%),linear-gradient(0deg,#EAEAEB,#EAEAEB)] bg-clip-text font-forma filter-[url(#inset-shadow)]">
-          AI Padhai points out where you need improvement.
+        <h2 className="mt-10 text-transparent max-w-3xl pb-4 text-6xl font-semibold leading-none sm:text-7xl relative z-10 bg-[linear-gradient(183deg,rgba(20,20,30,0)_13.9%,rgba(30,30,50,0.3)_121.71%),linear-gradient(0deg,#EAEAEB,#EAEAEB)] bg-clip-text font-forma filter-[url(#inset-shadow)]">
+          AI Padhai{" "}
+          <span
+            className="font-[100] italic"
+            style={{ fontFamily: '"Instrument Serif", serif' }}
+          >
+            <span className="text-6xl sm:text-7xl md:text-7xl">points out</span>
+          </span>{" "}
+          where you need improvement.
         </h2>
       </div>
     </section>
@@ -392,38 +406,56 @@ const FAQ = () => {
   };
 
   return (
-    <section className="py-20 px-4 sm:px-8">
+    <section className="py-20 px-4 sm:px-8 ">
       <div className="container mx-auto max-w-3xl text-left">
         <h3 className="text-3xl md:text-4xl font-semibold mb-8 text-gray-500">
           Frequently Asked Questions
         </h3>
-        <div className="text-left space-y-4">
-          {faqs.map((faq, index) => (
-            <div
-              onClick={() => toggleFAQ(index)}
-              key={index}
-              className="hover:cursor-pointer border-b border-zinc-800 pb-4"
-            >
-              <div className="w-full flex justify-between items-center text-lg font-semibold text-white py-2 text-left">
-                <span>{faq.question}</span>
-                <Plus
-                  className={`w-6 h-6 transform transition-transform duration-300 flex-shrink-0 ${
-                    openIndex === index ? "rotate-45" : ""
-                  }`}
-                />
-              </div>
+        <div className="text-left relative">
+          {/* Mask moved here */}
+          <div
+        className="absolute inset-x-0 top-[-10rem] z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
+        aria-hidden="true"
+      >
+        <div
+          className="relative left-1/2 -z-10 aspect-[1155/678] w-[36.125rem] max-w-none -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#67e8f9] to-[#3b82f6] opacity-20 sm:left-[calc(50%-40rem)] sm:w-[72.1875rem]"
+          style={{
+            clipPath:
+              "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
+          }}
+        />
+      </div>
 
+
+          {/* Content wrapper above background */}
+          <div className="relative z-10 space-y-4">
+            {faqs.map((faq, index) => (
               <div
-                className={`transition-all duration-300 overflow-hidden ${
-                  openIndex === index
-                    ? "max-h-40 opacity-100"
-                    : "max-h-0 opacity-0"
-                }`}
+                key={index}
+                onClick={() => toggleFAQ(index)}
+                className="hover:cursor-pointer px-4 py-2 rounded-3xl border border-[rgba(255,255,255,0.1)] backdrop-blur-xl bg-[rgba(255,255,255,0.04)]"
               >
-                <p className="mt-2 text-zinc-400 pr-8">{faq.answer}</p>
+                <div className="w-full flex justify-between items-center text-lg font-semibold text-white py-2 text-left">
+                  <span>{faq.question}</span>
+                  <Plus
+                    className={`w-6 h-6 transform transition-transform duration-300 flex-shrink-0 ${
+                      openIndex === index ? "rotate-45" : ""
+                    }`}
+                  />
+                </div>
+
+                <div
+                  className={`transition-all duration-300 overflow-hidden ${
+                    openIndex === index
+                      ? "max-h-40 opacity-100"
+                      : "max-h-0 opacity-0"
+                  }`}
+                >
+                  <p className="mt-2 font-semibold text-gray-300 pr-8">{faq.answer}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
@@ -461,7 +493,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="bg-black min-h-screen font-sans antialiased text-white transition-colors duration-300 relative text-center overflow-x-clip">
+    <div className="bg-transparent min-h-screen font-sans antialiased text-white transition-colors duration-300 relative text-center overflow-x-clip">
       {/* SVG filter definition for the inset shadow effect on text in the Hero section */}
       <svg width="0" height="0" style={{ position: "absolute" }}>
         <defs>
@@ -486,7 +518,7 @@ export default function Home() {
         </defs>
       </svg>
       <div
-        className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
+        className="absolute inset-x-0 top-[-10rem] z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
         aria-hidden="true"
       >
         <div
@@ -497,7 +529,7 @@ export default function Home() {
           }}
         />
       </div>
-      <main>
+      <main className="">
         <Hero />
         <LearnFromVideo />
         <Features />

@@ -202,9 +202,9 @@ const ContactInfo: React.FC = () => {
         <InfoBlock
           icon={<MapPin className="w-6 h-6" />}
           title="Address"
-          copyText="Bengaluru"
+          copyText="Bengaluru, Karnataka, India"
         >
-          <p>Bengaluru</p>
+          <p>Bengaluru, Karnataka, India</p>
         </InfoBlock>
       </div>
     </div>

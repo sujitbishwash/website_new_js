@@ -10,7 +10,15 @@ export const FinalCTA = () => (
     <div className="container mx-auto">
       <div className="bg-white/10 dark:bg-zinc-900/40 backdrop-blur-2xl rounded-3xl p-10 text-center shadow-2xl border border-white/20 dark:border-zinc-800/50">
         <h3 className="text-4xl md:text-5xl font-semibold mb-4 text-white">
-          Join 3k+ Students Already Crushing Their Exams
+          Join {" "}
+          <span
+            className="font-[100] italic"
+            style={{ fontFamily: '"Instrument Serif", serif' }}
+          >
+            <span className="text-4xl md:text-5xl">
+              3k+ Students
+            </span>
+          </span>{" "} Already Crushing Their Exams
         </h3>
         <p className="text-lg text-zinc-500 mb-8 max-w-2xl mx-auto">
           Get started with a free trial today—no credit card required.

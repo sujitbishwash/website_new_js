@@ -22,12 +22,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import ProgressBar from "@/components/ui/ProgressBar";
 import LoadingScreen from "@/components/ui/LoadingScreen";
 
-declare global {
-  interface Window {
-    YT: any;
-    onYouTubeIframeAPIReady?: () => void;
-  }
-}
+
 
 // Wrapper components to prevent unnecessary re-renders
 const FlashcardsWrapper = React.memo(({ videoId }: { videoId: string }) => {
