@@ -55,7 +55,7 @@ const RootLayout: React.FC = () => {
         }
       } else {
         // User is not authenticated, send to login
-        navigate(ROUTES.LOGIN, { replace: true });
+        navigate(ROUTES.LANDING, { replace: true });
       }
     };
 

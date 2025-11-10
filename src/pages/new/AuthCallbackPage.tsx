@@ -34,7 +34,7 @@ const AuthCallbackPage: React.FC = () => {
           // No token present; invalid access to callback
           
           setError("Invalid authentication callback.");
-          setTimeout(() => navigate(ROUTES.LOGIN), 2000);
+          setTimeout(() => navigate(ROUTES.LANDING), 2000);
           return;
         }
 
