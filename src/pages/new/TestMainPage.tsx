@@ -205,7 +205,7 @@ Mg + O₂ → MgO`,
 Reactants side: Mg = 2, O = 2
 Products side: Mg = 2, O = 2
 The equation is now balanced.`,
-  explanation: `The Law of Conservation of Mass states that mass is neither created nor destroyed in a chemical reaction. To balance an equation, you must have the same number of atoms of each element on both the reactant (left) and product (right) side. We use coefficients (numbers in front of formulas) to adjust these counts until they are equal.`,
+  explanation: `[Beta Sample]: The Law of Conservation of Mass states that mass is neither created nor destroyed in a chemical reaction. To balance an equation, you must have the same number of atoms of each element on both the reactant (left) and product (right) side. We use coefficients (numbers in front of formulas) to adjust these counts until they are equal.`,
 };
 const mockYouTubeVideos: IYouTubeVideo[] = [
   {
