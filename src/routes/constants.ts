@@ -49,8 +49,8 @@ export const ROUTES = {
     EXAM_GOAL: "/exam-goal",
 
     // policy routes
-    PRIVACY_POLICY: "/privacy-policy",
-    TERMS_AND_CONDITIONS: "/terms-and-conditions",
+    PRIVACY_POLICY: "/landing/privacy-policy",
+    TERMS_AND_CONDITIONS: "/landing/terms-and-conditions",
     AUTH_CALLBACK: "/auth/callback",
 
     STATS: "/stats"
