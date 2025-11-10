@@ -1,4 +1,3 @@
-import "./Landing.css";
 import { Link, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import aipadhailogo from "@/assets/images/ai_padhai_logo.svg";
