@@ -178,6 +178,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             >
               AI Padhai
             </h1>
+            <span className="text-xs text-primary pb-2 ">BETA</span>
           </div>
 
           {/* Desktop contract/expand button */}
