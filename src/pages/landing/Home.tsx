@@ -206,7 +206,7 @@ const LearnFromVideo = () => {
         >
           <iframe
             className="object-cover object-center w-full h-full"
-            src="https://www.youtube.com/embed/gWqeg1OvO7c?autoplay=1&mute=1&modestbranding=1&playsinline=1&rel=0"
+            src="https://www.youtube.com/embed/NFTPScYg7Lg?autoplay=1&mute=1&modestbranding=1&playsinline=1&rel=0"
             allow="autoplay; encrypted-media"
             allowFullScreen
             frameBorder={0}
