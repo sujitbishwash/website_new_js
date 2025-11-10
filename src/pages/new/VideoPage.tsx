@@ -74,6 +74,13 @@ const VideoPage: React.FC = () => {
   const [chatError, setChatError] = useState<string | null>(null);
   const [chatInitialized, setChatInitialized] = useState(false);
 
+  // ⬇️ Add near your other refs
+  const chatMessagesRef = useRef(chatMessages);
+  useEffect(() => {
+    chatMessagesRef.current = chatMessages;
+  }, [chatMessages]);
+
+
   // Refs (persisted values across renders)
   const ytPlayerRef = useRef<any>(null);
   const resumeSeekAppliedRef = useRef(false);
@@ -353,6 +360,12 @@ const VideoPage: React.FC = () => {
           (now - lastSaved.timestamp) >= 60000;
         
         if (!shouldSave) {
+          return;
+        }
+
+        const hasUserNotInteracted = chatMessagesRef.current.filter(c => c.isUser).length == 0
+
+        if (watchPercentage == 0 && hasUserNotInteracted) {
           return;
         }
 

@@ -61,7 +61,7 @@ const OnboardingRoute: React.FC<OnboardingRouteProps> = ({
       return <Navigate to={ROUTES.EXAM_GOAL} replace />;
     }
     
-            console.log("Navigating to personal details in OnboardingRoute",nextStep);
+    console.log("Navigating to personal details in OnboardingRoute",nextStep);
     // default to personal details
     return <Navigate to={ROUTES.PERSONAL_DETAILS} replace />;
   }

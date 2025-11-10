@@ -1,6 +1,3 @@
-import fromanycard1 from "@/assets/videos/fromanycard1.mp4";
-import fromanycard2 from "@/assets/videos/fromanycard2.mp4";
-import fromanycard3 from "@/assets/videos/fromanycard3.mp4";
 /*import fromanyvideo from "@/assets/videos/main.mp4";*/
 import kf1 from "@/assets/images/thumbnails/kf1.png";
 import kf2 from "@/assets/images/thumbnails/kf2.png";

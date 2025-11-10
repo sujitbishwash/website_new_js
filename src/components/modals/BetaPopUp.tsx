@@ -73,7 +73,7 @@ const BetaModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             className="text-[17px] leading-relaxed font-medium mb-8"
             style={{ color: theme.secondaryText }}
           >
-            As we're in beta phase, please use YouTube videos for banking exams only.
+            Since we’re in the beta phase, please use YouTube videos related to <span className='text-xl'>English topics</span> for <span className='text-xl'>Banking exams</span> only.
           </p>
 
           {/* Action Buttons */}
@@ -92,7 +92,6 @@ const BetaModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             <button
               onClick={() => {
                 // Perform acceptance action here
-                console.log("User understood beta notice");
                 onClose();
               }}
               className="px-6 py-3 rounded-full text-sm font-bold transition-transform duration-200 ease-out active:scale-95 hover:brightness-110 flex-1 max-w-[140px] shadow-lg"
@@ -116,35 +115,9 @@ export default function BetaPopUp() {
   const [isModalOpen, setIsModalOpen] = useState(true);
 
   return (
-    <div 
-      className="min-h-screen w-full flex flex-col items-center justify-center p-6 font-sans antialiased"
-      style={{ backgroundColor: theme.background }}
-    >
-      <div className="text-center space-y-6 max-w-lg">
-        <h1 className="text-4xl font-bold" style={{ color: theme.primaryText }}>
-          Lavender Beta App
-        </h1>
-        <p className="text-lg" style={{ color: theme.mutedText }}>
-          Welcome to our new platform. Click the button below if you missed the announcement.
-        </p>
-        
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className="px-8 py-3 rounded-xl font-semibold shadow-lg transition-all hover:-translate-y-0.5"
-          style={{
-             backgroundColor: theme.inputBackground,
-             color: theme.accent,
-             border: `1px solid ${theme.divider}`
-          }}
-        >
-          Show Beta Popup
-        </button>
-      </div>
-
       <BetaModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
       />
-    </div>
   );
 }
