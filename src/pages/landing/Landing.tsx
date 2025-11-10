@@ -1,5 +1,5 @@
 import { Link, Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import aipadhailogo from "@/assets/images/ai_padhai_logo.svg";
 import aipadhailogowhite from "@/assets/images/ai_padhai_logo_white.svg";
 import { Icon } from "@/components/landing/Icon";
@@ -8,26 +8,23 @@ import { Linkedin } from "lucide-react";
 import ScrollToTop from "@/components/landing/scrollToTop";
 import { ROUTES } from "@/routes/constants";
 import { markdownContent } from "@/components/landing/markdownContent";
-
-// Type alias for theme
-type Theme = "light" | "dark";
+import { UserProfile, useUser } from "@/contexts/UserContext";
 
 // Props interface for the Header component
 interface HeaderProps {
-  toggleTheme: () => void;
-  theme: Theme;
+  profile: UserProfile | null
 }
-
 window.addEventListener("error", (e) => console.warn("GLOBAL ERROR", e.error));
 //{ name: "Blog", path: "/blog" },
 // Header Component
-const Header: React.FC<HeaderProps> = () => {
+const Header: React.FC<HeaderProps> = ({profile}) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const navLinks = [
     { name: "Home", path: ROUTES.LANDING },
     { name: "Features", path: ROUTES.FEATURES },
 
     { name: "Contact", path: ROUTES.CONTACT },
+    { name: "Sign in", path: ROUTES.LOGIN },
   ];
 
   return (
@@ -41,7 +38,7 @@ const Header: React.FC<HeaderProps> = () => {
         </div>
         <div className="flex items-center gap-2 sm:gap-4">
           <nav className="hidden md:flex items-center space-x-6 text-md font-medium text-zinc-100 pr-6">
-            {navLinks.map((link) => (
+            {navLinks.filter(c => c.name !== "Sign in").map((link) => (
               <Link
                 key={link.name}
                 to={link.path}
@@ -58,7 +55,7 @@ const Header: React.FC<HeaderProps> = () => {
             className="hover:cursor-pointer hidden md:block text-sm font-semibold py-2 px-6 rounded-full transition-all shadow-md text-white bg-gradient-to-br from-white/50 via-white/30 to-white/20 dark:from-white/20 dark:via-white/10 dark:to-transparent backdrop-blur-lg border border-white/30 dark:border-white/20 hover:border-white/50 dark:hover:border-white/30"
              to={ROUTES.LOGIN}
           >
-            Sign In
+            {!!profile?.id? profile?.email : "Sign In"}
           </Link>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -81,7 +78,7 @@ const Header: React.FC<HeaderProps> = () => {
                 onClick={() => setIsMenuOpen(false)}
                 className="text-lg text-gray-300 hover:text-white"
               >
-                {link.name}
+                {link.name === "Sign in" ? !!profile?.id ? profile?.email : link.name : link.name}
               </Link>
             ))}
           </nav>
@@ -208,34 +205,14 @@ const Footer = () => {
 };
 
 function Landing() {
-  const [theme, setTheme] = useState<Theme>(() => {
-    if (typeof window !== "undefined") {
-      const savedTheme = localStorage.getItem("theme");
-      if (savedTheme === "dark" || savedTheme === "light") return savedTheme;
-      return window.matchMedia("(prefers-color-scheme: dark)").matches
-        ? "dark"
-        : "light";
-    }
-    return "light"; // Default theme for server-side rendering
-  });
 
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
+  const { profile } = useUser();
 
-  useEffect(() => {
-    if (theme === "dark") {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-    localStorage.setItem("theme", theme);
-  }, [theme]);
   return (
     <>
       <ScrollToTop /> {/* ✅ Always scrolls on route change */}
       <div className="bg-black">
-        <Header toggleTheme={toggleTheme} theme={theme} />
+        <Header profile={profile} />
         <Outlet />
 
         <Footer />
