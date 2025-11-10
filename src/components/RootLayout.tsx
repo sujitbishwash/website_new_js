@@ -24,7 +24,7 @@ const RootLayout: React.FC = () => {
       }
 
       // Check if user should see splash screen (first-time users)
-      if (shouldShowSplash()) {
+      if (shouldShowSplash() && isAuthenticated) {
         navigate(ROUTES.SPLASH, { replace: true });
         return;
       }
