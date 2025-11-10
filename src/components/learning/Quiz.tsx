@@ -435,6 +435,10 @@ const Quiz: React.FC<QuizProps> = ({
   }
   */}
 
+  if(quizError) {
+    console.log(quizError);
+  }
+
   // No questions state
   if (quizQuestions.length === 0) {
     return (
