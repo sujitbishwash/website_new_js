@@ -429,7 +429,7 @@ const Quiz: React.FC<QuizProps> = ({
             Try Again
           </button>
           */}
-          <p>The app is currently in beta; this feature will be available in the next update.</p>
+          <p className="text-sm italic text-muted-foreground">The app is currently in beta; this feature will be available in the next update.</p>
         </div>
       </div>
     );
@@ -454,7 +454,7 @@ const Quiz: React.FC<QuizProps> = ({
             Try Again
           </button>
           */}
-          <p>The app is currently in beta; this feature will be available in the next update.</p>
+          <p className="text-sm italic text-muted-foreground">The app is currently in beta; this feature will be available in the next update.</p>
         </div>
       </div>
     );
