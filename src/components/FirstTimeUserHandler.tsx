@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ROUTES } from '@/routes/constants';
 import { shouldShowSplash } from '@/lib/utils';
-import { useUser } from '@/contexts/UserContext';
 
 interface FirstTimeUserHandlerProps {
   children: React.ReactNode;
@@ -11,7 +10,6 @@ interface FirstTimeUserHandlerProps {
 const FirstTimeUserHandler: React.FC<FirstTimeUserHandlerProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { profile } = useUser();
 
   useEffect(() => {
     // Only redirect to splash if:
@@ -20,7 +18,7 @@ const FirstTimeUserHandler: React.FC<FirstTimeUserHandlerProps> = ({ children })
     // 3. Not already on splash page
     if (
       location.pathname === '/' && 
-      shouldShowSplash() && !!profile?.id
+      shouldShowSplash()
     ) {
       navigate(ROUTES.SPLASH);
     }
