@@ -9,7 +9,7 @@ import { registerSW } from 'virtual:pwa-register'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
+    <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
       <App />
     </ThemeProvider>
   </StrictMode>
