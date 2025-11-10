@@ -1,5 +1,5 @@
 import { Link, Outlet } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import aipadhailogo from "@/assets/images/ai_padhai_logo.svg";
 import aipadhailogowhite from "@/assets/images/ai_padhai_logo_white.svg";
 import { Icon } from "@/components/landing/Icon";
@@ -12,8 +12,13 @@ import { UserProfile, useUser } from "@/contexts/UserContext";
 
 // Props interface for the Header component
 interface HeaderProps {
+  toggleTheme: () => void;
+  theme: Theme;
   profile: UserProfile | null
 }
+// Type alias for theme
+type Theme = "light" | "dark";
+
 window.addEventListener("error", (e) => console.warn("GLOBAL ERROR", e.error));
 //{ name: "Blog", path: "/blog" },
 // Header Component
@@ -205,14 +210,35 @@ const Footer = () => {
 };
 
 function Landing() {
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window !== "undefined") {
+      const savedTheme = localStorage.getItem("theme");
+      if (savedTheme === "dark" || savedTheme === "light") return savedTheme;
+      return window.matchMedia("(prefers-color-scheme: dark)").matches
+        ? "dark"
+        : "light";
+    }
+    return "light"; // Default theme for server-side rendering
+  });
 
   const { profile } = useUser();
+  const toggleTheme = () => {
+    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+  };
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", theme);
+  }, [theme]);
 
   return (
     <>
       <ScrollToTop /> {/* ✅ Always scrolls on route change */}
       <div className="bg-black">
-        <Header profile={profile} />
+        <Header profile={profile} toggleTheme={toggleTheme} theme={theme} />
         <Outlet />
 
         <Footer />
