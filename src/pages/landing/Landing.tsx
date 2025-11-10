@@ -1,18 +1,12 @@
 import "./Landing.css";
-import { Routes, Route, BrowserRouter, Link, Outlet } from "react-router-dom";
-import Home from "@/pages/landing/Home";
-import Features from "@/pages/landing/Features";
-import Contact from "@/pages/landing/Contact";
+import { Link, Outlet } from "react-router-dom";
 import { useEffect, useState } from "react";
 import aipadhailogo from "@/assets/images/ai_padhai_logo.svg";
 import aipadhailogowhite from "@/assets/images/ai_padhai_logo_white.svg";
 import { Icon } from "@/components/landing/Icon";
 import { ICONS } from "@/components/landing/icons";
-import Blog from "@/pages/landing/Blog";
 import { Linkedin } from "lucide-react";
 import ScrollToTop from "@/components/landing/scrollToTop";
-import PrivacyPolicy from "@/pages/landing/PrivacyPolicy";
-import TermsAndConditions from "@/pages/landing/TermsAndConditions";
 import { ROUTES } from "@/routes/constants";
 
 // Type alias for theme
