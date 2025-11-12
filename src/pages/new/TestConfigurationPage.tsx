@@ -144,7 +144,7 @@ const TestConfigurationPageComponent = () => {
   const [isExamConfigModalOpen, setIsExamConfigModalOpen] = useState(false);
 
   // Get available subjects from API data
-  const subjects = testData?.subjects.map((subject) => subject.subject) || [];
+  const subjects = testData?.subjects.filter(e => e.subject === "English").map((subject) => subject.subject) || [];
 
   // Get sub-topics for selected subject
   const currentSubTopics =
@@ -152,8 +152,8 @@ const TestConfigurationPageComponent = () => {
       ?.sub_topic || [];
 
   // Get difficulties and languages from API data
-  const difficulties = testData?.level || [];
-  const languages = testData?.language || [];
+  const difficulties = testData?.level.filter(e => e === "Medium") || [];
+  const languages = testData?.language.filter(e => e === "en") || [];
 
   // Fetch test configuration data on component mount
   useEffect(() => {
