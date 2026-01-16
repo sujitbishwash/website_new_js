@@ -85,8 +85,8 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
         {/*<div className="flex items-center justify-between ml-18 lg:ml-0">
           <Hexagon width={48} height={48} className="text-muted-foreground" />
         </div>*/}
-        <div className="flex text-center px-2">
-          <h1 className="text-lg sm:text-xl font-bold text-foreground truncate">
+        <div className="flex-1 text-center px-2">
+          <h1 className="text-lg sm:text-xl font-bold text-foreground">
             {examDetails.title}
           </h1>
         </div>
@@ -178,13 +178,13 @@ const ExamConfirmationPage: React.FC<{ examDetails: ExamDetails }> = ({
         {/* The student info section has been removed as requested. */}
       </div>
       {/* Footer Buttons */}
-      <footer className="flex-shrink-0 p-6 border-t border-border space-y-4">
+      <footer className="flex-shrink-0 p-2 sm:p-6 border-t border-border space-y-4">
         {/* Language Note */}
-        <div className="text-destructive">
+        <div className="text-destructive hidden sm:block">
           <p>{examDetails.languageNote}</p>
         </div>
         {/* Confirmation Checkbox */}
-        <div className="flex items-start space-x-4 mb-8">
+        <div className="flex items-start space-x-4 mb-4">
           <input
             type="checkbox"
             id="confirmation"

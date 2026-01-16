@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, validateUrl, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
-import OutOfSyllabus from "./OutOfSyllabus";
-import { X } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { AlertTriangle, Link, Loader, LoaderCircle, X } from "lucide-react";
 
 // --- Type Definitions ---
 interface IconProps {
@@ -14,46 +14,6 @@ interface AddSourceModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
-
-// To make this a self-contained component, we'll use inline SVGs for icons
-// instead of an external library like lucide-react.
-
-const LinkIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.72" />
-    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.72-1.72" />
-  </svg>
-);
-
-
-
-const LoadingIcon: React.FC<IconProps> = ({ className }) => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className={className}
-  >
-    <path d="M21 12a9 9 0 11-6.219-8.56" />
-  </svg>
-);
 
 // The Modal Component
 export const AddSourceModal: React.FC<AddSourceModalProps> = ({
@@ -69,8 +29,13 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
   const [isLoadingSuggestions, setIsLoadingSuggestions] = useState(false);
   const [suggestionsError, setSuggestionsError] = useState("");
   const [showOutOfSyllabus, setShowOutOfSyllabus] = useState(false);
+  const [userExamGoal, setUserExamGoal] = useState<{
+    exam: string;
+    group: string;
+  } | null>(null);
   const [loadingVideoId, setLoadingVideoId] = useState<string | null>(null);
 
+  const { getUserData } = useAuth();
   // Effect to handle clicks outside the modal
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -95,6 +60,25 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [isOpen, onClose, showOutOfSyllabus]);
+
+  // Fetch user exam goal when component mounts
+  useEffect(() => {
+    const fetchExamGoal = async () => {
+      try {
+        const response = await getUserData();
+        if (response?.data?.exam_goal) {
+          setUserExamGoal({
+            exam: response.data.exam_goal.exam || "",
+            group: response.data.exam_goal.group || "",
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch exam goal:", error);
+      }
+    };
+
+    fetchExamGoal();
+  }, [getUserData]);
 
   // Reset state when modal opens/closes
   useEffect(() => {
@@ -135,9 +119,10 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     }
   };
 
-
-
   const handleUrlChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (showOutOfSyllabus) {
+      setShowOutOfSyllabus(false);
+    }
     const newUrl = e.target.value;
     setUrl(newUrl);
     setError("");
@@ -184,7 +169,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         setIsLoading(false);
         return;
       }
-      
+
       setError(
         err.message ||
           "Failed to add video. Please check the URL and try again."
@@ -196,7 +181,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
   const navigateToHome = () => {
     onClose();
-    navigate(ROUTES.DASHBOARD);
+    navigate(ROUTES.HOME);
   };
 
   const handleSuggestedVideoClick = async (video: SuggestedVideo) => {
@@ -233,7 +218,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
         setLoadingVideoId(null);
         return;
       }
-      
+
       setError(
         err.message || "Failed to add suggested video. Please try again."
       );
@@ -250,36 +235,39 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
     "YouTubeSourceDialog render - showOutOfSyllabus:",
     showOutOfSyllabus
   ); // Debug log
-  
+
   // Debug logging for suggested videos
   console.log("🎬 YouTubeSourceDialog - suggestedVideos:", suggestedVideos);
-  console.log("🎬 YouTubeSourceDialog - suggestedVideos length:", suggestedVideos?.length);
+  console.log(
+    "🎬 YouTubeSourceDialog - suggestedVideos length:",
+    suggestedVideos?.length
+  );
 
   return (
-    // Backdrop
+    <>
+      {/* Backdrop */}
       <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/20 backdrop-blur-sm animate-fade-in p-4">
-      {/* Modal Panel */}
-      <div
-        ref={modalRef}
-          className="relative w-full max-w-lg rounded-2xl shadow-2xl bg-card flex flex-col md:flex-row overflow-hidden animate-slide-in"
+        {/* Modal Panel */}
+        <div
+          ref={modalRef}
+          className="relative w-full max-w-lg bg-card text-primary rounded-2xl shadow-2xl border border-border flex flex-col max-h-[70vh]"
         >
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 p-2 text-border-high rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
-        >
-          <X />
-        </button>
-        <div className="p-6 sm:p-8">
+          <button
+            onClick={onClose}
+            className="absolute top-3 right-3 p-2 text-border-high rounded-full hover:bg-foreground/10 hover:text-foreground transition-colors z-10 cursor-pointer"
+          >
+            <X />
+          </button>{" "}
           {/* Header */}
-          <div className="flex items-center justify-between">
+          <div className="text-center p-4 border-b border-border">
             <h2 className="flex items-center text-lg font-semibold text-foreground">
-              <LinkIcon className="mr-3 h-5 w-5 text-muted-foreground" />
+              <Link className="mr-3 h-5 w-5 text-muted-foreground" />
               YouTube, Website, Etc.
             </h2>
           </div>
-          {/* Body */}
+          <div className="p-4 sm:p-6 overflow-y-auto">
+            {/* Body */}
 
-          <div className="mt-6">
             <label
               htmlFor="url-input"
               className="text-sm text-muted-foreground"
@@ -298,7 +286,13 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
             {/* Error Message */}
             {error && <div className="mt-2 text-sm text-red-400">{error}</div>}
-
+            {showOutOfSyllabus && userExamGoal && url.length > 0 && (
+              <div className="mt-2 text-sm flex text-red-400 gap-2 items-center">
+                <AlertTriangle className="text-red-400" />
+                This video is outside the syllabus for your selected Exam Goal:
+                {userExamGoal.exam}
+              </div>
+            )}
             {/* Separator */}
             <div className="my-6 flex items-center" aria-hidden="true">
               <div className="w-full border-t border-border-high" />
@@ -325,7 +319,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
 
               {isLoadingSuggestions ? (
                 <div className="mt-4 flex items-center justify-center py-8">
-                  <LoadingIcon className="h-6 w-6 animate-spin text-gray-400" />
+                  <LoaderCircle className="h-6 w-6 animate-spin text-gray-400" />
                   <span className="ml-2 text-sm text-gray-400">
                     Loading suggestions...
                   </span>
@@ -353,7 +347,9 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
                       key={video.id}
                       onClick={() => handleSuggestedVideoClick(video)}
                       className={`group relative overflow-hidden rounded-lg border border-border bg-none transition-all hover:bg-accent hover:shadow-lg hover:border-primary ${
-                        loadingVideoId === video.id ? 'opacity-50 pointer-events-none' : 'cursor-pointer'
+                        loadingVideoId === video.id
+                          ? "opacity-50 pointer-events-none"
+                          : "cursor-pointer"
                       }`}
                     >
                       <img
@@ -386,19 +382,22 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
               )}
             </div>
           </div>
-
           {/* Footer */}
-          <div className="mt-8 flex justify-end space-x-4">
+          <div className="p-4 flex justify-end space-x-4">
             <button
               onClick={navigateToHome}
-              className={`rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border, focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer`}
+              className={`rounded-lg bg-border-high px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer`}
             >
               Go to Home
             </button>
             <button
               onClick={handleAdd}
               disabled={!url.trim() || isLoading}
-              className={`rounded-lg bg-border-medium px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-border-medium focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer disabled:bg-border-border disabled:cursor-not-allowed flex items-center gap-2 ${!url.trim() || isLoading ? "bg-border-border cursor-not-allowed" : "bg-primary"}`}
+              className={`rounded-lg bg-border-medium px-5 py-2.5 text-sm font-semibold text-white transition-colors focus:outline-none focus:ring-2 focus:ring-border-high cursor-pointer disabled:bg-border-border disabled:cursor-not-allowed flex items-center gap-2 ${
+                !url.trim() || isLoading
+                  ? "bg-border-border cursor-not-allowed"
+                  : "bg-primary hover:bg-primary/80"
+              }`}
             >
               {isLoading && (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
@@ -408,28 +407,7 @@ export const AddSourceModal: React.FC<AddSourceModalProps> = ({
           </div>
         </div>
       </div>
-
-      {/* OutOfSyllabus Modal Overlay */}
-      {showOutOfSyllabus && (
-        <div
-          className="fixed inset-0 z-60 flex items-center justify-center bg-background/30 backdrop-blur-sm"
-          onClick={(e) => {
-            // Only close if clicking on the backdrop, not on the modal content
-            if (e.target === e.currentTarget) {
-              setShowOutOfSyllabus(false);
-            }
-          }}
-        >
-          <OutOfSyllabus
-            onGoBack={() => {
-              console.log("Closing OutOfSyllabus modal"); // Debug log
-              setShowOutOfSyllabus(false);
-            }}
-            suggestedVideos={suggestedVideos}
-          />
-        </div>
-      )}
-    </div>
+    </>
   );
 };
 
@@ -438,7 +416,7 @@ export default function YouTubeSourceDialog() {
   const [isModalOpen, setIsModalOpen] = useState(true);
   const navigate = useNavigate();
   const handleClose = () => {
-    navigate(ROUTES.DASHBOARD);
+    navigate(ROUTES.HOME);
     setIsModalOpen(false);
   };
 

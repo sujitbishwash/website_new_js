@@ -68,10 +68,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const { profile, isLoading, error, isDataLoaded } =
-    useUser();
-
-
+  const { profile, isLoading, error, isDataLoaded } = useUser();
 
   const toggleMenu = () => {
     setMenuOpen((prev) => !prev);
@@ -88,7 +85,7 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
-  
+
   const handleExamConfigurationClick = () => {
     onToggle(); // Close the sidebar if it's open
     onExamConfigurationClick();
@@ -116,11 +113,11 @@ const ProfileMenu: React.FC<ProfileMenuProps> = ({
     onToggle(); // Close the sidebar if it's open
     window.open(ROUTES.TERMS_AND_CONDITIONS, "_blank");
   };
-const handleLogoutClick = () => {
+  const handleLogoutClick = () => {
     onToggle(); // Close the sidebar if it's open
-        onLogoutClick();
-        setMenuOpen(false);
-      };
+    onLogoutClick();
+    setMenuOpen(false);
+  };
   const menuOptions: MenuItem[] = [
     {
       icon: (
@@ -169,7 +166,7 @@ const handleLogoutClick = () => {
     {
       icon: <LogOut className="w-5 h-5" />,
       label: "Log Out",
-      action: handleLogoutClick
+      action: handleLogoutClick,
     },
   ];
 
@@ -185,11 +182,14 @@ const handleLogoutClick = () => {
           className={`flex items-center justify-center"
             }`}
         >
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center"}`}>
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center"}`}
+          >
             <CircleUserRound className="w-8 h-8 text-muted-foreground" />
           </div>
 
-          <div className={`flex-1 text-left whitespace-nowrap transition-opacity mx-2 ${
+          <div
+            className={`flex-1 text-left whitespace-nowrap transition-opacity mx-2 ${
               isContracted ? "lg:opacity-0 lg:hidden" : "opacity-100"
             }`}
           >
@@ -321,9 +321,7 @@ const Moreoptions = ({
 }) => {
   return (
     // Set the background on the main container
-    <div
-      className="flex flex-col justify-end"
-    >
+    <div className="flex flex-col justify-end">
       <style>{`
           @keyframes fade-in {
             0% { opacity: 0; }

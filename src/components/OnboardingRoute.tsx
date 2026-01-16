@@ -46,7 +46,7 @@ const OnboardingRoute: React.FC<OnboardingRouteProps> = ({
 
   if (isLoading || validating) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <LoadingSpinner size="lg" text="Preparing your experience..." />
       </div>
     );
@@ -55,7 +55,7 @@ const OnboardingRoute: React.FC<OnboardingRouteProps> = ({
   // If user's next step is not this page, redirect accordingly without rendering children
   if (nextStep && nextStep !== requiredStep) {
     if (nextStep === "dashboard") {
-      return <Navigate to={ROUTES.DASHBOARD} replace />;
+      return <Navigate to={ROUTES.HOME} replace />;
     }
     if (nextStep === "exam-goal") {
       return <Navigate to={ROUTES.EXAM_GOAL} replace />;

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { SuggestedVideo, videoApi } from "../lib/api-client";
 import { ROUTES, buildVideoLearningRoute } from "../routes/constants";
 import { useAuth } from "../contexts/AuthContext";
-import { Annoyed, X } from "lucide-react";
+import { X } from "lucide-react";
 
 // Centralized theme colors for easy customization
 const theme = {
@@ -169,7 +169,7 @@ const OutOfSyllabus: React.FC<OutOfSyllabusProps> = ({ onGoBack, suggestedVideos
   };
 const navigateToHome = () => {
     handleClose();
-    navigate(ROUTES.DASHBOARD);
+    navigate(ROUTES.HOME);
   };
   if (!isVisible) {
     return null; // Don't render anything if the box is closed

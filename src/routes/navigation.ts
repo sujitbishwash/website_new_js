@@ -13,6 +13,7 @@ export const navigationCategories = {
     { path: '/exam-reconfirmation', name: 'Exam Reconfirmation' },
     { path: '/test-main-page', name: 'Test Interface' },
     { path: '/analysis', name: 'Test Analysis' },
+    { path: '/analysis2', name: 'Test Analysis2' },
   ],
   auth: [
     { path: '/login', name: 'Login' },

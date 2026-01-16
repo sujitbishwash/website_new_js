@@ -18,20 +18,57 @@ const theme = {
 // --- Helper Components ---
 
 const YouTubeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="50"
+    height="50"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  >
     <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33" />
     <path d="m9.75 15.02 5.75-3.27-5.75-3.27z" />
   </svg>
-
 );
 
 const AiAgentIcon = () => (
-  <svg height="50" width="50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37.172 37.172"><g stroke-width="0" /><g stroke-linecap="round" stroke-linejoin="round" /><path fill="currentColor" d="M37.01 14.722a1.52 1.52 0 0 0-1.475-.836l-1.849.135C31.68 6.772 25.041 1.425 17.161 1.425 7.698 1.425 0 9.124 0 18.586s7.698 17.161 17.161 17.161a17.23 17.23 0 0 0 13.896-7.088 1.527 1.527 0 0 0-2.47-1.794 14.17 14.17 0 0 1-11.427 5.83c-7.781 0-14.11-6.33-14.11-14.11s6.329-14.11 14.11-14.11c6.266 0 11.586 4.109 13.421 9.772l-.963.07a1.526 1.526 0 0 0-.886 2.676l2.77 2.392c.27.434.746.724 1.293.724.029 0 .055-.006.084-.008l.025.004a1.53 1.53 0 0 0 1.155-.529l2.742-3.175a1.52 1.52 0 0 0 .21-1.683" /><path fill="currentColor" d="M9.093 23.903v-1.482l1.351-1.221c2.284-2.043 3.393-3.218 3.425-4.44 0-.853-.514-1.528-1.722-1.528-.9 0-1.689.449-2.235.869l-.692-1.754c.788-.593 2.01-1.077 3.426-1.077 2.365 0 3.667 1.383 3.667 3.281 0 1.753-1.27 3.153-2.782 4.504l-.965.804v.031h3.941v2.012H9.093zm13.259 0v-2.494h-4.633v-1.591l3.957-6.371h2.992v6.129h1.254v1.833h-1.254v2.494zm0-4.327V17.26c0-.628.032-1.27.08-1.946h-.064c-.339.676-.612 1.287-.965 1.946l-1.399 2.284v.032z" /></svg>
-
+  <svg
+    height="50"
+    width="50"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 37.172 37.172"
+  >
+    <g stroke-width="0" />
+    <g stroke-linecap="round" stroke-linejoin="round" />
+    <path
+      fill="currentColor"
+      d="M37.01 14.722a1.52 1.52 0 0 0-1.475-.836l-1.849.135C31.68 6.772 25.041 1.425 17.161 1.425 7.698 1.425 0 9.124 0 18.586s7.698 17.161 17.161 17.161a17.23 17.23 0 0 0 13.896-7.088 1.527 1.527 0 0 0-2.47-1.794 14.17 14.17 0 0 1-11.427 5.83c-7.781 0-14.11-6.33-14.11-14.11s6.329-14.11 14.11-14.11c6.266 0 11.586 4.109 13.421 9.772l-.963.07a1.526 1.526 0 0 0-.886 2.676l2.77 2.392c.27.434.746.724 1.293.724.029 0 .055-.006.084-.008l.025.004a1.53 1.53 0 0 0 1.155-.529l2.742-3.175a1.52 1.52 0 0 0 .21-1.683"
+    />
+    <path
+      fill="currentColor"
+      d="M9.093 23.903v-1.482l1.351-1.221c2.284-2.043 3.393-3.218 3.425-4.44 0-.853-.514-1.528-1.722-1.528-.9 0-1.689.449-2.235.869l-.692-1.754c.788-.593 2.01-1.077 3.426-1.077 2.365 0 3.667 1.383 3.667 3.281 0 1.753-1.27 3.153-2.782 4.504l-.965.804v.031h3.941v2.012H9.093zm13.259 0v-2.494h-4.633v-1.591l3.957-6.371h2.992v6.129h1.254v1.833h-1.254v2.494zm0-4.327V17.26c0-.628.032-1.27.08-1.946h-.064c-.339.676-.612 1.287-.965 1.946l-1.399 2.284v.032z"
+    />
+  </svg>
 );
 
 const PersonalizedIcon = () => (
-  <svg width="50" height="50" viewBox="0 0 0.72 0.72" xmlns="http://www.w3.org/2000/svg"><g fill="none"><path d="M.72 0v.72H0V0zM.378.698.376.699H.375L.373.698H.372L.371.711v.001l.003.002.003-.002V.711L.376.698.375.697M.383.694.377.697.378.71l.006.003h.001L.384.695zm-.021 0H.361L.36.712l.001.001L.367.71.368.697z" /><path d="M.36.06q.017 0 .033.002a.03.03 0 0 1-.007.06.24.24 0 1 0 .212.212.03.03 0 1 1 .06-.007Q.66.343.66.36a.3.3 0 1 1-.3-.3M.359.236a.03.03 0 0 1-.022.037A.09.09 0 0 0 .36.45.09.09 0 0 0 .447.382a.03.03 0 0 1 .058.015A.15.15 0 0 1 .21.36.15.15 0 0 1 .322.215a.03.03 0 0 1 .037.022M.555.065a.03.03 0 0 1 .019.028v.055h.055A.03.03 0 0 1 .65.199L.544.304a.03.03 0 0 1-.021.009H.45L.395.368A.03.03 0 0 1 .353.326L.408.27V.198A.03.03 0 0 1 .417.177L.523.071A.03.03 0 0 1 .556.064m-.041.1L.468.21v.042H.51L.556.206H.544a.03.03 0 0 1-.03-.03z" fill="currentColor" /></g></svg>
+  <svg
+    width="50"
+    height="50"
+    viewBox="0 0 0.72 0.72"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <g fill="none">
+      <path d="M.72 0v.72H0V0zM.378.698.376.699H.375L.373.698H.372L.371.711v.001l.003.002.003-.002V.711L.376.698.375.697M.383.694.377.697.378.71l.006.003h.001L.384.695zm-.021 0H.361L.36.712l.001.001L.367.71.368.697z" />
+      <path
+        d="M.36.06q.017 0 .033.002a.03.03 0 0 1-.007.06.24.24 0 1 0 .212.212.03.03 0 1 1 .06-.007Q.66.343.66.36a.3.3 0 1 1-.3-.3M.359.236a.03.03 0 0 1-.022.037A.09.09 0 0 0 .36.45.09.09 0 0 0 .447.382a.03.03 0 0 1 .058.015A.15.15 0 0 1 .21.36.15.15 0 0 1 .322.215a.03.03 0 0 1 .037.022M.555.065a.03.03 0 0 1 .019.028v.055h.055A.03.03 0 0 1 .65.199L.544.304a.03.03 0 0 1-.021.009H.45L.395.368A.03.03 0 0 1 .353.326L.408.27V.198A.03.03 0 0 1 .417.177L.523.071A.03.03 0 0 1 .556.064m-.041.1L.468.21v.042H.51L.556.206H.544a.03.03 0 0 1-.03-.03z"
+        fill="currentColor"
+      />
+    </g>
+  </svg>
 );
 
 interface Hotspot {
@@ -107,13 +144,13 @@ const AnimatedTitle: React.FC<{
   return (
     <h2
       className={`text-4xl md:text-6xl text-foreground font-bold ${className}`}
-
     >
       {text.split("").map((char, index) => (
         <span
           key={index}
-          className={`inline-block transition-all duration-500 ease-out ${isActive ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
-            }`}
+          className={`inline-block transition-all duration-500 ease-out ${
+            isActive ? "translate-y-0 opacity-100" : "translate-y-5 opacity-0"
+          }`}
           style={{ transitionDelay: `${index * 30}ms` }}
         >
           {char === " " ? "\u00A0" : char}
@@ -130,15 +167,17 @@ const WelcomeSlide: React.FC<{
 }> = ({ isActive, title, description }) => {
   return (
     <div
-      className={`absolute inset-0 w-full h-full flex flex-col justify-center items-center text-center p-8 transition-all duration-700 ease-in-out ${isActive
-        ? "opacity-100 scale-100"
-        : "opacity-0 scale-95 pointer-events-none"
-        }`}
+      className={`absolute inset-0 w-full h-full flex flex-col justify-center items-center text-center p-8 transition-all duration-700 ease-in-out ${
+        isActive
+          ? "opacity-100 scale-100"
+          : "opacity-0 scale-95 pointer-events-none"
+      }`}
     >
       <AnimatedTitle text={title} isActive={isActive} />
       <p
-        className={`max-w-2xl mt-4 text-lg md:text-xl transition-all duration-700 ease-out delay-300 text-muted-foreground ${isActive ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
-          }`}
+        className={`max-w-2xl mt-4 text-lg md:text-xl transition-all duration-700 ease-out delay-300 text-muted-foreground ${
+          isActive ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"
+        }`}
       >
         {description}
       </p>
@@ -158,8 +197,9 @@ const FeatureSlide: React.FC<{ feature: any; isActive: boolean }> = ({
     const { left, top, width, height } = currentTarget.getBoundingClientRect();
     const x = (clientX - left) / width - 0.5;
     const y = (clientY - top) / height - 0.5;
-    imageRef.current.style.transform = `rotateY(${x * 10}deg) rotateX(${-y * 10
-      }deg) scale(1.05)`;
+    imageRef.current.style.transform = `rotateY(${x * 10}deg) rotateX(${
+      -y * 10
+    }deg) scale(1.05)`;
     imageRef.current.style.transition = "none";
   };
 
@@ -170,24 +210,49 @@ const FeatureSlide: React.FC<{ feature: any; isActive: boolean }> = ({
   };
 
   return (
-    <div className={`absolute inset-0 w-full h-full flex justify-center items-center p-8 transition-all duration-700 ease-in-out ${isActive ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}>
+    <div
+      className={`absolute inset-0 w-full h-full flex justify-center items-center p-8 transition-all duration-700 ease-in-out ${
+        isActive
+          ? "opacity-100 scale-100"
+          : "opacity-0 scale-95 pointer-events-none"
+      }`}
+    >
       <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-8 md:gap-16 w-full max-w-7xl">
         {/* Text Content */}
         <div className="flex flex-col items-center md:items-start text-center md:text-left">
-          <div className={`flex items-center gap-4 mb-4 transition-all duration-500 ease-out ${isActive ? "animate-pop-in" : "opacity-0"}`} style={{ color: theme.accent }}>
+          <div
+            className={`flex items-center gap-4 mb-4 transition-all duration-500 ease-out ${
+              isActive ? "animate-pop-in" : "opacity-0"
+            }`}
+            style={{ color: theme.accent }}
+          >
             {feature.icon}
             <h2 className="text-3xl md:text-4xl font-bold text-foreground">
               {feature.title}
             </h2>
           </div>
-          <p className={`max-w-md text-lg md:text-xl transition-all duration-700 ease-out delay-200 ${isActive ? "translate-y-0 opacity-100" : "-translate-y-5 opacity-0"}`} style={{ color: theme.secondaryText }}>
+          <p
+            className={`max-w-md text-lg md:text-xl transition-all duration-700 ease-out delay-200 ${
+              isActive
+                ? "translate-y-0 opacity-100"
+                : "-translate-y-5 opacity-0"
+            }`}
+            style={{ color: theme.secondaryText }}
+          >
             {feature.description}
           </p>
         </div>
 
         {/* Image Content */}
-        <div className="w-full flex items-center justify-center [perspective:1000px]" onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}>
-          <div ref={imageRef} className={`relative transition-transform duration-500 ease-out w-full max-w-2xl`}>
+        <div
+          className="w-full flex items-center justify-center [perspective:1000px]"
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+        >
+          <div
+            ref={imageRef}
+            className={`relative transition-transform duration-500 ease-out w-full max-w-2xl`}
+          >
             <img
               src={feature.image}
               alt={feature.title}
@@ -196,7 +261,8 @@ const FeatureSlide: React.FC<{ feature: any; isActive: boolean }> = ({
               onError={(e) => {
                 const target = e.target as HTMLImageElement;
                 target.onerror = null;
-                target.src = "https://placehold.co/1200x900/1F2937/FF0000?text=Image+Not+Found";
+                target.src =
+                  "https://placehold.co/1200x900/1F2937/FF0000?text=Image+Not+Found";
               }}
             />
             {feature.hotspots?.map((hotspot: Hotspot, index: number) => (
@@ -242,36 +308,33 @@ export default function Splash() {
       (prev) => (prev - 1 + features.length) % features.length
     );
 
-    // Keyboard navigation
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "ArrowRight" && currentFeatureIndex < features.length - 1) goToNext();
-            if (e.key === "ArrowLeft" && currentFeatureIndex > 0) goToPrev();
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, [currentFeatureIndex]);
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight" && currentFeatureIndex < features.length - 1)
+        goToNext();
+      if (e.key === "ArrowLeft" && currentFeatureIndex > 0) goToPrev();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [currentFeatureIndex]);
 
-    // Auto-advance timer
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentFeatureIndex < features.length - 1) {
-                goToNext();
-            } else {
-                // On the last slide, timer completion triggers navigation
-                handleGetStarted();
-            }
-        }, slideDuration);
+  // Auto-advance timer
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (currentFeatureIndex < features.length - 1) {
+        goToNext();
+      } else {
+        // On the last slide, timer completion triggers navigation
+        handleGetStarted();
+      }
+    }, slideDuration);
 
-        return () => clearTimeout(timer);
-    }, [currentFeatureIndex]);
-
-
+    return () => clearTimeout(timer);
+  }, [currentFeatureIndex]);
 
   return (
-    <div
-      className="bg-background h-screen w-screen overflow-hidden flex flex-col justify-between items-center relative font-sans antialiased"
-    >
+    <div className="bg-background h-screen w-screen overflow-hidden flex flex-col justify-between items-center relative font-sans antialiased">
       <style>{`
                 @keyframes progress {
                     from { width: 0%; }
@@ -308,7 +371,8 @@ export default function Splash() {
                     animation: glow 2.5s infinite ease-in-out;
                 }
             `}</style>
-      <div className="aurora-background"></div><header className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
+      <div className="aurora-background"></div>
+      <header className="absolute top-0 left-0 w-full p-6 flex justify-between items-center z-50">
         <div
           className={`flex items-center gap-2 overflow-hidden transition-all duration-300 lg:w-auto`}
         >
@@ -330,45 +394,90 @@ export default function Splash() {
       <div className="w-full h-full flex-grow relative z-10">
         {features.map((feature, index) => {
           if (feature.type === "welcome") {
-            return <WelcomeSlide key={index} isActive={index === currentFeatureIndex} {...feature} />;
+            return (
+              <WelcomeSlide
+                key={index}
+                isActive={index === currentFeatureIndex}
+                {...feature}
+              />
+            );
           }
-          return <FeatureSlide key={index} feature={feature} isActive={index === currentFeatureIndex} />;
+          return (
+            <FeatureSlide
+              key={index}
+              feature={feature}
+              isActive={index === currentFeatureIndex}
+            />
+          );
         })}
       </div>
 
-            {/* Footer Navigation */}
-            <div className="absolute bottom-0 w-full p-8 flex flex-col items-center z-20">
-                <div className="flex justify-center gap-3 mb-6">
-                    {features.map((_, index) => (
-                        <button
-                            key={index}
-                            onClick={() => setCurrentFeatureIndex(index)}
-                            className={`w-2 h-2 rounded-full transition-all duration-300 ${currentFeatureIndex === index ? "bg-blue-400 scale-150" : "bg-gray-600 hover:bg-gray-500"}`}
-                            aria-label={`Go to slide ${index + 1}`}
-                        />
-                    ))}
-                </div>
-                <div className="w-full max-w-xs">
-                   <ProgressBar key={currentFeatureIndex} duration={slideDuration} />
-                </div>
-            </div>
+      {/* Footer Navigation */}
+      <div className="absolute bottom-0 w-full p-8 flex flex-col items-center z-20">
+        <div className="flex justify-center gap-3 mb-6">
+          {features.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentFeatureIndex(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                currentFeatureIndex === index
+                  ? "bg-blue-400 scale-150"
+                  : "bg-gray-600 hover:bg-gray-500"
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+        <div className="w-full max-w-xs">
+          <ProgressBar key={currentFeatureIndex} duration={slideDuration} />
+        </div>
+      </div>
 
       {/* Side Navigation Buttons */}
       {currentFeatureIndex > 0 && (
-        <button onClick={goToPrev} className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors z-20" aria-label="Previous slide">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+        <button
+          onClick={goToPrev}
+          className="absolute left-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors z-20"
+          aria-label="Previous slide"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
           </svg>
         </button>
       )}
       {currentFeatureIndex < features.length - 1 && (
-        <button onClick={goToNext} className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors z-20" aria-label="Next slide">
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        <button
+          onClick={goToNext}
+          className="absolute right-4 top-1/2 -translate-y-1/2 p-2 rounded-full bg-foreground/10 hover:bg-foreground/20 backdrop-blur-sm transition-colors z-20"
+          aria-label="Next slide"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-6 w-6"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
           </svg>
         </button>
       )}
-
     </div>
   );
 }
